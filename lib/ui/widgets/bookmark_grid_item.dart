@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/bookmark.dart';
@@ -55,7 +55,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     return GestureDetector(
       onTap: () {
         ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
-        context.push('/bookmark/', extra: widget.bookmark);
+        context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
       },
       onLongPressStart: _handleLongPressStart,
       onLongPressMoveUpdate: _handleLongPressMoveUpdate,
@@ -195,3 +195,5 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     );
   }
 }
+
+

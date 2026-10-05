@@ -110,7 +110,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return GestureDetector(
       onTap: () {
         ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
-        context.push('/bookmark/', extra: bookmark);
+        context.push('/bookmark/${bookmark.id}', extra: bookmark);
       },
       child: Container(
         width: 160,
@@ -462,4 +462,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 }
+
+
 
