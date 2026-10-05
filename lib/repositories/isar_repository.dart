@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/bookmark.dart';
@@ -16,7 +17,7 @@ class IsarRepository {
       return await Isar.open(
         [BookmarkSchema, BookmarkCollectionSchema],
         directory: dir.path,
-        inspector: true,
+        inspector: kDebugMode,
       );
     }
     return Future.value(Isar.getInstance());
