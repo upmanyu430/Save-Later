@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../../providers/providers.dart';
-
+import 'package:package_info_plus/package_info_plus.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -20,6 +20,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _hapticFeedback = true;
   bool _newSaveReminders = true;
   bool _isLoading = true;
+  String _appVersion = 'Version 1.0.0';
 
   @override
   void initState() {
@@ -29,9 +30,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    final packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       _hapticFeedback = prefs.getBool('hapticFeedback') ?? true;
       _newSaveReminders = prefs.getBool('newSaveReminders') ?? true;
+      _appVersion = 'Version ${packageInfo.version}';
       _isLoading = false;
     });
   }
@@ -373,10 +376,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
 
                   const SizedBox(height: 24),
-                  const Center(
+                  Center(
                     child: Text(
-                      'Version 1.4.0',
-                      style: TextStyle(
+                      _appVersion,
+                      style: const TextStyle(
                         color: Colors.black38,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
