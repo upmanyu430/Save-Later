@@ -218,12 +218,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           return Consumer(
                             builder: (context, ref, _) {
                               final countAsync = ref.watch(unsortedBookmarksProvider);
-                              final count = countAsync.valueOrNull?.length ?? 0;
+                              final bookmarks = countAsync.valueOrNull ?? [];
+                              final count = bookmarks.length;
+                              final hasNew = bookmarks.any((b) => !b.isRead);
                               return FolderBox(
                                 title: 'Unsorted',
                                 itemCountText: '$count items',
                                 folderColor: Colors.grey.shade400,
                                 onTap: () => context.push('/unsorted'),
+                                hasNewItems: hasNew,
                               );
                             }
                           );
@@ -233,12 +236,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         return Consumer(
                           builder: (context, ref, _) {
                             final countAsync = ref.watch(collectionBookmarksProvider(col.id));
-                            final count = countAsync.valueOrNull?.length ?? 0;
+                            final bookmarks = countAsync.valueOrNull ?? [];
+                            final count = bookmarks.length;
+                            final hasNew = bookmarks.any((b) => !b.isRead);
                             return FolderBox(
                               title: col.name,
                               itemCountText: '$count items',
                               folderColor: col.color,
                               onTap: () => context.push('/collection/${col.id}', extra: col),
+                              hasNewItems: hasNew,
                             );
                           }
                         );
@@ -256,6 +262,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+
 
 
 

@@ -6,6 +6,7 @@ class FolderBox extends StatelessWidget {
   final String itemCountText;
   final Color folderColor;
   final VoidCallback onTap;
+  final bool hasNewItems;
 
   const FolderBox({
     Key? key,
@@ -13,6 +14,7 @@ class FolderBox extends StatelessWidget {
     required this.itemCountText,
     required this.folderColor,
     required this.onTap,
+    this.hasNewItems = false,
   }) : super(key: key);
 
   @override
@@ -90,13 +92,34 @@ class FolderBox extends StatelessWidget {
                           child: Icon(Icons.folder_outlined, color: AppTheme.border, size: 28),
                         ),
                       ),
-                      Text(
-                        itemCountText,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppTheme.border,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            itemCountText,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.border,
+                            ),
+                          ),
+                          if (hasNewItems) ...[
+                            const SizedBox(width: 6),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD166),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'NEW',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       )
                     ],
                   ),
@@ -120,3 +143,4 @@ class FolderBox extends StatelessWidget {
     );
   }
 }
+

@@ -202,7 +202,10 @@ class CollectionDetailScreen extends ConsumerWidget {
                           itemBuilder: (context, index) {
                             final b = bookmarks[index];
                             return GestureDetector(
-                              onTap: () => context.push('/bookmark/${b.id}', extra: b),
+                              onTap: () {
+                                  ref.read(bookmarkNotifierProvider.notifier).markAsRead(b);
+                                  context.push('/bookmark/${b.id}', extra: b);
+                                },
                               child: NeoBox(
                                 padding: const EdgeInsets.all(0),
                                 borderRadius: 12,
@@ -272,5 +275,6 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
+
 
 
