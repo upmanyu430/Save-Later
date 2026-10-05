@@ -131,11 +131,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      NeoBox(
-                        padding: const EdgeInsets.all(8),
-                        borderRadius: 8,
-                        borderWidth: 2.5,
-                        child: const Icon(Icons.search, size: 28),
+                      GestureDetector(
+                        onTap: () => context.push('/search'),
+                        child: NeoBox(
+                          padding: const EdgeInsets.all(8),
+                          borderRadius: 8,
+                          borderWidth: 2.5,
+                          child: const Icon(Icons.search, size: 28),
+                        ),
                       ),
                     ],
                   )
@@ -265,6 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
 
 
 
