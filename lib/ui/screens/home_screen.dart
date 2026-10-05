@@ -6,6 +6,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/folder_box.dart';
 import '../../theme/app_theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -144,40 +145,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
 
     return Scaffold(
+      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Top Action Bar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: const Text(
-                      'Save now.\nFind anytime.',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w900,
-                        height: 1.1,
-                      ),
-                    ),
+                  NeoBox(
+                    padding: const EdgeInsets.all(8),
+                    borderRadius: 8,
+                    borderWidth: 2.5,
+                    child: const Icon(Icons.settings_outlined, size: 28),
                   ),
                   Row(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.style, size: 32), // Review mode icon
-                        onPressed: () => context.push('/review'),
+                      GestureDetector(
+                        onTap: _showAddCollectionModal,
+                        child: NeoBox(
+                          padding: const EdgeInsets.all(8),
+                          borderRadius: 8,
+                          borderWidth: 2.5,
+                          child: const Icon(Icons.create_new_folder_outlined, size: 28),
+                        ),
                       ),
                       const SizedBox(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.settings, size: 32),
-                        onPressed: () {}, // TODO: Settings
+                      NeoBox(
+                        padding: const EdgeInsets.all(8),
+                        borderRadius: 8,
+                        borderWidth: 2.5,
+                        child: const Icon(Icons.search, size: 28),
                       ),
                     ],
                   )
                 ],
+              ),
+              const SizedBox(height: 32),
+
+              // Title
+              const Text(
+                'Save now.\nFind anytime.',
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.w900,
+                  height: 1.1,
+                  letterSpacing: -1,
+                ),
               ),
               const SizedBox(height: 32),
 
@@ -190,19 +207,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       borderRadius: 12,
                       child: TextField(
                         controller: _urlController,
-                        decoration: const InputDecoration(
-                          hintText: '# Paste link to quick save',
+                        decoration: InputDecoration(
+                          hintText: '#   Paste link to quick save',
                           border: InputBorder.none,
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
+                            onPressed: () async {
+                              // Optional: Add clipboard pasting logic here
+                            },
+                          ),
                         ),
                         onSubmitted: (_) => _quickSave(),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: 12),
                   NeoButton(
                     padding: const EdgeInsets.all(16),
                     borderRadius: 12,
-                    color: AppTheme.secondary,
+                    color: AppTheme.accent, // Yellow button
                     onPressed: _quickSave,
                     child: isSaving 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
@@ -213,87 +236,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 48),
 
               // Collections Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Expanded(
-                    child: Text(
-                      'My Collections',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.create_new_folder, size: 28),
-                    onPressed: _showAddCollectionModal,
-                  ),
-                ],
+              const Text(
+                'My Collections',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Collections Grid
               Expanded(
                 child: collectionsAsync.when(
                   data: (collections) {
-                    if (collections.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
-                            const SizedBox(height: 16),
-                            const Text('No collections yet.', style: TextStyle(fontSize: 18)),
-                            const SizedBox(height: 16),
-                            NeoButton(
-                              color: AppTheme.accent,
-                              onPressed: _showAddCollectionModal,
-                              child: const Text('Create One', style: TextStyle(fontWeight: FontWeight.bold)),
-                            )
-                          ],
-                        ),
-                      );
-                    }
                     return GridView.builder(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                        childAspectRatio: 1.1,
+                        mainAxisSpacing: 24, // Extra space for the folder tabs
+                        childAspectRatio: 0.95,
                       ),
-                      itemCount: collections.length,
+                      itemCount: collections.length + 1, // +1 for Unsorted
                       itemBuilder: (context, index) {
-                        final col = collections[index];
-                        return GestureDetector(
-                          onTap: () => context.push('/collection/${col.id}', extra: col),
-                          child: NeoBox(
-                            color: col.color,
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
-                                  size: 32,
-                                ),
-                                const Spacer(),
-                                Text(
-                                  col.name,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 4),
-                                // We don't have the item count easily available without a stream or join, 
-                                // so we can display a placeholder or leave it out for v1
-                                const Text('View items', style: TextStyle(fontSize: 14)),
-                              ],
-                            ),
-                          ),
+                        if (index == 0) {
+                          // Unsorted Folder
+                          return FolderBox(
+                            title: 'Unsorted',
+                            itemCountText: 'View items',
+                            folderColor: Colors.grey.shade400,
+                            onTap: () => context.push('/review'),
+                          );
+                        }
+                        
+                        final col = collections[index - 1];
+                        return Consumer(
+                          builder: (context, ref, _) {
+                            final countAsync = ref.watch(collectionBookmarksProvider(col.id));
+                            final count = countAsync.valueOrNull?.length ?? 0;
+                            return FolderBox(
+                              title: col.name,
+                              itemCountText: '$count items',
+                              folderColor: col.color,
+                              onTap: () => context.push('/collection/${col.id}', extra: col),
+                            );
+                          }
                         );
                       },
                     );
