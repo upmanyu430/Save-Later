@@ -71,7 +71,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildLibraryStats(
-      int collectionsCount, int bookmarksCount, int tagsCount) {
+      int collectionsCount, int bookmarksCount, int pinnedCount, int tagsCount) {
     return NeoBox(
       color: const Color(0xFFFFD166), // Yellow
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -92,13 +92,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildStatColumn(Icons.folder_outlined, '', 'Collections'),
+              _buildStatColumn(Icons.folder_outlined, '$collectionsCount', 'Collections'),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.book_outlined, '', 'Saves'),
+              _buildStatColumn(Icons.book_outlined, '$bookmarksCount', 'Saves'),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.push_pin_outlined, '0', 'Pinned'),
+              _buildStatColumn(Icons.push_pin_outlined, '$pinnedCount', 'Pinned'),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.local_offer_outlined, '', 'Tags'),
+              _buildStatColumn(Icons.local_offer_outlined, '$tagsCount', 'Tags'),
             ],
           ),
         ],
@@ -318,6 +318,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final allBookmarks = bookmarksAsync.valueOrNull ?? [];
     final bookmarksCount = allBookmarks.length;
 
+    // Count pinned bookmarks
+    final pinnedCount = allBookmarks.where((b) => b.isPinned).length;
+
     // Count unique tags
     final Set<String> uniqueTags = {};
     for (var b in allBookmarks) {
@@ -394,8 +397,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 24, vertical: 24),
                       children: [
-                        _buildLibraryStats(
-                            collectionsCount, bookmarksCount, tagsCount),
+                        _buildLibraryStats(collectionsCount, bookmarksCount,
+                            pinnedCount, tagsCount),
                         const SizedBox(height: 32),
 
                         // Recently Saved Header
