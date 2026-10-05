@@ -7,6 +7,7 @@ import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/folder_box.dart';
+import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -69,61 +70,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showAddCollectionModal() {
-    // A simplified modal for adding collections
-    String name = '';
-    String colorHex = 'FF9EAA'; // Default Primary
-    int iconCode = Icons.folder.codePoint;
-
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-          child: NeoBox(
-            borderRadius: 32,
-            padding: const EdgeInsets.all(24),
-            color: AppTheme.background,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  'New Collection',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  decoration: const InputDecoration(
-                    hintText: 'Collection Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (val) => name = val,
-                ),
-                const SizedBox(height: 24),
-                NeoButton(
-                  onPressed: () {
-                    if (name.isNotEmpty) {
-                      ref.read(collectionNotifierProvider.notifier).addCollection(name, colorHex, iconCode);
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Center(
-                    child: Text(
-                      'Create Collection',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
+      builder: (context) => const CollectionEditorModal(),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -295,3 +249,4 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+

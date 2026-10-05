@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
 class CollectionDetailScreen extends ConsumerWidget {
@@ -178,6 +179,19 @@ class CollectionDetailScreen extends ConsumerWidget {
                   title: const Text('Share Collection'),
                   onTap: () => Navigator.pop(ctx),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Edit Collection'),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      isScrollControlled: true,
+                      builder: (modalCtx) => CollectionEditorModal(existingCollection: collection),
+                    );
+                  },
+                ),
               ],
             ),
           );
@@ -188,3 +202,4 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
+

@@ -148,9 +148,25 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> updateCollection(BookmarkCollection collection, String name, String colorHex, int iconCode) async {
+    state = const AsyncValue.loading();
+    try {
+      final repo = ref.read(repositoryProvider);
+      collection.name = name;
+      collection.colorHex = colorHex;
+      collection.iconCodePoint = iconCode;
+      await repo.addCollection(collection); 
+      ref.invalidate(collectionsProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
 
 final collectionNotifierProvider =
     StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
   return CollectionNotifier(ref);
 });
+
