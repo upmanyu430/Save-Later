@@ -311,12 +311,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               _buildDivider(),
                               _buildActionItem(Icons.folder_outlined, 'Move', _showMoveModal),
                               _buildDivider(),
-                              _buildActionItem(Icons.refresh, 'Refresh', () async {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Refreshing...')));
-                                await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
-                                setState(() {});
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Refreshed!')));
-                              }),
+                              _buildActionItem(Icons.refresh, 'Refresh', _showRefreshDialog),
                               _buildDivider(),
                               _buildActionItem(Icons.delete_outline, 'Delete', () async {
                                 await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
@@ -439,6 +434,126 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showRefreshDialog() {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (ctx) => Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: AppTheme.background,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.border, width: 3),
+            boxShadow: const [
+              BoxShadow(
+                color: AppTheme.border,
+                offset: Offset(4, 4),
+                blurRadius: 0,
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Refresh link metadata?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Refresh updates the link preview (title, image, description). Your notes, pin state, and collection will remain unchanged.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF555555),
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => Navigator.pop(ctx),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.background,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppTheme.border, width: 2.5),
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Refreshing...')),
+                          );
+                          await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+                          setState(() {});
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Refreshed!')),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFF3366),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppTheme.border, width: 2.5),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppTheme.border,
+                                offset: Offset(3, 3),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Refresh',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
