@@ -5,6 +5,12 @@ import 'package:save_later/main.dart' as app;
 
 void main() {
   testWidgets('App basic functions widget test', (WidgetTester tester) async {
+    // Set a realistic phone size to prevent out-of-bounds tap errors
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0; // Logical size 540x1200
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     // Start the app
     app.main();
     await tester.pump(const Duration(seconds: 1));
@@ -36,8 +42,11 @@ void main() {
     // Tap "Create Collection"
     final createColBtn = find.text('Create Collection');
     expect(createColBtn, findsOneWidget);
+    await tester.ensureVisible(createColBtn);
     await tester.tap(createColBtn);
-    await tester.pump(const Duration(seconds: 1));
+    
+    // Wait for bottom sheet to fully close
+    await tester.pump(const Duration(seconds: 2));
 
     // Verify collection was created and is visible
     expect(find.text('Test Collection'), findsOneWidget);

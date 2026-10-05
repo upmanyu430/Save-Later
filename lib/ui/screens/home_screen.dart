@@ -126,6 +126,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(bookmarkNotifierProvider, (previous, next) {
+      if (previous?.isLoading == true && !next.isLoading) {
+        if (next.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Error saving link!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Link saved! Tap the cards icon to review and organize it.')),
+          );
+        }
+      }
+    });
+
     final collectionsAsync = ref.watch(collectionsProvider);
     final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
 
@@ -140,12 +154,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Save now.\nFind anytime.',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w900,
-                      height: 1.1,
+                  Expanded(
+                    child: const Text(
+                      'Save now.\nFind anytime.',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w900,
+                        height: 1.1,
+                      ),
                     ),
                   ),
                   Row(
@@ -200,11 +216,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'My Collections',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                  const Expanded(
+                    child: Text(
+                      'My Collections',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   IconButton(

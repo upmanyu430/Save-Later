@@ -1,0 +1,1453 @@
+﻿diff --git a/integration_test/app_test.dart b/integration_test/app_test.dart
+new file mode 100644
+index 0000000..f555d7a
+--- /dev/null
++++ b/integration_test/app_test.dart
+@@ -0,0 +1,70 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:integration_test/integration_test.dart';
++import 'package:save_later/main.dart' as app;
++import 'package:save_later/ui/widgets/neo_button.dart';
++
++void main() {
++  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
++
++  testWidgets('App basic functions test', (WidgetTester tester) async {
++    app.main();
++    await tester.pumpAndSettle();
++
++    // 1. Verify Home Screen is present
++    expect(find.textContaining('Save now'), findsOneWidget);
++
++    // 2. Test Quick Save
++    // Find the url text field
++    final urlField = find.byType(TextField);
++    expect(urlField, findsOneWidget);
++    await tester.enterText(urlField, 'https://flutter.dev');
++    
++    // Tap the submit button
++    // It's the NeoButton inside the row.
++    final addIcon = find.byIcon(Icons.add);
++    expect(addIcon, findsOneWidget);
++    await tester.tap(addIcon);
++    await tester.pumpAndSettle();
++
++    // Wait for the metadata fetch to complete
++    // Since it's a real HTTP call, we'll give it some time
++    await tester.pump(const Duration(seconds: 3));
++
++    // 3. Test Create Collection Modal
++    final createColIcon = find.byIcon(Icons.create_new_folder);
++    expect(createColIcon, findsOneWidget);
++    await tester.tap(createColIcon);
++    await tester.pumpAndSettle();
++
++    // Verify modal is open
++    expect(find.text('New Collection'), findsOneWidget);
++
++    // Enter collection name
++    final nameField = find.byType(TextField).last;
++    await tester.enterText(nameField, 'Test Collection');
++
++    // Tap "Create Collection"
++    final createColBtn = find.text('Create Collection');
++    expect(createColBtn, findsOneWidget);
++    await tester.tap(createColBtn);
++    await tester.pumpAndSettle();
++
++    // Verify collection was created and is visible
++    expect(find.text('Test Collection'), findsOneWidget);
++    
++    // 4. Test Navigation to Review Mode
++    final reviewIcon = find.byIcon(Icons.style);
++    expect(reviewIcon, findsOneWidget);
++    await tester.tap(reviewIcon);
++    await tester.pumpAndSettle();
++
++    // Verify Review mode text
++    expect(find.textContaining('Review'), findsWidgets);
++    
++    // We should see our newly added bookmark here.
++    // Swipe it to mark as read!
++    // Since it might take a moment to fetch metadata, we'll check if a CardSwiper or an item is present
++    await tester.pump(const Duration(seconds: 1));
++  });
++}
+diff --git a/lib/main.dart b/lib/main.dart
+new file mode 100644
+index 0000000..dfa77a5
+--- /dev/null
++++ b/lib/main.dart
+@@ -0,0 +1,49 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:go_router/go_router.dart';
++import 'models/collection.dart';
++import 'theme/app_theme.dart';
++import 'ui/screens/home_screen.dart';
++import 'ui/screens/collection_detail_screen.dart';
++import 'ui/screens/review_mode_screen.dart';
++
++void main() {
++  WidgetsFlutterBinding.ensureInitialized();
++  runApp(const ProviderScope(child: SaveLaterApp()));
++}
++
++final _router = GoRouter(
++  initialLocation: '/',
++  routes: [
++    GoRoute(
++      path: '/',
++      builder: (context, state) => const HomeScreen(),
++    ),
++    GoRoute(
++      path: '/collection/:id',
++      builder: (context, state) {
++        final id = int.parse(state.pathParameters['id']!);
++        final collection = state.extra as BookmarkCollection;
++        return CollectionDetailScreen(collectionId: id, collection: collection);
++      },
++    ),
++    GoRoute(
++      path: '/review',
++      builder: (context, state) => const ReviewModeScreen(),
++    ),
++  ],
++);
++
++class SaveLaterApp extends StatelessWidget {
++  const SaveLaterApp({Key? key}) : super(key: key);
++
++  @override
++  Widget build(BuildContext context) {
++    return MaterialApp.router(
++      title: 'Save Later',
++      debugShowCheckedModeBanner: false,
++      theme: AppTheme.theme,
++      routerConfig: _router,
++    );
++  }
++}
+diff --git a/lib/models/bookmark.dart b/lib/models/bookmark.dart
+new file mode 100644
+index 0000000..a5f2b93
+--- /dev/null
++++ b/lib/models/bookmark.dart
+@@ -0,0 +1,28 @@
++import 'package:isar/isar.dart';
++import 'collection.dart';
++
++part 'bookmark.g.dart';
++
++@collection
++class Bookmark {
++  Id id = Isar.autoIncrement;
++
++  late String url;
++  
++  String? title;
++  
++  String? description;
++  
++  String? imageUrl;
++  
++  String? sourceDomain;
++  
++  @Index()
++  bool isRead = false;
++
++  @Index()
++  DateTime createdAt = DateTime.now();
++
++  // A link to the collection it belongs to
++  final collection = IsarLink<BookmarkCollection>();
++}
+diff --git a/lib/models/collection.dart b/lib/models/collection.dart
+new file mode 100644
+index 0000000..675fb37
+--- /dev/null
++++ b/lib/models/collection.dart
+@@ -0,0 +1,22 @@
++import 'package:isar/isar.dart';
++
++part 'collection.g.dart';
++
++@collection
++class BookmarkCollection {
++  Id id = Isar.autoIncrement;
++
++  late String name;
++  
++  // Hex color string, e.g., 'FFAABB'
++  late String colorHex;
++  
++  // CodePoint for the icon
++  late int iconCodePoint;
++  
++  // Font family for the icon, usually 'MaterialIcons'
++  late String iconFontFamily;
++
++  @Index()
++  DateTime createdAt = DateTime.now();
++}
+diff --git a/lib/providers/providers.dart b/lib/providers/providers.dart
+new file mode 100644
+index 0000000..3e32539
+--- /dev/null
++++ b/lib/providers/providers.dart
+@@ -0,0 +1,128 @@
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:metadata_fetch/metadata_fetch.dart';
++import '../models/bookmark.dart';
++import '../models/collection.dart';
++import '../repositories/isar_repository.dart';
++
++final repositoryProvider = Provider<IsarRepository>((ref) {
++  return IsarRepository();
++});
++
++final collectionsProvider = FutureProvider<List<BookmarkCollection>>((ref) async {
++  final repo = ref.watch(repositoryProvider);
++  return repo.getCollections();
++});
++
++final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
++  final repo = ref.watch(repositoryProvider);
++  return repo.getBookmarks();
++});
++
++final collectionBookmarksProvider = FutureProvider.family<List<Bookmark>, int>((ref, collectionId) async {
++  final repo = ref.watch(repositoryProvider);
++  return repo.getBookmarksByCollection(collectionId);
++});
++
++// A notifier to handle adding a bookmark and fetching metadata
++class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
++  final Ref ref;
++
++  BookmarkNotifier(this.ref) : super(const AsyncValue.data(null));
++
++  Future<void> quickSave(String url) async {
++    state = const AsyncValue.loading();
++    try {
++      final repo = ref.read(repositoryProvider);
++      
++      // Attempt to fetch metadata
++      String? title;
++      String? description;
++      String? imageUrl;
++      String? sourceDomain;
++
++      try {
++        final uri = Uri.parse(url);
++        sourceDomain = uri.host;
++        var data = await MetadataFetch.extract(url);
++        if (data != null) {
++          title = data.title;
++          description = data.description;
++          imageUrl = data.image;
++        }
++      } catch (e) {
++        // Fallback or ignore
++        print('Error fetching metadata: $e');
++      }
++
++      final bookmark = Bookmark()
++        ..url = url
++        ..title = title ?? url
++        ..description = description
++        ..imageUrl = imageUrl
++        ..sourceDomain = sourceDomain
++        ..createdAt = DateTime.now()
++        ..isRead = false;
++
++      await repo.addBookmark(bookmark);
++      
++      // Invalidate the provider to refresh the UI
++      ref.invalidate(bookmarksProvider);
++      
++      state = const AsyncValue.data(null);
++    } catch (e, st) {
++      state = AsyncValue.error(e, st);
++    }
++  }
++
++  Future<void> markAsRead(Bookmark bookmark) async {
++    final repo = ref.read(repositoryProvider);
++    bookmark.isRead = true;
++    await repo.updateBookmark(bookmark);
++    ref.invalidate(bookmarksProvider);
++    if (bookmark.collection.value != null) {
++      ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
++    }
++  }
++
++  Future<void> deleteBookmark(Bookmark bookmark) async {
++    final repo = ref.read(repositoryProvider);
++    await repo.deleteBookmark(bookmark.id);
++    ref.invalidate(bookmarksProvider);
++    if (bookmark.collection.value != null) {
++      ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
++    }
++  }
++}
++
++final bookmarkNotifierProvider = StateNotifierProvider<BookmarkNotifier, AsyncValue<void>>((ref) {
++  return BookmarkNotifier(ref);
++});
++
++// A notifier to handle adding collections
++class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
++  final Ref ref;
++  CollectionNotifier(this.ref) : super(const AsyncValue.data(null));
++
++  Future<void> addCollection(String name, String colorHex, int iconCode) async {
++    state = const AsyncValue.loading();
++    try {
++      final repo = ref.read(repositoryProvider);
++      final collection = BookmarkCollection()
++        ..name = name
++        ..colorHex = colorHex
++        ..iconCodePoint = iconCode
++        ..iconFontFamily = 'MaterialIcons'
++        ..createdAt = DateTime.now();
++
++      await repo.addCollection(collection);
++      ref.invalidate(collectionsProvider);
++      state = const AsyncValue.data(null);
++    } catch (e, st) {
++      state = AsyncValue.error(e, st);
++    }
++  }
++}
++
++final collectionNotifierProvider = StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
++  return CollectionNotifier(ref);
++});
+diff --git a/lib/repositories/isar_repository.dart b/lib/repositories/isar_repository.dart
+new file mode 100644
+index 0000000..4af81f0
+--- /dev/null
++++ b/lib/repositories/isar_repository.dart
+@@ -0,0 +1,76 @@
++import 'package:isar/isar.dart';
++import 'package:path_provider/path_provider.dart';
++import '../models/bookmark.dart';
++import '../models/collection.dart';
++
++class IsarRepository {
++  late Future<Isar> db;
++
++  IsarRepository() {
++    db = openDB();
++  }
++
++  Future<Isar> openDB() async {
++    if (Isar.instanceNames.isEmpty) {
++      final dir = await getApplicationDocumentsDirectory();
++      return await Isar.open(
++        [BookmarkSchema, BookmarkCollectionSchema],
++        directory: dir.path,
++        inspector: true,
++      );
++    }
++    return Future.value(Isar.getInstance());
++  }
++
++  // --- Collection Methods ---
++  Future<List<BookmarkCollection>> getCollections() async {
++    final isar = await db;
++    return await isar.bookmarkCollections.where().findAll();
++  }
++
++  Future<void> addCollection(BookmarkCollection collection) async {
++    final isar = await db;
++    await isar.writeTxn(() async {
++      await isar.bookmarkCollections.put(collection);
++    });
++  }
++
++  // --- Bookmark Methods ---
++  Future<List<Bookmark>> getBookmarks() async {
++    final isar = await db;
++    return await isar.bookmarks.where().sortByCreatedAtDesc().findAll();
++  }
++
++  Future<List<Bookmark>> getBookmarksByCollection(Id collectionId) async {
++    final isar = await db;
++    // Assuming the link has been setup properly
++    // This fetches bookmarks linking to the collection
++    return await isar.bookmarks
++        .filter()
++        .collection((q) => q.idEqualTo(collectionId))
++        .sortByCreatedAtDesc()
++        .findAll();
++  }
++
++  Future<void> addBookmark(Bookmark bookmark) async {
++    final isar = await db;
++    await isar.writeTxn(() async {
++      await isar.bookmarks.put(bookmark);
++      await bookmark.collection.save();
++    });
++  }
++
++  Future<void> updateBookmark(Bookmark bookmark) async {
++    final isar = await db;
++    await isar.writeTxn(() async {
++      await isar.bookmarks.put(bookmark);
++    });
++  }
++  
++  Future<void> deleteBookmark(Id id) async {
++    final isar = await db;
++    await isar.writeTxn(() async {
++      await isar.bookmarks.delete(id);
++    });
++  }
++}
+diff --git a/lib/theme/app_theme.dart b/lib/theme/app_theme.dart
+new file mode 100644
+index 0000000..ce2468a
+--- /dev/null
++++ b/lib/theme/app_theme.dart
+@@ -0,0 +1,44 @@
++import 'package:flutter/material.dart';
++import 'package:google_fonts/google_fonts.dart';
++
++class AppTheme {
++  // Pastel color palette
++  static const Color background = Color(0xFFF4F0EB);
++  static const Color primary = Color(0xFFFF9EAA); // Pastel Pink
++  static const Color secondary = Color(0xFF3AC19F); // Pastel Green
++  static const Color accent = Color(0xFFFFD166); // Pastel Yellow
++  static const Color cardColor = Color(0xFFFFFFFF);
++  
++  static const Color border = Color(0xFF1C1C1C); // Very dark gray/black
++  
++  static ThemeData get theme {
++    return ThemeData(
++      scaffoldBackgroundColor: background,
++      primaryColor: primary,
++      colorScheme: const ColorScheme.light(
++        primary: primary,
++        secondary: secondary,
++        surface: cardColor,
++        background: background,
++        onPrimary: border,
++        onSecondary: border,
++        onSurface: border,
++        onBackground: border,
++      ),
++      textTheme: GoogleFonts.epilogueTextTheme().apply(
++        bodyColor: border,
++        displayColor: border,
++      ),
++      appBarTheme: const AppBarTheme(
++        backgroundColor: background,
++        elevation: 0,
++        iconTheme: IconThemeData(color: border, size: 28),
++        titleTextStyle: TextStyle(
++          color: border,
++          fontSize: 24,
++          fontWeight: FontWeight.bold,
++        ),
++      ),
++    );
++  }
++}
+diff --git a/lib/ui/screens/collection_detail_screen.dart b/lib/ui/screens/collection_detail_screen.dart
+new file mode 100644
+index 0000000..9a397cf
+--- /dev/null
++++ b/lib/ui/screens/collection_detail_screen.dart
+@@ -0,0 +1,151 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:go_router/go_router.dart';
++import 'package:url_launcher/url_launcher.dart';
++import '../../models/collection.dart';
++import '../../providers/providers.dart';
++import '../widgets/neo_box.dart';
++import '../../theme/app_theme.dart';
++
++class CollectionDetailScreen extends ConsumerWidget {
++  final int collectionId;
++  final BookmarkCollection collection;
++
++  const CollectionDetailScreen({
++    Key? key,
++    required this.collectionId,
++    required this.collection,
++  }) : super(key: key);
++
++  @override
++  Widget build(BuildContext context, WidgetRef ref) {
++    final bookmarksAsync = ref.watch(collectionBookmarksProvider(collectionId));
++
++    return Scaffold(
++      appBar: AppBar(
++        title: Text(collection.name),
++        backgroundColor: Color(int.parse('0xFF${collection.colorHex}')),
++      ),
++      body: bookmarksAsync.when(
++        data: (bookmarks) {
++          if (bookmarks.isEmpty) {
++            return Center(
++              child: Padding(
++                padding: const EdgeInsets.all(24.0),
++                child: Column(
++                  mainAxisAlignment: MainAxisAlignment.center,
++                  children: [
++                    const Icon(Icons.inbox, size: 80, color: AppTheme.border),
++                    const SizedBox(height: 16),
++                    const Text(
++                      'No items yet. Tap + or share to save one.',
++                      textAlign: TextAlign.center,
++                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
++                    ),
++                    const SizedBox(height: 24),
++                  ],
++                ),
++              ),
++            );
++          }
++
++          return ListView.separated(
++            padding: const EdgeInsets.all(16),
++            itemCount: bookmarks.length,
++            separatorBuilder: (_, __) => const SizedBox(height: 16),
++            itemBuilder: (context, index) {
++              final b = bookmarks[index];
++              return GestureDetector(
++                onTap: () async {
++                  final uri = Uri.parse(b.url);
++                  if (await canLaunchUrl(uri)) {
++                    await launchUrl(uri, mode: LaunchMode.externalApplication);
++                  }
++                },
++                child: NeoBox(
++                  padding: const EdgeInsets.all(0),
++                  child: Column(
++                    crossAxisAlignment: CrossAxisAlignment.stretch,
++                    children: [
++                      if (b.imageUrl != null)
++                        ClipRRect(
++                          borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
++                          child: Image.network(
++                            b.imageUrl!,
++                            height: 140,
++                            fit: BoxFit.cover,
++                            errorBuilder: (_, __, ___) => const SizedBox(height: 140, child: Center(child: Icon(Icons.image_not_supported))),
++                          ),
++                        ),
++                      Padding(
++                        padding: const EdgeInsets.all(16.0),
++                        child: Column(
++                          crossAxisAlignment: CrossAxisAlignment.start,
++                          children: [
++                            Text(
++                              b.title ?? b.url,
++                              style: const TextStyle(
++                                fontSize: 18,
++                                fontWeight: FontWeight.bold,
++                              ),
++                              maxLines: 2,
++                              overflow: TextOverflow.ellipsis,
++                            ),
++                            const SizedBox(height: 8),
++                            if (b.sourceDomain != null)
++                              Text(
++                                b.sourceDomain!,
++                                style: TextStyle(
++                                  fontSize: 14,
++                                  color: AppTheme.border.withOpacity(0.7),
++                                ),
++                              ),
++                          ],
++                        ),
++                      )
++                    ],
++                  ),
++                ),
++              );
++            },
++          );
++        },
++        loading: () => const Center(child: CircularProgressIndicator()),
++        error: (e, st) => Center(child: Text('Error: $e')),
++      ),
++      floatingActionButton: FloatingActionButton(
++        onPressed: () {
++          // Open menu (Bottom Sheet)
++          showModalBottomSheet(
++            context: context,
++            builder: (ctx) => Column(
++              mainAxisSize: MainAxisSize.min,
++              children: [
++                ListTile(
++                  leading: const Icon(Icons.add_link),
++                  title: const Text('Add Link'),
++                  onTap: () {
++                    // Logic to add link to this collection
++                    Navigator.pop(ctx);
++                  },
++                ),
++                ListTile(
++                  leading: const Icon(Icons.checklist),
++                  title: const Text('Select Links'),
++                  onTap: () => Navigator.pop(ctx),
++                ),
++                ListTile(
++                  leading: const Icon(Icons.share),
++                  title: const Text('Share Collection'),
++                  onTap: () => Navigator.pop(ctx),
++                ),
++              ],
++            ),
++          );
++        },
++        backgroundColor: AppTheme.primary,
++        child: const Icon(Icons.menu, color: AppTheme.border),
++      ),
++    );
++  }
++}
+diff --git a/lib/ui/screens/home_screen.dart b/lib/ui/screens/home_screen.dart
+new file mode 100644
+index 0000000..64ee422
+--- /dev/null
++++ b/lib/ui/screens/home_screen.dart
+@@ -0,0 +1,293 @@
++import 'dart:async';
++import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:go_router/go_router.dart';
++import 'package:receive_sharing_intent/receive_sharing_intent.dart';
++import '../../providers/providers.dart';
++import '../widgets/neo_box.dart';
++import '../widgets/neo_button.dart';
++import '../../theme/app_theme.dart';
++
++class HomeScreen extends ConsumerStatefulWidget {
++  const HomeScreen({Key? key}) : super(key: key);
++
++  @override
++  ConsumerState<HomeScreen> createState() => _HomeScreenState();
++}
++
++class _HomeScreenState extends ConsumerState<HomeScreen> {
++  final TextEditingController _urlController = TextEditingController();
++  late StreamSubscription _intentDataStreamSubscription;
++
++  @override
++  void initState() {
++    super.initState();
++    
++    // For sharing or opening url/text coming from outside the app while the app is in the memory
++    _intentDataStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen((List<SharedMediaFile> value) {
++      if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
++         final text = value.first.path;
++         _urlController.text = text;
++         _quickSave();
++      }
++    }, onError: (err) {
++      print("getIntentDataStream error: $err");
++    });
++
++    // For sharing or opening url/text coming from outside the app while the app is closed
++    ReceiveSharingIntent.instance.getInitialMedia().then((List<SharedMediaFile> value) {
++      if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
++         final text = value.first.path;
++         _urlController.text = text;
++         _quickSave();
++      }
++    });
++  }
++
++  @override
++  void dispose() {
++    _intentDataStreamSubscription.cancel();
++    _urlController.dispose();
++    super.dispose();
++  }
++
++  void _quickSave() {
++    final url = _urlController.text.trim();
++    if (url.isNotEmpty) {
++      // Basic validation
++      if (!url.startsWith('http')) {
++        ScaffoldMessenger.of(context).showSnackBar(
++          const SnackBar(content: Text('Please enter a valid URL starting with http/https')),
++        );
++        return;
++      }
++      ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
++      _urlController.clear();
++      FocusScope.of(context).unfocus();
++    }
++  }
++
++  void _showAddCollectionModal() {
++    // A simplified modal for adding collections
++    String name = '';
++    String colorHex = 'FF9EAA'; // Default Primary
++    int iconCode = Icons.folder.codePoint;
++
++    showModalBottomSheet(
++      context: context,
++      backgroundColor: Colors.transparent,
++      isScrollControlled: true,
++      builder: (context) {
++        return Padding(
++          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
++          child: NeoBox(
++            borderRadius: 32,
++            padding: const EdgeInsets.all(24),
++            color: AppTheme.background,
++            child: Column(
++              mainAxisSize: MainAxisSize.min,
++              crossAxisAlignment: CrossAxisAlignment.stretch,
++              children: [
++                const Text(
++                  'New Collection',
++                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
++                ),
++                const SizedBox(height: 16),
++                TextField(
++                  decoration: const InputDecoration(
++                    hintText: 'Collection Name',
++                    border: OutlineInputBorder(),
++                  ),
++                  onChanged: (val) => name = val,
++                ),
++                const SizedBox(height: 24),
++                NeoButton(
++                  onPressed: () {
++                    if (name.isNotEmpty) {
++                      ref.read(collectionNotifierProvider.notifier).addCollection(name, colorHex, iconCode);
++                      Navigator.pop(context);
++                    }
++                  },
++                  child: const Center(
++                    child: Text(
++                      'Create Collection',
++                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
++                    ),
++                  ),
++                ),
++                const SizedBox(height: 16),
++              ],
++            ),
++          ),
++        );
++      },
++    );
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final collectionsAsync = ref.watch(collectionsProvider);
++    final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
++
++    return Scaffold(
++      body: SafeArea(
++        child: Padding(
++          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
++          child: Column(
++            crossAxisAlignment: CrossAxisAlignment.start,
++            children: [
++              // Header
++              Row(
++                mainAxisAlignment: MainAxisAlignment.spaceBetween,
++                children: [
++                  const Text(
++                    'Save now.\nFind anytime.',
++                    style: TextStyle(
++                      fontSize: 32,
++                      fontWeight: FontWeight.w900,
++                      height: 1.1,
++                    ),
++                  ),
++                  Row(
++                    children: [
++                      IconButton(
++                        icon: const Icon(Icons.style, size: 32), // Review mode icon
++                        onPressed: () => context.push('/review'),
++                      ),
++                      const SizedBox(width: 8),
++                      IconButton(
++                        icon: const Icon(Icons.settings, size: 32),
++                        onPressed: () {}, // TODO: Settings
++                      ),
++                    ],
++                  )
++                ],
++              ),
++              const SizedBox(height: 32),
++
++              // Quick Save Bar
++              Row(
++                children: [
++                  Expanded(
++                    child: NeoBox(
++                      padding: const EdgeInsets.symmetric(horizontal: 16),
++                      borderRadius: 12,
++                      child: TextField(
++                        controller: _urlController,
++                        decoration: const InputDecoration(
++                          hintText: '# Paste link to quick save',
++                          border: InputBorder.none,
++                        ),
++                        onSubmitted: (_) => _quickSave(),
++                      ),
++                    ),
++                  ),
++                  const SizedBox(width: 16),
++                  NeoButton(
++                    padding: const EdgeInsets.all(16),
++                    borderRadius: 12,
++                    color: AppTheme.secondary,
++                    onPressed: _quickSave,
++                    child: isSaving 
++                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
++                      : const Icon(Icons.add, color: AppTheme.border, size: 28),
++                  ),
++                ],
++              ),
++              const SizedBox(height: 48),
++
++              // Collections Header
++              Row(
++                mainAxisAlignment: MainAxisAlignment.spaceBetween,
++                children: [
++                  const Text(
++                    'My Collections',
++                    style: TextStyle(
++                      fontSize: 24,
++                      fontWeight: FontWeight.bold,
++                    ),
++                  ),
++                  IconButton(
++                    icon: const Icon(Icons.create_new_folder, size: 28),
++                    onPressed: _showAddCollectionModal,
++                  ),
++                ],
++              ),
++              const SizedBox(height: 16),
++
++              // Collections Grid
++              Expanded(
++                child: collectionsAsync.when(
++                  data: (collections) {
++                    if (collections.isEmpty) {
++                      return Center(
++                        child: Column(
++                          mainAxisAlignment: MainAxisAlignment.center,
++                          children: [
++                            const Icon(Icons.folder_open, size: 64, color: Colors.grey),
++                            const SizedBox(height: 16),
++                            const Text('No collections yet.', style: TextStyle(fontSize: 18)),
++                            const SizedBox(height: 16),
++                            NeoButton(
++                              color: AppTheme.accent,
++                              onPressed: _showAddCollectionModal,
++                              child: const Text('Create One', style: TextStyle(fontWeight: FontWeight.bold)),
++                            )
++                          ],
++                        ),
++                      );
++                    }
++                    return GridView.builder(
++                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
++                        crossAxisCount: 2,
++                        crossAxisSpacing: 16,
++                        mainAxisSpacing: 16,
++                        childAspectRatio: 1.1,
++                      ),
++                      itemCount: collections.length,
++                      itemBuilder: (context, index) {
++                        final col = collections[index];
++                        return GestureDetector(
++                          onTap: () => context.push('/collection/${col.id}', extra: col),
++                          child: NeoBox(
++                            color: Color(int.parse('0xFF${col.colorHex}')),
++                            padding: const EdgeInsets.all(16),
++                            child: Column(
++                              crossAxisAlignment: CrossAxisAlignment.start,
++                              children: [
++                                Icon(
++                                  IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
++                                  size: 32,
++                                ),
++                                const Spacer(),
++                                Text(
++                                  col.name,
++                                  style: const TextStyle(
++                                    fontSize: 18,
++                                    fontWeight: FontWeight.bold,
++                                  ),
++                                  maxLines: 1,
++                                  overflow: TextOverflow.ellipsis,
++                                ),
++                                const SizedBox(height: 4),
++                                // We don't have the item count easily available without a stream or join, 
++                                // so we can display a placeholder or leave it out for v1
++                                const Text('View items', style: TextStyle(fontSize: 14)),
++                              ],
++                            ),
++                          ),
++                        );
++                      },
++                    );
++                  },
++                  loading: () => const Center(child: CircularProgressIndicator()),
++                  error: (e, st) => Center(child: Text('Error: $e')),
++                ),
++              ),
++            ],
++          ),
++        ),
++      ),
++    );
++  }
++}
+diff --git a/lib/ui/screens/review_mode_screen.dart b/lib/ui/screens/review_mode_screen.dart
+new file mode 100644
+index 0000000..4d73f78
+--- /dev/null
++++ b/lib/ui/screens/review_mode_screen.dart
+@@ -0,0 +1,181 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:flutter_card_swiper/flutter_card_swiper.dart';
++import 'package:url_launcher/url_launcher.dart';
++import '../../models/bookmark.dart';
++import '../../providers/providers.dart';
++import '../widgets/neo_box.dart';
++import '../../theme/app_theme.dart';
++
++class ReviewModeScreen extends ConsumerStatefulWidget {
++  const ReviewModeScreen({Key? key}) : super(key: key);
++
++  @override
++  ConsumerState<ReviewModeScreen> createState() => _ReviewModeScreenState();
++}
++
++class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
++  final CardSwiperController controller = CardSwiperController();
++  int currentIndex = 0;
++
++  bool _onSwipe(
++    int previousIndex,
++    int? currentIndex,
++    CardSwiperDirection direction,
++    List<Bookmark> unreadBookmarks,
++  ) {
++    if (direction == CardSwiperDirection.right) {
++      // Mark as read / Archive
++      ref.read(bookmarkNotifierProvider.notifier).markAsRead(unreadBookmarks[previousIndex]);
++    }
++    
++    setState(() {
++      this.currentIndex = currentIndex ?? unreadBookmarks.length;
++    });
++    return true;
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    final bookmarksAsync = ref.watch(bookmarksProvider);
++
++    return Scaffold(
++      backgroundColor: AppTheme.background,
++      appBar: AppBar(
++        title: const Text('Review'),
++      ),
++      body: bookmarksAsync.when(
++        data: (bookmarks) {
++          final unread = bookmarks.where((b) => !b.isRead).toList();
++
++          if (unread.isEmpty || currentIndex >= unread.length) {
++            return Center(
++              child: Column(
++                mainAxisAlignment: MainAxisAlignment.center,
++                children: const [
++                  Icon(Icons.check_circle, size: 100, color: AppTheme.secondary),
++                  SizedBox(height: 24),
++                  Text(
++                    "You're all caught up!",
++                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
++                  ),
++                ],
++              ),
++            );
++          }
++
++          return Column(
++            children: [
++              Padding(
++                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
++                child: Row(
++                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
++                  children: [
++                    Text(
++                      '${currentIndex + 1} / ${unread.length}',
++                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
++                    ),
++                    Expanded(
++                      child: Padding(
++                        padding: const EdgeInsets.only(left: 16.0),
++                        child: LinearProgressIndicator(
++                          value: (currentIndex + 1) / unread.length,
++                          color: AppTheme.primary,
++                          backgroundColor: Colors.white,
++                          minHeight: 12,
++                          borderRadius: BorderRadius.circular(6),
++                        ),
++                      ),
++                    )
++                  ],
++                ),
++              ),
++              Expanded(
++                child: CardSwiper(
++                  controller: controller,
++                  cardsCount: unread.length,
++                  onSwipe: (prev, current, direction) => _onSwipe(prev, current, direction, unread),
++                  numberOfCardsDisplayed: unread.length > 2 ? 3 : unread.length,
++                  backCardOffset: const Offset(0, -40),
++                  padding: const EdgeInsets.all(24.0),
++                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
++                    final b = unread[index];
++                    return GestureDetector(
++                      onTap: () async {
++                        final uri = Uri.parse(b.url);
++                        if (await canLaunchUrl(uri)) {
++                          await launchUrl(uri, mode: LaunchMode.externalApplication);
++                        }
++                      },
++                      child: NeoBox(
++                        padding: EdgeInsets.zero,
++                        color: AppTheme.cardColor,
++                        child: Column(
++                          crossAxisAlignment: CrossAxisAlignment.stretch,
++                          children: [
++                            if (b.imageUrl != null)
++                              Expanded(
++                                flex: 3,
++                                child: ClipRRect(
++                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
++                                  child: Image.network(
++                                    b.imageUrl!,
++                                    fit: BoxFit.cover,
++                                    errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported, size: 64)),
++                                  ),
++                                ),
++                              ),
++                            Expanded(
++                              flex: 2,
++                              child: Padding(
++                                padding: const EdgeInsets.all(24.0),
++                                child: Column(
++                                  crossAxisAlignment: CrossAxisAlignment.start,
++                                  children: [
++                                    Text(
++                                      b.title ?? b.url,
++                                      style: const TextStyle(
++                                        fontSize: 22,
++                                        fontWeight: FontWeight.bold,
++                                        height: 1.2,
++                                      ),
++                                      maxLines: 3,
++                                      overflow: TextOverflow.ellipsis,
++                                    ),
++                                    const SizedBox(height: 12),
++                                    if (b.sourceDomain != null)
++                                      Text(
++                                        b.sourceDomain!,
++                                        style: TextStyle(
++                                          fontSize: 16,
++                                          fontWeight: FontWeight.w600,
++                                          color: AppTheme.border.withOpacity(0.6),
++                                        ),
++                                      ),
++                                  ],
++                                ),
++                              ),
++                            )
++                          ],
++                        ),
++                      ),
++                    );
++                  },
++                ),
++              ),
++              const Padding(
++                padding: EdgeInsets.only(bottom: 32.0),
++                child: Text(
++                  'Swipe right to archive, left to skip',
++                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
++                ),
++              ),
++            ],
++          );
++        },
++        loading: () => const Center(child: CircularProgressIndicator()),
++        error: (e, st) => Center(child: Text('Error: $e')),
++      ),
++    );
++  }
++}
+diff --git a/lib/ui/widgets/neo_box.dart b/lib/ui/widgets/neo_box.dart
+new file mode 100644
+index 0000000..38619e9
+--- /dev/null
++++ b/lib/ui/widgets/neo_box.dart
+@@ -0,0 +1,45 @@
++import 'package:flutter/material.dart';
++import '../../theme/app_theme.dart';
++
++class NeoBox extends StatelessWidget {
++  final Widget child;
++  final Color color;
++  final double borderWidth;
++  final double borderRadius;
++  final double shadowOffset;
++  final EdgeInsetsGeometry padding;
++
++  const NeoBox({
++    Key? key,
++    required this.child,
++    this.color = AppTheme.cardColor,
++    this.borderWidth = 3.0,
++    this.borderRadius = 16.0,
++    this.shadowOffset = 6.0,
++    this.padding = const EdgeInsets.all(16.0),
++  }) : super(key: key);
++
++  @override
++  Widget build(BuildContext context) {
++    return Container(
++      padding: padding,
++      decoration: BoxDecoration(
++        color: color,
++        borderRadius: BorderRadius.circular(borderRadius),
++        border: Border.all(
++          color: AppTheme.border,
++          width: borderWidth,
++        ),
++        boxShadow: [
++          BoxShadow(
++            color: AppTheme.border,
++            offset: Offset(shadowOffset, shadowOffset),
++            blurRadius: 0,
++            spreadRadius: 0,
++          ),
++        ],
++      ),
++      child: child,
++    );
++  }
++}
+diff --git a/lib/ui/widgets/neo_button.dart b/lib/ui/widgets/neo_button.dart
+new file mode 100644
+index 0000000..8116248
+--- /dev/null
++++ b/lib/ui/widgets/neo_button.dart
+@@ -0,0 +1,89 @@
++import 'package:flutter/material.dart';
++import 'package:flutter/services.dart';
++import '../../theme/app_theme.dart';
++
++class NeoButton extends StatefulWidget {
++  final VoidCallback onPressed;
++  final Widget child;
++  final Color color;
++  final double borderWidth;
++  final double borderRadius;
++  final double shadowOffset;
++  final EdgeInsetsGeometry padding;
++
++  const NeoButton({
++    Key? key,
++    required this.onPressed,
++    required this.child,
++    this.color = AppTheme.primary,
++    this.borderWidth = 3.0,
++    this.borderRadius = 12.0,
++    this.shadowOffset = 5.0,
++    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
++  }) : super(key: key);
++
++  @override
++  State<NeoButton> createState() => _NeoButtonState();
++}
++
++class _NeoButtonState extends State<NeoButton> {
++  bool _isPressed = false;
++
++  void _handleTapDown(TapDownDetails details) {
++    HapticFeedback.lightImpact();
++    setState(() {
++      _isPressed = true;
++    });
++  }
++
++  void _handleTapUp(TapUpDetails details) {
++    setState(() {
++      _isPressed = false;
++    });
++    widget.onPressed();
++  }
++
++  void _handleTapCancel() {
++    setState(() {
++      _isPressed = false;
++    });
++  }
++
++  @override
++  Widget build(BuildContext context) {
++    return GestureDetector(
++      onTapDown: _handleTapDown,
++      onTapUp: _handleTapUp,
++      onTapCancel: _handleTapCancel,
++      child: Transform.translate(
++        offset: Offset(
++          _isPressed ? widget.shadowOffset : 0,
++          _isPressed ? widget.shadowOffset : 0,
++        ),
++        child: AnimatedContainer(
++          duration: const Duration(milliseconds: 100),
++          padding: widget.padding,
++          decoration: BoxDecoration(
++            color: widget.color,
++            borderRadius: BorderRadius.circular(widget.borderRadius),
++            border: Border.all(
++              color: AppTheme.border,
++              width: widget.borderWidth,
++            ),
++            boxShadow: _isPressed
++                ? []
++                : [
++                    BoxShadow(
++                      color: AppTheme.border,
++                      offset: Offset(widget.shadowOffset, widget.shadowOffset),
++                      blurRadius: 0,
++                      spreadRadius: 0,
++                    ),
++                  ],
++          ),
++          child: widget.child,
++        ),
++      ),
++    );
++  }
++}
+diff --git a/pubspec.yaml b/pubspec.yaml
+new file mode 100644
+index 0000000..3a6f90f
+--- /dev/null
++++ b/pubspec.yaml
+@@ -0,0 +1,103 @@
++name: save_later
++description: "A new Flutter project."
++# The following line prevents the package from being accidentally published to
++# pub.dev using `flutter pub publish`. This is preferred for private packages.
++publish_to: 'none' # Remove this line if you wish to publish to pub.dev
++
++# The following defines the version and build number for your application.
++# A version number is three numbers separated by dots, like 1.2.43
++# followed by an optional build number separated by a +.
++# Both the version and the builder number may be overridden in flutter
++# build by specifying --build-name and --build-number, respectively.
++# In Android, build-name is used as versionName while build-number used as versionCode.
++# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
++# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
++# Read more about iOS versioning at
++# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
++# In Windows, build-name is used as the major, minor, and patch parts
++# of the product and file versions while build-number is used as the build suffix.
++version: 1.0.0+1
++
++environment:
++  sdk: ^3.6.2
++
++# Dependencies specify other packages that your package needs in order to work.
++# To automatically upgrade your package dependencies to the latest versions
++# consider running `flutter pub upgrade --major-versions`. Alternatively,
++# dependencies can be manually updated by changing the version numbers below to
++# the latest version available on pub.dev. To see which dependencies have newer
++# versions available, run `flutter pub outdated`.
++dependencies:
++  flutter:
++    sdk: flutter
++
++  # The following adds the Cupertino Icons font to your application.
++  # Use with the CupertinoIcons class for iOS style icons.
++  cupertino_icons: ^1.0.8
++  flutter_riverpod: ^2.6.1
++  isar: ^3.1.0+1
++  isar_flutter_libs: ^3.1.0+1
++  metadata_fetch: ^0.4.2
++  google_fonts: ^6.3.0
++  go_router: ^16.1.0
++  path_provider: ^2.1.5
++  url_launcher: ^6.3.2
++  flutter_card_swiper: ^7.2.0
++  receive_sharing_intent: ^1.8.1
++
++dev_dependencies:
++  flutter_test:
++    sdk: flutter
++
++  # The "flutter_lints" package below contains a set of recommended lints to
++  # encourage good coding practices. The lint set provided by the package is
++  # activated in the `analysis_options.yaml` file located at the root of your
++  # package. See that file for information about deactivating specific lint
++  # rules and activating additional ones.
++  flutter_lints: ^5.0.0
++  build_runner: ^2.4.13
++  isar_generator: ^3.1.0+1
++  integration_test:
++    sdk: flutter
++
++# For information on the generic Dart part of this file, see the
++# following page: https://dart.dev/tools/pub/pubspec
++
++# The following section is specific to Flutter packages.
++flutter:
++
++  # The following line ensures that the Material Icons font is
++  # included with your application, so that you can use the icons in
++  # the material Icons class.
++  uses-material-design: true
++
++  # To add assets to your application, add an assets section, like this:
++  # assets:
++  #   - images/a_dot_burr.jpeg
++  #   - images/a_dot_ham.jpeg
++
++  # An image asset can refer to one or more resolution-specific "variants", see
++  # https://flutter.dev/to/resolution-aware-images
++
++  # For details regarding adding assets from package dependencies, see
++  # https://flutter.dev/to/asset-from-package
++
++  # To add custom fonts to your application, add a fonts section here,
++  # in this "flutter" section. Each entry in this list should have a
++  # "family" key with the font family name, and a "fonts" key with a
++  # list giving the asset and other descriptors for the font. For
++  # example:
++  # fonts:
++  #   - family: Schyler
++  #     fonts:
++  #       - asset: fonts/Schyler-Regular.ttf
++  #       - asset: fonts/Schyler-Italic.ttf
++  #         style: italic
++  #   - family: Trajan Pro
++  #     fonts:
++  #       - asset: fonts/TrajanPro.ttf
++  #       - asset: fonts/TrajanPro_Bold.ttf
++  #         weight: 700
++  #
++  # For details regarding fonts from package dependencies,
++  # see https://flutter.dev/to/font-from-package
+diff --git a/test/app_test.dart b/test/app_test.dart
+new file mode 100644
+index 0000000..6e3a7cc
+--- /dev/null
++++ b/test/app_test.dart
+@@ -0,0 +1,54 @@
++import 'package:flutter/material.dart';
++import 'package:flutter_test/flutter_test.dart';
++import 'package:flutter_riverpod/flutter_riverpod.dart';
++import 'package:save_later/main.dart' as app;
++
++void main() {
++  testWidgets('App basic functions widget test', (WidgetTester tester) async {
++    // Start the app
++    app.main();
++    await tester.pump(const Duration(seconds: 1));
++
++    // 1. Verify Home Screen is present
++    expect(find.textContaining('Save now'), findsOneWidget);
++
++    // 2. Test Quick Save UI presence
++    final urlField = find.byType(TextField);
++    expect(urlField, findsOneWidget);
++    await tester.enterText(urlField, 'https://flutter.dev');
++    
++    final addIcon = find.byIcon(Icons.add);
++    expect(addIcon, findsOneWidget);
++
++    // 3. Test Create Collection Modal
++    final createColIcon = find.byIcon(Icons.create_new_folder);
++    expect(createColIcon, findsOneWidget);
++    await tester.tap(createColIcon);
++    await tester.pump(const Duration(seconds: 1));
++
++    // Verify modal is open
++    expect(find.text('New Collection'), findsOneWidget);
++
++    // Enter collection name
++    final nameField = find.byType(TextField).last;
++    await tester.enterText(nameField, 'Test Collection');
++
++    // Tap "Create Collection"
++    final createColBtn = find.text('Create Collection');
++    expect(createColBtn, findsOneWidget);
++    await tester.tap(createColBtn);
++    await tester.pump(const Duration(seconds: 1));
++
++    // Verify collection was created and is visible
++    expect(find.text('Test Collection'), findsOneWidget);
++    
++    // 4. Test Navigation to Review Mode
++    final reviewIcon = find.byIcon(Icons.style);
++    expect(reviewIcon, findsOneWidget);
++    await tester.tap(reviewIcon);
++    await tester.pump(const Duration(seconds: 1));
++
++    // Verify Review mode text
++    expect(find.textContaining('Review'), findsWidgets);
++  });
++}
+diff --git a/test/widget_test.dart b/test/widget_test.dart
+new file mode 100644
+index 0000000..a5a159a
+--- /dev/null
++++ b/test/widget_test.dart
+@@ -0,0 +1,30 @@
++// This is a basic Flutter widget test.
++//
++// To perform an interaction with a widget in your test, use the WidgetTester
++// utility in the flutter_test package. For example, you can send tap and scroll
++// gestures. You can also use WidgetTester to find child widgets in the widget
++// tree, read text, and verify that the values of widget properties are correct.
++
++import 'package:flutter/material.dart';
++import 'package:flutter_test/flutter_test.dart';
++
++import 'package:save_later/main.dart';
++
++void main() {
++  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
++    // Build our app and trigger a frame.
++    await tester.pumpWidget(const MyApp());
++
++    // Verify that our counter starts at 0.
++    expect(find.text('0'), findsOneWidget);
++    expect(find.text('1'), findsNothing);
++
++    // Tap the '+' icon and trigger a frame.
++    await tester.tap(find.byIcon(Icons.add));
++    await tester.pump();
++
++    // Verify that our counter has incremented.
++    expect(find.text('0'), findsNothing);
++    expect(find.text('1'), findsOneWidget);
++  });
++}
