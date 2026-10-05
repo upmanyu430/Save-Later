@@ -297,60 +297,109 @@ class CollectionDetailScreen extends ConsumerWidget {
                                   context.push('/bookmark/${b.id}', extra: b);
                                 },
                               child: NeoBox(
-                                padding: const EdgeInsets.all(0),
-                                borderRadius: 12,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(
-                                      flex: 5,
-                                      child: Container(
-                                        decoration: const BoxDecoration(
-                                          border: Border(bottom: BorderSide(color: AppTheme.border, width: 2.5)),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: const BorderRadius.vertical(top: Radius.circular(9.5)),
-                                          child: b.imageUrl != null
-                                              ? Image.network(b.imageUrl!.startsWith('//') ? 'https:' + b.imageUrl! : b.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey))
-                                              : const Icon(Icons.link, size: 40, color: Colors.grey),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              b.title ?? b.url,
-                                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Row(
-                                              children: [
-                                                const Icon(Icons.public, size: 14, color: Colors.grey),
-                                                const SizedBox(width: 4),
-                                                Expanded(
-                                                  child: Text(
-                                                    b.sourceDomain ?? 'Unknown',
-                                                    style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w600),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
+                                  padding: const EdgeInsets.all(0),
+                                  borderRadius: 12,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(
+                                        flex: 5,
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            border: Border(bottom: BorderSide(color: AppTheme.border, width: 2.5)),
+                                            color: Color(0xFFF0F0F0),
+                                            borderRadius: BorderRadius.vertical(top: Radius.circular(9.5)),
+                                          ),
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: const BorderRadius.vertical(top: Radius.circular(9.5)),
+                                                child: b.imageUrl != null
+                                                    ? Image.network(b.imageUrl!.startsWith('//') ? 'https:' + b.imageUrl! : b.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey))
+                                                    : Center(
+                                                        child: Text(
+                                                          b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
+                                                          style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: AppTheme.border),
+                                                        ),
+                                                      ),
+                                              ),
+                                              if (!b.isRead)
+                                                Positioned(
+                                                  top: 6,
+                                                  left: 6,
+                                                  child: Transform.rotate(
+                                                    angle: -0.1,
+                                                    child: Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: const Color(0xFFFFD166),
+                                                        borderRadius: BorderRadius.circular(4),
+                                                        border: Border.all(color: AppTheme.border, width: 1.5),
+                                                      ),
+                                                      child: const Text(
+                                                        'NEW',
+                                                        style: TextStyle(
+                                                          fontSize: 10,
+                                                          fontWeight: FontWeight.w900,
+                                                          color: AppTheme.border,
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ],
-                                            )
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      Expanded(
+                                        flex: 4,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                b.title ?? b.url,
+                                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              const Spacer(),
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    width: 16,
+                                                    height: 16,
+                                                    decoration: const BoxDecoration(
+                                                      color: AppTheme.border,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Center(
+                                                      child: Text(
+                                                        b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
+                                                        style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Expanded(
+                                                    child: Text(
+                                                      b.sourceDomain ?? 'Unknown',
+                                                      style: const TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.w600),
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
                             );
                           },
                         ),
