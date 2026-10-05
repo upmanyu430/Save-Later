@@ -19,11 +19,9 @@ class AppTheme {
         primary: primary,
         secondary: secondary,
         surface: cardColor,
-        background: background,
         onPrimary: border,
         onSecondary: border,
         onSurface: border,
-        onBackground: border,
       ),
       textTheme: GoogleFonts.spaceMonoTextTheme().apply(
         bodyColor: border,

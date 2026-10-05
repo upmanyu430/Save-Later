@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 void main() {
   File('lib/ui/screens/search_screen.dart').writeAsStringSync('''
@@ -94,13 +94,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildStatColumn(Icons.folder_outlined, '\', 'Collections'),
+              _buildStatColumn(Icons.folder_outlined, '', 'Collections'),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.book_outlined, '\', 'Saves'),
+              _buildStatColumn(Icons.book_outlined, '', 'Saves'),
               _buildVerticalDivider(),
               _buildStatColumn(Icons.push_pin_outlined, '0', 'Pinned'),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.local_offer_outlined, '\', 'Tags'),
+              _buildStatColumn(Icons.local_offer_outlined, '', 'Tags'),
             ],
           ),
         ],
@@ -112,7 +112,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return GestureDetector(
       onTap: () {
         ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
-        context.push('/bookmark/\', extra: bookmark);
+        context.push('/bookmark/', extra: bookmark);
       },
       child: Container(
         width: 160,
@@ -303,7 +303,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           child: GestureDetector(
             onTap: () {
               ref.read(bookmarkNotifierProvider.notifier).markAsRead(b);
-              context.push('/bookmark/\', extra: b);
+              context.push('/bookmark/', extra: b);
             },
             child: NeoBox(
               child: Column(

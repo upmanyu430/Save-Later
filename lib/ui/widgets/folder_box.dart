@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
 class FolderBox extends StatelessWidget {
@@ -10,14 +11,14 @@ class FolderBox extends StatelessWidget {
   final IconData icon;
 
   const FolderBox({
-    Key? key,
+    super.key,
     required this.title,
     required this.itemCountText,
     required this.folderColor,
     required this.onTap,
     this.hasNewItems = false,
     this.icon = Icons.folder_outlined,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,9 +113,9 @@ class FolderBox extends StatelessWidget {
                                 color: const Color(0xFFFFD166),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text(
-                                'NEW',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.newBadge,
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
                                 ),

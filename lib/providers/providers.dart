@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:metadata_fetch/metadata_fetch.dart';
 import '../models/bookmark.dart';
@@ -48,7 +49,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       String? sourceDomain;
 
       try {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://' + url; }
+        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
           final uri = Uri.parse(url);
         sourceDomain = uri.host;
         var data = await MetadataFetch.extract(url);
@@ -59,7 +60,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         }
       } catch (e) {
         // Fallback or ignore
-        print('Error fetching metadata: $e');
+        debugPrint('Error fetching metadata: $e');
       }
 
       final bookmark = Bookmark()
@@ -90,16 +91,17 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       await repo.updateBookmark(bookmark);
       ref.invalidate(bookmarksProvider);
       ref.invalidate(unsortedBookmarksProvider);
-      if (bookmark.collection.value != null)
+      if (bookmark.collection.value != null) {
         ref.invalidate(
             collectionBookmarksProvider(bookmark.collection.value!.id));
+      }
     }
   }
 
   Future<void> refreshMetadata(Bookmark bookmark) async {
       try {
         String url = bookmark.url;
-        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://' + url; }
+        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
         bookmark.url = url; // Update url
         bookmark.sourceDomain = Uri.parse(url).host;
         var data = await MetadataFetch.extract(url);
@@ -115,7 +117,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
           ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
         }
       } catch (e) {
-        print('Error refreshing metadata: $e');
+        debugPrint('Error refreshing metadata: $e');
       }
     }
 
@@ -125,9 +127,10 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
       ref.invalidate(unsortedBookmarksProvider);
-    if (bookmark.collection.value != null)
+    if (bookmark.collection.value != null) {
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
+    }
   }
 
   Future<void> markAsRead(Bookmark bookmark) async {

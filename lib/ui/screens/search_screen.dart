@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
@@ -8,7 +9,7 @@ import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({Key? key}) : super(key: key);
+  const SearchScreen({super.key});
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -72,15 +73,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildLibraryStats(
       int collectionsCount, int bookmarksCount, int pinnedCount, int tagsCount) {
+    final l10n = AppLocalizations.of(context)!;
     return NeoBox(
       color: const Color(0xFFFFD166), // Yellow
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'YOUR LIBRARY',
-            style: TextStyle(
+          Text(
+            l10n.yourLibrary,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w900,
               color: AppTheme.border,
@@ -92,13 +94,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _buildStatColumn(Icons.folder_outlined, '$collectionsCount', 'Collections'),
+              _buildStatColumn(Icons.folder_outlined, '$collectionsCount', l10n.collections),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.book_outlined, '$bookmarksCount', 'Saves'),
+              _buildStatColumn(Icons.book_outlined, '$bookmarksCount', l10n.saves),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.push_pin_outlined, '$pinnedCount', 'Pinned'),
+              _buildStatColumn(Icons.push_pin_outlined, '$pinnedCount', l10n.pinned),
               _buildVerticalDivider(),
-              _buildStatColumn(Icons.local_offer_outlined, '$tagsCount', 'Tags'),
+              _buildStatColumn(Icons.local_offer_outlined, '$tagsCount', l10n.tags),
             ],
           ),
         ],
@@ -158,7 +160,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
-                            bookmark.collection.value?.name ?? 'Unsorted',
+                            bookmark.collection.value?.name ?? AppLocalizations.of(context)!.unsorted,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
@@ -183,9 +185,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 border: Border.all(
                                     color: AppTheme.border, width: 1.5),
                               ),
-                              child: const Text(
-                                'NEW',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context)!.newBadge,
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
                                   color: AppTheme.border,
@@ -252,7 +254,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
-                              bookmark.sourceDomain ?? 'Unknown',
+                              bookmark.sourceDomain ?? AppLocalizations.of(context)!.unknown,
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.black54,
@@ -285,12 +287,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }).toList();
 
     if (results.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(32.0),
+          padding: const EdgeInsets.all(32.0),
           child: Text(
-            'No results found.',
-            style: TextStyle(
+            AppLocalizations.of(context)!.noResultsFound,
+            style: const TextStyle(
                 color: Colors.black54,
                 fontSize: 16,
                 fontWeight: FontWeight.w500),
@@ -311,6 +313,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final collectionsAsync = ref.watch(collectionsProvider);
     final bookmarksAsync = ref.watch(bookmarksProvider);
 
@@ -345,14 +348,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       color: Colors.white,
                       child: TextField(
                         controller: _searchController,
-                        decoration: const InputDecoration(
-                          hintText: 'Find collections or saves...',
-                          hintStyle: TextStyle(
+                        decoration: InputDecoration(
+                          hintText: l10n.findCollectionsOrSavesHint,
+                          hintStyle: const TextStyle(
                             color: Colors.black38,
                             fontWeight: FontWeight.w600,
                           ),
                           border: InputBorder.none,
-                          icon: Icon(Icons.search,
+                          icon: const Icon(Icons.search,
                               color: AppTheme.border, size: 28),
                         ),
                         style: const TextStyle(
@@ -369,9 +372,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 14),
                       color: Colors.white,
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.cancel,
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                           color: AppTheme.border,
@@ -403,13 +406,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
                         // Recently Saved Header
                         Row(
-                          children: const [
-                            Icon(Icons.schedule,
+                          children: [
+                            const Icon(Icons.schedule,
                                 color: AppTheme.border, size: 22),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'RECENTLY SAVED',
-                              style: TextStyle(
+                              l10n.recentlySaved,
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 color: AppTheme.border,
@@ -445,10 +448,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           color: AppTheme.border,
                         ),
                         const SizedBox(height: 16),
-                        const Center(
+                        Center(
                           child: Text(
-                            'Type something to search...',
-                            style: TextStyle(
+                            l10n.typeSomethingToSearch,
+                            style: const TextStyle(
                               color: Colors.black54,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

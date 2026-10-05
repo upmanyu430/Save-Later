@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -7,7 +8,6 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
-import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
 class CollectionDetailScreen extends ConsumerStatefulWidget {
@@ -15,10 +15,10 @@ class CollectionDetailScreen extends ConsumerStatefulWidget {
   final BookmarkCollection? collection;
 
   const CollectionDetailScreen({
-    Key? key,
+    super.key,
     required this.collectionId,
     required this.collection,
-  }) : super(key: key);
+  });
 
   @override
   ConsumerState<CollectionDetailScreen> createState() => _CollectionDetailScreenState();
@@ -29,7 +29,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   final Set<int> _selectedIds = {};
 
   void _showAddLinkModal(BuildContext context) {
-    String url = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -47,23 +46,22 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Add Link to Collection',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.addLinkToCollection,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               TextField(
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'https://...',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.linkUrlHint,
+                  border: const OutlineInputBorder(),
                 ),
-                onChanged: (val) => url = val,
                 onSubmitted: (val) {
                   if (val.trim().isNotEmpty) {
                     ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: widget.collection);
                     Navigator.pop(modalCtx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saving link...')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savingLink)));
                   }
                 },
               ),
@@ -109,7 +107,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             // Add Link
             _buildMenuItem(
               icon: Icons.add,
-              title: 'Add Link',
+              title: AppLocalizations.of(context)!.addLink,
               onTap: () {
                 Navigator.pop(ctx);
                 _showAddLinkModal(context);
@@ -120,7 +118,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             // Select Links
             _buildMenuItem(
               icon: Icons.check_box_outlined,
-              title: 'Select Links',
+              title: AppLocalizations.of(context)!.selectLinks,
               onTap: () {
                 Navigator.pop(ctx);
                 setState(() {
@@ -134,12 +132,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             // Create Sub-collection
             _buildMenuItem(
               icon: Icons.create_new_folder_outlined,
-              title: 'Create Sub-collection',
+              title: AppLocalizations.of(context)!.createSubCollection,
               trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: 28),
               onTap: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sub-collections are a premium feature!')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.subCollectionsPremiumFeature)),
                 );
               },
             ),
@@ -148,11 +146,11 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             // Share Collection
             _buildMenuItem(
               icon: Icons.share_outlined,
-              title: 'Share Collection',
+              title: AppLocalizations.of(context)!.shareCollection,
               onTap: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Sharing collection...')),
+                  SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
                 );
               },
             ),
@@ -236,6 +234,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   void _moveSelected(List<Bookmark> allBookmarks) async {
      if (_selectedIds.isEmpty) return;
      final collections = await ref.read(collectionsProvider.future);
+     if (!mounted) return;
      
      showModalBottomSheet(
       context: context,
@@ -255,9 +254,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text(
-              'Move to...',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            Text(
+              AppLocalizations.of(context)!.moveTo,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -293,6 +292,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final bookmarksAsync = widget.collectionId != null ? ref.watch(collectionBookmarksProvider(widget.collectionId!)) : ref.watch(unsortedBookmarksProvider);
 
     return Scaffold(
@@ -312,19 +312,19 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           child: Row(
                             children: [
                               Text(
-                                '${_selectedIds.length} select...',
+                                l10n.selectedCount(_selectedIds.length),
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                               ),
                               const SizedBox(width: 8),
-                              _buildSelectButton('All', onTap: () {
+                              _buildSelectButton(l10n.selectAll, onTap: () {
                                 setState(() {
                                   _selectedIds.addAll(bookmarks.map((b) => b.id));
                                 });
                               }),
-                              _buildSelectButton('Share', onTap: () => _shareSelected(bookmarks)),
-                              _buildSelectButton('Move', onTap: () => _moveSelected(bookmarks)),
-                              _buildSelectButton('Delete', color: const Color(0xFFEF476F), textColor: Colors.white, onTap: () => _deleteSelected(bookmarks)),
-                              _buildSelectButton('Cancel', onTap: () {
+                              _buildSelectButton(l10n.share, onTap: () => _shareSelected(bookmarks)),
+                              _buildSelectButton(l10n.move, onTap: () => _moveSelected(bookmarks)),
+                              _buildSelectButton(l10n.delete, color: const Color(0xFFEF476F), textColor: Colors.white, onTap: () => _deleteSelected(bookmarks)),
+                              _buildSelectButton(l10n.cancel, onTap: () {
                                 setState(() {
                                   _isSelectMode = false;
                                   _selectedIds.clear();
@@ -348,11 +348,11 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             Column(
                               children: [
                                 Text(
-                                  (widget.collection?.name ?? 'Unsorted'),
+                                  (widget.collection?.name ?? l10n.unsorted),
                                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                                 ),
                                 Text(
-                                  '${bookmarks.length} ${bookmarks.length == 1 ? 'item' : 'items'}',
+                                  l10n.itemsCount(bookmarks.length),
                                   style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -389,7 +389,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                   child: Text(
-                    'SAVES (${bookmarks.length})',
+                    l10n.savesCount(bookmarks.length),
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.2),
                   ),
                 ),
@@ -403,10 +403,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             children: [
                               const Icon(Icons.inbox, size: 80, color: AppTheme.border),
                               const SizedBox(height: 16),
-                              const Text(
-                                'No items yet.',
+                              Text(
+                                l10n.noItemsYet,
                                 textAlign: TextAlign.center,
-                                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -443,7 +443,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text('Error: $e')),
+          error: (e, st) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
         ),
       ),
     );

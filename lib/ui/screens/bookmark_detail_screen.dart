@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,7 +13,7 @@ import '../../utils/url_launcher.dart';
 class BookmarkDetailScreen extends ConsumerStatefulWidget {
   final Bookmark bookmark;
 
-  const BookmarkDetailScreen({Key? key, required this.bookmark}) : super(key: key);
+  const BookmarkDetailScreen({super.key, required this.bookmark});
 
   @override
   ConsumerState<BookmarkDetailScreen> createState() => _BookmarkDetailScreenState();
@@ -39,7 +40,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _showAddTagModal() {
-    String newTag = '';
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -57,18 +57,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Add Tag',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                AppLocalizations.of(context)!.addTag,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               TextField(
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: 'tag_name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.tagNameHint,
+                  border: const OutlineInputBorder(),
                 ),
-                onChanged: (val) => newTag = val,
                 onSubmitted: (val) {
                   if (val.trim().isNotEmpty) {
                     _addTag(val);
@@ -112,7 +111,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             padding: const EdgeInsets.all(24),
             child: collectionsAsync.when(
               data: (collections) {
-                if (collections.isEmpty) return const Text('No collections created yet.');
+                if (collections.isEmpty) return Text(AppLocalizations.of(context)!.noCollectionsCreated);
                 return ListView.builder(
                   shrinkWrap: true,
                   itemCount: collections.length,
@@ -127,16 +126,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         bookmark.collection.save();
                         ref.invalidate(bookmarksProvider);
                         ref.invalidate(collectionBookmarksProvider(col.id));
+                        if (!mounted || !ctx.mounted) return;
                         setState(() {});
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Moved to ${col.name}')));
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.movedToCollection(col.name))));
                       },
                     );
                   }
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text('Error: $e'),
+              error: (e, _) => Text(AppLocalizations.of(context)!.errorWithMessage(e.toString())),
             )
           );
         }
@@ -146,6 +146,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.black, // Matches image overflow areas
       body: Stack(
@@ -156,7 +157,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             height: MediaQuery.of(context).size.height * 0.45,
             child: bookmark.imageUrl != null
                 ? Image.network(
-                    bookmark.imageUrl!.startsWith('//') ? 'https:' + bookmark.imageUrl! : bookmark.imageUrl!,
+                    bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
                     fit: BoxFit.cover,
                     errorBuilder: (_,__,___) => Container(
                       color: Colors.grey.shade900,
@@ -198,7 +199,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             const Icon(Icons.public, size: 18),
                             const SizedBox(width: 8),
                             Text(
-                              bookmark.sourceDomain ?? 'Unknown Source',
+                              bookmark.sourceDomain ?? l10n.unknownSource,
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                           ],
@@ -250,7 +251,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       borderRadius: 12,
                                       borderWidth: 3,
                                       color: Colors.white,
-                                      child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
+                                      child: Text(l10n.cancel, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -277,7 +278,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         borderRadius: BorderRadius.circular(12),
                                         border: Border.all(color: Colors.grey.shade600, width: 3),
                                       ),
-                                      child: Text('Save', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.grey.shade600)),
+                                      child: Text(l10n.save, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.grey.shade600)),
                                     ),
                                   ),
                                 ],
@@ -364,9 +365,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'Open link',
-                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                      Text(
+                                        l10n.openLink,
+                                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                       ),
                                       Text(
                                         bookmark.sourceDomain ?? bookmark.url,
@@ -397,19 +398,21 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           borderRadius: 16,
                           child: Row(
                             children: [
-                              _buildActionItem(Icons.share_outlined, 'Share', () {
+                              _buildActionItem(Icons.share_outlined, l10n.share, () {
                                 Share.share(widget.bookmark.url);
                               }),
                               _buildDivider(),
-                              _buildActionItem(Icons.folder_outlined, 'Move', _showMoveModal),
+                              _buildActionItem(Icons.folder_outlined, l10n.move, _showMoveModal),
                               _buildDivider(),
-                              _buildActionItem(Icons.refresh, 'Refresh', _showRefreshDialog),
+                              _buildActionItem(Icons.refresh, l10n.refresh, _showRefreshDialog),
                               _buildDivider(),
-                              _buildActionItem(Icons.delete_outline, 'Delete', () async {
+                              _buildActionItem(Icons.delete_outline, l10n.delete, () async {
                                 await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
                                 ref.invalidate(bookmarksProvider);
                                 if (bookmark.collection.value != null) ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-                                context.pop();
+                                if (context.mounted) {
+                                  context.pop();
+                                }
                               }, isDestructive: true),
                             ],
                           ),
@@ -417,16 +420,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: 32),
 
                         // Description
-                        const Text('DESCRIPTION', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        Text(l10n.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
                         Text(
-                          bookmark.description ?? 'No description provided.',
+                          bookmark.description ?? l10n.noDescriptionProvided,
                           style: const TextStyle(fontSize: 16, height: 1.4, color: Color(0xFF333333)),
                         ),
                         const SizedBox(height: 32),
 
                         // Tags
-                        const Text('TAGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        Text(l10n.tagsLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
                         Wrap(
                           spacing: 8.0,
@@ -454,12 +457,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 borderRadius: 8,
                                 borderWidth: 2,
-                                child: const Row(
+                                child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text('👑', style: TextStyle(fontSize: 12)),
-                                    SizedBox(width: 6),
-                                    Text('Add', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                    const Text('👑', style: TextStyle(fontSize: 12)),
+                                    const SizedBox(width: 6),
+                                    Text(l10n.add, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                                   ],
                                 ),
                               ),
@@ -469,7 +472,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: 32),
 
                         // Notes
-                        const Text('NOTES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        Text(l10n.notesLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
                         NeoBox(
                           color: const Color(0xFFFFF7E0), // Pale yellow
@@ -478,9 +481,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           child: TextField(
                             controller: _notesController,
                             maxLines: null,
-                            decoration: const InputDecoration(
-                              hintText: 'Tap to add notes...',
-                              hintStyle: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                            decoration: InputDecoration(
+                              hintText: l10n.tapToAddNotesHint,
+                              hintStyle: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
                               border: InputBorder.none,
                             ),
                           ),
@@ -570,20 +573,20 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  'Refresh link metadata?',
+                Text(
+                  AppLocalizations.of(context)!.refreshLinkMetadata,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w900,
                     height: 1.2,
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Refresh updates the link preview (title, image, description). Your notes, pin state, and collection will remain unchanged.',
+                Text(
+                  AppLocalizations.of(context)!.refreshMetadataDescription,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 15,
                     color: Color(0xFF555555),
                     height: 1.4,
@@ -602,10 +605,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: AppTheme.border, width: 2.5),
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Cancel',
-                              style: TextStyle(
+                              AppLocalizations.of(context)!.cancel,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -635,10 +638,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               ),
                             ],
                           ),
-                          child: const Center(
+                          child: Center(
                             child: Text(
-                              'Refresh',
-                              style: TextStyle(
+                              AppLocalizations.of(context)!.refresh,
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -823,8 +826,8 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
               const SizedBox(height: 20),
               Text(
                 _done
-                    ? (_error ? 'Something went wrong' : 'All done!')
-                    : 'Refreshing...',
+                    ? (_error ? AppLocalizations.of(context)!.somethingWentWrong : AppLocalizations.of(context)!.allDone)
+                    : AppLocalizations.of(context)!.refreshing,
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
@@ -834,9 +837,9 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
               Text(
                 _done
                     ? (_error
-                        ? 'Could not fetch metadata.'
-                        : 'Metadata updated successfully.')
-                    : 'Fetching latest title, image\nand description...',
+                        ? AppLocalizations.of(context)!.couldNotFetchMetadata
+                        : AppLocalizations.of(context)!.metadataUpdatedSuccessfully)
+                    : AppLocalizations.of(context)!.fetchingLatestMetadata,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,

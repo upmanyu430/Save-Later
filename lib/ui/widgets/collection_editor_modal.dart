@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
-import 'neo_box.dart';
 import 'neo_button.dart';
 
 class CollectionEditorModal extends ConsumerStatefulWidget {
   final BookmarkCollection? existingCollection;
 
-  const CollectionEditorModal({Key? key, this.existingCollection}) : super(key: key);
+  const CollectionEditorModal({super.key, this.existingCollection});
 
   @override
   ConsumerState<CollectionEditorModal> createState() => _CollectionEditorModalState();
@@ -101,7 +101,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      isEditing ? 'Edit collection' : 'New collection',
+                      isEditing
+                          ? AppLocalizations.of(context)!.editCollection
+                          : AppLocalizations.of(context)!.newCollection,
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     GestureDetector(
@@ -123,7 +125,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('NAME', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                    Text(AppLocalizations.of(context)!.nameUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                     Text('${_nameController.text.length}/40', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                   ],
                 ),
@@ -147,7 +149,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 const SizedBox(height: 24),
                 
                 // Color Picker
-                const Text('COLOR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                Text(AppLocalizations.of(context)!.colorUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(height: 12),
                 GridView.builder(
                   shrinkWrap: true,
@@ -179,7 +181,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 const SizedBox(height: 24),
                 
                 // Icon Picker
-                const Text('ICON', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                Text(AppLocalizations.of(context)!.iconUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(height: 12),
                 GridView.builder(
                   shrinkWrap: true,
@@ -216,7 +218,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Center(
                     child: Text(
-                      isEditing ? 'Update collection' : 'Create collection',
+                      isEditing
+                          ? AppLocalizations.of(context)!.updateCollection
+                          : AppLocalizations.of(context)!.createCollection,
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),

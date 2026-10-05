@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +12,7 @@ import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_config.dart';
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -21,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _hapticFeedback = true;
   bool _newSaveReminders = true;
   bool _isLoading = true;
-  String _appVersion = 'Version 1.0.0';
+  String _appVersion = '1.0.0';
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _hapticFeedback = prefs.getBool('hapticFeedback') ?? true;
       _newSaveReminders = prefs.getBool('newSaveReminders') ?? true;
-      _appVersion = 'Version ${packageInfo.version}';
+      _appVersion = packageInfo.version;
       _isLoading = false;
     });
   }
@@ -73,27 +74,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
     try {
       await launchUrl(emailLaunchUri);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open email client')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.couldNotOpenEmailClient)),
+        );
+      }
     }
   }
 
   Future<void> _deleteData(BuildContext ctx, WidgetRef ref) async {
     if (_hapticFeedback) HapticFeedback.selectionClick();
+    final l10n = AppLocalizations.of(ctx)!;
     final confirm = await showDialog<bool>(
       context: ctx,
       builder: (c) => AlertDialog(
-        title: const Text('Delete All Data?'),
-        content: const Text(
-            'This will permanently erase all saves, collections, and tags on this device. This cannot be undone.'),
+        title: Text(l10n.deleteAllDataTitle),
+        content: Text(l10n.deleteAllDataConfirmation),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(c, false),
-              child: const Text('Cancel')),
+              child: Text(l10n.cancel)),
           TextButton(
             onPressed: () => Navigator.pop(c, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -112,7 +115,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
-          const SnackBar(content: Text('All data deleted successfully.')),
+          SnackBar(content: Text(l10n.allDataDeleted)),
         );
       }
     }
@@ -204,6 +207,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) return const Scaffold(backgroundColor: AppTheme.background);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -231,9 +235,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-                  const Text(
-                    'Settings',
-                    style: TextStyle(
+                  Text(
+                    l10n.settings,
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                     ),
@@ -247,64 +251,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
                 children: [
-                  _buildSectionHeader('PREFERENCES'),
+                  _buildSectionHeader(l10n.preferences),
                   _buildSettingTile(
-                    title: 'Haptic Feedback',
-                    subtitle: 'Vibrate for actions and selections',
+                    title: l10n.hapticFeedback,
+                    subtitle: l10n.hapticFeedbackSubtitle,
                     icon: _buildIconContainer(Icons.bolt),
                     trailing: CupertinoSwitch(
                       value: _hapticFeedback,
                       onChanged: _setHaptic,
-                      activeColor: const Color(0xFF26D5A8), // Teal from image
+                      activeTrackColor: const Color(0xFF26D5A8), // Teal from image
                     ),
                   ),
                   _buildSettingTile(
-                    title: 'New Save Reminders',
-                    subtitle: 'Gentle reminders to review unseen saves',
+                    title: l10n.newSaveReminders,
+                    subtitle: l10n.newSaveRemindersSubtitle,
                     icon: _buildIconContainer(Icons.notifications_none),
                     trailing: CupertinoSwitch(
                       value: _newSaveReminders,
                       onChanged: _setReminders,
-                      activeColor: const Color(0xFF26D5A8), // Teal from image
+                      activeTrackColor: const Color(0xFF26D5A8), // Teal from image
                     ),
                   ),
 
-                  _buildSectionHeader('SUPPORT'),
+                  _buildSectionHeader(l10n.support),
                   _buildSettingTile(
-                    title: 'How To',
-                    subtitle: 'Quick guides for getting more from ${AppConfig.appName}',
+                    title: l10n.howTo,
+                    subtitle: l10n.howToSubtitle(AppConfig.appName),
                     icon: _buildIconContainer(Icons.book_outlined),
                     onTap: () => _openUrl(AppConfig.howToUrl),
                     trailing: const Icon(Icons.chevron_right, color: Colors.black54),
                   ),
                   _buildSettingTile(
-                    title: 'Send Feedback',
-                    subtitle: 'Got a bug or idea? We\'d love to hear it!',
+                    title: l10n.sendFeedback,
+                    subtitle: l10n.sendFeedbackSubtitle,
                     icon: _buildIconContainer(Icons.chat_bubble_outline),
                     onTap: _sendFeedback,
                     trailing: const Icon(Icons.open_in_new, color: Colors.black54, size: 20),
                   ),
                   _buildSettingTile(
-                    title: 'Privacy Policy',
+                    title: l10n.privacyPolicy,
                     subtitle: null,
                     icon: _buildIconContainer(Icons.lock_outline),
                     onTap: () => _openUrl(AppConfig.privacyPolicyUrl),
                     trailing: const Icon(Icons.open_in_new, color: Colors.black54, size: 20),
                   ),
                   _buildSettingTile(
-                    title: 'Terms of Service',
+                    title: l10n.termsOfService,
                     subtitle: null,
                     icon: _buildIconContainer(Icons.description_outlined),
                     onTap: () => _openUrl(AppConfig.termsOfServiceUrl),
                     trailing: const Icon(Icons.open_in_new, color: Colors.black54, size: 20),
                   ),
 
-                  _buildSectionHeader('ACCOUNT'),
+                  _buildSectionHeader(l10n.account),
                   Consumer(
                     builder: (context, ref, _) {
                       return _buildSettingTile(
-                        title: 'Delete All Data',
-                        subtitle: 'Permanently erase all saves, collections, and tags on this device',
+                        title: l10n.deleteAllData,
+                        subtitle: l10n.deleteAllDataSubtitle,
                         titleColor: Colors.pink.shade400,
                         icon: _buildIconContainer(Icons.delete_outline, bgColor: Colors.pink.shade50, iconColor: Colors.pink.shade400),
                         onTap: () => _deleteData(context, ref),
@@ -316,7 +320,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 24),
                   Center(
                     child: Text(
-                      _appVersion,
+                      l10n.versionLabel(_appVersion),
                       style: const TextStyle(
                         color: Colors.black38,
                         fontSize: 12,

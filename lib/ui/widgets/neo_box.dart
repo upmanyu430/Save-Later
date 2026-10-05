@@ -10,14 +10,14 @@ class NeoBox extends StatelessWidget {
   final EdgeInsetsGeometry padding;
 
   const NeoBox({
-    Key? key,
+    super.key,
     required this.child,
     this.color = AppTheme.cardColor,
     this.borderWidth = 3.0,
     this.borderRadius = 16.0,
     this.shadowOffset = 6.0,
     this.padding = const EdgeInsets.all(16.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

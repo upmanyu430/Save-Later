@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:save_later/main.dart' as app;
-import 'package:save_later/ui/widgets/neo_button.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -38,14 +37,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify modal is open
-    expect(find.text('New Collection'), findsOneWidget);
+    expect(find.text('New collection'), findsOneWidget);
 
     // Enter collection name
     final nameField = find.byType(TextField).last;
     await tester.enterText(nameField, 'Test Collection');
 
     // Tap "Create Collection"
-    final createColBtn = find.text('Create Collection');
+    final createColBtn = find.text('Create collection');
     expect(createColBtn, findsOneWidget);
     await tester.tap(createColBtn);
     await tester.pumpAndSettle();

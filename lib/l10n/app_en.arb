@@ -1,0 +1,448 @@
+{
+  "@@locale": "en",
+  "appName": "Save Later",
+  "@appName": {
+    "description": "The name of the application"
+  },
+  "enterValidUrl": "Please enter a valid URL starting with http/https",
+  "@enterValidUrl": {
+    "description": "Validation message when entered URL does not start with http/https"
+  },
+  "errorSavingLink": "Error saving link!",
+  "@errorSavingLink": {
+    "description": "Error message when saving a link fails"
+  },
+  "linkSavedMessage": "Link saved! Tap the cards icon to review and organize it.",
+  "@linkSavedMessage": {
+    "description": "Success message when a link is saved"
+  },
+  "saveNowFindAnytime": "Save now.\nFind anytime.",
+  "@saveNowFindAnytime": {
+    "description": "Header title on home screen"
+  },
+  "pasteLinkHint": "#   Paste link to quick save",
+  "@pasteLinkHint": {
+    "description": "Hint text for quick save text field"
+  },
+  "myCollections": "My Collections",
+  "@myCollections": {
+    "description": "Section title for collections"
+  },
+  "unsorted": "Unsorted",
+  "@unsorted": {
+    "description": "Label for unsorted collection"
+  },
+  "itemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@itemsCount": {
+    "description": "Number of items",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "errorWithMessage": "Error: {error}",
+  "@errorWithMessage": {
+    "description": "Generic error message with details",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "addLinkToCollection": "Add Link to Collection",
+  "@addLinkToCollection": {
+    "description": "Title of modal to add link to collection"
+  },
+  "linkUrlHint": "https://...",
+  "@linkUrlHint": {
+    "description": "Hint for link URL text field"
+  },
+  "savingLink": "Saving link...",
+  "@savingLink": {
+    "description": "Snackbar message while saving link"
+  },
+  "addLink": "Add Link",
+  "@addLink": {
+    "description": "Menu option to add a link"
+  },
+  "selectLinks": "Select Links",
+  "@selectLinks": {
+    "description": "Menu option to enter select mode"
+  },
+  "createSubCollection": "Create Sub-collection",
+  "@createSubCollection": {
+    "description": "Menu option to create a sub-collection"
+  },
+  "subCollectionsPremiumFeature": "Sub-collections are a premium feature!",
+  "@subCollectionsPremiumFeature": {
+    "description": "Message indicating sub-collections are premium"
+  },
+  "shareCollection": "Share Collection",
+  "@shareCollection": {
+    "description": "Menu option to share a collection"
+  },
+  "sharingCollection": "Sharing collection...",
+  "@sharingCollection": {
+    "description": "Snackbar message while sharing collection"
+  },
+  "moveTo": "Move to...",
+  "@moveTo": {
+    "description": "Title of move modal"
+  },
+  "selectedCount": "{count} select...",
+  "@selectedCount": {
+    "description": "Count of selected items in select mode",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "selectAll": "All",
+  "@selectAll": {
+    "description": "Button to select all items"
+  },
+  "share": "Share",
+  "@share": {
+    "description": "Button or action to share"
+  },
+  "move": "Move",
+  "@move": {
+    "description": "Button or action to move"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Button or action to delete"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Button to cancel an action"
+  },
+  "savesCount": "SAVES ({count})",
+  "@savesCount": {
+    "description": "Header showing count of saves",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noItemsYet": "No items yet.",
+  "@noItemsYet": {
+    "description": "Empty state text when collection has no items"
+  },
+  "addTag": "Add Tag",
+  "@addTag": {
+    "description": "Title of modal to add a tag"
+  },
+  "tagNameHint": "tag_name",
+  "@tagNameHint": {
+    "description": "Hint for tag name input"
+  },
+  "noCollectionsCreated": "No collections created yet.",
+  "@noCollectionsCreated": {
+    "description": "Message when no collections exist to move to"
+  },
+  "movedToCollection": "Moved to {collectionName}",
+  "@movedToCollection": {
+    "description": "Snackbar message when moved to a collection",
+    "placeholders": {
+      "collectionName": {
+        "type": "String"
+      }
+    }
+  },
+  "unknownSource": "Unknown Source",
+  "@unknownSource": {
+    "description": "Fallback text when source domain is not known"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Button to save changes"
+  },
+  "openLink": "Open link",
+  "@openLink": {
+    "description": "Button to open link in browser"
+  },
+  "refresh": "Refresh",
+  "@refresh": {
+    "description": "Button or action to refresh"
+  },
+  "descriptionLabel": "DESCRIPTION",
+  "@descriptionLabel": {
+    "description": "Section header for description"
+  },
+  "noDescriptionProvided": "No description provided.",
+  "@noDescriptionProvided": {
+    "description": "Text when bookmark has no description"
+  },
+  "tagsLabel": "TAGS",
+  "@tagsLabel": {
+    "description": "Section header for tags"
+  },
+  "add": "Add",
+  "@add": {
+    "description": "Button to add a tag"
+  },
+  "notesLabel": "NOTES",
+  "@notesLabel": {
+    "description": "Section header for notes"
+  },
+  "tapToAddNotesHint": "Tap to add notes...",
+  "@tapToAddNotesHint": {
+    "description": "Hint text for notes input field"
+  },
+  "refreshLinkMetadata": "Refresh link metadata?",
+  "@refreshLinkMetadata": {
+    "description": "Title of confirmation dialog to refresh link metadata"
+  },
+  "refreshMetadataDescription": "Refresh updates the link preview (title, image, description). Your notes, pin state, and collection will remain unchanged.",
+  "@refreshMetadataDescription": {
+    "description": "Description in refresh metadata confirmation dialog"
+  },
+  "somethingWentWrong": "Something went wrong",
+  "@somethingWentWrong": {
+    "description": "Error title in refresh overlay"
+  },
+  "allDone": "All done!",
+  "@allDone": {
+    "description": "Success title in refresh overlay"
+  },
+  "refreshing": "Refreshing...",
+  "@refreshing": {
+    "description": "Progress title in refresh overlay"
+  },
+  "couldNotFetchMetadata": "Could not fetch metadata.",
+  "@couldNotFetchMetadata": {
+    "description": "Error subtitle in refresh overlay"
+  },
+  "metadataUpdatedSuccessfully": "Metadata updated successfully.",
+  "@metadataUpdatedSuccessfully": {
+    "description": "Success subtitle in refresh overlay"
+  },
+  "fetchingLatestMetadata": "Fetching latest title, image\nand description...",
+  "@fetchingLatestMetadata": {
+    "description": "Progress subtitle in refresh overlay"
+  },
+  "caughtUpTitle": "You're all caught up!",
+  "@caughtUpTitle": {
+    "description": "Title when all bookmarks in review mode have been reviewed"
+  },
+  "caughtUpSubtitle": "Great job.",
+  "@caughtUpSubtitle": {
+    "description": "Subtitle when review mode is caught up"
+  },
+  "viewedCount": "Viewed {count}",
+  "@viewedCount": {
+    "description": "Count of items viewed in review mode",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "previous": "Previous",
+  "@previous": {
+    "description": "Button to go to previous item in review mode"
+  },
+  "done": "Done",
+  "@done": {
+    "description": "Button when finished reviewing"
+  },
+  "unknown": "Unknown",
+  "@unknown": {
+    "description": "Fallback text when source is unknown"
+  },
+  "yourLibrary": "YOUR LIBRARY",
+  "@yourLibrary": {
+    "description": "Header for library stats"
+  },
+  "collections": "Collections",
+  "@collections": {
+    "description": "Label for collections stat"
+  },
+  "saves": "Saves",
+  "@saves": {
+    "description": "Label for saves stat"
+  },
+  "pinned": "Pinned",
+  "@pinned": {
+    "description": "Label for pinned stat"
+  },
+  "tags": "Tags",
+  "@tags": {
+    "description": "Label for tags stat"
+  },
+  "newBadge": "NEW",
+  "@newBadge": {
+    "description": "Badge indicating new or unread bookmark"
+  },
+  "noResultsFound": "No results found.",
+  "@noResultsFound": {
+    "description": "Text when search yields no results"
+  },
+  "findCollectionsOrSavesHint": "Find collections or saves...",
+  "@findCollectionsOrSavesHint": {
+    "description": "Hint text for search field"
+  },
+  "recentlySaved": "RECENTLY SAVED",
+  "@recentlySaved": {
+    "description": "Header for recently saved section"
+  },
+  "typeSomethingToSearch": "Type something to search...",
+  "@typeSomethingToSearch": {
+    "description": "Placeholder text when search field is empty"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Title of settings screen"
+  },
+  "preferences": "PREFERENCES",
+  "@preferences": {
+    "description": "Section header for preferences"
+  },
+  "hapticFeedback": "Haptic Feedback",
+  "@hapticFeedback": {
+    "description": "Setting title for haptic feedback"
+  },
+  "hapticFeedbackSubtitle": "Vibrate for actions and selections",
+  "@hapticFeedbackSubtitle": {
+    "description": "Subtitle for haptic feedback setting"
+  },
+  "newSaveReminders": "New Save Reminders",
+  "@newSaveReminders": {
+    "description": "Setting title for new save reminders"
+  },
+  "newSaveRemindersSubtitle": "Gentle reminders to review unseen saves",
+  "@newSaveRemindersSubtitle": {
+    "description": "Subtitle for new save reminders setting"
+  },
+  "support": "SUPPORT",
+  "@support": {
+    "description": "Section header for support"
+  },
+  "howTo": "How To",
+  "@howTo": {
+    "description": "Setting title for how-to guide"
+  },
+  "howToSubtitle": "Quick guides for getting more from {appName}",
+  "@howToSubtitle": {
+    "description": "Subtitle for how-to guide setting",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "sendFeedback": "Send Feedback",
+  "@sendFeedback": {
+    "description": "Setting title for sending feedback"
+  },
+  "sendFeedbackSubtitle": "Got a bug or idea? We'd love to hear it!",
+  "@sendFeedbackSubtitle": {
+    "description": "Subtitle for send feedback setting"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Setting title for privacy policy"
+  },
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Setting title for terms of service"
+  },
+  "account": "ACCOUNT",
+  "@account": {
+    "description": "Section header for account"
+  },
+  "deleteAllData": "Delete All Data",
+  "@deleteAllData": {
+    "description": "Action title to delete all data"
+  },
+  "deleteAllDataSubtitle": "Permanently erase all saves, collections, and tags on this device",
+  "@deleteAllDataSubtitle": {
+    "description": "Subtitle explaining delete all data"
+  },
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "description": "Version label with version number",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotOpenEmailClient": "Could not open email client",
+  "@couldNotOpenEmailClient": {
+    "description": "Snackbar message when opening email client fails"
+  },
+  "deleteAllDataTitle": "Delete All Data?",
+  "@deleteAllDataTitle": {
+    "description": "Confirmation title to delete all data"
+  },
+  "deleteAllDataConfirmation": "This will permanently erase all saves, collections, and tags on this device. This cannot be undone.",
+  "@deleteAllDataConfirmation": {
+    "description": "Confirmation message to delete all data"
+  },
+  "allDataDeleted": "All data deleted successfully.",
+  "@allDataDeleted": {
+    "description": "Snackbar message confirming all data has been deleted"
+  },
+  "openUpper": "OPEN",
+  "@openUpper": {
+    "description": "Radial menu action label to open link"
+  },
+  "pinUpper": "PIN",
+  "@pinUpper": {
+    "description": "Radial menu action label to pin/unpin bookmark"
+  },
+  "shareUpper": "SHARE",
+  "@shareUpper": {
+    "description": "Radial menu action label to share bookmark"
+  },
+  "deleteUpper": "DELETE",
+  "@deleteUpper": {
+    "description": "Radial menu action label to delete bookmark"
+  },
+  "editCollection": "Edit collection",
+  "@editCollection": {
+    "description": "Modal title for editing an existing collection"
+  },
+  "newCollection": "New collection",
+  "@newCollection": {
+    "description": "Modal title for creating a new collection"
+  },
+  "nameUpper": "NAME",
+  "@nameUpper": {
+    "description": "Label for collection name field"
+  },
+  "colorUpper": "COLOR",
+  "@colorUpper": {
+    "description": "Label for collection color picker"
+  },
+  "iconUpper": "ICON",
+  "@iconUpper": {
+    "description": "Label for collection icon picker"
+  },
+  "updateCollection": "Update collection",
+  "@updateCollection": {
+    "description": "Button label to update collection"
+  },
+  "createCollection": "Create collection",
+  "@createCollection": {
+    "description": "Button label to create collection"
+  },
+  "noUrl": "No URL",
+  "@noUrl": {
+    "description": "Dialog title when no URL is provided"
+  },
+  "pleaseEnterLinkToSave": "Please enter a link to save",
+  "@pleaseEnterLinkToSave": {
+    "description": "Dialog message asking to enter a link"
+  },
+  "ok": "OK",
+  "@ok": {
+    "description": "Button text for OK"
+  }
+}

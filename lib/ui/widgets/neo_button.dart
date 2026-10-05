@@ -12,7 +12,7 @@ class NeoButton extends StatefulWidget {
   final EdgeInsetsGeometry padding;
 
   const NeoButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.child,
     this.color = AppTheme.primary,
@@ -20,7 +20,7 @@ class NeoButton extends StatefulWidget {
     this.borderRadius = 12.0,
     this.shadowOffset = 5.0,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-  }) : super(key: key);
+  });
 
   @override
   State<NeoButton> createState() => _NeoButtonState();

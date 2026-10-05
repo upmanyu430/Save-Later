@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -13,7 +14,7 @@ import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -35,7 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
          _quickSave();
       }
     }, onError: (err) {
-      print("getIntentDataStream error: $err");
+      debugPrint("getIntentDataStream error: $err");
     });
 
     // For sharing or opening url/text coming from outside the app while the app is closed
@@ -65,7 +66,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     // Basic validation
     if (!url.startsWith('http')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid URL starting with http/https')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.enterValidUrl)),
       );
       return;
     }
@@ -86,15 +87,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     ref.listen(bookmarkNotifierProvider, (previous, next) {
       if (previous?.isLoading == true && !next.isLoading) {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Error saving link!')),
+            SnackBar(content: Text(l10n.errorSavingLink)),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Link saved! Tap the cards icon to review and organize it.')),
+            SnackBar(content: Text(l10n.linkSavedMessage)),
           );
         }
       }
@@ -152,9 +154,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 32),
 
               // Title
-              const Text(
-                'Save now.\nFind anytime.',
-                style: TextStyle(
+              Text(
+                l10n.saveNowFindAnytime,
+                style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
                   height: 1.1,
@@ -173,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: TextField(
                         controller: _urlController,
                         decoration: InputDecoration(
-                          hintText: '#   Paste link to quick save',
+                          hintText: l10n.pasteLinkHint,
                           border: InputBorder.none,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
@@ -204,9 +206,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               const SizedBox(height: 48),
 
               // Collections Header
-              const Text(
-                'My Collections',
-                style: TextStyle(
+              Text(
+                l10n.myCollections,
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
@@ -236,8 +238,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               final count = bookmarks.length;
                               final hasNew = bookmarks.any((b) => !b.isRead);
                               return FolderBox(
-                                title: 'Unsorted',
-                                itemCountText: '$count items',
+                                title: l10n.unsorted,
+                                itemCountText: l10n.itemsCount(count),
                                 folderColor: Colors.grey.shade400,
                                 onTap: () => context.push('/unsorted'),
                                 hasNewItems: hasNew,
@@ -255,7 +257,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final hasNew = bookmarks.any((b) => !b.isRead);
                             return FolderBox(
                               title: col.name,
-                              itemCountText: '$count items',
+                              itemCountText: l10n.itemsCount(count),
                               folderColor: col.color,
                               icon: IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
                               onTap: () => context.push('/collection/${col.id}', extra: col),
@@ -267,7 +269,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Center(child: Text('Error: $e')),
+                  error: (e, st) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
                 ),
               ),
             ],

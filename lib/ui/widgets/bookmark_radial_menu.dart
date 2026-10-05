@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/bookmark.dart';
@@ -25,18 +26,19 @@ class BookmarkRadialMenu {
     required WidgetRef ref,
   }) {
     if (_overlayEntry != null) return;
+    final l10n = AppLocalizations.of(context)!;
     
     final actions = [
       RadialMenuAction(
         icon: Icons.open_in_new, 
-        label: 'OPEN', 
+        label: l10n.openUpper, 
         onTap: () {
           openUrl(bookmark.url);
         }
       ),
       RadialMenuAction(
         icon: Icons.push_pin_outlined, 
-        label: 'PIN', 
+        label: l10n.pinUpper, 
         onTap: () async {
           bookmark.isPinned = !bookmark.isPinned;
           await ref.read(repositoryProvider).updateBookmark(bookmark);
@@ -49,14 +51,14 @@ class BookmarkRadialMenu {
       ),
       RadialMenuAction(
         icon: Icons.share_outlined, 
-        label: 'SHARE', 
+        label: l10n.shareUpper, 
         onTap: () {
           Share.share(bookmark.url);
         }
       ),
       RadialMenuAction(
         icon: Icons.delete_outline, 
-        label: 'DELETE', 
+        label: l10n.deleteUpper, 
         onTap: () async {
           await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
           ref.invalidate(bookmarksProvider);
@@ -70,10 +72,10 @@ class BookmarkRadialMenu {
 
     _overlayEntry = OverlayEntry(
       builder: (context) => _RadialMenuOverlayWidget(
-        child: child,
         cardRect: cardRect,
         actions: actions,
         onClose: _removeOverlay,
+        child: child,
       ),
     );
     Overlay.of(context).insert(_overlayEntry!);
@@ -126,7 +128,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   final double buttonRadius = 36.0; // Slightly larger for easier touch
   final double arcRadius = 120.0;
   
-  List<Offset> _buttonPositions = [];
+  final List<Offset> _buttonPositions = [];
 
   @override
   void initState() {
@@ -194,7 +196,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
             child: AnimatedBuilder(
               animation: _anim,
               builder: (c, _) => Container(
-                color: Colors.black.withOpacity(0.85 * _anim.value),
+                color: Colors.black.withValues(alpha: 0.85 * _anim.value),
               ),
             ),
           ),

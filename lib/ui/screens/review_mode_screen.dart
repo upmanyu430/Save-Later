@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:go_router/go_router.dart';
@@ -11,7 +12,7 @@ import '../../utils/url_launcher.dart';
 
 class ReviewModeScreen extends ConsumerStatefulWidget {
   final BookmarkCollection? collection;
-  const ReviewModeScreen({Key? key, this.collection}) : super(key: key);
+  const ReviewModeScreen({super.key, this.collection});
 
   @override
   ConsumerState<ReviewModeScreen> createState() => _ReviewModeScreenState();
@@ -105,14 +106,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           ],
         ),
         const SizedBox(height: 32),
-        const Text(
-          "You're all caught up!",
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+        Text(
+          AppLocalizations.of(context)!.caughtUpTitle,
+          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 12),
-        const Text(
-          "Great job.",
-          style: TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w600),
+        Text(
+          AppLocalizations.of(context)!.caughtUpSubtitle,
+          style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 32),
         Container(
@@ -122,7 +123,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "Viewed ${completedCount}",
+            AppLocalizations.of(context)!.viewedCount(completedCount),
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black),
           ),
         ),
@@ -142,12 +143,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                        });
                     }
                   },
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.arrow_back, color: Colors.black),
-                      SizedBox(width: 8),
-                      Text('Previous', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
+                      const Icon(Icons.arrow_back, color: Colors.black),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)!.previous, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
@@ -157,12 +158,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 child: NeoButton(
                   color: const Color(0xFFFFD166),
                   onPressed: () => context.go('/'),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.home_outlined, color: Colors.black),
-                      SizedBox(width: 8),
-                      Text('Done', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
+                      const Icon(Icons.home_outlined, color: Colors.black),
+                      const SizedBox(width: 8),
+                      Text(AppLocalizations.of(context)!.done, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
@@ -188,7 +189,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (widget.collection?.name ?? 'UNSORTED').toUpperCase(),
+                    (widget.collection?.name ?? AppLocalizations.of(context)!.unsorted).toUpperCase(),
                     style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1.5),
                   ),
                   Row(
@@ -288,13 +289,13 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       color: const Color(0xFFFFD166),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Open link', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900)),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_outward, color: Colors.black, size: 22),
+                          Text(AppLocalizations.of(context)!.openLink, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900)),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.arrow_outward, color: Colors.black, size: 22),
                         ],
                       ),
                     ),
@@ -324,7 +325,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   Widget _buildCard(Bookmark b) {
     final collection = b.collection.value ?? widget.collection;
-    final collectionName = collection?.name ?? 'Unsorted';
+    final collectionName = collection?.name ?? AppLocalizations.of(context)!.unsorted;
     final collectionColor = collection?.color ?? Colors.grey.shade400;
 
     return Container(
@@ -356,7 +357,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    b.sourceDomain ?? 'Unknown',
+                    b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
                     style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black),
                   ),
                 ),
@@ -380,7 +381,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     borderRadius: BorderRadius.circular(14),
                     child: b.imageUrl != null
                         ? Image.network(
-                            b.imageUrl!.startsWith('//') ? 'https:' + b.imageUrl! : b.imageUrl!,
+                            b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 64)),
                           )

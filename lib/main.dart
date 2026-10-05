@@ -10,6 +10,8 @@ import 'ui/screens/settings_screen.dart';
 import 'ui/screens/search_screen.dart';
 import 'ui/screens/bookmark_detail_screen.dart';
 import 'models/bookmark.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,7 +60,7 @@ final _router = GoRouter(
 );
 
 class SaveLaterApp extends StatelessWidget {
-  const SaveLaterApp({Key? key}) : super(key: key);
+  const SaveLaterApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +69,15 @@ class SaveLaterApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
       routerConfig: _router,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), 
+      ],
     );
   }
 }
