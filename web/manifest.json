@@ -1,6 +1,6 @@
 {
-    "name": "save_later",
-    "short_name": "save_later",
+    "name": "Save Later",
+    "short_name": "Save Later",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
