@@ -2,7 +2,7 @@
     <!-- Required to fetch metadata from URLs in release builds -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application
+    <application android:usesCleartextTraffic="true"
         android:label="save_later"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">

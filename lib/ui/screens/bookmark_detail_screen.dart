@@ -151,8 +151,18 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             top: 0, left: 0, right: 0,
             height: MediaQuery.of(context).size.height * 0.45,
             child: bookmark.imageUrl != null
-                ? Image.network(bookmark.imageUrl!, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: Colors.grey.shade900))
-                : Container(color: Colors.grey.shade900),
+                ? Image.network(
+                    bookmark.imageUrl!.startsWith('//') ? 'https:' + bookmark.imageUrl! : bookmark.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_,__,___) => Container(
+                      color: Colors.grey.shade900,
+                      child: const Center(child: Icon(Icons.image_not_supported, size: 64, color: Colors.grey)),
+                    ),
+                  )
+                : Container(
+                    color: Colors.grey.shade900,
+                    child: const Center(child: Icon(Icons.link, size: 64, color: Colors.grey)),
+                  ),
           ),
 
           // 2. Main Content Card
@@ -458,3 +468,4 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     );
   }
 }
+

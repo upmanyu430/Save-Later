@@ -218,7 +218,7 @@ class CollectionDetailScreen extends ConsumerWidget {
                                         child: ClipRRect(
                                           borderRadius: const BorderRadius.vertical(top: Radius.circular(9.5)),
                                           child: b.imageUrl != null
-                                              ? Image.network(b.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey))
+                                              ? Image.network(b.imageUrl!.startsWith('//') ? 'https:' + b.imageUrl! : b.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey))
                                               : const Icon(Icons.link, size: 40, color: Colors.grey),
                                         ),
                                       ),
@@ -272,3 +272,4 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
+
