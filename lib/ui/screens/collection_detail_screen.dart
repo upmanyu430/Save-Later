@@ -222,7 +222,7 @@ class CollectionDetailScreen extends ConsumerWidget {
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                           ),
                           Text(
-                            '${bookmarks.length} items · 0 subcollections',
+                            '${bookmarks.length} ${bookmarks.length == 1 ? 'item' : 'items'}',
                             style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
                           ),
                         ],
