@@ -122,8 +122,50 @@ class CollectionDetailScreen extends ConsumerWidget {
                   leading: const Icon(Icons.add_link),
                   title: const Text('Add Link'),
                   onTap: () {
-                    // Logic to add link to this collection
                     Navigator.pop(ctx);
+                    String url = '';
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (modalCtx) => Padding(
+                        padding: EdgeInsets.only(bottom: MediaQuery.of(modalCtx).viewInsets.bottom),
+                        child: Container(
+                          decoration: const BoxDecoration(
+                            color: AppTheme.background,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                            border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
+                          ),
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const Text(
+                                'Add Link to Collection',
+                                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                autofocus: true,
+                                decoration: const InputDecoration(
+                                  hintText: 'https://...',
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (val) => url = val,
+                                onSubmitted: (val) {
+                                  if (val.trim().isNotEmpty) {
+                                    ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: collection);
+                                    Navigator.pop(modalCtx);
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saving link...')));
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
