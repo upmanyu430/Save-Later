@@ -311,9 +311,19 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               _buildDivider(),
                               _buildActionItem(Icons.folder_outlined, 'Move', _showMoveModal),
                               _buildDivider(),
-                              _buildActionItem(Icons.refresh, 'Refresh', () {}),
+                              _buildActionItem(Icons.refresh, 'Refresh', () async {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Refreshing...')));
+                                await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+                                setState(() {});
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Refreshed!')));
+                              }),
                               _buildDivider(),
-                              _buildActionItem(Icons.delete_outline, 'Delete', () {}, isDestructive: true),
+                              _buildActionItem(Icons.delete_outline, 'Delete', () async {
+                                await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
+                                ref.invalidate(bookmarksProvider);
+                                if (bookmark.collection.value != null) ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                                context.pop();
+                              }, isDestructive: true),
                             ],
                           ),
                         ),
@@ -468,4 +478,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     );
   }
 }
+
+
 

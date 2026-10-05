@@ -43,7 +43,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       String? sourceDomain;
 
       try {
-        final uri = Uri.parse(url);
+        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://' + url; }
+          final uri = Uri.parse(url);
         sourceDomain = uri.host;
         var data = await MetadataFetch.extract(url);
         if (data != null) {
@@ -88,7 +89,29 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> removeTag(Bookmark bookmark, String tag) async {
+  Future<void> refreshMetadata(Bookmark bookmark) async {
+      try {
+        String url = bookmark.url;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://' + url; }
+        bookmark.url = url; // Update url
+        bookmark.sourceDomain = Uri.parse(url).host;
+        var data = await MetadataFetch.extract(url);
+        if (data != null) {
+          bookmark.title = data.title ?? bookmark.title;
+          bookmark.description = data.description ?? bookmark.description;
+          bookmark.imageUrl = data.image ?? bookmark.imageUrl;
+        }
+        await ref.read(repositoryProvider).updateBookmark(bookmark);
+        ref.invalidate(bookmarksProvider);
+        if (bookmark.collection.value != null) {
+          ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+        }
+      } catch (e) {
+        print('Error refreshing metadata: $e');
+      }
+    }
+
+    Future<void> removeTag(Bookmark bookmark, String tag) async {
     final repo = ref.read(repositoryProvider);
     bookmark.tags = List.from(bookmark.tags)..remove(tag);
     await repo.updateBookmark(bookmark);
@@ -169,4 +192,7 @@ final collectionNotifierProvider =
     StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
   return CollectionNotifier(ref);
 });
+
+
+
 
