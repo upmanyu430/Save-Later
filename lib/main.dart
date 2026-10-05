@@ -37,7 +37,7 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/review',
-      builder: (context, state) => const ReviewModeScreen(),
+      builder: (context, state) => ReviewModeScreen(collection: state.extra as BookmarkCollection?),
     ),
     GoRoute(
       path: '/settings',
@@ -70,5 +70,6 @@ class SaveLaterApp extends StatelessWidget {
     );
   }
 }
+
 
 

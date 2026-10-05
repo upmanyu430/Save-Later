@@ -229,13 +229,13 @@ class CollectionDetailScreen extends ConsumerWidget {
                       Row(
                         children: [
                           GestureDetector(
-                            onTap: () => _showAddLinkModal(context, ref),
+                            onTap: () => context.push('/review', extra: collection),
                             child: NeoBox(
                               color: const Color(0xFFFFD166), // Yellow
                               padding: const EdgeInsets.all(8),
                               borderRadius: 8,
                               borderWidth: 2.5,
-                              child: const Icon(Icons.add_link, size: 28),
+                              child: const Icon(Icons.style, size: 28),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -414,6 +414,7 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
+
 
 
 
