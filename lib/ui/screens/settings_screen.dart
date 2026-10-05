@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -271,26 +272,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'Haptic Feedback',
                     subtitle: 'Vibrate for actions and selections',
                     icon: _buildIconContainer(Icons.bolt),
-                    trailing: Switch(
+                    trailing: CupertinoSwitch(
                       value: _hapticFeedback,
                       onChanged: _setHaptic,
-                      activeColor: Colors.tealAccent.shade400,
-                      activeTrackColor: Colors.teal,
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey.shade300,
+                      activeColor: const Color(0xFF26D5A8), // Teal from image
                     ),
                   ),
                   _buildSettingTile(
                     title: 'New Save Reminders',
                     subtitle: 'Gentle reminders to review unseen saves',
                     icon: _buildIconContainer(Icons.notifications_none),
-                    trailing: Switch(
+                    trailing: CupertinoSwitch(
                       value: _newSaveReminders,
                       onChanged: _setReminders,
-                      activeColor: Colors.tealAccent.shade400,
-                      activeTrackColor: Colors.teal,
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.grey.shade300,
+                      activeColor: const Color(0xFF26D5A8), // Teal from image
                     ),
                   ),
 
@@ -398,3 +393,4 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 }
+
