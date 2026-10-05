@@ -9,8 +9,17 @@ import '../../providers/providers.dart';
 
 class BookmarkGridItem extends ConsumerStatefulWidget {
   final Bookmark bookmark;
+  final bool isSelectMode;
+  final bool isSelected;
+  final VoidCallback? onSelectTapped;
 
-  const BookmarkGridItem({Key? key, required this.bookmark}) : super(key: key);
+  const BookmarkGridItem({
+    Key? key, 
+    required this.bookmark,
+    this.isSelectMode = false,
+    this.isSelected = false,
+    this.onSelectTapped,
+  }) : super(key: key);
 
   @override
   ConsumerState<BookmarkGridItem> createState() => _BookmarkGridItemState();
@@ -20,6 +29,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   final GlobalKey _cardKey = GlobalKey();
 
   void _handleLongPressStart(LongPressStartDetails details) {
+    if (widget.isSelectMode) return;
+    
     final renderBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
       final size = renderBox.size;
@@ -39,23 +50,30 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (widget.isSelectMode) return;
     BookmarkRadialMenu.updatePosition(details.globalPosition);
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    if (widget.isSelectMode) return;
     BookmarkRadialMenu.executeSelectedAndClose();
   }
   
   void _handleLongPressCancel() {
-    BookmarkRadialMenu.executeSelectedAndClose(); // or just close
+    if (widget.isSelectMode) return;
+    BookmarkRadialMenu.executeSelectedAndClose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
-        context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
+        if (widget.isSelectMode) {
+          if (widget.onSelectTapped != null) widget.onSelectTapped!();
+        } else {
+          ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+          context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
+        }
       },
       onLongPressStart: _handleLongPressStart,
       onLongPressMoveUpdate: _handleLongPressMoveUpdate,
@@ -127,7 +145,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                       ),
                     ),
                   // Pinned Indicator (if pinned)
-                  if (b.isPinned)
+                  if (b.isPinned && (!widget.isSelectMode))
                     Positioned(
                       top: 6,
                       right: 6,
@@ -139,6 +157,25 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           border: Border.all(color: AppTheme.border, width: 1.5),
                         ),
                         child: const Icon(Icons.push_pin, size: 14, color: AppTheme.border),
+                      ),
+                    ),
+                  // Select Mode Checkbox
+                  if (widget.isSelectMode)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: widget.isSelected ? const Color(0xFFFFD166) : Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.border, width: 2),
+                        ),
+                        child: Icon(
+                          Icons.check, 
+                          size: 16, 
+                          color: widget.isSelected ? AppTheme.border : Colors.transparent,
+                        ),
                       ),
                     ),
                 ],
@@ -195,5 +232,3 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     );
   }
 }
-
-

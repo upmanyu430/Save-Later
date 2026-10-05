@@ -63,30 +63,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _exportBackup() async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Exporting backup...')),
-    );
-    // Placeholder for actual logic
-  }
-
-  Future<void> _restoreBackup() async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Selecting backup file...')),
-    );
-    // Placeholder for actual logic
-  }
-
-  Future<void> _importBookmarks() async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Import feature coming soon!')),
-    );
-    // Placeholder for actual logic
-  }
-
   Future<void> _sendFeedback() async {
     if (_hapticFeedback) HapticFeedback.selectionClick();
     final Uri emailLaunchUri = Uri(
@@ -291,45 +267,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       onChanged: _setReminders,
                       activeColor: const Color(0xFF26D5A8), // Teal from image
                     ),
-                  ),
-
-                  _buildSectionHeader('YOUR ${AppConfig.appName.toUpperCase()} DATA'),
-                  _buildSettingTile(
-                    title: 'Export Backup',
-                    subtitle: 'Export a backup file you can save anywhere',
-                    icon: _buildIconContainer(Icons.share_outlined),
-                    onTap: _exportBackup,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.workspace_premium, color: Color(0xFFFFD166), size: 20),
-                        SizedBox(width: 4),
-                        Icon(Icons.chevron_right, color: Colors.black54),
-                      ],
-                    ),
-                  ),
-                  _buildSettingTile(
-                    title: 'Restore from Backup',
-                    subtitle: 'Restore from a ${AppConfig.appName} backup (.zip or .json)',
-                    icon: _buildIconContainer(Icons.cloud_download_outlined),
-                    onTap: _restoreBackup,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(Icons.workspace_premium, color: Color(0xFFFFD166), size: 20),
-                        SizedBox(width: 4),
-                        Icon(Icons.chevron_right, color: Colors.black54),
-                      ],
-                    ),
-                  ),
-
-                  _buildSectionHeader('IMPORT FROM OTHER APPS'),
-                  _buildSettingTile(
-                    title: 'Import Bookmarks',
-                    subtitle: 'From CSV, HTML, or JSON exports',
-                    icon: _buildIconContainer(Icons.inbox_outlined),
-                    onTap: _importBookmarks,
-                    trailing: const Icon(Icons.chevron_right, color: Colors.black54),
                   ),
 
                   _buildSectionHeader('SUPPORT'),

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../models/collection.dart';
+import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
-class CollectionDetailScreen extends ConsumerWidget {
+class CollectionDetailScreen extends ConsumerStatefulWidget {
   final int? collectionId;
   final BookmarkCollection? collection;
 
@@ -18,7 +20,15 @@ class CollectionDetailScreen extends ConsumerWidget {
     required this.collection,
   }) : super(key: key);
 
-  void _showAddLinkModal(BuildContext context, WidgetRef ref) {
+  @override
+  ConsumerState<CollectionDetailScreen> createState() => _CollectionDetailScreenState();
+}
+
+class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen> {
+  bool _isSelectMode = false;
+  final Set<int> _selectedIds = {};
+
+  void _showAddLinkModal(BuildContext context) {
     String url = '';
     showModalBottomSheet(
       context: context,
@@ -51,7 +61,7 @@ class CollectionDetailScreen extends ConsumerWidget {
                 onChanged: (val) => url = val,
                 onSubmitted: (val) {
                   if (val.trim().isNotEmpty) {
-                    ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: collection);
+                    ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: widget.collection);
                     Navigator.pop(modalCtx);
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saving link...')));
                   }
@@ -64,7 +74,7 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 
-  void _showMenuModal(BuildContext context, WidgetRef ref) {
+  void _showMenuModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -102,7 +112,7 @@ class CollectionDetailScreen extends ConsumerWidget {
               title: 'Add Link',
               onTap: () {
                 Navigator.pop(ctx);
-                _showAddLinkModal(context, ref);
+                _showAddLinkModal(context);
               },
             ),
             _buildDivider(),
@@ -113,9 +123,10 @@ class CollectionDetailScreen extends ConsumerWidget {
               title: 'Select Links',
               onTap: () {
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Select mode coming soon!')),
-                );
+                setState(() {
+                  _isSelectMode = true;
+                  _selectedIds.clear();
+                });
               },
             ),
             _buildDivider(),
@@ -186,11 +197,103 @@ class CollectionDetailScreen extends ConsumerWidget {
       ),
     );
   }
+  
+  Widget _buildSelectButton(String label, {Color? color, Color? textColor, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: NeoBox(
+          color: color ?? Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          borderRadius: 8,
+          borderWidth: 2.5,
+          child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
+        ),
+      ),
+    );
+  }
 
+  void _shareSelected(List<Bookmark> allBookmarks) {
+    if (_selectedIds.isEmpty) return;
+    final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
+    final urls = selectedBookmarks.map((b) => b.url).join('\n');
+    Share.share(urls);
+  }
+  
+  void _deleteSelected(List<Bookmark> allBookmarks) {
+    if (_selectedIds.isEmpty) return;
+    final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
+    for (var b in selectedBookmarks) {
+      ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(b);
+    }
+    setState(() {
+      _isSelectMode = false;
+      _selectedIds.clear();
+    });
+  }
+
+  void _moveSelected(List<Bookmark> allBookmarks) async {
+     if (_selectedIds.isEmpty) return;
+     final collections = await ref.read(collectionsProvider.future);
+     
+     showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          border: Border(
+            top: BorderSide(color: AppTheme.border, width: 3),
+            left: BorderSide(color: AppTheme.border, width: 3),
+            right: BorderSide(color: AppTheme.border, width: 3),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Move to...',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: collections.length,
+                itemBuilder: (context, index) {
+                  final c = collections[index];
+                  if (c.id == widget.collectionId) return const SizedBox.shrink();
+                  return ListTile(
+                    leading: const Icon(Icons.folder, color: AppTheme.border),
+                    title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    onTap: () {
+                      final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
+                      for (var b in selectedBookmarks) {
+                        ref.read(bookmarkNotifierProvider.notifier).moveToCollection(b, c);
+                      }
+                      Navigator.pop(ctx);
+                      setState(() {
+                        _isSelectMode = false;
+                        _selectedIds.clear();
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final bookmarksAsync = collectionId != null ? ref.watch(collectionBookmarksProvider(collectionId!)) : ref.watch(unsortedBookmarksProvider);
+  Widget build(BuildContext context) {
+    final bookmarksAsync = widget.collectionId != null ? ref.watch(collectionBookmarksProvider(widget.collectionId!)) : ref.watch(unsortedBookmarksProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -202,57 +305,84 @@ class CollectionDetailScreen extends ConsumerWidget {
               children: [
                 // Top Custom App Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () => context.pop(),
-                        child: NeoBox(
-                          padding: const EdgeInsets.all(8),
-                          borderRadius: 8,
-                          borderWidth: 2.5,
-                          child: const Icon(Icons.arrow_back, size: 28),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  child: _isSelectMode
+                      ? SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              Text(
+                                '${_selectedIds.length} select...',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                              ),
+                              const SizedBox(width: 8),
+                              _buildSelectButton('All', onTap: () {
+                                setState(() {
+                                  _selectedIds.addAll(bookmarks.map((b) => b.id));
+                                });
+                              }),
+                              _buildSelectButton('Share', onTap: () => _shareSelected(bookmarks)),
+                              _buildSelectButton('Move', onTap: () => _moveSelected(bookmarks)),
+                              _buildSelectButton('Delete', color: const Color(0xFFEF476F), textColor: Colors.white, onTap: () => _deleteSelected(bookmarks)),
+                              _buildSelectButton('Cancel', onTap: () {
+                                setState(() {
+                                  _isSelectMode = false;
+                                  _selectedIds.clear();
+                                });
+                              }),
+                            ],
+                          ),
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () => context.pop(),
+                              child: NeoBox(
+                                padding: const EdgeInsets.all(8),
+                                borderRadius: 8,
+                                borderWidth: 2.5,
+                                child: const Icon(Icons.arrow_back, size: 28),
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                Text(
+                                  (widget.collection?.name ?? 'Unsorted'),
+                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+                                ),
+                                Text(
+                                  '${bookmarks.length} ${bookmarks.length == 1 ? 'item' : 'items'}',
+                                  style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => context.push('/review', extra: widget.collection),
+                                  child: NeoBox(
+                                    color: const Color(0xFFFFD166), // Yellow
+                                    padding: const EdgeInsets.all(8),
+                                    borderRadius: 8,
+                                    borderWidth: 2.5,
+                                    child: const Icon(Icons.style, size: 28),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => _showMenuModal(context),
+                                  child: NeoBox(
+                                    padding: const EdgeInsets.all(8),
+                                    borderRadius: 8,
+                                    borderWidth: 2.5,
+                                    child: const Icon(Icons.more_vert, size: 28),
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
                         ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            (collection?.name ?? 'Unsorted'),
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                          ),
-                          Text(
-                            '${bookmarks.length} ${bookmarks.length == 1 ? 'item' : 'items'}',
-                            style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () => context.push('/review', extra: collection),
-                            child: NeoBox(
-                              color: const Color(0xFFFFD166), // Yellow
-                              padding: const EdgeInsets.all(8),
-                              borderRadius: 8,
-                              borderWidth: 2.5,
-                              child: const Icon(Icons.style, size: 28),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () => _showMenuModal(context, ref),
-                            child: NeoBox(
-                              padding: const EdgeInsets.all(8),
-                              borderRadius: 8,
-                              borderWidth: 2.5,
-                              child: const Icon(Icons.more_vert, size: 28),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
                 ),
                 
                 // Title
@@ -292,7 +422,20 @@ class CollectionDetailScreen extends ConsumerWidget {
                           itemCount: bookmarks.length,
                           itemBuilder: (context, index) {
                               final b = bookmarks[index];
-                              return BookmarkGridItem(bookmark: b);
+                              return BookmarkGridItem(
+                                bookmark: b,
+                                isSelectMode: _isSelectMode,
+                                isSelected: _selectedIds.contains(b.id),
+                                onSelectTapped: () {
+                                  setState(() {
+                                    if (_selectedIds.contains(b.id)) {
+                                      _selectedIds.remove(b.id);
+                                    } else {
+                                      _selectedIds.add(b.id);
+                                    }
+                                  });
+                                },
+                              );
                             },
                         ),
                 ),
@@ -306,7 +449,3 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
-
-
-
-

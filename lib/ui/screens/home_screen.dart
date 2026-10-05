@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -177,7 +178,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
                             onPressed: () async {
-                              // Optional: Add clipboard pasting logic here
+                              final data = await Clipboard.getData(Clipboard.kTextPlain);
+                              if (data != null && data.text != null && data.text!.isNotEmpty) {
+                                _urlController.text = data.text!;
+                              }
                             },
                           ),
                         ),

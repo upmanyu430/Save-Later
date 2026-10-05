@@ -1,4 +1,5 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/bookmark.dart';
 import 'dart:math';
@@ -50,7 +51,7 @@ class BookmarkRadialMenu {
         icon: Icons.share_outlined, 
         label: 'SHARE', 
         onTap: () {
-          // Placeholder for share
+          Share.share(bookmark.url);
         }
       ),
       RadialMenuAction(

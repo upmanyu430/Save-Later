@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -396,7 +397,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           borderRadius: 16,
                           child: Row(
                             children: [
-                              _buildActionItem(Icons.share_outlined, 'Share', () {}),
+                              _buildActionItem(Icons.share_outlined, 'Share', () {
+                                Share.share(widget.bookmark.url);
+                              }),
                               _buildDivider(),
                               _buildActionItem(Icons.folder_outlined, 'Move', _showMoveModal),
                               _buildDivider(),
