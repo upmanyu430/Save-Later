@@ -438,6 +438,21 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     );
   }
 
+  void _performRefresh() {
+    // Show loading overlay
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black54,
+      builder: (ctx) => _RefreshOverlay(
+        onRefresh: () async {
+          await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+          setState(() {});
+        },
+      ),
+    );
+  }
+
   void _showRefreshDialog() {
     showDialog(
       context: context,
@@ -512,14 +527,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       child: GestureDetector(
                         onTap: () async {
                           Navigator.pop(ctx);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Refreshing...')),
-                          );
-                          await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
-                          setState(() {});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Refreshed!')),
-                          );
+                          _performRefresh();
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -596,3 +604,158 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
 
 
+
+class _RefreshOverlay extends StatefulWidget {
+  final Future<void> Function() onRefresh;
+
+  const _RefreshOverlay({required this.onRefresh});
+
+  @override
+  State<_RefreshOverlay> createState() => _RefreshOverlayState();
+}
+
+class _RefreshOverlayState extends State<_RefreshOverlay>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _spinController;
+  bool _done = false;
+  bool _error = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _spinController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat();
+    _doRefresh();
+  }
+
+  Future<void> _doRefresh() async {
+    try {
+      await widget.onRefresh();
+      if (!mounted) return;
+      setState(() => _done = true);
+      _spinController.stop();
+      await Future.delayed(const Duration(milliseconds: 900));
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = true;
+        _done = true;
+      });
+      _spinController.stop();
+      await Future.delayed(const Duration(seconds: 2));
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _spinController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 48),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+        decoration: BoxDecoration(
+          color: AppTheme.background,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppTheme.border, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              color: AppTheme.border,
+              offset: Offset(4, 4),
+              blurRadius: 0,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _done
+                    ? Container(
+                        key: const ValueKey('done'),
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: _error
+                              ? const Color(0xFFFF3366)
+                              : const Color(0xFF2ECC71),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.border, width: 2.5),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppTheme.border,
+                              offset: Offset(3, 3),
+                              blurRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _error ? Icons.close : Icons.check,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      )
+                    : RotationTransition(
+                        key: const ValueKey('loading'),
+                        turns: _spinController,
+                        child: Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD166),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppTheme.border, width: 2.5),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppTheme.border,
+                                offset: Offset(3, 3),
+                                blurRadius: 0,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.refresh, size: 36, color: AppTheme.border),
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                _done
+                    ? (_error ? 'Something went wrong' : 'All done!')
+                    : 'Refreshing...',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                _done
+                    ? (_error
+                        ? 'Could not fetch metadata.'
+                        : 'Metadata updated successfully.')
+                    : 'Fetching latest title, image\nand description...',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
