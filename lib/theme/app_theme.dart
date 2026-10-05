@@ -25,7 +25,7 @@ class AppTheme {
         onSurface: border,
         onBackground: border,
       ),
-      textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Quilon',
+      textTheme: GoogleFonts.spaceMonoTextTheme().apply(
         bodyColor: border,
         displayColor: border,
       ),
@@ -42,4 +42,5 @@ class AppTheme {
     );
   }
 }
+
 
