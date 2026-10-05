@@ -6,6 +6,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/no_url_dialog.dart';
 import '../widgets/folder_box.dart';
 import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
@@ -55,18 +56,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _quickSave() {
     final url = _urlController.text.trim();
-    if (url.isNotEmpty) {
-      // Basic validation
-      if (!url.startsWith('http')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid URL starting with http/https')),
-        );
-        return;
-      }
-      ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
-      _urlController.clear();
-      FocusScope.of(context).unfocus();
+    if (url.isEmpty) {
+      showNoUrlDialog(context);
+      return;
     }
+    
+    // Basic validation
+    if (!url.startsWith('http')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid URL starting with http/https')),
+      );
+      return;
+    }
+    ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
+    _urlController.clear();
+    FocusScope.of(context).unfocus();
   }
 
   void _showAddCollectionModal() {
