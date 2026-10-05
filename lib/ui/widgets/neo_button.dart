@@ -81,9 +81,10 @@ class _NeoButtonState extends State<NeoButton> {
                     ),
                   ],
           ),
-          child: widget.child,
+          child: Center(child: widget.child),
         ),
       ),
     );
   }
 }
+
