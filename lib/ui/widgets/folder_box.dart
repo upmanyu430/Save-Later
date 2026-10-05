@@ -7,6 +7,7 @@ class FolderBox extends StatelessWidget {
   final Color folderColor;
   final VoidCallback onTap;
   final bool hasNewItems;
+  final IconData icon;
 
   const FolderBox({
     Key? key,
@@ -15,6 +16,7 @@ class FolderBox extends StatelessWidget {
     required this.folderColor,
     required this.onTap,
     this.hasNewItems = false,
+    this.icon = Icons.folder_outlined,
   }) : super(key: key);
 
   @override
@@ -143,4 +145,5 @@ class FolderBox extends StatelessWidget {
     );
   }
 }
+
 

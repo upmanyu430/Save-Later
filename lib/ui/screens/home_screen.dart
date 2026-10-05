@@ -249,6 +249,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               title: col.name,
                               itemCountText: '$count items',
                               folderColor: col.color,
+                              icon: IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
                               onTap: () => context.push('/collection/${col.id}', extra: col),
                               hasNewItems: hasNew,
                             );
@@ -268,6 +269,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
 
 
 
