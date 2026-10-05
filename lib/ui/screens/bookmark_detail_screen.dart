@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
-import '../widgets/neo_button.dart';
 import '../../utils/url_launcher.dart';
 
 class BookmarkDetailScreen extends ConsumerStatefulWidget {
@@ -19,11 +19,19 @@ class BookmarkDetailScreen extends ConsumerStatefulWidget {
 
 class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   late Bookmark bookmark;
+  late TextEditingController _notesController;
 
   @override
   void initState() {
     super.initState();
     bookmark = widget.bookmark;
+    _notesController = TextEditingController(text: bookmark.description ?? '');
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   void _showAddTagModal() {
@@ -53,29 +61,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               TextField(
                 autofocus: true,
                 decoration: const InputDecoration(
-                  hintText: 'e.g. Flutter, Recipes, ToRead',
+                  hintText: 'tag_name',
                   border: OutlineInputBorder(),
                 ),
                 onChanged: (val) => newTag = val,
                 onSubmitted: (val) {
-                  _addTag(val);
-                  Navigator.pop(ctx);
-                },
-              ),
-              const SizedBox(height: 24),
-              NeoButton(
-                onPressed: () {
-                  if (newTag.isNotEmpty) {
-                    _addTag(newTag);
+                  if (val.trim().isNotEmpty) {
+                    _addTag(val);
                     Navigator.pop(ctx);
                   }
                 },
-                child: const Center(
-                  child: Text(
-                    'Add',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
               ),
             ],
           ),
@@ -89,143 +84,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     if (cleanTag.isEmpty) return;
 
     await ref.read(bookmarkNotifierProvider.notifier).addTag(bookmark, cleanTag);
-    setState(() {}); // refresh UI to show new tag
+    setState(() {});
   }
 
   void _removeTag(String tag) async {
     await ref.read(bookmarkNotifierProvider.notifier).removeTag(bookmark, tag);
-    setState(() {}); // refresh UI to hide tag
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppTheme.border),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('Bookmark', style: TextStyle(color: AppTheme.border, fontWeight: FontWeight.bold)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (bookmark.imageUrl != null)
-              Container(
-                height: 200,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.border, width: 2),
-                  image: DecorationImage(
-                    image: NetworkImage(bookmark.imageUrl!),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            const SizedBox(height: 24),
-            Text(
-              bookmark.title ?? bookmark.url,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              bookmark.sourceDomain ?? bookmark.url,
-              style: const TextStyle(fontSize: 16, color: AppTheme.border, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            if (bookmark.description != null) ...[
-              Text(
-                bookmark.description!,
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 24),
-            ],
-            
-            // Tags
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: [
-                ...bookmark.tags.map((tag) => InputChip(
-                  label: Text('#$tag'),
-                  backgroundColor: AppTheme.primary,
-                  side: const BorderSide(color: AppTheme.border, width: 2),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: () => _removeTag(tag),
-                )),
-                ActionChip(
-                  label: const Text('+ Add Tag'),
-                  backgroundColor: AppTheme.secondary,
-                  side: const BorderSide(color: AppTheme.border, width: 2),
-                  onPressed: _showAddTagModal,
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 48),
-            
-            // Actions
-            Row(
-              children: [
-                Expanded(
-                  child: NeoButton(
-                    onPressed: () => openUrl(bookmark.url),
-                    color: AppTheme.accent,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.open_in_browser),
-                        SizedBox(width: 8),
-                        Text('Open', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: NeoButton(
-                    onPressed: () {
-                      ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Marked as read!'))
-                      );
-                    },
-                    color: AppTheme.primary,
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.check),
-                        SizedBox(width: 8),
-                        Text('Mark Read', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            NeoButton(
-              onPressed: _showMoveModal,
-              color: AppTheme.secondary,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.drive_file_move),
-                  SizedBox(width: 8),
-                  Text('Move to Collection', style: TextStyle(fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    setState(() {});
   }
 
   void _showMoveModal() {
@@ -273,6 +137,324 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           );
         }
       )
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black, // Matches image overflow areas
+      body: Stack(
+        children: [
+          // 1. Background Image
+          Positioned(
+            top: 0, left: 0, right: 0,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: bookmark.imageUrl != null
+                ? Image.network(bookmark.imageUrl!, fit: BoxFit.cover, errorBuilder: (_,__,___) => Container(color: Colors.grey.shade900))
+                : Container(color: Colors.grey.shade900),
+          ),
+
+          // 2. Main Content Card
+          Positioned.fill(
+            child: CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: SizedBox(height: MediaQuery.of(context).size.height * 0.35),
+                ),
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: AppTheme.background,
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                      border: Border(
+                        top: BorderSide(color: AppTheme.border, width: 3),
+                        left: BorderSide(color: AppTheme.border, width: 3),
+                        right: BorderSide(color: AppTheme.border, width: 3),
+                      ),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Source Domain
+                        Row(
+                          children: [
+                            const Icon(Icons.public, size: 18),
+                            const SizedBox(width: 8),
+                            Text(
+                              bookmark.sourceDomain ?? 'Unknown Source',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Title & Edit Button
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                bookmark.title ?? bookmark.url,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w900,
+                                  height: 1.1,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            NeoBox(
+                              padding: const EdgeInsets.all(8),
+                              borderRadius: 12,
+                              borderWidth: 2.5,
+                              child: const Icon(Icons.edit_outlined, size: 24),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Collection & Date
+                        Row(
+                          children: [
+                            if (bookmark.collection.value != null)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 12.0),
+                                child: NeoBox(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  borderRadius: 8,
+                                  borderWidth: 2,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        IconData(bookmark.collection.value!.iconCodePoint, fontFamily: bookmark.collection.value!.iconFontFamily),
+                                        size: 16,
+                                        color: bookmark.collection.value!.color,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        bookmark.collection.value!.name,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            Text(
+                              DateFormat('dd MMM yyyy, h:mm a').format(bookmark.createdAt),
+                              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Open Link Button
+                        GestureDetector(
+                          onTap: () => openUrl(bookmark.url),
+                          child: NeoBox(
+                            color: const Color(0xFFFFD166), // Yellow
+                            padding: const EdgeInsets.all(16),
+                            borderRadius: 16,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        'Open link',
+                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        bookmark.sourceDomain ?? bookmark.url,
+                                        style: const TextStyle(fontSize: 14),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.border,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: 24),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+
+                        // Actions Row
+                        NeoBox(
+                          padding: const EdgeInsets.all(0),
+                          borderRadius: 16,
+                          child: Row(
+                            children: [
+                              _buildActionItem(Icons.share_outlined, 'Share', () {}),
+                              _buildDivider(),
+                              _buildActionItem(Icons.folder_outlined, 'Move', _showMoveModal),
+                              _buildDivider(),
+                              _buildActionItem(Icons.refresh, 'Refresh', () {}),
+                              _buildDivider(),
+                              _buildActionItem(Icons.delete_outline, 'Delete', () {}, isDestructive: true),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Description
+                        const Text('DESCRIPTION', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        const SizedBox(height: 12),
+                        Text(
+                          bookmark.description ?? 'No description provided.',
+                          style: const TextStyle(fontSize: 16, height: 1.4, color: Color(0xFF333333)),
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Tags
+                        const Text('TAGS', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            ...bookmark.tags.map((tag) => GestureDetector(
+                              onTap: () => _removeTag(tag), // Or edit
+                              child: NeoBox(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                borderRadius: 8,
+                                borderWidth: 2,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text('🔖', style: TextStyle(fontSize: 12)),
+                                    const SizedBox(width: 6),
+                                    Text(tag, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  ],
+                                ),
+                              ),
+                            )),
+                            GestureDetector(
+                              onTap: _showAddTagModal,
+                              child: NeoBox(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                borderRadius: 8,
+                                borderWidth: 2,
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('👑', style: TextStyle(fontSize: 12)),
+                                    SizedBox(width: 6),
+                                    Text('Add', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+
+                        // Notes
+                        const Text('NOTES', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        const SizedBox(height: 12),
+                        NeoBox(
+                          color: const Color(0xFFFFF7E0), // Pale yellow
+                          borderRadius: 12,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: TextField(
+                            controller: _notesController,
+                            maxLines: null,
+                            decoration: const InputDecoration(
+                              hintText: 'Tap to add notes...',
+                              hintStyle: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 48), // Bottom padding
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 3. Top Floating App Bar
+          Positioned(
+            top: 0, left: 0, right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.pop(),
+                      child: NeoBox(
+                        padding: const EdgeInsets.all(8),
+                        color: AppTheme.background,
+                        borderRadius: 12,
+                        borderWidth: 2.5,
+                        child: const Icon(Icons.arrow_back, size: 24),
+                      ),
+                    ),
+                    NeoBox(
+                      padding: const EdgeInsets.all(8),
+                      color: AppTheme.background,
+                      borderRadius: 12,
+                      borderWidth: 2.5,
+                      child: const Icon(Icons.auto_fix_off_outlined, size: 24),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionItem(IconData icon, String label, VoidCallback onTap, {bool isDestructive = false}) {
+    final color = isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          color: Colors.transparent,
+          child: Column(
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(
+      height: 60,
+      width: 2,
+      color: AppTheme.border,
     );
   }
 }
