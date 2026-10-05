@@ -90,8 +90,8 @@ class FolderBox extends StatelessWidget {
                             width: 2.0,
                           ),
                         ),
-                        child: const Center(
-                          child: Icon(Icons.folder_outlined, color: AppTheme.border, size: 28),
+                        child: Center(
+                          child: Icon(icon, color: AppTheme.border, size: 28),
                         ),
                       ),
                       Row(
