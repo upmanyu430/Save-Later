@@ -32,28 +32,33 @@ const BookmarkSchema = CollectionSchema(
       name: r'imageUrl',
       type: IsarType.string,
     ),
-    r'isRead': PropertySchema(
+    r'isPinned': PropertySchema(
       id: 3,
+      name: r'isPinned',
+      type: IsarType.bool,
+    ),
+    r'isRead': PropertySchema(
+      id: 4,
       name: r'isRead',
       type: IsarType.bool,
     ),
     r'sourceDomain': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'sourceDomain',
       type: IsarType.string,
     ),
     r'tags': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'tags',
       type: IsarType.stringList,
     ),
     r'title': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'url',
       type: IsarType.string,
     )
@@ -85,6 +90,19 @@ const BookmarkSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'createdAt',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'isPinned': IndexSchema(
+      id: 7607338673446676027,
+      name: r'isPinned',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'isPinned',
           type: IndexType.value,
           caseSensitive: false,
         )
@@ -156,11 +174,12 @@ void _bookmarkSerialize(
   writer.writeDateTime(offsets[0], object.createdAt);
   writer.writeString(offsets[1], object.description);
   writer.writeString(offsets[2], object.imageUrl);
-  writer.writeBool(offsets[3], object.isRead);
-  writer.writeString(offsets[4], object.sourceDomain);
-  writer.writeStringList(offsets[5], object.tags);
-  writer.writeString(offsets[6], object.title);
-  writer.writeString(offsets[7], object.url);
+  writer.writeBool(offsets[3], object.isPinned);
+  writer.writeBool(offsets[4], object.isRead);
+  writer.writeString(offsets[5], object.sourceDomain);
+  writer.writeStringList(offsets[6], object.tags);
+  writer.writeString(offsets[7], object.title);
+  writer.writeString(offsets[8], object.url);
 }
 
 Bookmark _bookmarkDeserialize(
@@ -174,11 +193,12 @@ Bookmark _bookmarkDeserialize(
   object.description = reader.readStringOrNull(offsets[1]);
   object.id = id;
   object.imageUrl = reader.readStringOrNull(offsets[2]);
-  object.isRead = reader.readBool(offsets[3]);
-  object.sourceDomain = reader.readStringOrNull(offsets[4]);
-  object.tags = reader.readStringList(offsets[5]) ?? [];
-  object.title = reader.readStringOrNull(offsets[6]);
-  object.url = reader.readString(offsets[7]);
+  object.isPinned = reader.readBool(offsets[3]);
+  object.isRead = reader.readBool(offsets[4]);
+  object.sourceDomain = reader.readStringOrNull(offsets[5]);
+  object.tags = reader.readStringList(offsets[6]) ?? [];
+  object.title = reader.readStringOrNull(offsets[7]);
+  object.url = reader.readString(offsets[8]);
   return object;
 }
 
@@ -198,12 +218,14 @@ P _bookmarkDeserializeProp<P>(
     case 3:
       return (reader.readBool(offset)) as P;
     case 4:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 6:
+      return (reader.readStringList(offset) ?? []) as P;
     case 7:
+      return (reader.readStringOrNull(offset)) as P;
+    case 8:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -243,6 +265,14 @@ extension BookmarkQueryWhereSort on QueryBuilder<Bookmark, Bookmark, QWhere> {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'createdAt'),
+      );
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterWhere> anyIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'isPinned'),
       );
     });
   }
@@ -446,6 +476,51 @@ extension BookmarkQueryWhere on QueryBuilder<Bookmark, Bookmark, QWhereClause> {
         upper: [upperCreatedAt],
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> isPinnedEqualTo(
+      bool isPinned) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'isPinned',
+        value: [isPinned],
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterWhereClause> isPinnedNotEqualTo(
+      bool isPinned) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isPinned',
+              lower: [],
+              upper: [isPinned],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isPinned',
+              lower: [isPinned],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isPinned',
+              lower: [isPinned],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'isPinned',
+              lower: [],
+              upper: [isPinned],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -848,6 +923,16 @@ extension BookmarkQueryFilter
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'imageUrl',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> isPinnedEqualTo(
+      bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isPinned',
+        value: value,
       ));
     });
   }
@@ -1562,6 +1647,18 @@ extension BookmarkQuerySortBy on QueryBuilder<Bookmark, Bookmark, QSortBy> {
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByIsPinnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByIsRead() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isRead', Sort.asc);
@@ -1661,6 +1758,18 @@ extension BookmarkQuerySortThenBy
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByIsPinnedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isPinned', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByIsRead() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isRead', Sort.asc);
@@ -1732,6 +1841,12 @@ extension BookmarkQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByIsPinned() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isPinned');
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByIsRead() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isRead');
@@ -1789,6 +1904,12 @@ extension BookmarkQueryProperty
   QueryBuilder<Bookmark, String?, QQueryOperations> imageUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'imageUrl');
+    });
+  }
+
+  QueryBuilder<Bookmark, bool, QQueryOperations> isPinnedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isPinned');
     });
   }
 

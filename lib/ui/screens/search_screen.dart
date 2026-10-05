@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/bookmark_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
 
@@ -302,44 +303,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       padding: const EdgeInsets.all(24),
       itemCount: results.length,
       itemBuilder: (context, index) {
-        final b = results[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 16.0),
-          child: GestureDetector(
-            onTap: () {
-              ref.read(bookmarkNotifierProvider.notifier).markAsRead(b);
-              context.push('/bookmark/', extra: b);
-            },
-            child: NeoBox(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    b.title ?? b.url,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppTheme.border,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    b.url,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+                              final b = results[index];
+                              return BookmarkGridItem(bookmark: b);
+                            },
     );
   }
 
@@ -496,3 +462,4 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 }
+

@@ -25,6 +25,10 @@ class Bookmark {
 
   List<String> tags = [];
 
+  @Index()
+  bool isPinned = false;
+
   // A link to the collection it belongs to
   final collection = IsarLink<BookmarkCollection>();
 }
+

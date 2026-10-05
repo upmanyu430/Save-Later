@@ -1,0 +1,285 @@
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/bookmark.dart';
+import 'dart:math';
+import '../../utils/url_launcher.dart';
+import '../../providers/providers.dart';
+
+class RadialMenuAction {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  
+  RadialMenuAction({required this.icon, required this.label, required this.onTap});
+}
+
+class BookmarkRadialMenu {
+  static OverlayEntry? _overlayEntry;
+
+  static void show({
+    required BuildContext context,
+    required Widget child,
+    required Bookmark bookmark,
+    required Rect cardRect,
+    required WidgetRef ref,
+  }) {
+    if (_overlayEntry != null) return;
+    
+    final actions = [
+      RadialMenuAction(
+        icon: Icons.open_in_new, 
+        label: 'OPEN', 
+        onTap: () {
+          openUrl(bookmark.url);
+        }
+      ),
+      RadialMenuAction(
+        icon: Icons.push_pin_outlined, 
+        label: 'PIN', 
+        onTap: () async {
+          bookmark.isPinned = !bookmark.isPinned;
+          await ref.read(repositoryProvider).updateBookmark(bookmark);
+          ref.invalidate(bookmarksProvider);
+          if (bookmark.collection.value != null) {
+            ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+          }
+          ref.invalidate(unsortedBookmarksProvider);
+        }
+      ),
+      RadialMenuAction(
+        icon: Icons.share_outlined, 
+        label: 'SHARE', 
+        onTap: () {
+          // Placeholder for share
+        }
+      ),
+      RadialMenuAction(
+        icon: Icons.delete_outline, 
+        label: 'DELETE', 
+        onTap: () async {
+          await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
+          ref.invalidate(bookmarksProvider);
+          if (bookmark.collection.value != null) {
+            ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+          }
+          ref.invalidate(unsortedBookmarksProvider);
+        }
+      ),
+    ];
+
+    _overlayEntry = OverlayEntry(
+      builder: (context) => _RadialMenuOverlayWidget(
+        child: child,
+        cardRect: cardRect,
+        actions: actions,
+        onClose: _removeOverlay,
+      ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+  }
+  
+  static void _removeOverlay() {
+    _overlayEntry?.remove();
+    _overlayEntry = null;
+  }
+  
+  static void updatePosition(Offset globalPosition) {
+    if (_overlayStateKey.currentState != null) {
+      _overlayStateKey.currentState!.updateFingerPosition(globalPosition);
+    }
+  }
+  
+  static void executeSelectedAndClose() {
+    if (_overlayStateKey.currentState != null) {
+      _overlayStateKey.currentState!.executeSelected();
+    }
+    _removeOverlay();
+  }
+}
+
+final GlobalKey<_RadialMenuOverlayWidgetState> _overlayStateKey = GlobalKey();
+
+class _RadialMenuOverlayWidget extends StatefulWidget {
+  final Widget child;
+  final Rect cardRect;
+  final List<RadialMenuAction> actions;
+  final VoidCallback onClose;
+
+  _RadialMenuOverlayWidget({
+    required this.child,
+    required this.cardRect,
+    required this.actions,
+    required this.onClose,
+  }) : super(key: _overlayStateKey);
+
+  @override
+  State<_RadialMenuOverlayWidget> createState() => _RadialMenuOverlayWidgetState();
+}
+
+class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with SingleTickerProviderStateMixin {
+  late AnimationController _animController;
+  late Animation<double> _anim;
+  
+  int _selectedIndex = -1;
+
+  final double buttonRadius = 36.0; // Slightly larger for easier touch
+  final double arcRadius = 120.0;
+  
+  List<Offset> _buttonPositions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
+    _animController.forward();
+    
+    // Origin is near top-right of the cardRect
+    final origin = Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
+    
+    // The user image shows an arc fanning out. 
+    // From left-up to down-right
+    final angles = [
+      -pi * 0.8,   // Open (top left)
+      -pi * 0.45,  // Pin (top rightish)
+      -pi * 0.1,   // Share (right)
+      pi * 0.25    // Delete (bottom right)
+    ];
+    for (int i = 0; i < widget.actions.length; i++) {
+      _buttonPositions.add(Offset(
+        origin.dx + arcRadius * cos(angles[i]),
+        origin.dy + arcRadius * sin(angles[i]),
+      ));
+    }
+  }
+
+  void updateFingerPosition(Offset pos) {
+    int newSelectedIndex = -1;
+    for (int i = 0; i < _buttonPositions.length; i++) {
+      if ((_buttonPositions[i] - pos).distance < buttonRadius * 1.5) { // generous hit area
+        newSelectedIndex = i;
+        break;
+      }
+    }
+    
+    if (newSelectedIndex != _selectedIndex) {
+      setState(() {
+        _selectedIndex = newSelectedIndex;
+      });
+    }
+  }
+
+  void executeSelected() {
+    if (_selectedIndex != -1) {
+      widget.actions[_selectedIndex].onTap();
+    }
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Stack(
+        children: [
+          // Background dim
+          GestureDetector(
+            onTap: widget.onClose,
+            child: AnimatedBuilder(
+              animation: _anim,
+              builder: (c, _) => Container(
+                color: Colors.black.withOpacity(0.85 * _anim.value),
+              ),
+            ),
+          ),
+          
+          // The selected label
+          if (_selectedIndex != -1)
+            Positioned.fill(
+              child: Center(
+                child: AnimatedOpacity(
+                  opacity: 1.0,
+                  duration: const Duration(milliseconds: 100),
+                  child: Text(
+                    widget.actions[_selectedIndex].label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 64,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 4,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            
+          // The card replica
+          AnimatedBuilder(
+            animation: _anim,
+            builder: (c, child) {
+              return Positioned(
+                top: widget.cardRect.top,
+                left: widget.cardRect.left,
+                width: widget.cardRect.width,
+                height: widget.cardRect.height,
+                child: Transform.rotate(
+                  angle: -0.05 * _anim.value,
+                  child: Transform.scale(
+                    scale: 1.0 + (0.05 * _anim.value),
+                    child: widget.child,
+                  ),
+                ),
+              );
+            }
+          ),
+          
+          // The radial buttons
+          ...List.generate(widget.actions.length, (index) {
+            final action = widget.actions[index];
+            final pos = _buttonPositions[index];
+            final isSelected = index == _selectedIndex;
+            
+            return AnimatedBuilder(
+              animation: _anim,
+              builder: (context, _) {
+                // Animate buttons out from the origin (top right of card)
+                final origin = Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
+                final currentDx = origin.dx + (pos.dx - origin.dx) * _anim.value;
+                final currentDy = origin.dy + (pos.dy - origin.dy) * _anim.value;
+                
+                final scale = _anim.value * (isSelected ? 1.3 : 1.0);
+                
+                return Positioned(
+                  left: currentDx - buttonRadius,
+                  top: currentDy - buttonRadius,
+                  width: buttonRadius * 2,
+                  height: buttonRadius * 2,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFFFFD166) : Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 4),
+                      ),
+                      child: Icon(
+                        action.icon, 
+                        color: Colors.black, 
+                        size: 36,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}

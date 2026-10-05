@@ -1,0 +1,197 @@
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../models/bookmark.dart';
+import '../../theme/app_theme.dart';
+import 'neo_box.dart';
+import 'bookmark_radial_menu.dart';
+import '../../providers/providers.dart';
+
+class BookmarkGridItem extends ConsumerStatefulWidget {
+  final Bookmark bookmark;
+
+  const BookmarkGridItem({Key? key, required this.bookmark}) : super(key: key);
+
+  @override
+  ConsumerState<BookmarkGridItem> createState() => _BookmarkGridItemState();
+}
+
+class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
+  final GlobalKey _cardKey = GlobalKey();
+
+  void _handleLongPressStart(LongPressStartDetails details) {
+    final renderBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final size = renderBox.size;
+      final position = renderBox.localToGlobal(Offset.zero);
+      final rect = position & size;
+      
+      BookmarkRadialMenu.show(
+        context: context,
+        child: _buildCard(), // Replica
+        bookmark: widget.bookmark,
+        cardRect: rect,
+        ref: ref,
+      );
+      
+      BookmarkRadialMenu.updatePosition(details.globalPosition);
+    }
+  }
+
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    BookmarkRadialMenu.updatePosition(details.globalPosition);
+  }
+
+  void _handleLongPressEnd(LongPressEndDetails details) {
+    BookmarkRadialMenu.executeSelectedAndClose();
+  }
+  
+  void _handleLongPressCancel() {
+    BookmarkRadialMenu.executeSelectedAndClose(); // or just close
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+        context.push('/bookmark/', extra: widget.bookmark);
+      },
+      onLongPressStart: _handleLongPressStart,
+      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
+      onLongPressEnd: _handleLongPressEnd,
+      onLongPressCancel: _handleLongPressCancel,
+      child: Container(
+        key: _cardKey,
+        child: _buildCard(),
+      ),
+    );
+  }
+  
+  Widget _buildCard() {
+    final b = widget.bookmark;
+    return NeoBox(
+      padding: const EdgeInsets.all(0),
+      borderRadius: 12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            flex: 5,
+            child: Container(
+              decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppTheme.border, width: 2.5)),
+                color: Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(9.5)),
+              ),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(9.5)),
+                    child: b.imageUrl != null
+                        ? Image.network(
+                            b.imageUrl!.startsWith('//') ? 'https:' + b.imageUrl! : b.imageUrl!, 
+                            fit: BoxFit.cover, 
+                            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey)
+                          )
+                        : Center(
+                            child: Text(
+                              b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
+                              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: AppTheme.border),
+                            ),
+                          ),
+                  ),
+                  if (!b.isRead)
+                    Positioned(
+                      top: 6,
+                      left: 6,
+                      child: Transform.rotate(
+                        angle: -0.1,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFD166),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: AppTheme.border, width: 1.5),
+                          ),
+                          child: const Text(
+                            'NEW',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.border,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Pinned Indicator (if pinned)
+                  if (b.isPinned)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppTheme.border, width: 1.5),
+                        ),
+                        child: const Icon(Icons.push_pin, size: 14, color: AppTheme.border),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    b.title ?? b.url,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.border,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
+                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          b.sourceDomain ?? 'Unknown',
+                          style: const TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
