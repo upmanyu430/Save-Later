@@ -8,8 +8,8 @@ import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 
 class CollectionDetailScreen extends ConsumerWidget {
-  final int collectionId;
-  final BookmarkCollection collection;
+  final int? collectionId;
+  final BookmarkCollection? collection;
 
   const CollectionDetailScreen({
     Key? key,
@@ -99,7 +99,7 @@ class CollectionDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bookmarksAsync = ref.watch(collectionBookmarksProvider(collectionId));
+    final bookmarksAsync = collectionId != null ? ref.watch(collectionBookmarksProvider(collectionId!)) : ref.watch(unsortedBookmarksProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -127,7 +127,7 @@ class CollectionDetailScreen extends ConsumerWidget {
                       Column(
                         children: [
                           Text(
-                            collection.name,
+                            (collection?.name ?? 'Unsorted'),
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                           ),
                           Text(
@@ -272,4 +272,5 @@ class CollectionDetailScreen extends ConsumerWidget {
     );
   }
 }
+
 

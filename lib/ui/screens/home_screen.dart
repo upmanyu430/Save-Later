@@ -213,12 +213,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       itemCount: collections.length + 1, // +1 for Unsorted
                       itemBuilder: (context, index) {
                         if (index == 0) {
+                          
                           // Unsorted Folder
-                          return FolderBox(
-                            title: 'Unsorted',
-                            itemCountText: 'View items',
-                            folderColor: Colors.grey.shade400,
-                            onTap: () => context.push('/review'),
+                          return Consumer(
+                            builder: (context, ref, _) {
+                              final countAsync = ref.watch(unsortedBookmarksProvider);
+                              final count = countAsync.valueOrNull?.length ?? 0;
+                              return FolderBox(
+                                title: 'Unsorted',
+                                itemCountText: '$count items',
+                                folderColor: Colors.grey.shade400,
+                                onTap: () => context.push('/unsorted'),
+                              );
+                            }
                           );
                         }
                         
@@ -249,4 +256,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+
 

@@ -52,6 +52,15 @@ class IsarRepository {
         .findAll();
   }
 
+  Future<List<Bookmark>> getUnsortedBookmarks() async {
+    final isar = await db;
+    return await isar.bookmarks
+        .filter()
+        .collectionIsNull()
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
   Future<void> addBookmark(Bookmark bookmark) async {
     final isar = await db;
     await isar.writeTxn(() async {

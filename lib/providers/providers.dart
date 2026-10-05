@@ -19,6 +19,11 @@ final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
   return repo.getBookmarks();
 });
 
+final unsortedBookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
+  final repo = ref.watch(repositoryProvider);
+  return repo.getUnsortedBookmarks();
+});
+
 final collectionBookmarksProvider =
     FutureProvider.family<List<Bookmark>, int>((ref, collectionId) async {
   final repo = ref.watch(repositoryProvider);
@@ -70,6 +75,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
       // Invalidate the provider to refresh the UI
       ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
 
       state = const AsyncValue.data(null);
     } catch (e, st) {
@@ -83,6 +89,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       bookmark.tags = List.from(bookmark.tags)..add(tag);
       await repo.updateBookmark(bookmark);
       ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
       if (bookmark.collection.value != null)
         ref.invalidate(
             collectionBookmarksProvider(bookmark.collection.value!.id));
@@ -103,6 +110,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         }
         await ref.read(repositoryProvider).updateBookmark(bookmark);
         ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
         if (bookmark.collection.value != null) {
           ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
         }
@@ -116,6 +124,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     bookmark.tags = List.from(bookmark.tags)..remove(tag);
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
     if (bookmark.collection.value != null)
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
@@ -126,6 +135,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     bookmark.isRead = true;
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
     if (bookmark.collection.value != null) {
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
@@ -136,6 +146,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     final repo = ref.read(repositoryProvider);
     await repo.deleteBookmark(bookmark.id);
     ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
     if (bookmark.collection.value != null) {
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
@@ -192,6 +203,7 @@ final collectionNotifierProvider =
     StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
   return CollectionNotifier(ref);
 });
+
 
 
 

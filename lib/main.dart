@@ -30,6 +30,10 @@ final _router = GoRouter(
       },
     ),
     GoRoute(
+      path: '/unsorted',
+      builder: (context, state) => const CollectionDetailScreen(collectionId: null, collection: null),
+    ),
+    GoRoute(
       path: '/review',
       builder: (context, state) => const ReviewModeScreen(),
     ),
