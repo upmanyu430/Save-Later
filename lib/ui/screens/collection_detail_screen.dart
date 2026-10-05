@@ -24,7 +24,7 @@ class CollectionDetailScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(collection.name),
-        backgroundColor: Color(int.parse('0xFF${collection.colorHex}')),
+        backgroundColor: collection.color,
       ),
       body: bookmarksAsync.when(
         data: (bookmarks) {
@@ -56,11 +56,8 @@ class CollectionDetailScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final b = bookmarks[index];
               return GestureDetector(
-                onTap: () async {
-                  final uri = Uri.parse(b.url);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
+                onTap: () {
+                  context.push('/bookmark/${b.id}', extra: b);
                 },
                 child: NeoBox(
                   padding: const EdgeInsets.all(0),

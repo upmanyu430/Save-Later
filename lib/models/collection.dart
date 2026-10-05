@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 part 'collection.g.dart';
@@ -19,4 +20,7 @@ class BookmarkCollection {
 
   @Index()
   DateTime createdAt = DateTime.now();
+
+  @ignore
+  Color get color => Color(int.parse('0xFF$colorHex'));
 }

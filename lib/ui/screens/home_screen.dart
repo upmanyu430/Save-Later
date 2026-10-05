@@ -268,7 +268,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         return GestureDetector(
                           onTap: () => context.push('/collection/${col.id}', extra: col),
                           child: NeoBox(
-                            color: Color(int.parse('0xFF${col.colorHex}')),
+                            color: col.color,
                             padding: const EdgeInsets.all(16),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

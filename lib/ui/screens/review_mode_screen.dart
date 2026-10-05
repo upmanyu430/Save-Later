@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
@@ -101,11 +101,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
                     final b = unread[index];
                     return GestureDetector(
-                      onTap: () async {
-                        final uri = Uri.parse(b.url);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        }
+                      onTap: () {
+                        context.push('/bookmark/${b.id}', extra: b);
                       },
                       child: NeoBox(
                         padding: EdgeInsets.zero,

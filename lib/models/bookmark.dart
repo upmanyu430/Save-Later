@@ -23,6 +23,8 @@ class Bookmark {
   @Index()
   DateTime createdAt = DateTime.now();
 
+  List<String> tags = [];
+
   // A link to the collection it belongs to
   final collection = IsarLink<BookmarkCollection>();
 }
