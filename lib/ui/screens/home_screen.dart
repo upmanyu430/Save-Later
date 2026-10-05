@@ -110,11 +110,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  NeoBox(
-                    padding: const EdgeInsets.all(8),
-                    borderRadius: 8,
-                    borderWidth: 2.5,
-                    child: const Icon(Icons.settings_outlined, size: 28),
+                  GestureDetector(
+                    onTap: () => context.push('/settings'),
+                    child: NeoBox(
+                      padding: const EdgeInsets.all(8),
+                      borderRadius: 8,
+                      borderWidth: 2.5,
+                      child: const Icon(Icons.settings_outlined, size: 28),
+                    ),
                   ),
                   Row(
                     children: [
@@ -262,6 +265,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+
 
 
 

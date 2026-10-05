@@ -6,6 +6,7 @@ import 'theme/app_theme.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/collection_detail_screen.dart';
 import 'ui/screens/review_mode_screen.dart';
+import 'ui/screens/settings_screen.dart';
 import 'ui/screens/bookmark_detail_screen.dart';
 import 'models/bookmark.dart';
 
@@ -38,6 +39,10 @@ final _router = GoRouter(
       builder: (context, state) => const ReviewModeScreen(),
     ),
     GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
       path: '/bookmark/:id',
       builder: (context, state) {
         final bookmark = state.extra as Bookmark;
@@ -60,3 +65,4 @@ class SaveLaterApp extends StatelessWidget {
     );
   }
 }
+
