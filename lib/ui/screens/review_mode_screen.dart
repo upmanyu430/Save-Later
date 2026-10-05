@@ -323,6 +323,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   }
 
   Widget _buildCard(Bookmark b) {
+    final collection = b.collection.value ?? widget.collection;
+    final collectionName = collection?.name ?? 'Unsorted';
+    final collectionColor = collection?.color ?? Colors.grey.shade400;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -405,14 +409,26 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade400,
+                              color: collectionColor,
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(color: AppTheme.border, width: 2),
                             ),
+                            child: collection != null
+                                ? Center(
+                                    child: Icon(
+                                      IconData(
+                                        collection.iconCodePoint,
+                                        fontFamily: collection.iconFontFamily,
+                                      ),
+                                      size: 10,
+                                      color: AppTheme.border,
+                                    ),
+                                  )
+                                : null,
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            widget.collection?.name ?? 'Unsorted',
+                            collectionName,
                             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.black),
                           ),
                         ],
