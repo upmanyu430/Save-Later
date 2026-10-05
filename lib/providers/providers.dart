@@ -8,7 +8,8 @@ final repositoryProvider = Provider<IsarRepository>((ref) {
   return IsarRepository();
 });
 
-final collectionsProvider = FutureProvider<List<BookmarkCollection>>((ref) async {
+final collectionsProvider =
+    FutureProvider<List<BookmarkCollection>>((ref) async {
   final repo = ref.watch(repositoryProvider);
   return repo.getCollections();
 });
@@ -18,7 +19,8 @@ final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
   return repo.getBookmarks();
 });
 
-final collectionBookmarksProvider = FutureProvider.family<List<Bookmark>, int>((ref, collectionId) async {
+final collectionBookmarksProvider =
+    FutureProvider.family<List<Bookmark>, int>((ref, collectionId) async {
   final repo = ref.watch(repositoryProvider);
   return repo.getBookmarksByCollection(collectionId);
 });
@@ -33,7 +35,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
-      
+
       // Attempt to fetch metadata
       String? title;
       String? description;
@@ -64,14 +66,36 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         ..isRead = false;
 
       await repo.addBookmark(bookmark);
-      
+
       // Invalidate the provider to refresh the UI
       ref.invalidate(bookmarksProvider);
-      
+
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  Future<void> addTag(Bookmark bookmark, String tag) async {
+    final repo = ref.read(repositoryProvider);
+    if (!bookmark.tags.contains(tag)) {
+      bookmark.tags = List.from(bookmark.tags)..add(tag);
+      await repo.updateBookmark(bookmark);
+      ref.invalidate(bookmarksProvider);
+      if (bookmark.collection.value != null)
+        ref.invalidate(
+            collectionBookmarksProvider(bookmark.collection.value!.id));
+    }
+  }
+
+  Future<void> removeTag(Bookmark bookmark, String tag) async {
+    final repo = ref.read(repositoryProvider);
+    bookmark.tags = List.from(bookmark.tags)..remove(tag);
+    await repo.updateBookmark(bookmark);
+    ref.invalidate(bookmarksProvider);
+    if (bookmark.collection.value != null)
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
   }
 
   Future<void> markAsRead(Bookmark bookmark) async {
@@ -80,7 +104,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
     if (bookmark.collection.value != null) {
-      ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
     }
   }
 
@@ -89,12 +114,14 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     await repo.deleteBookmark(bookmark.id);
     ref.invalidate(bookmarksProvider);
     if (bookmark.collection.value != null) {
-      ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
     }
   }
 }
 
-final bookmarkNotifierProvider = StateNotifierProvider<BookmarkNotifier, AsyncValue<void>>((ref) {
+final bookmarkNotifierProvider =
+    StateNotifierProvider<BookmarkNotifier, AsyncValue<void>>((ref) {
   return BookmarkNotifier(ref);
 });
 
@@ -123,6 +150,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final collectionNotifierProvider = StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
+final collectionNotifierProvider =
+    StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
   return CollectionNotifier(ref);
 });

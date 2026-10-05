@@ -55,7 +55,7 @@ class IsarRepository {
   Future<void> addBookmark(Bookmark bookmark) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.bookmarks.put(bookmark);
+      await isar.bookmarks.put(bookmark); await bookmark.collection.save();
       await bookmark.collection.save();
     });
   }
@@ -63,7 +63,7 @@ class IsarRepository {
   Future<void> updateBookmark(Bookmark bookmark) async {
     final isar = await db;
     await isar.writeTxn(() async {
-      await isar.bookmarks.put(bookmark);
+      await isar.bookmarks.put(bookmark); await bookmark.collection.save();
     });
   }
   
