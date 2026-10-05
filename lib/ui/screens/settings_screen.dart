@@ -9,6 +9,7 @@ import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../../config/app_config.dart';
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
@@ -90,8 +91,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_hapticFeedback) HapticFeedback.selectionClick();
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
-      path: 'feedback@tuckii.com',
-      query: 'subject=Tuckii Feedback',
+      path: AppConfig.supportEmail,
+      query: 'subject=${AppConfig.appName} Feedback',
     );
     try {
       await launchUrl(emailLaunchUri);
@@ -292,7 +293,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
 
-                  _buildSectionHeader('YOUR TUCKII DATA'),
+                  _buildSectionHeader('YOUR ${AppConfig.appName.toUpperCase()} DATA'),
                   _buildSettingTile(
                     title: 'Export Backup',
                     subtitle: 'Export a backup file you can save anywhere',
@@ -309,7 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   _buildSettingTile(
                     title: 'Restore from Backup',
-                    subtitle: 'Restore from a Tuckii backup (.zip or .json)',
+                    subtitle: 'Restore from a ${AppConfig.appName} backup (.zip or .json)',
                     icon: _buildIconContainer(Icons.cloud_download_outlined),
                     onTap: _restoreBackup,
                     trailing: Row(
@@ -334,9 +335,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSectionHeader('SUPPORT'),
                   _buildSettingTile(
                     title: 'How To',
-                    subtitle: 'Quick guides for getting more from Tuckii',
+                    subtitle: 'Quick guides for getting more from ${AppConfig.appName}',
                     icon: _buildIconContainer(Icons.book_outlined),
-                    onTap: () => _openUrl('https://example.com/howto'),
+                    onTap: () => _openUrl(AppConfig.howToUrl),
                     trailing: const Icon(Icons.chevron_right, color: Colors.black54),
                   ),
                   _buildSettingTile(
@@ -350,14 +351,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'Privacy Policy',
                     subtitle: null,
                     icon: _buildIconContainer(Icons.lock_outline),
-                    onTap: () => _openUrl('https://example.com/privacy'),
+                    onTap: () => _openUrl(AppConfig.privacyPolicyUrl),
                     trailing: const Icon(Icons.open_in_new, color: Colors.black54, size: 20),
                   ),
                   _buildSettingTile(
                     title: 'Terms of Service',
                     subtitle: null,
                     icon: _buildIconContainer(Icons.description_outlined),
-                    onTap: () => _openUrl('https://example.com/terms'),
+                    onTap: () => _openUrl(AppConfig.termsOfServiceUrl),
                     trailing: const Icon(Icons.open_in_new, color: Colors.black54, size: 20),
                   ),
 
