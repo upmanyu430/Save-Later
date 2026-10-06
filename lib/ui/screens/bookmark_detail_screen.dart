@@ -38,7 +38,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   @override
   void dispose() {
     _notesController.dispose();
+    _titleController.dispose();
     super.dispose();
+  }
+
+  void _saveNotes(String val) async {
+    bookmark.description = val;
+    await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
   }
 
   void _showAddTagModal() {
@@ -483,6 +489,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           child: TextField(
                             controller: _notesController,
                             maxLines: null,
+                            onChanged: (val) => _saveNotes(val),
+                            onEditingComplete: () {
+                              _saveNotes(_notesController.text);
+                              if (mounted) setState(() {});
+                            },
                             decoration: InputDecoration(
                               hintText: l10n.tapToAddNotesHint,
                               hintStyle: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
