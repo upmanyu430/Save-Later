@@ -11,6 +11,8 @@ import '../widgets/neo_box.dart';
 import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_config.dart';
+import 'package:save_later/config/app_constants.dart';
+
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
 
@@ -150,13 +152,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.only(bottom: 12),
         child: NeoBox(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          borderRadius: 8,
-          borderWidth: 2.5,
+          borderRadius: AppDimensions.radiusSm,
+          borderWidth: AppDimensions.borderWidthMd,
           color: AppTheme.cardColor,
           child: Row(
             children: [
               icon,
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.paddingLg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +185,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppDimensions.paddingSm),
               trailing,
             ],
           ),
@@ -200,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         color: bgColor,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(icon, color: iconColor, size: 24),
+      child: Icon(icon, color: iconColor, size: AppDimensions.iconSizeMd),
     );
   }
 
@@ -216,7 +218,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             // Top Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -228,10 +230,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         context.pop();
                       },
                       child: NeoBox(
-                        padding: const EdgeInsets.all(8),
-                        borderRadius: 8,
-                        borderWidth: 2.5,
-                        child: const Icon(Icons.arrow_back, size: 28),
+                        padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                        borderRadius: AppDimensions.radiusSm,
+                        borderWidth: AppDimensions.borderWidthMd,
+                        child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeLg),
                       ),
                     ),
                   ),
@@ -249,7 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Content
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingSm),
                 children: [
                   _buildSectionHeader(l10n.preferences),
                   _buildSettingTile(
@@ -317,7 +319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     }
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: AppDimensions.paddingXl),
                   Center(
                     child: Text(
                       l10n.versionLabel(_appVersion),
@@ -328,7 +330,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: AppDimensions.paddingXxxl),
                 ],
               ),
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class AppTheme {
   // Pastel color palette
@@ -30,7 +32,7 @@ class AppTheme {
       appBarTheme: const AppBarTheme(
         backgroundColor: background,
         elevation: 0,
-        iconTheme: IconThemeData(color: border, size: 28),
+        iconTheme: IconThemeData(color: border, size: AppDimensions.iconSizeLg),
         titleTextStyle: TextStyle(
           color: border,
           fontSize: 24,

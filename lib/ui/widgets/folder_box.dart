@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class FolderBox extends StatelessWidget {
   final String title;
@@ -57,10 +59,10 @@ class FolderBox extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 15.0),
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppDimensions.paddingLg),
               decoration: BoxDecoration(
                 color: AppTheme.cardColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                 border: Border.all(
                   color: AppTheme.border,
                   width: 3.0,
@@ -85,14 +87,14 @@ class FolderBox extends StatelessWidget {
                         height: 44,
                         decoration: BoxDecoration(
                           color: folderColor,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(
                             color: AppTheme.border,
                             width: 2.0,
                           ),
                         ),
                         child: Center(
-                          child: Icon(icon, color: AppTheme.border, size: 28),
+                          child: Icon(icon, color: AppTheme.border, size: AppDimensions.iconSizeLg),
                         ),
                       ),
                       Row(

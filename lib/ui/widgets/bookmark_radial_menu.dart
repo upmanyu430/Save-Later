@@ -6,6 +6,8 @@ import '../../models/bookmark.dart';
 import 'dart:math';
 import '../../utils/url_launcher.dart';
 import '../../providers/providers.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class RadialMenuAction {
   final IconData icon;
@@ -133,7 +135,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _animController = AnimationController(vsync: this, duration: AppDurations.animationNormal);
     _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
     _animController.forward();
     
@@ -207,7 +209,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
               child: Center(
                 child: AnimatedOpacity(
                   opacity: 1.0,
-                  duration: const Duration(milliseconds: 100),
+                  duration: AppDurations.animationFast,
                   child: Text(
                     widget.actions[_selectedIndex].label,
                     style: const TextStyle(
@@ -273,7 +275,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                       child: Icon(
                         action.icon, 
                         color: Colors.black, 
-                        size: 36,
+                        size: AppDimensions.iconSizeXl,
                       ),
                     ),
                   ),

@@ -9,6 +9,8 @@ import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../../theme/app_theme.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class CollectionDetailScreen extends ConsumerStatefulWidget {
   final int? collectionId;
@@ -50,7 +52,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 AppLocalizations.of(context)!.addLinkToCollection,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppDimensions.paddingLg),
               TextField(
                 autofocus: true,
                 decoration: InputDecoration(
@@ -102,7 +104,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppDimensions.paddingXl),
             
             // Add Link
             _buildMenuItem(
@@ -133,7 +135,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             _buildMenuItem(
               icon: Icons.create_new_folder_outlined,
               title: AppLocalizations.of(context)!.createSubCollection,
-              trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: 28),
+              trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: AppDimensions.iconSizeLg),
               onTap: () {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -167,8 +169,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
         padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
         child: Row(
           children: [
-            Icon(icon, size: 28, color: AppTheme.border),
-            const SizedBox(width: 16),
+            Icon(icon, size: AppDimensions.iconSizeLg, color: AppTheme.border),
+            const SizedBox(width: AppDimensions.paddingLg),
             Expanded(
               child: Text(
                 title,
@@ -204,8 +206,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
         child: NeoBox(
           color: color ?? Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          borderRadius: 8,
-          borderWidth: 2.5,
+          borderRadius: AppDimensions.radiusSm,
+          borderWidth: AppDimensions.borderWidthMd,
           child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
         ),
       ),
@@ -259,7 +261,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppDimensions.paddingLg),
             Expanded(
               child: ListView.builder(
                 itemCount: collections.length,
@@ -305,7 +307,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               children: [
                 // Top Custom App Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                  padding: const EdgeInsets.all(AppDimensions.paddingLg),
                   child: _isSelectMode
                       ? SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -315,7 +317,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                 l10n.selectedCount(_selectedIds.length),
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppDimensions.paddingSm),
                               _buildSelectButton(l10n.selectAll, onTap: () {
                                 setState(() {
                                   _selectedIds.addAll(bookmarks.map((b) => b.id));
@@ -339,10 +341,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             GestureDetector(
                               onTap: () => context.pop(),
                               child: NeoBox(
-                                padding: const EdgeInsets.all(8),
-                                borderRadius: 8,
-                                borderWidth: 2.5,
-                                child: const Icon(Icons.arrow_back, size: 28),
+                                padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                                borderRadius: AppDimensions.radiusSm,
+                                borderWidth: AppDimensions.borderWidthMd,
+                                child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeLg),
                               ),
                             ),
                             Column(
@@ -363,20 +365,20 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   onTap: () => context.push('/review', extra: widget.collection),
                                   child: NeoBox(
                                     color: const Color(0xFFFFD166), // Yellow
-                                    padding: const EdgeInsets.all(8),
-                                    borderRadius: 8,
-                                    borderWidth: 2.5,
-                                    child: const Icon(Icons.style, size: 28),
+                                    padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                                    borderRadius: AppDimensions.radiusSm,
+                                    borderWidth: AppDimensions.borderWidthMd,
+                                    child: const Icon(Icons.style, size: AppDimensions.iconSizeLg),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
+                                const SizedBox(width: AppDimensions.paddingSm),
                                 GestureDetector(
                                   onTap: () => _showMenuModal(context),
                                   child: NeoBox(
-                                    padding: const EdgeInsets.all(8),
-                                    borderRadius: 8,
-                                    borderWidth: 2.5,
-                                    child: const Icon(Icons.more_vert, size: 28),
+                                    padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                                    borderRadius: AppDimensions.radiusSm,
+                                    borderWidth: AppDimensions.borderWidthMd,
+                                    child: const Icon(Icons.more_vert, size: AppDimensions.iconSizeLg),
                                   ),
                                 ),
                               ],
@@ -387,7 +389,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 
                 // Title
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingSm),
                   child: Text(
                     l10n.savesCount(bookmarks.length),
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.2),
@@ -401,8 +403,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.inbox, size: 80, color: AppTheme.border),
-                              const SizedBox(height: 16),
+                              const Icon(Icons.inbox, size: AppDimensions.iconSizeXxl, color: AppTheme.border),
+                              const SizedBox(height: AppDimensions.paddingLg),
                               Text(
                                 l10n.noItemsYet,
                                 textAlign: TextAlign.center,
@@ -412,12 +414,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           ),
                         )
                       : GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            childAspectRatio: 0.85,
+                            crossAxisCount: AppDimensions.gridCrossAxisCount,
+                            crossAxisSpacing: AppDimensions.gridSpacingMd,
+                            mainAxisSpacing: AppDimensions.gridSpacingMd,
+                            childAspectRatio: AppDimensions.gridAspectRatioRegular,
                           ),
                           itemCount: bookmarks.length,
                           itemBuilder: (context, index) {

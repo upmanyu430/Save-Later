@@ -9,6 +9,8 @@ import '../../providers/providers.dart';
 import '../widgets/neo_button.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class ReviewModeScreen extends ConsumerStatefulWidget {
   final BookmarkCollection? collection;
@@ -90,10 +92,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           alignment: Alignment.center,
           children: [
             // Sparkles background
-            Positioned(top: 0, left: 20, child: Icon(Icons.auto_awesome, color: Colors.greenAccent.withValues(alpha: 0.8), size: 24)),
+            Positioned(top: 0, left: 20, child: Icon(Icons.auto_awesome, color: Colors.greenAccent.withValues(alpha: 0.8), size: AppDimensions.iconSizeMd)),
             Positioned(bottom: 10, right: 20, child: Icon(Icons.auto_awesome, color: Colors.white, size: 20)),
             Positioned(top: 20, right: 0, child: Icon(Icons.auto_awesome, color: Colors.white, size: 16)),
-            Positioned(bottom: 0, left: 10, child: Icon(Icons.auto_awesome, color: Colors.greenAccent, size: 28)),
+            Positioned(bottom: 0, left: 10, child: Icon(Icons.auto_awesome, color: Colors.greenAccent, size: AppDimensions.iconSizeLg)),
             Container(
               width: 120,
               height: 120,
@@ -105,7 +107,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppDimensions.paddingXxl),
         Text(
           AppLocalizations.of(context)!.caughtUpTitle,
           style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
@@ -115,12 +117,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           AppLocalizations.of(context)!.caughtUpSubtitle,
           style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppDimensions.paddingXxl),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
           ),
           child: Text(
             AppLocalizations.of(context)!.viewedCount(completedCount),
@@ -147,13 +149,13 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.arrow_back, color: Colors.black),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppDimensions.paddingSm),
                       Text(AppLocalizations.of(context)!.previous, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.paddingLg),
               Expanded(
                 child: NeoButton(
                   color: const Color(0xFFFFD166),
@@ -162,7 +164,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Icon(Icons.home_outlined, color: Colors.black),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppDimensions.paddingSm),
                       Text(AppLocalizations.of(context)!.done, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
                     ],
                   ),
@@ -211,10 +213,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               InkWell(
                 onTap: () => context.pop(),
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(AppDimensions.paddingMd),
                   decoration: BoxDecoration(
                     color: const Color(0xFF222222),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                     border: Border.all(color: Colors.white24, width: 1.5),
                   ),
                   child: const Icon(Icons.close, color: Colors.white),
@@ -269,7 +271,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                    controller.swipe(CardSwiperDirection.left);
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppDimensions.paddingLg),
                   decoration: const BoxDecoration(
                     color: Color(0xFF222222),
                     shape: BoxShape.circle,
@@ -277,7 +279,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   child: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.paddingLg),
               Expanded(
                 child: InkWell(
                   onTap: () {
@@ -287,14 +289,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     height: 64,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFD166),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                     ),
                     child: Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(AppLocalizations.of(context)!.openLink, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w900)),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppDimensions.paddingSm),
                           const Icon(Icons.arrow_outward, color: Colors.black, size: 22),
                         ],
                       ),
@@ -302,13 +304,13 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppDimensions.paddingLg),
               InkWell(
                 onTap: () {
                    controller.swipe(CardSwiperDirection.right);
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppDimensions.paddingLg),
                   decoration: const BoxDecoration(
                     color: Color(0xFF222222),
                     shape: BoxShape.circle,
@@ -331,7 +333,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
         border: Border.all(color: AppTheme.border, width: 3),
       ),
       child: Column(
@@ -347,14 +349,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   height: 32,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                     border: Border.all(color: AppTheme.border, width: 2),
                   ),
                   child: const Center(
                     child: Icon(Icons.public, color: AppTheme.border, size: 18),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppDimensions.paddingMd),
                 Expanded(
                   child: Text(
                     b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
@@ -371,14 +373,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               margin: const EdgeInsets.symmetric(horizontal: 16.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF111111),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
                 border: Border.all(color: AppTheme.border, width: 2),
               ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
                     child: b.imageUrl != null
                         ? Image.network(
                             b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!,
@@ -400,7 +402,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                         border: Border.all(color: AppTheme.border, width: 2),
                       ),
                       child: Row(
@@ -427,7 +429,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                   )
                                 : null,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppDimensions.paddingSm),
                           Text(
                             collectionName,
                             style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Colors.black),

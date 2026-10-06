@@ -7,6 +7,8 @@ import '../../theme/app_theme.dart';
 import 'neo_box.dart';
 import 'bookmark_radial_menu.dart';
 import '../../providers/providers.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class BookmarkGridItem extends ConsumerStatefulWidget {
   final Bookmark bookmark;
@@ -91,7 +93,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     final b = widget.bookmark;
     return NeoBox(
       padding: const EdgeInsets.all(0),
-      borderRadius: 12,
+      borderRadius: AppDimensions.radiusMd,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -99,7 +101,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
             flex: 5,
             child: Container(
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppTheme.border, width: 2.5)),
+                border: Border(bottom: BorderSide(color: AppTheme.border, width: AppDimensions.borderWidthMd)),
                 color: Color(0xFFF0F0F0),
                 borderRadius: BorderRadius.vertical(top: Radius.circular(9.5)),
               ),
@@ -186,7 +188,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           Expanded(
             flex: 4,
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(AppDimensions.paddingMd),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

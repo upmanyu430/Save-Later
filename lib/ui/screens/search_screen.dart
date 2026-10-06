@@ -7,6 +7,8 @@ import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -47,8 +49,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 24, color: AppTheme.border),
-        const SizedBox(height: 8),
+        Icon(icon, size: AppDimensions.iconSizeMd, color: AppTheme.border),
+        const SizedBox(height: AppDimensions.paddingSm),
         Text(
           count,
           style: const TextStyle(
@@ -206,7 +208,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               Expanded(
                 flex: 4,
                 child: Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(AppDimensions.paddingMd),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -356,7 +358,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ),
                           border: InputBorder.none,
                           icon: const Icon(Icons.search,
-                              color: AppTheme.border, size: 28),
+                              color: AppTheme.border, size: AppDimensions.iconSizeLg),
                         ),
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
@@ -365,7 +367,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppDimensions.paddingMd),
                   GestureDetector(
                     onTap: () => context.pop(),
                     child: NeoBox(
@@ -402,14 +404,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       children: [
                         _buildLibraryStats(collectionsCount, bookmarksCount,
                             pinnedCount, tagsCount),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Recently Saved Header
                         Row(
                           children: [
                             const Icon(Icons.schedule,
                                 color: AppTheme.border, size: 22),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppDimensions.paddingSm),
                             Text(
                               l10n.recentlySaved,
                               style: const TextStyle(
@@ -421,7 +423,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Horizontal Cards
                         if (allBookmarks.isNotEmpty)
@@ -447,7 +449,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           size: 64,
                           color: AppTheme.border,
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppDimensions.paddingLg),
                         Center(
                           child: Text(
                             l10n.typeSomethingToSearch,
@@ -458,7 +460,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppDimensions.paddingXxl),
                       ],
                     ),
             ),

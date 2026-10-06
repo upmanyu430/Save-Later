@@ -9,6 +9,8 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../../utils/url_launcher.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class BookmarkDetailScreen extends ConsumerStatefulWidget {
   final Bookmark bookmark;
@@ -52,7 +54,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
           ),
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,7 +63,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 AppLocalizations.of(context)!.addTag,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppDimensions.paddingLg),
               TextField(
                 autofocus: true,
                 decoration: InputDecoration(
@@ -108,7 +110,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
             ),
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             child: collectionsAsync.when(
               data: (collections) {
                 if (collections.isEmpty) return Text(AppLocalizations.of(context)!.noCollectionsCreated);
@@ -189,7 +191,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         right: BorderSide(color: AppTheme.border, width: 3),
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -197,14 +199,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         Row(
                           children: [
                             const Icon(Icons.public, size: 18),
-                            const SizedBox(width: 8),
+                            const SizedBox(width: AppDimensions.paddingSm),
                             Text(
                               bookmark.sourceDomain ?? l10n.unknownSource,
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Title & Edit Button
                         if (_isEditingTitle)
@@ -214,10 +216,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                                   border: Border.all(color: const Color(0xFFFFD166), width: 3),
                                 ),
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 child: TextField(
                                   controller: _titleController,
                                   style: const TextStyle(
@@ -247,14 +249,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       });
                                     },
                                     child: NeoBox(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                      borderRadius: 12,
+                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                      borderRadius: AppDimensions.radiusMd,
                                       borderWidth: 3,
                                       color: Colors.white,
                                       child: Text(l10n.cancel, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  const SizedBox(width: AppDimensions.paddingMd),
                                   GestureDetector(
                                     onTap: () async {
                                       final newTitle = _titleController.text.trim();
@@ -272,10 +274,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       }
                                     },
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                                       decoration: BoxDecoration(
                                         color: const Color(0xFFEEEEEE),
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                                         border: Border.all(color: Colors.grey.shade600, width: 3),
                                       ),
                                       child: Text(l10n.save, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.grey.shade600)),
@@ -300,7 +302,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 16),
+                              const SizedBox(width: AppDimensions.paddingLg),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -308,25 +310,25 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   });
                                 },
                                 child: NeoBox(
-                                  padding: const EdgeInsets.all(8),
-                                  borderRadius: 12,
-                                  borderWidth: 2.5,
-                                  child: const Icon(Icons.edit_outlined, size: 24),
+                                  padding: EdgeInsets.all(AppDimensions.paddingSm),
+                                  borderRadius: AppDimensions.radiusMd,
+                                  borderWidth: AppDimensions.borderWidthMd,
+                                  child: const Icon(Icons.edit_outlined, size: AppDimensions.iconSizeMd),
                                 ),
                               ),
                             ],
                           ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Collection & Date
                         Row(
                           children: [
                             if (bookmark.collection.value != null)
                               Padding(
-                                padding: const EdgeInsets.only(right: 12.0),
+                                padding: EdgeInsets.only(right: 12.0),
                                 child: NeoBox(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  borderRadius: 8,
+                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  borderRadius: AppDimensions.radiusSm,
                                   borderWidth: 2,
                                   child: Row(
                                     children: [
@@ -350,15 +352,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppDimensions.paddingXl),
 
                         // Open Link Button
                         GestureDetector(
                           onTap: () => openUrl(bookmark.url),
                           child: NeoBox(
                             color: const Color(0xFFFFD166), // Yellow
-                            padding: const EdgeInsets.all(16),
-                            borderRadius: 16,
+                            padding: EdgeInsets.all(AppDimensions.paddingLg),
+                            borderRadius: AppDimensions.radiusXl,
                             child: Row(
                               children: [
                                 Expanded(
@@ -379,23 +381,23 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.all(8),
+                                  padding: EdgeInsets.all(AppDimensions.paddingSm),
                                   decoration: const BoxDecoration(
                                     color: AppTheme.border,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: 24),
+                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: AppDimensions.iconSizeMd),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: AppDimensions.paddingXl),
 
                         // Actions Row
                         NeoBox(
-                          padding: const EdgeInsets.all(0),
-                          borderRadius: 16,
+                          padding: EdgeInsets.all(0),
+                          borderRadius: AppDimensions.radiusXl,
                           child: Row(
                             children: [
                               _buildActionItem(Icons.share_outlined, l10n.share, () {
@@ -417,7 +419,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Description
                         Text(l10n.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
@@ -426,7 +428,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           bookmark.description ?? l10n.noDescriptionProvided,
                           style: const TextStyle(fontSize: 16, height: 1.4, color: Color(0xFF333333)),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Tags
                         Text(l10n.tagsLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
@@ -438,8 +440,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ...bookmark.tags.map((tag) => GestureDetector(
                               onTap: () => _removeTag(tag), // Or edit
                               child: NeoBox(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                borderRadius: 8,
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                borderRadius: AppDimensions.radiusSm,
                                 borderWidth: 2,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -454,8 +456,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             GestureDetector(
                               onTap: _showAddTagModal,
                               child: NeoBox(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                borderRadius: 8,
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                borderRadius: AppDimensions.radiusSm,
                                 borderWidth: 2,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
@@ -469,15 +471,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Notes
                         Text(l10n.notesLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
                         NeoBox(
                           color: const Color(0xFFFFF7E0), // Pale yellow
-                          borderRadius: 12,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          borderRadius: AppDimensions.radiusMd,
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                           child: TextField(
                             controller: _notesController,
                             maxLines: null,
@@ -488,7 +490,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 48), // Bottom padding
+                        const SizedBox(height: AppDimensions.paddingXxxl), // Bottom padding
                       ],
                     ),
                   ),
@@ -502,26 +504,26 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             top: 0, left: 0, right: 0,
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
                       onTap: () => context.pop(),
                       child: NeoBox(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(AppDimensions.paddingSm),
                         color: AppTheme.background,
-                        borderRadius: 12,
-                        borderWidth: 2.5,
-                        child: const Icon(Icons.arrow_back, size: 24),
+                        borderRadius: AppDimensions.radiusMd,
+                        borderWidth: AppDimensions.borderWidthMd,
+                        child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
                       ),
                     ),
                     NeoBox(
-                      padding: const EdgeInsets.all(8),
+                      padding: EdgeInsets.all(AppDimensions.paddingSm),
                       color: AppTheme.background,
-                      borderRadius: 12,
-                      borderWidth: 2.5,
-                      child: const Icon(Icons.auto_fix_off_outlined, size: 24),
+                      borderRadius: AppDimensions.radiusMd,
+                      borderWidth: AppDimensions.borderWidthMd,
+                      child: const Icon(Icons.auto_fix_off_outlined, size: AppDimensions.iconSizeMd),
                     ),
                   ],
                 ),
@@ -554,16 +556,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       barrierColor: Colors.black54,
       builder: (ctx) => Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 32),
-          padding: const EdgeInsets.all(28),
+          margin: EdgeInsets.symmetric(horizontal: 32),
+          padding: EdgeInsets.all(28),
           decoration: BoxDecoration(
             color: AppTheme.background,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
             border: Border.all(color: AppTheme.border, width: 3),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
                 color: AppTheme.border,
-                offset: Offset(4, 4),
+                offset: Offset(AppDimensions.shadowOffsetMd, AppDimensions.shadowOffsetMd),
                 blurRadius: 0,
               ),
             ],
@@ -582,7 +584,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppDimensions.paddingLg),
                 Text(
                   AppLocalizations.of(context)!.refreshMetadataDescription,
                   textAlign: TextAlign.center,
@@ -599,11 +601,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       child: GestureDetector(
                         onTap: () => Navigator.pop(ctx),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
                           decoration: BoxDecoration(
                             color: AppTheme.background,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppTheme.border, width: 2.5),
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                            border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
                           ),
                           child: Center(
                             child: Text(
@@ -617,7 +619,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppDimensions.paddingMd),
                     Expanded(
                       child: GestureDetector(
                         onTap: () async {
@@ -625,15 +627,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           _performRefresh();
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFF3366),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppTheme.border, width: 2.5),
-                            boxShadow: const [
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                            border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
+                            boxShadow: [
                               BoxShadow(
                                 color: AppTheme.border,
-                                offset: Offset(3, 3),
+                                offset: Offset(AppDimensions.shadowOffsetSm, AppDimensions.shadowOffsetSm),
                                 blurRadius: 0,
                               ),
                             ],
@@ -667,11 +669,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 12),
           color: Colors.transparent,
           child: Column(
             children: [
-              Icon(icon, color: color, size: 24),
+              Icon(icon, color: color, size: AppDimensions.iconSizeMd),
               const SizedBox(height: 4),
               Text(
                 label,
@@ -720,7 +722,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
     super.initState();
     _spinController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: AppDurations.animationSlow,
     )..repeat();
     _doRefresh();
   }
@@ -731,7 +733,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
       if (!mounted) return;
       setState(() => _done = true);
       _spinController.stop();
-      await Future.delayed(const Duration(milliseconds: 900));
+      await Future.delayed(AppDurations.delayLong);
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
@@ -740,7 +742,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
         _done = true;
       });
       _spinController.stop();
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(AppDurations.messageDuration);
       if (mounted) Navigator.pop(context);
     }
   }
@@ -755,16 +757,16 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 48),
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+        margin: EdgeInsets.symmetric(horizontal: 48),
+        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 36),
         decoration: BoxDecoration(
           color: AppTheme.background,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
           border: Border.all(color: AppTheme.border, width: 3),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
               color: AppTheme.border,
-              offset: Offset(4, 4),
+              offset: Offset(AppDimensions.shadowOffsetMd, AppDimensions.shadowOffsetMd),
               blurRadius: 0,
             ),
           ],
@@ -775,7 +777,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
             mainAxisSize: MainAxisSize.min,
             children: [
               AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: AppDurations.animationNormal,
                 child: _done
                     ? Container(
                         key: const ValueKey('done'),
@@ -786,11 +788,11 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
                               ? const Color(0xFFFF3366)
                               : const Color(0xFF2ECC71),
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.border, width: 2.5),
-                          boxShadow: const [
+                          border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
+                          boxShadow: [
                             BoxShadow(
                               color: AppTheme.border,
-                              offset: Offset(3, 3),
+                              offset: Offset(AppDimensions.shadowOffsetSm, AppDimensions.shadowOffsetSm),
                               blurRadius: 0,
                             ),
                           ],
@@ -798,7 +800,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
                         child: Icon(
                           _error ? Icons.close : Icons.check,
                           color: Colors.white,
-                          size: 36,
+                          size: AppDimensions.iconSizeXl,
                         ),
                       )
                     : RotationTransition(
@@ -810,16 +812,16 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFD166),
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.border, width: 2.5),
-                            boxShadow: const [
+                            border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
+                            boxShadow: [
                               BoxShadow(
                                 color: AppTheme.border,
-                                offset: Offset(3, 3),
+                                offset: Offset(AppDimensions.shadowOffsetSm, AppDimensions.shadowOffsetSm),
                                 blurRadius: 0,
                               ),
                             ],
                           ),
-                          child: const Icon(Icons.refresh, size: 36, color: AppTheme.border),
+                          child: const Icon(Icons.refresh, size: AppDimensions.iconSizeXl, color: AppTheme.border),
                         ),
                       ),
               ),
@@ -833,7 +835,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppDimensions.paddingSm),
               Text(
                 _done
                     ? (_error

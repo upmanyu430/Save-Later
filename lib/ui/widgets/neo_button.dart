@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class NeoButton extends StatefulWidget {
   final VoidCallback onPressed;
@@ -19,7 +21,7 @@ class NeoButton extends StatefulWidget {
     this.borderWidth = 3.0,
     this.borderRadius = 12.0,
     this.shadowOffset = 5.0,
-    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+    this.padding = const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: 14),
   });
 
   @override
@@ -61,7 +63,7 @@ class _NeoButtonState extends State<NeoButton> {
           _isPressed ? widget.shadowOffset : 0,
         ),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 100),
+          duration: AppDurations.animationFast,
           padding: widget.padding,
           decoration: BoxDecoration(
             color: widget.color,

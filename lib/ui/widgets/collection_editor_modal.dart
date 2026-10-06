@@ -5,6 +5,8 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'neo_button.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class CollectionEditorModal extends ConsumerStatefulWidget {
   final BookmarkCollection? existingCollection;
@@ -94,7 +96,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.paddingXl),
                 
                 // Header
                 Row(
@@ -109,17 +111,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(AppDimensions.paddingSm),
                         decoration: BoxDecoration(
                           border: Border.all(color: AppTheme.border, width: 2),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                         ),
-                        child: const Icon(Icons.close, size: 24),
+                        child: const Icon(Icons.close, size: AppDimensions.iconSizeMd),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppDimensions.paddingXxl),
                 
                 // Name Field
                 Row(
@@ -129,10 +131,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     Text('${_nameController.text.length}/40', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                   ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppDimensions.paddingSm),
                 Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                     border: Border.all(color: AppTheme.border, width: 2),
                   ),
                   child: TextField(
@@ -146,7 +148,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.paddingXl),
                 
                 // Color Picker
                 Text(AppLocalizations.of(context)!.colorUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -170,7 +172,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: color,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
                         ),
                         child: isSelected ? const Icon(Icons.check, size: 16) : null,
@@ -178,7 +180,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     );
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.paddingXl),
                 
                 // Icon Picker
                 Text(AppLocalizations.of(context)!.iconUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
@@ -201,7 +203,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: isSelected ? const Color(0xFFFFD166) : Colors.transparent,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
                         ),
                         child: Icon(icon, size: 20),
@@ -209,7 +211,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     );
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: AppDimensions.paddingXxl),
                 
                 // Save Button
                 NeoButton(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class NeoBox extends StatelessWidget {
   final Widget child;
@@ -16,7 +18,7 @@ class NeoBox extends StatelessWidget {
     this.borderWidth = 3.0,
     this.borderRadius = 16.0,
     this.shadowOffset = 6.0,
-    this.padding = const EdgeInsets.all(16.0),
+    this.padding = const EdgeInsets.all(AppDimensions.paddingLg),
   });
 
   @override

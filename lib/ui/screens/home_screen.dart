@@ -12,6 +12,8 @@ import '../widgets/no_url_dialog.dart';
 import '../widgets/folder_box.dart';
 import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
+import 'package:save_later/config/app_constants.dart';
+
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -109,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -120,10 +122,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   GestureDetector(
                     onTap: () => context.push('/settings'),
                     child: NeoBox(
-                      padding: const EdgeInsets.all(8),
-                      borderRadius: 8,
-                      borderWidth: 2.5,
-                      child: const Icon(Icons.settings_outlined, size: 28),
+                      padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                      borderRadius: AppDimensions.radiusSm,
+                      borderWidth: AppDimensions.borderWidthMd,
+                      child: const Icon(Icons.settings_outlined, size: AppDimensions.iconSizeLg),
                     ),
                   ),
                   Row(
@@ -131,27 +133,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       GestureDetector(
                         onTap: _showAddCollectionModal,
                         child: NeoBox(
-                          padding: const EdgeInsets.all(8),
-                          borderRadius: 8,
-                          borderWidth: 2.5,
-                          child: const Icon(Icons.create_new_folder_outlined, size: 28),
+                          padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                          borderRadius: AppDimensions.radiusSm,
+                          borderWidth: AppDimensions.borderWidthMd,
+                          child: const Icon(Icons.create_new_folder_outlined, size: AppDimensions.iconSizeLg),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppDimensions.paddingSm),
                       GestureDetector(
                         onTap: () => context.push('/search'),
                         child: NeoBox(
-                          padding: const EdgeInsets.all(8),
-                          borderRadius: 8,
-                          borderWidth: 2.5,
-                          child: const Icon(Icons.search, size: 28),
+                          padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                          borderRadius: AppDimensions.radiusSm,
+                          borderWidth: AppDimensions.borderWidthMd,
+                          child: const Icon(Icons.search, size: AppDimensions.iconSizeLg),
                         ),
                       ),
                     ],
                   )
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppDimensions.paddingXxl),
 
               // Title
               Text(
@@ -163,15 +165,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   letterSpacing: -1,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppDimensions.paddingXxl),
 
               // Quick Save Bar
               Row(
                 children: [
                   Expanded(
                     child: NeoBox(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      borderRadius: 12,
+                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg),
+                      borderRadius: AppDimensions.radiusMd,
                       child: TextField(
                         controller: _urlController,
                         decoration: InputDecoration(
@@ -191,19 +193,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppDimensions.paddingMd),
                   NeoButton(
-                    padding: const EdgeInsets.all(16),
-                    borderRadius: 12,
+                    padding: const EdgeInsets.all(AppDimensions.paddingLg),
+                    borderRadius: AppDimensions.radiusMd,
                     color: AppTheme.accent, // Yellow button
                     onPressed: _quickSave,
                     child: isSaving 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
-                      : const Icon(Icons.add, color: AppTheme.border, size: 28),
+                      : const Icon(Icons.add, color: AppTheme.border, size: AppDimensions.iconSizeLg),
                   ),
                 ],
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: AppDimensions.paddingXxxl),
 
               // Collections Header
               Text(
@@ -213,7 +215,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppDimensions.paddingXl),
 
               // Collections Grid
               Expanded(
@@ -221,10 +223,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   data: (collections) {
                     return GridView.builder(
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 24, // Extra space for the folder tabs
-                        childAspectRatio: 0.95,
+                        crossAxisCount: AppDimensions.gridCrossAxisCount,
+                        crossAxisSpacing: AppDimensions.gridSpacingMd,
+                        mainAxisSpacing: AppDimensions.gridSpacingLg, // Extra space for the folder tabs
+                        childAspectRatio: AppDimensions.gridAspectRatioFolder,
                       ),
                       itemCount: collections.length + 1, // +1 for Unsorted
                       itemBuilder: (context, index) {
