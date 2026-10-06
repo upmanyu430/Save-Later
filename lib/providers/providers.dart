@@ -133,6 +133,14 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<void> markAsUnread(Bookmark bookmark) async {
+    final repo = ref.read(repositoryProvider);
+    bookmark.isRead = false;
+    await repo.updateBookmark(bookmark);
+    ref.invalidate(bookmarksProvider);
+    
+  }
+
   Future<void> markAsRead(Bookmark bookmark) async {
     final repo = ref.read(repositoryProvider);
     bookmark.isRead = true;
@@ -219,6 +227,9 @@ final collectionNotifierProvider =
     StateNotifierProvider<CollectionNotifier, AsyncValue<void>>((ref) {
   return CollectionNotifier(ref);
 });
+
+
+
 
 
 
