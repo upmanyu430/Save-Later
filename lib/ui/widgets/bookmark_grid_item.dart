@@ -177,10 +177,15 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppTheme.border, width: 2),
                         ),
-                        child: Icon(
-                          Icons.check, 
-                          size: 16, 
-                          color: widget.isSelected ? AppTheme.border : Colors.transparent,
+                        child: AnimatedScale(
+                          scale: widget.isSelected ? 1.0 : 0.0,
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOutBack,
+                          child: const Icon(
+                            Icons.check, 
+                            size: 16, 
+                            color: AppTheme.border,
+                          ),
                         ),
                       ),
                     ),

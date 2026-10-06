@@ -136,7 +136,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: AppDurations.animationNormal);
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
     _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
     _animController.forward();
   }
