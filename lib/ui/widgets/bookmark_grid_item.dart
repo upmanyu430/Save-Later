@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/bookmark.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
@@ -88,7 +89,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         key: _cardKey,
         child: _buildCard(),
       ),
-    );
+    ).animate().slideY(curve: Curves.easeOutBack, duration: 400.ms).fadeIn();
   }
   
   Widget _buildCard() {
