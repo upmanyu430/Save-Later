@@ -109,9 +109,9 @@ class FolderBox extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   itemCountText,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
-                                    fontWeight: forceBold ? FontWeight.bold : FontWeight.w500,
+                                    fontWeight: FontWeight.w500,
                                     color: AppTheme.border,
                                   ),
                                 ),
