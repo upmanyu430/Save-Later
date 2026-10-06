@@ -127,8 +127,8 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   
   int _selectedIndex = -1;
 
-  final double buttonRadius = 36.0; // Slightly larger for easier touch
-  final double arcRadius = 85.0;
+  final double buttonRadius = 34.0; // Slightly larger for easier touch
+  final double arcRadius = 65.0;
   
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
@@ -285,12 +285,20 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                       decoration: BoxDecoration(
                         color: isSelected ? const Color(0xFFFFD166) : Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 4),
+                        border: Border.all(color: Colors.black, width: 3),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black,
+                            offset: Offset(3, 3),
+                            blurRadius: 0,
+                          ),
+                        ],
                       ),
                       child: Icon(
                         action.icon, 
                         color: Colors.black, 
-                        size: AppDimensions.iconSizeXl,
+                        size: 32.0,
+                        weight: 700,
                       ),
                     ),
                   ),
