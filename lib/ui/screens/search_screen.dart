@@ -136,19 +136,39 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                   ),
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      // Initial letter
-                      Center(
-                        child: Text(
-                          bookmark.title != null && bookmark.title!.isNotEmpty
-                              ? bookmark.title![0].toUpperCase()
-                              : '?',
-                          style: const TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w900,
-                            color: AppTheme.border,
-                          ),
-                        ),
+                      ClipRRect(
+                        borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
+                        child: bookmark.imageUrl != null
+                            ? Image.network(
+                                bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Center(
+                                  child: Text(
+                                    bookmark.title != null && bookmark.title!.isNotEmpty
+                                        ? bookmark.title![0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 48,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppTheme.border,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Text(
+                                  bookmark.title != null && bookmark.title!.isNotEmpty
+                                      ? bookmark.title![0].toUpperCase()
+                                      : '?',
+                                  style: const TextStyle(
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppTheme.border,
+                                  ),
+                                ),
+                              ),
                       ),
                       // Overlay Unsorted/Collection pill
                       Positioned(
@@ -471,6 +491,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 }
+
 
 
 
