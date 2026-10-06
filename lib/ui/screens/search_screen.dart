@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,6 +114,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildRecentCard(Bookmark bookmark) {
     return GestureDetector(
       onTap: () {
+                                    HapticFeedback.lightImpact();
         ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
         context.push('/bookmark/${bookmark.id}', extra: bookmark);
       },
@@ -390,7 +392,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                   const SizedBox(width: AppDimensions.paddingMd),
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () { HapticFeedback.lightImpact(); context.pop(); },
                     child: NeoBox(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 16, vertical: 14),

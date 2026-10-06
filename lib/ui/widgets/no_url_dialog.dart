@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
@@ -45,7 +46,7 @@ void showNoUrlDialog(BuildContext context) {
                   color: AppTheme.accent,
                   borderWidth: AppDimensions.borderWidthMd,
                   padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
                   child: Text(
                     l10n.ok,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.border),

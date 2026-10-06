@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -149,6 +150,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 child: NeoButton(
                   color: Colors.white,
                   onPressed: () {
+                                    HapticFeedback.lightImpact();
                     if (completedCount > 0 && unreadBookmarks.isNotEmpty) {
                        setState(() {
                          currentIndex = currentIndex - 1;
@@ -170,7 +172,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               Expanded(
                 child: NeoButton(
                   color: const Color(0xFFFFD166),
-                  onPressed: () => context.go('/'),
+                  onPressed: () { HapticFeedback.lightImpact(); context.go('/'); },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -222,7 +224,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 ],
               ),
               InkWell(
-                onTap: () => context.pop(),
+                onTap: () { HapticFeedback.lightImpact(); context.pop(); },
                 child: Container(
                   padding: const EdgeInsets.all(AppDimensions.paddingMd),
                   decoration: BoxDecoration(
@@ -279,6 +281,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
             children: [
               InkWell(
                 onTap: () {
+                                    HapticFeedback.lightImpact();
                    controller.swipe(CardSwiperDirection.left);
                 },
                 child: Container(
@@ -294,6 +297,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               Expanded(
                 child: InkWell(
                   onTap: () {
+                                    HapticFeedback.lightImpact();
                      openUrl(unreadBookmarks[currentIndex].url);
                   },
                   child: Container(
@@ -318,6 +322,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               const SizedBox(width: AppDimensions.paddingLg),
               InkWell(
                 onTap: () {
+                                    HapticFeedback.lightImpact();
                    controller.swipe(CardSwiperDirection.right);
                 },
                 child: Container(

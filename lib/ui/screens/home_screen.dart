@@ -113,7 +113,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () => context.push('/settings'),
+                    onTap: () { HapticFeedback.lightImpact(); context.push('/settings'); },
                     child: NeoBox(
                       padding: const EdgeInsets.all(AppDimensions.paddingSm),
                       borderRadius: AppDimensions.radiusSm,
@@ -124,7 +124,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: _showAddCollectionModal,
+                        onTap: () { HapticFeedback.lightImpact(); _showAddCollectionModal(); },
                         child: NeoBox(
                           padding: const EdgeInsets.all(AppDimensions.paddingSm),
                           borderRadius: AppDimensions.radiusSm,
@@ -134,7 +134,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       const SizedBox(width: AppDimensions.paddingSm),
                       GestureDetector(
-                        onTap: () => context.push('/search'),
+                        onTap: () { HapticFeedback.lightImpact(); context.push('/search'); },
                         child: NeoBox(
                           padding: const EdgeInsets.all(AppDimensions.paddingSm),
                           borderRadius: AppDimensions.radiusSm,
@@ -178,7 +178,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             border: InputBorder.none,
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
-                              onPressed: () async {
+                              onPressed: () async { HapticFeedback.lightImpact();
                                 final data = await Clipboard.getData(Clipboard.kTextPlain);
                                 if (data != null && data.text != null && data.text!.isNotEmpty) {
                                   _urlController.text = data.text!;
@@ -199,7 +199,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: EdgeInsets.zero,
                       borderRadius: AppDimensions.radiusMd,
                       color: AppTheme.accent, // Yellow button
-                      onPressed: _quickSave,
+                      onPressed: () { HapticFeedback.lightImpact(); _quickSave(); },
                       child: isSaving 
                         ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
                         : const Icon(Icons.add, color: AppTheme.border, size: AppDimensions.iconSizeLg),
@@ -245,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 title: l10n.unsorted,
                                 itemCountText: l10n.itemsCount(count),
                                 folderColor: Colors.grey.shade400,
-                                onTap: () => context.push('/unsorted'),
+                                onTap: () { HapticFeedback.lightImpact(); context.push('/unsorted'); },
                                 hasNewItems: hasNew,
                               );
                             }

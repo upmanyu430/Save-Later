@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
@@ -193,6 +194,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
 
   void executeSelected() {
     if (_selectedIndex != -1) {
+      HapticFeedback.lightImpact();
       widget.actions[_selectedIndex].onTap();
     }
   }
@@ -211,7 +213,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
         children: [
           // Background dim
           GestureDetector(
-            onTap: widget.onClose,
+            onTap: () { HapticFeedback.lightImpact(); widget.onClose(); },
             child: AnimatedBuilder(
               animation: _anim,
               builder: (c, _) => Container(

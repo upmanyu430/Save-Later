@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:share_plus/share_plus.dart';
@@ -129,6 +130,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       leading: Icon(IconData(col.iconCodePoint, fontFamily: col.iconFontFamily), color: col.color),
                       title: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                       onTap: () async {
+                                    HapticFeedback.lightImpact();
                         bookmark.collection.value = col;
                         await ref.read(repositoryProvider).updateBookmark(bookmark);
                         bookmark.collection.save();
@@ -249,6 +251,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
+                                    HapticFeedback.lightImpact();
                                       setState(() {
                                         _isEditingTitle = false;
                                         _titleController.text = bookmark.title ?? bookmark.url;
@@ -265,6 +268,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   const SizedBox(width: AppDimensions.paddingMd),
                                   GestureDetector(
                                     onTap: () async {
+                                    HapticFeedback.lightImpact();
                                       final newTitle = _titleController.text.trim();
                                       if (newTitle.isNotEmpty) {
                                         bookmark.title = newTitle;
@@ -311,6 +315,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               const SizedBox(width: AppDimensions.paddingLg),
                               GestureDetector(
                                 onTap: () {
+                                    HapticFeedback.lightImpact();
                                   setState(() {
                                     _isEditingTitle = true;
                                   });
@@ -362,7 +367,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
                         // Open Link Button
                         GestureDetector(
-                          onTap: () => openUrl(bookmark.url),
+                          onTap: () { HapticFeedback.lightImpact(); openUrl(bookmark.url); },
                           child: NeoBox(
                             color: const Color(0xFFFFD166), // Yellow
                             padding: EdgeInsets.all(AppDimensions.paddingLg),
@@ -444,7 +449,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           runSpacing: 8.0,
                           children: [
                             ...bookmark.tags.map((tag) => GestureDetector(
-                              onTap: () => _removeTag(tag), // Or edit
+                              onTap: () { HapticFeedback.lightImpact(); _removeTag(tag); }, // Or edit
                               child: NeoBox(
                                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 borderRadius: AppDimensions.radiusSm,
@@ -460,7 +465,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               ),
                             )),
                             GestureDetector(
-                              onTap: _showAddTagModal,
+                              onTap: () { HapticFeedback.lightImpact(); _showAddTagModal(); },
                               child: NeoBox(
                                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 borderRadius: AppDimensions.radiusSm,
@@ -520,7 +525,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     GestureDetector(
-                      onTap: () => context.pop(),
+                      onTap: () { HapticFeedback.lightImpact(); context.pop(); },
                       child: NeoBox(
                         padding: EdgeInsets.all(AppDimensions.paddingSm),
                         color: AppTheme.background,
@@ -627,7 +632,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   children: [
                     Expanded(
                       child: GestureDetector(
-                        onTap: () => Navigator.pop(ctx),
+                        onTap: () { HapticFeedback.lightImpact(); Navigator.pop(ctx); },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
                           decoration: BoxDecoration(
@@ -651,6 +656,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     Expanded(
                       child: GestureDetector(
                         onTap: () async {
+                                    HapticFeedback.lightImpact();
                           Navigator.pop(ctx);
                           _performRefresh();
                         },
@@ -695,7 +701,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     final color = isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
     return Expanded(
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () { HapticFeedback.lightImpact(); onTap(); },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12),
           color: Colors.transparent,

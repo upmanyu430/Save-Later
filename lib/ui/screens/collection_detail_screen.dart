@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,7 +165,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
   Widget _buildMenuItem({required IconData icon, required String title, Widget? trailing, required VoidCallback onTap}) {
     return InkWell(
-      onTap: onTap,
+      onTap: () { HapticFeedback.lightImpact(); onTap(); },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
         child: Row(
@@ -200,7 +201,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   
   Widget _buildSelectButton(String label, {Color? color, Color? textColor, VoidCallback? onTap}) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap == null ? null : () { HapticFeedback.lightImpact(); onTap(); },
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0),
         child: NeoBox(
@@ -339,7 +340,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () => context.pop(),
+                              onTap: () { HapticFeedback.lightImpact(); context.pop(); },
                               child: NeoBox(
                                 padding: const EdgeInsets.all(AppDimensions.paddingSm),
                                 borderRadius: AppDimensions.radiusSm,
@@ -362,7 +363,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             Row(
                               children: [
                                 GestureDetector(
-                                  onTap: () => context.push('/review', extra: widget.collection),
+                                  onTap: () { HapticFeedback.lightImpact(); context.push('/review', extra: widget.collection); },
                                   child: NeoBox(
                                     color: const Color(0xFFFFD166), // Yellow
                                     padding: const EdgeInsets.all(AppDimensions.paddingSm),
@@ -373,7 +374,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                 ),
                                 const SizedBox(width: AppDimensions.paddingSm),
                                 GestureDetector(
-                                  onTap: () => _showMenuModal(context),
+                                  onTap: () { HapticFeedback.lightImpact(); _showMenuModal(context); },
                                   child: NeoBox(
                                     padding: const EdgeInsets.all(AppDimensions.paddingSm),
                                     borderRadius: AppDimensions.radiusSm,

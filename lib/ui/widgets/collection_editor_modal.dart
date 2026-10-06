@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -215,7 +216,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 
                 // Save Button
                 NeoButton(
-                  onPressed: _nameController.text.isNotEmpty ? _save : () {},
+                  onPressed: _nameController.text.isNotEmpty ? () { HapticFeedback.lightImpact(); _save(); } : () {},
                   color: const Color(0xFFFFD166),
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   child: Center(

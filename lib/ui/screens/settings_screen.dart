@@ -104,10 +104,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
         content: Text(l10n.deleteAllDataConfirmation),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(c, false),
+              onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, false); },
               child: Text(l10n.cancel)),
           TextButton(
-            onPressed: () => Navigator.pop(c, true),
+            onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, true); },
             child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
@@ -236,6 +236,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     alignment: Alignment.centerLeft,
                     child: GestureDetector(
                       onTap: () {
+                                    HapticFeedback.lightImpact();
                         if (_hapticFeedback) HapticFeedback.selectionClick();
                         context.pop();
                       },
