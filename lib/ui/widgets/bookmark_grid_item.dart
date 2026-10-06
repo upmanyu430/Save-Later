@@ -69,62 +69,22 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   @override
   Widget build(BuildContext context) {
-    return Dismissible(
-      key: ValueKey(widget.bookmark.id),
-      direction: widget.isSelectMode ? DismissDirection.none : DismissDirection.horizontal,
-      background: Container(
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 20),
-        decoration: BoxDecoration(
-          color: widget.bookmark.isRead ? Colors.orange : Colors.green,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        child: Icon(widget.bookmark.isRead ? Icons.mark_email_unread : Icons.check, color: Colors.white),
-      ),
-      secondaryBackground: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          if (widget.bookmark.isRead) {
-            ref.read(bookmarkNotifierProvider.notifier).markAsUnread(widget.bookmark);
-          } else {
-            ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
-          }
-          return false;
-        } else if (direction == DismissDirection.endToStart) {
-          return true;
-        }
-        return false;
-      },
-      onDismissed: (direction) {
-        if (direction == DismissDirection.endToStart) {
-          ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(widget.bookmark.id);
+    return GestureDetector(
+      onTap: () {
+        if (widget.isSelectMode) {
+          if (widget.onSelectTapped != null) widget.onSelectTapped!();
+        } else {
+          ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+          context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
         }
       },
-      child: GestureDetector(
-        onTap: () {
-          if (widget.isSelectMode) {
-            if (widget.onSelectTapped != null) widget.onSelectTapped!();
-          } else {
-            ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
-            context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
-          }
-        },
-        onLongPressStart: _handleLongPressStart,
-        onLongPressMoveUpdate: _handleLongPressMoveUpdate,
-        onLongPressEnd: _handleLongPressEnd,
-        onLongPressCancel: _handleLongPressCancel,
-        child: Container(
-          key: _cardKey,
-          child: _buildCard(),
-        ),
+      onLongPressStart: _handleLongPressStart,
+      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
+      onLongPressEnd: _handleLongPressEnd,
+      onLongPressCancel: _handleLongPressCancel,
+      child: Container(
+        key: _cardKey,
+        child: _buildCard(),
       ),
     );
   }
