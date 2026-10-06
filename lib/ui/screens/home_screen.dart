@@ -164,7 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Expanded(
                     child: NeoBox(
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg),
+                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: 4.0),
                       borderRadius: AppDimensions.radiusMd,
                       child: TextField(
                         controller: _urlController,
@@ -187,7 +187,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(width: AppDimensions.paddingMd),
                   NeoButton(
-                    padding: const EdgeInsets.all(AppDimensions.paddingLg),
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
                     borderRadius: AppDimensions.radiusMd,
                     color: AppTheme.accent, // Yellow button
                     onPressed: _quickSave,
