@@ -219,17 +219,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        bookmark.title ?? bookmark.url,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.border,
+                      Expanded(
+                        child: Text(
+                          bookmark.title ?? bookmark.url,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.border,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
-                      const Spacer(),
                       Row(
                         children: [
                           Container(
