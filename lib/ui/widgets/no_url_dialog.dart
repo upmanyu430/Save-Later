@@ -8,9 +8,13 @@ import 'package:save_later/config/app_constants.dart';
 
 void showNoUrlDialog(BuildContext context) {
   final l10n = AppLocalizations.of(context)!;
-  showDialog(
+  showGeneralDialog(
     context: context,
-    builder: (context) {
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black54,
+    transitionDuration: const Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
       return Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -52,6 +56,12 @@ void showNoUrlDialog(BuildContext context) {
             ],
           ),
         ),
+      );
+    },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return ScaleTransition(
+        scale: animation.drive(Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
+        child: FadeTransition(opacity: animation, child: child),
       );
     },
   );

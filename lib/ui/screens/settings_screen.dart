@@ -87,9 +87,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _deleteData(BuildContext ctx, WidgetRef ref) async {
     if (_hapticFeedback) HapticFeedback.selectionClick();
     final l10n = AppLocalizations.of(ctx)!;
-    final confirm = await showDialog<bool>(
+    final confirm = await showGeneralDialog<bool>(
       context: ctx,
-      builder: (c) => AlertDialog(
+      barrierDismissible: true,
+      barrierLabel: 'Delete',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      pageBuilder: (c, animation, secondaryAnimation) => AlertDialog(
         title: Text(l10n.deleteAllDataTitle),
         content: Text(l10n.deleteAllDataConfirmation),
         actions: [

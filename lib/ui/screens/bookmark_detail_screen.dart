@@ -548,11 +548,19 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
   void _performRefresh() {
     // Show loading overlay
-    showDialog(
+    showGeneralDialog(
       context: context,
       barrierDismissible: false,
+      barrierLabel: 'RefreshOverlay',
       barrierColor: Colors.black54,
-      builder: (ctx) => _RefreshOverlay(
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      pageBuilder: (ctx, animation, secondaryAnimation) => _RefreshOverlay(
         onRefresh: () async {
           await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
           setState(() {});
@@ -562,10 +570,19 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _showRefreshDialog() {
-    showDialog(
+    showGeneralDialog(
       context: context,
+      barrierDismissible: true,
+      barrierLabel: 'RefreshDialog',
       barrierColor: Colors.black54,
-      builder: (ctx) => Center(
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      pageBuilder: (ctx, animation, secondaryAnimation) => Center(
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 32),
           padding: EdgeInsets.all(28),
