@@ -161,7 +161,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     children: [
                       const Icon(Icons.arrow_back, color: Colors.black),
                       const SizedBox(width: AppDimensions.paddingSm),
-                      Text(AppLocalizations.of(context)!.previous, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
+                      Flexible(child: Text(AppLocalizations.of(context)!.previous, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800), overflow: TextOverflow.ellipsis)),
                     ],
                   ),
                 ),
@@ -176,7 +176,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     children: [
                       const Icon(Icons.home_outlined, color: Colors.black),
                       const SizedBox(width: AppDimensions.paddingSm),
-                      Text(AppLocalizations.of(context)!.done, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800)),
+                      Flexible(child: Text(AppLocalizations.of(context)!.done, style: const TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w800), overflow: TextOverflow.ellipsis)),
                     ],
                   ),
                 ),
