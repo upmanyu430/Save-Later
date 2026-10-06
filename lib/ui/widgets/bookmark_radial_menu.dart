@@ -128,7 +128,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   int _selectedIndex = -1;
 
   final double buttonRadius = 36.0; // Slightly larger for easier touch
-  final double arcRadius = 120.0;
+  final double arcRadius = 85.0;
   
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
