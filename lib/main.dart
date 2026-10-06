@@ -41,7 +41,18 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/review',
-      builder: (context, state) => ReviewModeScreen(collection: state.extra as BookmarkCollection?),
+      pageBuilder: (context, state) => CustomTransitionPage(
+        child: ReviewModeScreen(collection: state.extra as BookmarkCollection?),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(Tween(
+              begin: const Offset(0, 1),
+              end: Offset.zero,
+            ).chain(CurveTween(curve: Curves.easeOutCubic))),
+            child: child,
+          );
+        },
+      ),
     ),
     GoRoute(
       path: '/settings',

@@ -110,11 +110,13 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         const SizedBox(height: AppDimensions.paddingXxl),
         Text(
           AppLocalizations.of(context)!.caughtUpTitle,
+          textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         const SizedBox(height: 12),
         Text(
           AppLocalizations.of(context)!.caughtUpSubtitle,
+          textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: AppDimensions.paddingXxl),
@@ -471,5 +473,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 }
+
 
 
