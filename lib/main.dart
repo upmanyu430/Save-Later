@@ -21,53 +21,91 @@ Future<void> main() async {
 }
 
 
+CustomTransitionPage<T> _buildPageWithTransition<T>({
+  required BuildContext context, 
+  required GoRouterState state, 
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 400),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return SlideTransition(
+        position: animation.drive(Tween(
+          begin: const Offset(1, 0),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutBack))),
+        child: child,
+      );
+    },
+  );
+}
+
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomeScreen(),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        context: context,
+        state: state,
+        child: const HomeScreen(),
+      ),
     ),
     GoRoute(
       path: '/collection/:id',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final id = int.parse(state.pathParameters['id']!);
         final collection = state.extra as BookmarkCollection;
-        return CollectionDetailScreen(collectionId: id, collection: collection);
+        return _buildPageWithTransition(
+          context: context,
+          state: state,
+          child: CollectionDetailScreen(collectionId: id, collection: collection),
+        );
       },
     ),
     GoRoute(
       path: '/unsorted',
-      builder: (context, state) => const CollectionDetailScreen(collectionId: null, collection: null),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        context: context,
+        state: state,
+        child: const CollectionDetailScreen(collectionId: null, collection: null),
+      ),
     ),
     GoRoute(
       path: '/review',
-      pageBuilder: (context, state) => CustomTransitionPage(
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        context: context,
+        state: state,
         child: ReviewModeScreen(collection: state.extra as BookmarkCollection?),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return SlideTransition(
-            position: animation.drive(Tween(
-              begin: const Offset(0, 1),
-              end: Offset.zero,
-            ).chain(CurveTween(curve: Curves.easeOutCubic))),
-            child: child,
-          );
-        },
       ),
     ),
     GoRoute(
       path: '/settings',
-      builder: (context, state) => const SettingsScreen(),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        context: context,
+        state: state,
+        child: const SettingsScreen(),
+      ),
     ),
     GoRoute(
       path: '/search',
-      builder: (context, state) => const SearchScreen(),
+      pageBuilder: (context, state) => _buildPageWithTransition(
+        context: context,
+        state: state,
+        child: const SearchScreen(),
+      ),
     ),
     GoRoute(
       path: '/bookmark/:id',
-      builder: (context, state) {
+      pageBuilder: (context, state) {
         final bookmark = state.extra as Bookmark;
-        return BookmarkDetailScreen(bookmark: bookmark);
+        return _buildPageWithTransition(
+          context: context,
+          state: state,
+          child: BookmarkDetailScreen(bookmark: bookmark),
+        );
       },
     ),
   ],
