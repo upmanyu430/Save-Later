@@ -46,6 +46,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   bool _onSwipe(
     int previousIndex,
     int? currentIndex,
@@ -476,6 +482,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 }
+
 
 
 
