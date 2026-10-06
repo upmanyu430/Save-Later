@@ -131,6 +131,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
   final double arcRadius = 120.0;
   
   final List<Offset> _buttonPositions = [];
+  late Offset _origin;
 
   @override
   void initState() {
@@ -138,23 +139,39 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
     _animController = AnimationController(vsync: this, duration: AppDurations.animationNormal);
     _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
     _animController.forward();
-    
-    // Origin is near top-right of the cardRect
-    final origin = Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
-    
-    // The user image shows an arc fanning out. 
-    // From left-up to down-right
-    final angles = [
-      -pi * 0.8,   // Open (top left)
-      -pi * 0.45,  // Pin (top rightish)
-      -pi * 0.1,   // Share (right)
-      pi * 0.25    // Delete (bottom right)
-    ];
-    for (int i = 0; i < widget.actions.length; i++) {
-      _buttonPositions.add(Offset(
-        origin.dx + arcRadius * cos(angles[i]),
-        origin.dy + arcRadius * sin(angles[i]),
-      ));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_buttonPositions.isEmpty) {
+      final screenWidth = MediaQuery.sizeOf(context).width;
+      final isRightSide = widget.cardRect.center.dx > screenWidth / 2;
+      
+      _origin = isRightSide 
+          ? Offset(widget.cardRect.left + 20, widget.cardRect.top + 20)
+          : Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
+          
+      final angles = isRightSide 
+          ? [
+              -pi * 0.2,
+              -pi * 0.55,
+              -pi * 0.9,
+              -pi * 1.25
+            ]
+          : [
+              -pi * 0.8,
+              -pi * 0.45,
+              -pi * 0.1,
+              pi * 0.25
+            ];
+            
+      for (int i = 0; i < widget.actions.length; i++) {
+        _buttonPositions.add(Offset(
+          _origin.dx + arcRadius * cos(angles[i]),
+          _origin.dy + arcRadius * sin(angles[i]),
+        ));
+      }
     }
   }
 
@@ -252,10 +269,8 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
             return AnimatedBuilder(
               animation: _anim,
               builder: (context, _) {
-                // Animate buttons out from the origin (top right of card)
-                final origin = Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
-                final currentDx = origin.dx + (pos.dx - origin.dx) * _anim.value;
-                final currentDy = origin.dy + (pos.dy - origin.dy) * _anim.value;
+                final currentDx = _origin.dx + (pos.dx - _origin.dx) * _anim.value;
+                final currentDy = _origin.dy + (pos.dy - _origin.dy) * _anim.value;
                 
                 final scale = _anim.value * (isSelected ? 1.3 : 1.0);
                 
