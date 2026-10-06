@@ -151,6 +151,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 l10n.saveNowFindAnytime,
                 style: const TextStyle(
+                  fontFamily: 'Quilon',
                   fontSize: 40,
                   fontWeight: FontWeight.w900,
                   height: 1.1,
@@ -203,6 +204,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 l10n.myCollections,
                 style: const TextStyle(
+                  fontFamily: 'Quilon',
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
