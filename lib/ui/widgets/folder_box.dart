@@ -78,8 +78,8 @@ class FolderBox extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       // Inner colored square with icon
                       Container(
@@ -97,9 +97,10 @@ class FolderBox extends StatelessWidget {
                           child: Icon(icon, color: AppTheme.border, size: AppDimensions.iconSizeLg),
                         ),
                       ),
+                      const SizedBox(width: 8),
                       Expanded(
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Flexible(
                               child: FittedBox(
