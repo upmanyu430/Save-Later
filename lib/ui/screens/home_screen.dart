@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../providers/providers.dart';
@@ -150,9 +151,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Title
               Text(
                 l10n.saveNowFindAnytime,
-                style: const TextStyle(
+                style: GoogleFonts.spaceMono(
                   fontSize: 40,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   height: 1.1,
                   letterSpacing: -1,
                 ),
@@ -202,7 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Collections Header
               Text(
                 l10n.myCollections,
-                style: const TextStyle(
+                style: GoogleFonts.spaceMono(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
