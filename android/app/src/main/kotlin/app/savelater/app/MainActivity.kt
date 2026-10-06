@@ -1,4 +1,4 @@
-package com.example.save_later
+package app.savelater.app
 
 import io.flutter.embedding.android.FlutterActivity
 
