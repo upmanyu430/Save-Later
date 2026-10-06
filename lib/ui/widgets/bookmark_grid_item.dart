@@ -192,13 +192,14 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    b.title ?? b.url,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Expanded(
+                    child: Text(
+                      b.title ?? b.url,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const Spacer(),
                   Row(
                     children: [
                       Container(
