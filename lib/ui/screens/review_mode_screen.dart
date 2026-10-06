@@ -51,9 +51,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     int? currentIndex,
     CardSwiperDirection direction,
   ) {
-    // any swipe direction
     if (direction == CardSwiperDirection.right) {
       ref.read(bookmarkNotifierProvider.notifier).markAsRead(unreadBookmarks[previousIndex]);
+    } else if (direction == CardSwiperDirection.left) {
+      ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(unreadBookmarks[previousIndex]);
+    } else if (direction == CardSwiperDirection.left) {
+      ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(unreadBookmarks[previousIndex]);
     }
     
     setState(() {
@@ -278,7 +281,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     color: Color(0xFF222222),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.arrow_back, color: Colors.white),
+                  child: const Icon(Icons.delete_outline, color: Colors.white),
                 ),
               ),
               const SizedBox(width: AppDimensions.paddingLg),
@@ -317,7 +320,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     color: Color(0xFF222222),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.arrow_forward, color: Colors.white),
+                  child: const Icon(Icons.check, color: Colors.white),
                 ),
               ),
             ],
@@ -473,6 +476,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 }
+
+
 
 
 
