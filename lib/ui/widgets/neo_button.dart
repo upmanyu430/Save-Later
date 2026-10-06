@@ -57,34 +57,36 @@ class _NeoButtonState extends State<NeoButton> {
       onTapDown: _handleTapDown,
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
-      child: Transform.translate(
-        offset: Offset(
+      child: AnimatedContainer(
+        transform: Matrix4.translationValues(
           _isPressed ? widget.shadowOffset : 0,
           _isPressed ? widget.shadowOffset : 0,
+          0,
         ),
-        child: AnimatedContainer(
-          duration: AppDurations.animationFast,
-          padding: widget.padding,
-          decoration: BoxDecoration(
-            color: widget.color,
-            borderRadius: BorderRadius.circular(widget.borderRadius),
-            border: Border.all(
-              color: AppTheme.border,
-              width: widget.borderWidth,
-            ),
-            boxShadow: _isPressed
-                ? []
-                : [
-                    BoxShadow(
-                      color: AppTheme.border,
-                      offset: Offset(widget.shadowOffset, widget.shadowOffset),
-                      blurRadius: 0,
-                      spreadRadius: 0,
-                    ),
-                  ],
+        duration: _isPressed
+            ? const Duration(milliseconds: 50)
+            : const Duration(milliseconds: 400),
+        curve: _isPressed ? Curves.easeOut : Curves.elasticOut,
+        padding: widget.padding,
+        decoration: BoxDecoration(
+          color: widget.color,
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          border: Border.all(
+            color: AppTheme.border,
+            width: widget.borderWidth,
           ),
-          child: Center(child: widget.child),
+          boxShadow: _isPressed
+              ? []
+              : [
+                  BoxShadow(
+                    color: AppTheme.border,
+                    offset: Offset(widget.shadowOffset, widget.shadowOffset),
+                    blurRadius: 0,
+                    spreadRadius: 0,
+                  ),
+                ],
         ),
+        child: Center(child: widget.child),
       ),
     );
   }
