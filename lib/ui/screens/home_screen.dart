@@ -164,38 +164,46 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: NeoBox(
-                      padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: 4.0),
-                      borderRadius: AppDimensions.radiusMd,
-                      child: TextField(
-                        controller: _urlController,
-                        decoration: InputDecoration(
-                          hintText: l10n.pasteLinkHint,
-                          hintStyle: GoogleFonts.spaceMono(fontWeight: FontWeight.bold),
-                          border: InputBorder.none,
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
-                            onPressed: () async {
-                              final data = await Clipboard.getData(Clipboard.kTextPlain);
-                              if (data != null && data.text != null && data.text!.isNotEmpty) {
-                                _urlController.text = data.text!;
-                              }
-                            },
+                    child: SizedBox(
+                      height: 56.0,
+                      child: NeoBox(
+                        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: 0.0),
+                        borderRadius: AppDimensions.radiusMd,
+                        child: TextField(
+                          controller: _urlController,
+                          textAlignVertical: TextAlignVertical.center,
+                          decoration: InputDecoration(
+                            hintText: l10n.pasteLinkHint,
+                            hintStyle: GoogleFonts.spaceMono(fontWeight: FontWeight.bold),
+                            border: InputBorder.none,
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
+                              onPressed: () async {
+                                final data = await Clipboard.getData(Clipboard.kTextPlain);
+                                if (data != null && data.text != null && data.text!.isNotEmpty) {
+                                  _urlController.text = data.text!;
+                                }
+                              },
+                            ),
                           ),
+                          onSubmitted: (_) => _quickSave(),
                         ),
-                        onSubmitted: (_) => _quickSave(),
                       ),
                     ),
                   ),
                   const SizedBox(width: AppDimensions.paddingMd),
-                  NeoButton(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
-                    borderRadius: AppDimensions.radiusMd,
-                    color: AppTheme.accent, // Yellow button
-                    onPressed: _quickSave,
-                    child: isSaving 
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
-                      : const Icon(Icons.add, color: AppTheme.border, size: AppDimensions.iconSizeLg),
+                  SizedBox(
+                    height: 56.0,
+                    width: 56.0,
+                    child: NeoButton(
+                      padding: EdgeInsets.zero,
+                      borderRadius: AppDimensions.radiusMd,
+                      color: AppTheme.accent, // Yellow button
+                      onPressed: _quickSave,
+                      child: isSaving 
+                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
+                        : const Icon(Icons.add, color: AppTheme.border, size: AppDimensions.iconSizeLg),
+                    ),
                   ),
                 ],
               ),
