@@ -64,14 +64,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       showNoUrlDialog(context);
       return;
     }
-    
-    // Basic validation
-    if (!url.startsWith('http')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.enterValidUrl)),
-      );
-      return;
-    }
     ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
     _urlController.clear();
     FocusScope.of(context).unfocus();
