@@ -171,6 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         controller: _urlController,
                         decoration: InputDecoration(
                           hintText: l10n.pasteLinkHint,
+                          hintStyle: GoogleFonts.spaceMono(fontWeight: FontWeight.bold),
                           border: InputBorder.none,
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
@@ -232,7 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               final bookmarks = countAsync.valueOrNull ?? [];
                               final count = bookmarks.length;
                               final hasNew = bookmarks.any((b) => !b.isRead);
-                              return FolderBox(
+                              return FolderBox(forceBold: true, 
                                 title: l10n.unsorted,
                                 itemCountText: l10n.itemsCount(count),
                                 folderColor: Colors.grey.shade400,
@@ -250,7 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             final bookmarks = countAsync.valueOrNull ?? [];
                             final count = bookmarks.length;
                             final hasNew = bookmarks.any((b) => !b.isRead);
-                            return FolderBox(
+                            return FolderBox(forceBold: true, 
                               title: col.name,
                               itemCountText: l10n.itemsCount(count),
                               folderColor: col.color,

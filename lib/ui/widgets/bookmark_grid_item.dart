@@ -15,6 +15,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
   final bool isSelectMode;
   final bool isSelected;
   final VoidCallback? onSelectTapped;
+  final bool forceBold;
 
   const BookmarkGridItem({
     super.key, 
@@ -22,6 +23,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
     this.isSelectMode = false,
     this.isSelected = false,
     this.onSelectTapped,
+    this.forceBold = false,
   });
 
   @override
@@ -119,7 +121,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         : Center(
                             child: Text(
                               b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
-                              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: AppTheme.border),
+                              style: TextStyle(fontSize: 48, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
                             ),
                           ),
                   ),
@@ -138,9 +140,9 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           ),
                           child: Text(
                             AppLocalizations.of(context)!.newBadge,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 10,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900,
                               color: AppTheme.border,
                             ),
                           ),
@@ -195,7 +197,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                   Expanded(
                     child: Text(
                       b.title ?? b.url,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
+                      style: TextStyle(fontSize: 14, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.bold, height: 1.2),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -212,7 +214,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         child: Center(
                           child: Text(
                             b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
-                            style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: Colors.white),
+                            style: TextStyle(fontSize: 9, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
                           ),
                         ),
                       ),
@@ -220,7 +222,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                       Expanded(
                         child: Text(
                           b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                          style: const TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

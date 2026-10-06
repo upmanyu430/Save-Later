@@ -11,6 +11,7 @@ class FolderBox extends StatelessWidget {
   final VoidCallback onTap;
   final bool hasNewItems;
   final IconData icon;
+  final bool forceBold;
 
   const FolderBox({
     super.key,
@@ -20,6 +21,7 @@ class FolderBox extends StatelessWidget {
     required this.onTap,
     this.hasNewItems = false,
     this.icon = Icons.folder_outlined,
+    this.forceBold = false,
   });
 
   @override
@@ -107,9 +109,9 @@ class FolderBox extends StatelessWidget {
                                 fit: BoxFit.scaleDown,
                                 child: Text(
                                   itemCountText,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: forceBold ? FontWeight.bold : FontWeight.w500,
                                     color: AppTheme.border,
                                   ),
                                 ),
@@ -125,9 +127,9 @@ class FolderBox extends StatelessWidget {
                                 ),
                                 child: Text(
                                   AppLocalizations.of(context)!.newBadge,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 10,
-                                    fontWeight: FontWeight.w900,
+                                    fontWeight: forceBold ? FontWeight.bold : FontWeight.w900,
                                   ),
                                 ),
                               ),
@@ -140,9 +142,9 @@ class FolderBox extends StatelessWidget {
                   const Spacer(),
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: forceBold ? FontWeight.bold : FontWeight.bold,
                       color: AppTheme.border,
                     ),
                     maxLines: 1,
