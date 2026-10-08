@@ -20,7 +20,7 @@ class NeoButton extends StatefulWidget {
     this.color = AppTheme.primary,
     this.borderWidth = 3.0,
     this.borderRadius = 12.0,
-    this.shadowOffset = 5.0,
+    this.shadowOffset = 2.0,
     this.padding = const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: 14),
   });
 

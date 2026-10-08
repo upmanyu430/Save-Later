@@ -186,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 l10n.saveNowFindAnytime,
                 textScaler: TextScaler.noScaling,
-                style: GoogleFonts.spaceMono(
+                style: GoogleFonts.arvo(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
@@ -211,7 +211,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
-                            hintStyle: GoogleFonts.spaceMono(
+                            hintStyle: GoogleFonts.arvo(
                                 fontWeight: FontWeight.bold),
                             border: InputBorder.none,
                             suffixIcon: IconButton(
@@ -264,7 +264,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Collections Header
               Text(
                 l10n.myCollections,
-                style: GoogleFonts.spaceMono(
+                style: GoogleFonts.arvo(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),

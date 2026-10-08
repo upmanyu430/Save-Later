@@ -17,7 +17,7 @@ class NeoBox extends StatelessWidget {
     this.color = AppTheme.cardColor,
     this.borderWidth = 3.0,
     this.borderRadius = 16.0,
-    this.shadowOffset = 6.0,
+    this.shadowOffset = 2.0,
     this.padding = const EdgeInsets.all(AppDimensions.paddingLg),
   });
 

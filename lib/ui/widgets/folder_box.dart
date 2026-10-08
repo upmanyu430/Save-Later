@@ -52,7 +52,7 @@ class FolderBox extends StatelessWidget {
                 boxShadow: const [
                   BoxShadow(
                     color: AppTheme.border,
-                    offset: Offset(6, 6),
+                    offset: Offset(2, 2),
                   ),
                 ],
               ),
@@ -73,7 +73,7 @@ class FolderBox extends StatelessWidget {
                 boxShadow: const [
                   BoxShadow(
                     color: AppTheme.border,
-                    offset: Offset(6, 6),
+                    offset: Offset(2, 2),
                   ),
                 ],
               ),

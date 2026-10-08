@@ -319,7 +319,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black,
-                            offset: Offset(3, 3),
+                            offset: Offset(0.5, 0.5),
                             blurRadius: 0,
                           ),
                         ],

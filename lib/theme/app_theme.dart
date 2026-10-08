@@ -25,7 +25,7 @@ class AppTheme {
         onSecondary: border,
         onSurface: border,
       ),
-      textTheme: GoogleFonts.spaceMonoTextTheme().apply(
+      textTheme: GoogleFonts.arvoTextTheme().apply(
         bodyColor: border,
         displayColor: border,
       ),

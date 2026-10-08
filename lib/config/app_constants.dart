@@ -22,10 +22,10 @@ class AppDimensions {
   static const double borderWidthLg = 3.0;
 
   // Shadows
-  static const double shadowOffsetSm = 3.0;
-  static const double shadowOffsetMd = 4.0;
-  static const double shadowOffsetLg = 5.0;
-  static const double shadowOffsetXl = 6.0;
+  static const double shadowOffsetSm = 0.5;
+  static const double shadowOffsetMd = 1.0;
+  static const double shadowOffsetLg = 2.0;
+  static const double shadowOffsetXl = 3.0;
 
   // Icons
   static const double iconSizeSm = 20.0;
@@ -39,7 +39,7 @@ class AppDimensions {
   static const double gridMaxCrossAxisExtent = 200.0;
   static const double gridSpacingMd = 16.0;
   static const double gridSpacingLg = 24.0;
-  static const double gridFolderCardHeight = 180.0;
+  static const double gridFolderCardHeight = 160.0;
 }
 
 class AppDurations {

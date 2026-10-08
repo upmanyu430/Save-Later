@@ -121,6 +121,21 @@ class SaveLaterApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
       routerConfig: _router,
+      // Keep the mobile-first UI from stretching to the full width of a
+      // tablet, desktop monitor, or browser window.  The screen background
+      // still fills the display, while the interactive content stays at a
+      // comfortable reading width and is centered on larger displays.
+      builder: (context, child) {
+        return ColoredBox(
+          color: AppTheme.background,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
+        );
+      },
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
