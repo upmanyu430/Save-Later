@@ -15,7 +15,6 @@ import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
-
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -25,29 +24,34 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final TextEditingController _urlController = TextEditingController();
+  final FocusNode _urlFocusNode = FocusNode();
   late StreamSubscription _intentDataStreamSubscription;
 
   @override
   void initState() {
     super.initState();
-    
+
     // For sharing or opening url/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.instance.getMediaStream().listen((List<SharedMediaFile> value) {
+    _intentDataStreamSubscription = ReceiveSharingIntent.instance
+        .getMediaStream()
+        .listen((List<SharedMediaFile> value) {
       if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-         final text = value.first.path;
-         _urlController.text = text;
-         _quickSave();
+        final text = value.first.path;
+        _urlController.text = text;
+        _quickSave();
       }
     }, onError: (err) {
       debugPrint("getIntentDataStream error: $err");
     });
 
     // For sharing or opening url/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.instance.getInitialMedia().then((List<SharedMediaFile> value) {
+    ReceiveSharingIntent.instance
+        .getInitialMedia()
+        .then((List<SharedMediaFile> value) {
       if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-         final text = value.first.path;
-         _urlController.text = text;
-         _quickSave();
+        final text = value.first.path;
+        _urlController.text = text;
+        _quickSave();
       }
     });
   }
@@ -56,6 +60,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   void dispose() {
     _intentDataStreamSubscription.cancel();
     _urlController.dispose();
+    _urlFocusNode.dispose();
     super.dispose();
   }
 
@@ -79,6 +84,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  void _pushRoute(String route, {Object? extra}) {
+    // Home stays mounted below pushed routes. Clear the URL field focus before
+    // leaving so it is not restored (and does not reopen the keyboard) when
+    // the route is popped.
+    _urlFocusNode.unfocus(disposition: UnfocusDisposition.scope);
+    SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    context.push(route, extra: extra);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +122,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.paddingXl,
+              vertical: AppDimensions.paddingLg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -118,33 +133,47 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: () { HapticFeedback.lightImpact(); context.push('/settings'); },
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _pushRoute('/settings');
+                    },
                     child: NeoBox(
                       padding: const EdgeInsets.all(AppDimensions.paddingSm),
                       borderRadius: AppDimensions.radiusSm,
                       borderWidth: AppDimensions.borderWidthMd,
-                      child: const Icon(Icons.settings_outlined, size: AppDimensions.iconSizeLg),
+                      child: const Icon(Icons.settings_outlined,
+                          size: AppDimensions.iconSizeLg),
                     ),
                   ),
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () { HapticFeedback.lightImpact(); _showAddCollectionModal(); },
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _showAddCollectionModal();
+                        },
                         child: NeoBox(
-                          padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                          padding:
+                              const EdgeInsets.all(AppDimensions.paddingSm),
                           borderRadius: AppDimensions.radiusSm,
                           borderWidth: AppDimensions.borderWidthMd,
-                          child: const Icon(Icons.create_new_folder_outlined, size: AppDimensions.iconSizeLg),
+                          child: const Icon(Icons.create_new_folder_outlined,
+                              size: AppDimensions.iconSizeLg),
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingSm),
                       GestureDetector(
-                        onTap: () { HapticFeedback.lightImpact(); context.push('/search'); },
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _pushRoute('/search');
+                        },
                         child: NeoBox(
-                          padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                          padding:
+                              const EdgeInsets.all(AppDimensions.paddingSm),
                           borderRadius: AppDimensions.radiusSm,
                           borderWidth: AppDimensions.borderWidthMd,
-                          child: const Icon(Icons.search, size: AppDimensions.iconSizeLg),
+                          child: const Icon(Icons.search,
+                              size: AppDimensions.iconSizeLg),
                         ),
                       ),
                     ],
@@ -173,20 +202,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: SizedBox(
                       height: 56.0,
                       child: NeoBox(
-                        padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: 0.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimensions.paddingLg, vertical: 0.0),
                         borderRadius: AppDimensions.radiusMd,
                         child: TextField(
                           controller: _urlController,
+                          focusNode: _urlFocusNode,
                           textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
-                            hintStyle: GoogleFonts.spaceMono(fontWeight: FontWeight.bold),
+                            hintStyle: GoogleFonts.spaceMono(
+                                fontWeight: FontWeight.bold),
                             border: InputBorder.none,
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.paste_outlined, color: AppTheme.border),
-                              onPressed: () async { HapticFeedback.lightImpact();
-                                final data = await Clipboard.getData(Clipboard.kTextPlain);
-                                if (data != null && data.text != null && data.text!.isNotEmpty) {
+                              icon: const Icon(Icons.paste_outlined,
+                                  color: AppTheme.border),
+                              onPressed: () async {
+                                HapticFeedback.lightImpact();
+                                final data = await Clipboard.getData(
+                                    Clipboard.kTextPlain);
+                                if (data != null &&
+                                    data.text != null &&
+                                    data.text!.isNotEmpty) {
                                   _urlController.text = data.text!;
                                 }
                               },
@@ -205,10 +242,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: EdgeInsets.zero,
                       borderRadius: AppDimensions.radiusMd,
                       color: AppTheme.accent, // Yellow button
-                      onPressed: () { HapticFeedback.lightImpact(); _quickSave(); },
-                      child: isSaving 
-                        ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: AppTheme.border, strokeWidth: 3))
-                        : const Icon(Icons.add, color: AppTheme.border, size: AppDimensions.iconSizeLg),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        _quickSave();
+                      },
+                      child: isSaving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                  color: AppTheme.border, strokeWidth: 3))
+                          : const Icon(Icons.add,
+                              color: AppTheme.border,
+                              size: AppDimensions.iconSizeLg),
                     ),
                   ),
                 ],
@@ -231,9 +277,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   data: (collections) {
                     return LayoutBuilder(
                       builder: (context, constraints) {
-                        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
+                        const maxCrossAxisExtent =
+                            AppDimensions.gridMaxCrossAxisExtent;
                         const crossAxisSpacing = AppDimensions.gridSpacingMd;
-                        const desiredCardHeight = AppDimensions.gridFolderCardHeight;
+                        const desiredCardHeight =
+                            AppDimensions.gridFolderCardHeight;
                         final columnCount = (constraints.maxWidth /
                                 (maxCrossAxisExtent + crossAxisSpacing))
                             .ceil()
@@ -245,58 +293,66 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                         return GridView.builder(
                           padding: EdgeInsets.only(bottom: bottomInset),
-                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: maxCrossAxisExtent,
                             crossAxisSpacing: crossAxisSpacing,
-                            mainAxisSpacing: AppDimensions.gridSpacingLg, // Extra space for the folder tabs
+                            mainAxisSpacing: AppDimensions
+                                .gridSpacingLg, // Extra space for the folder tabs
                             childAspectRatio: itemWidth / desiredCardHeight,
                           ),
                           itemCount: collections.length + 1, // +1 for Unsorted
                           itemBuilder: (context, index) {
-                        if (index == 0) {
-                          
-                          // Unsorted Folder
-                          return Consumer(
-                            builder: (context, ref, _) {
-                              final countAsync = ref.watch(unsortedBookmarksProvider);
+                            if (index == 0) {
+                              // Unsorted Folder
+                              return Consumer(builder: (context, ref, _) {
+                                final countAsync =
+                                    ref.watch(unsortedBookmarksProvider);
+                                final bookmarks = countAsync.valueOrNull ?? [];
+                                final count = bookmarks.length;
+                                final hasNew = bookmarks.any((b) => !b.isRead);
+                                return FolderBox(
+                                  forceBold: true,
+                                  title: l10n.unsorted,
+                                  itemCountText: l10n.itemsCount(count),
+                                  folderColor: Colors.grey.shade400,
+                                  onTap: () {
+                                    HapticFeedback.lightImpact();
+                                    _pushRoute('/unsorted');
+                                  },
+                                  hasNewItems: hasNew,
+                                );
+                              });
+                            }
+
+                            final col = collections[index - 1];
+                            return Consumer(builder: (context, ref, _) {
+                              final countAsync = ref
+                                  .watch(collectionBookmarksProvider(col.id));
                               final bookmarks = countAsync.valueOrNull ?? [];
                               final count = bookmarks.length;
                               final hasNew = bookmarks.any((b) => !b.isRead);
-                              return FolderBox(forceBold: true, 
-                                title: l10n.unsorted,
+                              return FolderBox(
+                                forceBold: true,
+                                title: col.name,
                                 itemCountText: l10n.itemsCount(count),
-                                folderColor: Colors.grey.shade400,
-                                onTap: () { HapticFeedback.lightImpact(); context.push('/unsorted'); },
+                                folderColor: col.color,
+                                icon: IconData(col.iconCodePoint,
+                                    fontFamily: col.iconFontFamily),
+                                onTap: () => _pushRoute('/collection/${col.id}',
+                                    extra: col),
                                 hasNewItems: hasNew,
                               );
-                            }
-                          );
-                        }
-                        
-                        final col = collections[index - 1];
-                        return Consumer(
-                          builder: (context, ref, _) {
-                            final countAsync = ref.watch(collectionBookmarksProvider(col.id));
-                            final bookmarks = countAsync.valueOrNull ?? [];
-                            final count = bookmarks.length;
-                            final hasNew = bookmarks.any((b) => !b.isRead);
-                            return FolderBox(forceBold: true, 
-                              title: col.name,
-                              itemCountText: l10n.itemsCount(count),
-                              folderColor: col.color,
-                              icon: IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
-                              onTap: () => context.push('/collection/${col.id}', extra: col),
-                              hasNewItems: hasNew,
-                            );
-                          }
-                        );
+                            });
                           },
                         );
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) =>
+                      Center(child: Text(l10n.errorWithMessage(e.toString()))),
                 ),
               ),
             ],
@@ -306,12 +362,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
