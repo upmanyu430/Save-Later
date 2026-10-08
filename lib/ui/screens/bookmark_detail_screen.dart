@@ -11,6 +11,7 @@ import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
+import 'dart:async';
 
 
 class BookmarkDetailScreen extends ConsumerStatefulWidget {
@@ -36,14 +37,35 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     _titleController = TextEditingController(text: bookmark.title ?? bookmark.url);
   }
 
+
+
+  Timer? _saveTimer;
+
+  void _scheduleSaveNotes(String val) {
+    // Cancel any existing timer to debounce rapid keystrokes
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 500), () async {
+      // Save notes after user stops typing for 500ms
+      bookmark.description = val;
+      await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
+    });
+  }
+
+  // Ensure any pending changes are saved when the screen is disposed
   @override
   void dispose() {
+    _saveTimer?.cancel();
+    // Save latest notes if needed
+    _saveNotes(_notesController.text);
     _notesController.dispose();
     _titleController.dispose();
     super.dispose();
   }
 
+  // Immediate save for editing complete (e.g., when user hits Done)
   void _saveNotes(String val) async {
+    // Cancel debounce timer since we're saving immediately
+    _saveTimer?.cancel();
     bookmark.description = val;
     await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
   }
@@ -494,7 +516,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           child: TextField(
                             controller: _notesController,
                             maxLines: null,
-                            onChanged: (val) => _saveNotes(val),
+                            onChanged: (val) => _scheduleSaveNotes(val),
                             onEditingComplete: () {
                               _saveNotes(_notesController.text);
                               if (mounted) setState(() {});
