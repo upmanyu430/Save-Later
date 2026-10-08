@@ -83,16 +83,20 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     }
 
     final isDone = unreadBookmarks.isEmpty || currentIndex >= unreadBookmarks.length;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: const Color(0xFF111111), // Almost black
       body: SafeArea(
-        child: isDone ? _buildCaughtUp() : _buildReviewUI(),
+        bottom: false,
+        child: isDone
+            ? _buildCaughtUp(bottomInset)
+            : _buildReviewUI(bottomInset),
       ),
     );
   }
 
-  Widget _buildCaughtUp() {
+  Widget _buildCaughtUp(double bottomInset) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -143,7 +147,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         ),
         const Spacer(),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+          padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0 + bottomInset),
           child: Row(
             children: [
               Expanded(
@@ -190,7 +194,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 
-  Widget _buildReviewUI() {
+  Widget _buildReviewUI(double bottomInset) {
     return Column(
       children: [
         // Top Bar
@@ -259,23 +263,28 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         
         // Swiper
         Expanded(
-          child: CardSwiper(
-            controller: controller,
-            cardsCount: unreadBookmarks.length,
-            onSwipe: (prev, current, direction) => _onSwipe(prev, current, direction),
-            numberOfCardsDisplayed: unreadBookmarks.length > 2 ? 3 : unreadBookmarks.length,
-            backCardOffset: const Offset(12, 0), // Offset to the right
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-            cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-              final b = unreadBookmarks[index];
-              return _buildCard(b);
-            },
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: CardSwiper(
+                controller: controller,
+                cardsCount: unreadBookmarks.length,
+                onSwipe: (prev, current, direction) => _onSwipe(prev, current, direction),
+                numberOfCardsDisplayed: unreadBookmarks.length > 2 ? 3 : unreadBookmarks.length,
+                backCardOffset: const Offset(12, 0), // Offset to the right
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                  final b = unreadBookmarks[index];
+                  return _buildCard(b);
+                },
+              ),
+            ),
           ),
         ),
         
         // Bottom Action Bar
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+          padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0 + bottomInset),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -345,6 +354,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     final collection = b.collection.value ?? widget.collection;
     final collectionName = collection?.name ?? AppLocalizations.of(context)!.unsorted;
     final collectionColor = collection?.color ?? Colors.grey.shade400;
+    final placeholderSize =
+        (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
+    final placeholderFontSize = MediaQuery.textScalerOf(context).scale(placeholderSize);
 
     return Container(
       decoration: BoxDecoration(
@@ -401,12 +413,23 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                         ? Image.network(
                             b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.image_not_supported, color: Colors.grey, size: 64)),
+                            errorBuilder: (_, __, ___) => Center(
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey,
+                                size: placeholderSize,
+                              ),
+                            ),
                           )
                         : Center(
                             child: Text(
                               b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
-                              style: const TextStyle(fontSize: 64, fontWeight: FontWeight.w900, color: Colors.white24),
+                              textScaler: TextScaler.noScaling,
+                              style: TextStyle(
+                                fontSize: placeholderFontSize,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white24,
+                              ),
                             ),
                           ),
                   ),

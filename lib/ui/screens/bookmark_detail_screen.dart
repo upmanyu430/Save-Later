@@ -76,7 +76,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom +
+              MediaQuery.paddingOf(ctx).bottom,
+        ),
         child: Container(
           decoration: const BoxDecoration(
             color: AppTheme.background,
@@ -139,7 +142,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
             ),
-            padding: EdgeInsets.all(24),
+            padding: EdgeInsets.fromLTRB(
+              24,
+              24,
+              24,
+              24 + MediaQuery.paddingOf(ctx).bottom,
+            ),
             child: collectionsAsync.when(
               data: (collections) {
                 if (collections.isEmpty) return Text(AppLocalizations.of(context)!.noCollectionsCreated);
@@ -179,6 +187,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final placeholderIconSize =
+        (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: Colors.black, // Matches image overflow areas
       body: Stack(
@@ -193,38 +204,56 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     fit: BoxFit.cover,
                     errorBuilder: (_,__,___) => Container(
                       color: Colors.grey.shade900,
-                      child: const Center(child: Icon(Icons.image_not_supported, size: 64, color: Colors.grey)),
+                      child: Center(
+                        child: Icon(
+                          Icons.image_not_supported,
+                          size: placeholderIconSize,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
                   )
                 : Container(
                     color: Colors.grey.shade900,
-                    child: const Center(child: Icon(Icons.link, size: 64, color: Colors.grey)),
+                    child: Center(
+                      child: Icon(
+                        Icons.link,
+                        size: placeholderIconSize,
+                        color: Colors.grey,
+                      ),
+                    ),
                   ),
           ),
 
           // 2. Main Content Card
           Positioned.fill(
-            child: CustomScrollView(
+            child: SafeArea(
+              top: false,
+              bottom: false,
+              child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: SizedBox(height: MediaQuery.of(context).size.height * 0.35),
                 ),
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: AppTheme.background,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                      border: Border(
-                        top: BorderSide(color: AppTheme.border, width: 3),
-                        left: BorderSide(color: AppTheme.border, width: 3),
-                        right: BorderSide(color: AppTheme.border, width: 3),
-                      ),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: AppTheme.background,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                          border: Border(
+                            top: BorderSide(color: AppTheme.border, width: 3),
+                            left: BorderSide(color: AppTheme.border, width: 3),
+                            right: BorderSide(color: AppTheme.border, width: 3),
+                          ),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                         // Source Domain
                         Row(
                           children: [
@@ -528,12 +557,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppDimensions.paddingXxxl), // Bottom padding
-                      ],
+                        SizedBox(
+                          height: AppDimensions.paddingXxxl + bottomInset,
+                        ), // Bottom padding
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ],
+            ),
             ),
           ),
 

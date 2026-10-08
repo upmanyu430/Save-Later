@@ -99,10 +99,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final collectionsAsync = ref.watch(collectionsProvider);
     final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
+    final titleFontSize = MediaQuery.textScalerOf(context).scale(
+      (MediaQuery.sizeOf(context).width * 0.1).clamp(32.0, 52.0),
+    );
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
+        bottom: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
           child: Column(
@@ -151,8 +156,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Title
               Text(
                 l10n.saveNowFindAnytime,
+                textScaler: TextScaler.noScaling,
                 style: GoogleFonts.spaceMono(
-                  fontSize: 40,
+                  fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
                   letterSpacing: -1,
@@ -223,15 +229,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Expanded(
                 child: collectionsAsync.when(
                   data: (collections) {
-                    return GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: AppDimensions.gridCrossAxisCount,
-                        crossAxisSpacing: AppDimensions.gridSpacingMd,
-                        mainAxisSpacing: AppDimensions.gridSpacingLg, // Extra space for the folder tabs
-                        childAspectRatio: AppDimensions.gridAspectRatioFolder,
-                      ),
-                      itemCount: collections.length + 1, // +1 for Unsorted
-                      itemBuilder: (context, index) {
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
+                        const crossAxisSpacing = AppDimensions.gridSpacingMd;
+                        const desiredCardHeight = AppDimensions.gridFolderCardHeight;
+                        final columnCount = (constraints.maxWidth /
+                                (maxCrossAxisExtent + crossAxisSpacing))
+                            .ceil()
+                            .clamp(1, 10)
+                            .toInt();
+                        final itemWidth = (constraints.maxWidth -
+                                (columnCount - 1) * crossAxisSpacing) /
+                            columnCount;
+
+                        return GridView.builder(
+                          padding: EdgeInsets.only(bottom: bottomInset),
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: maxCrossAxisExtent,
+                            crossAxisSpacing: crossAxisSpacing,
+                            mainAxisSpacing: AppDimensions.gridSpacingLg, // Extra space for the folder tabs
+                            childAspectRatio: itemWidth / desiredCardHeight,
+                          ),
+                          itemCount: collections.length + 1, // +1 for Unsorted
+                          itemBuilder: (context, index) {
                         if (index == 0) {
                           
                           // Unsorted Folder
@@ -268,6 +289,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               hasNewItems: hasNew,
                             );
                           }
+                        );
+                          },
                         );
                       },
                     );

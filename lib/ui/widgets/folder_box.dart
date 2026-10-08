@@ -37,8 +37,8 @@ class FolderBox extends StatelessWidget {
             top: 0,
             left: 0,
             child: Container(
-              width: 90,
-              height: 35,
+              width: MediaQuery.sizeOf(context).width * 0.22,
+              height: MediaQuery.sizeOf(context).width * 0.085,
               decoration: BoxDecoration(
                 color: folderColor,
                 borderRadius: const BorderRadius.only(

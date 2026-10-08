@@ -220,10 +220,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) return const Scaffold(backgroundColor: AppTheme.background);
     final l10n = AppLocalizations.of(context)!;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // Top Bar
@@ -262,7 +264,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // Content
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingSm),
+                padding: EdgeInsets.fromLTRB(
+                  AppDimensions.paddingXl,
+                  AppDimensions.paddingSm,
+                  AppDimensions.paddingXl,
+                  AppDimensions.paddingSm + bottomInset,
+                ),
                 children: [
                   _buildSectionHeader(l10n.preferences),
                   _buildSettingTile(

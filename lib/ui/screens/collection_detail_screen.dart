@@ -37,7 +37,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalCtx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(modalCtx).viewInsets.bottom),
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(modalCtx).viewInsets.bottom +
+              MediaQuery.paddingOf(modalCtx).bottom,
+        ),
         child: Container(
           decoration: const BoxDecoration(
             color: AppTheme.background,
@@ -80,7 +83,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Container(
-        padding: const EdgeInsets.only(bottom: 24, top: 12),
+        padding: EdgeInsets.only(
+          top: 12,
+          bottom: 24 + MediaQuery.paddingOf(ctx).bottom,
+        ),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -297,10 +303,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bookmarksAsync = widget.collectionId != null ? ref.watch(collectionBookmarksProvider(widget.collectionId!)) : ref.watch(unsortedBookmarksProvider);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
+        bottom: false,
         child: bookmarksAsync.when(
           data: (bookmarks) {
             return Column(
@@ -414,16 +422,37 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             ],
                           ),
                         )
-                      : GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: AppDimensions.gridCrossAxisCount,
-                            crossAxisSpacing: AppDimensions.gridSpacingMd,
-                            mainAxisSpacing: AppDimensions.gridSpacingMd,
-                            childAspectRatio: AppDimensions.gridAspectRatioRegular,
-                          ),
-                          itemCount: bookmarks.length,
-                          itemBuilder: (context, index) {
+                      : LayoutBuilder(
+                          builder: (context, constraints) {
+                            const horizontalPadding = AppDimensions.paddingXl * 2;
+                            const maxCrossAxisExtent = 200.0;
+                            const crossAxisSpacing = AppDimensions.gridSpacingMd;
+                            const desiredCardHeight = 180.0;
+                            final contentWidth = constraints.maxWidth - horizontalPadding;
+                            final columnCount = (contentWidth /
+                                    (maxCrossAxisExtent + crossAxisSpacing))
+                                .ceil()
+                                .clamp(1, 10)
+                                .toInt();
+                            final itemWidth = (contentWidth -
+                                    (columnCount - 1) * crossAxisSpacing) /
+                                columnCount;
+
+                            return GridView.builder(
+                              padding: EdgeInsets.fromLTRB(
+                                AppDimensions.paddingXl,
+                                AppDimensions.paddingLg,
+                                AppDimensions.paddingXl,
+                                AppDimensions.paddingLg + bottomInset,
+                              ),
+                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: maxCrossAxisExtent,
+                                crossAxisSpacing: crossAxisSpacing,
+                                mainAxisSpacing: AppDimensions.gridSpacingMd,
+                                childAspectRatio: itemWidth / desiredCardHeight,
+                              ),
+                              itemCount: bookmarks.length,
+                              itemBuilder: (context, index) {
                               final b = bookmarks[index];
                               return BookmarkGridItem(
                                 bookmark: b,
@@ -439,7 +468,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   });
                                 },
                               );
-                            },
+                              },
+                            );
+                          },
                         ),
                 ),
               ],

@@ -36,10 +36,10 @@ class AppDimensions {
 
   // Grid
   static const int gridCrossAxisCount = 2;
+  static const double gridMaxCrossAxisExtent = 200.0;
   static const double gridSpacingMd = 16.0;
   static const double gridSpacingLg = 24.0;
-  static const double gridAspectRatioRegular = 0.95;
-  static const double gridAspectRatioFolder = 0.95;
+  static const double gridFolderCardHeight = 180.0;
 }
 
 class AppDurations {

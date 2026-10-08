@@ -14,8 +14,16 @@ class RadialMenuAction {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final Color color;
+  final Color? labelColor;
   
-  RadialMenuAction({required this.icon, required this.label, required this.onTap});
+  RadialMenuAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.color,
+    this.labelColor,
+  });
 }
 
 class BookmarkRadialMenu {
@@ -35,6 +43,7 @@ class BookmarkRadialMenu {
       RadialMenuAction(
         icon: Icons.open_in_new, 
         label: l10n.openUpper, 
+        color: const Color(0xFF26D5A8),
         onTap: () {
           openUrl(bookmark.url);
         }
@@ -42,6 +51,7 @@ class BookmarkRadialMenu {
       RadialMenuAction(
         icon: Icons.push_pin_outlined, 
         label: l10n.pinUpper, 
+        color: const Color(0xFFFFD166),
         onTap: () async {
           bookmark.isPinned = !bookmark.isPinned;
           await ref.read(repositoryProvider).updateBookmark(bookmark);
@@ -55,6 +65,7 @@ class BookmarkRadialMenu {
       RadialMenuAction(
         icon: Icons.share_outlined, 
         label: l10n.shareUpper, 
+        color: const Color(0xFF7B61FF),
         onTap: () {
           Share.share(bookmark.url);
         }
@@ -62,6 +73,8 @@ class BookmarkRadialMenu {
       RadialMenuAction(
         icon: Icons.delete_outline, 
         label: l10n.deleteUpper, 
+        color: const Color(0xFFEF476F),
+        labelColor: const Color(0xFFEF476F),
         onTap: () async {
           await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
           ref.invalidate(bookmarksProvider);
@@ -186,6 +199,9 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
     }
     
     if (newSelectedIndex != _selectedIndex) {
+      if (newSelectedIndex != -1) {
+        HapticFeedback.selectionClick();
+      }
       setState(() {
         _selectedIndex = newSelectedIndex;
       });
@@ -207,6 +223,13 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
 
   @override
   Widget build(BuildContext context) {
+    final selectedLabelFontSize = MediaQuery.textScalerOf(context).scale(
+      (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0),
+    );
+    final selectedLabelColor = _selectedIndex == -1
+        ? Colors.white
+        : widget.actions[_selectedIndex].labelColor ?? Colors.white;
+
     return Material(
       color: Colors.transparent,
       child: Stack(
@@ -231,9 +254,10 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                   duration: AppDurations.animationFast,
                   child: Text(
                     widget.actions[_selectedIndex].label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 64,
+                    textScaler: TextScaler.noScaling,
+                    style: TextStyle(
+                      color: selectedLabelColor,
+                      fontSize: selectedLabelFontSize,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 4,
                     ),
@@ -275,6 +299,10 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                 final currentDy = _origin.dy + (pos.dy - _origin.dy) * _anim.value;
                 
                 final scale = _anim.value * (isSelected ? 1.3 : 1.0);
+                final buttonColor = isSelected ? action.color : Colors.white;
+                final iconColor = buttonColor.computeLuminance() < 0.5
+                    ? Colors.white
+                    : Colors.black;
                 
                 return Positioned(
                   left: currentDx - buttonRadius,
@@ -285,7 +313,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                     scale: scale,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFFFD166) : Colors.white,
+                        color: buttonColor,
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.black, width: 3),
                         boxShadow: const [
@@ -298,7 +326,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
                       ),
                       child: Icon(
                         action.icon, 
-                        color: Colors.black, 
+                        color: iconColor,
                         size: 32.0,
                         weight: 700,
                       ),

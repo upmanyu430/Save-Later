@@ -119,7 +119,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         context.push('/bookmark/${bookmark.id}', extra: bookmark);
       },
       child: Container(
-        width: 160,
+        width: _recentCardWidth(context),
+        height: AppDimensions.gridFolderCardHeight,
         margin: const EdgeInsets.only(right: 16),
         child: NeoBox(
           padding: EdgeInsets.zero,
@@ -302,7 +303,20 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  Widget _buildSearchResults(List<Bookmark> allBookmarks) {
+  double _recentCardWidth(BuildContext context) {
+    final availableWidth = MediaQuery.sizeOf(context).width -
+        (AppDimensions.paddingXl * 2);
+    final columnCount = (availableWidth /
+            (AppDimensions.gridMaxCrossAxisExtent + AppDimensions.gridSpacingMd))
+        .ceil()
+        .clamp(1, 10)
+        .toInt();
+    return (availableWidth -
+            (columnCount - 1) * AppDimensions.gridSpacingMd) /
+        columnCount;
+  }
+
+  Widget _buildSearchResults(List<Bookmark> allBookmarks, double bottomInset) {
     final results = allBookmarks.where((b) {
       final titleMatch = (b.title ?? '').toLowerCase().contains(_searchQuery);
       final urlMatch = b.url.toLowerCase().contains(_searchQuery);
@@ -326,13 +340,37 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(24),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const horizontalPadding = 48.0;
+        const maxCrossAxisExtent = 200.0;
+        const crossAxisSpacing = AppDimensions.gridSpacingMd;
+        const desiredCardHeight = 210.0;
+        final contentWidth = constraints.maxWidth - horizontalPadding;
+        final columnCount = (contentWidth /
+                (maxCrossAxisExtent + crossAxisSpacing))
+            .ceil()
+            .clamp(1, 10)
+            .toInt();
+        final itemWidth = (contentWidth -
+                (columnCount - 1) * crossAxisSpacing) /
+            columnCount;
+
+        return GridView.builder(
+          padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: maxCrossAxisExtent,
+            crossAxisSpacing: crossAxisSpacing,
+            mainAxisSpacing: AppDimensions.gridSpacingMd,
+            childAspectRatio: itemWidth / desiredCardHeight,
+          ),
+          itemCount: results.length,
+          itemBuilder: (context, index) {
                               final b = results[index];
                               return BookmarkGridItem(bookmark: b);
-                            },
+          },
+        );
+      },
     );
   }
 
@@ -345,6 +383,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final collectionsCount = collectionsAsync.valueOrNull?.length ?? 0;
     final allBookmarks = bookmarksAsync.valueOrNull ?? [];
     final bookmarksCount = allBookmarks.length;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     // Count pinned bookmarks
     final pinnedCount = allBookmarks.where((b) => b.isPinned).length;
@@ -359,6 +398,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             // Header
@@ -420,10 +460,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             // Body
             Expanded(
               child: _searchQuery.isNotEmpty
-                  ? _buildSearchResults(allBookmarks)
+                  ? _buildSearchResults(allBookmarks, bottomInset)
                   : ListView(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 24),
+                      padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
                       children: [
                         _buildLibraryStats(collectionsCount, bookmarksCount,
                             pinnedCount, tagsCount),
@@ -451,7 +490,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         // Horizontal Cards
                         if (allBookmarks.isNotEmpty)
                           SizedBox(
-                            height: 180,
+                            height: AppDimensions.gridFolderCardHeight,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: allBookmarks.length > 10

@@ -37,6 +37,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   void _handleLongPressStart(LongPressStartDetails details) {
     if (widget.isSelectMode) return;
+
+    HapticFeedback.mediumImpact();
     
     final renderBox = _cardKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox != null) {
