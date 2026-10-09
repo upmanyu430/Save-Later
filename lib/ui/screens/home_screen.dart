@@ -212,7 +212,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
                             hintStyle: GoogleFonts.arvo(
-                                fontWeight: FontWeight.bold),
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black38,
+                            ),
                             border: InputBorder.none,
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.paste_outlined,

@@ -53,7 +53,7 @@ void main() {
       ..id = 1
       ..url = 'https://example.com'
       ..title = 'Example Title'
-      ..description = 'Initial note';
+      ..notes = 'Initial note';
 
     await tester.pumpWidget(
       ProviderScope(
@@ -87,10 +87,10 @@ void main() {
 
     // Test onChanged trigger
     await tester.enterText(textFieldFinder, 'Updated note via onChanged');
-    expect(fakeRepo.lastUpdatedBookmark?.description, 'Updated note via onChanged');
+    expect(fakeRepo.lastUpdatedBookmark?.notes, 'Updated note via onChanged');
 
     // Test onEditingComplete trigger
     textField.onEditingComplete?.call();
-    expect(fakeRepo.lastUpdatedBookmark?.description, 'Updated note via onChanged');
+    expect(fakeRepo.lastUpdatedBookmark?.notes, 'Updated note via onChanged');
   });
 }

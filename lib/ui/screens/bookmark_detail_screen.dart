@@ -28,12 +28,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   late TextEditingController _notesController;
   late TextEditingController _titleController;
   bool _isEditingTitle = false;
+  bool _isEditingNotes = false;
+  bool _notesEdited = false;
 
   @override
   void initState() {
     super.initState();
     bookmark = widget.bookmark;
-    _notesController = TextEditingController(text: bookmark.description ?? '');
+    _notesController = TextEditingController(text: bookmark.notes);
     _titleController = TextEditingController(text: bookmark.title ?? bookmark.url);
   }
 
@@ -46,7 +48,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     _saveTimer?.cancel();
     _saveTimer = Timer(const Duration(milliseconds: 500), () async {
       // Save notes after user stops typing for 500ms
-      bookmark.description = val;
+      bookmark.notes = val;
       await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
     });
   }
@@ -55,8 +57,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   @override
   void dispose() {
     _saveTimer?.cancel();
-    // Save latest notes if needed
-    _saveNotes(_notesController.text);
     _notesController.dispose();
     _titleController.dispose();
     super.dispose();
@@ -66,52 +66,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   void _saveNotes(String val) async {
     // Cancel debounce timer since we're saving immediately
     _saveTimer?.cancel();
-    bookmark.description = val;
+    bookmark.notes = val;
     await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
   }
 
   void _showAddTagModal() {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom +
-              MediaQuery.paddingOf(ctx).bottom,
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppTheme.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
-          ),
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.addTag,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppDimensions.paddingLg),
-              TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.tagNameHint,
-                  border: const OutlineInputBorder(),
-                ),
-                onSubmitted: (val) {
-                  if (val.trim().isNotEmpty) {
-                    _addTag(val);
-                    Navigator.pop(ctx);
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
+      builder: (ctx) => _AddTagSheet(
+        onSubmit: (tag) => _addTag(tag),
       ),
     );
   }
@@ -124,9 +89,118 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     setState(() {});
   }
 
-  void _removeTag(String tag) async {
+  Future<void> _removeTag(String tag) async {
     await ref.read(bookmarkNotifierProvider.notifier).removeTag(bookmark, tag);
     setState(() {});
+  }
+
+  void _confirmRemoveTag(String tag) {
+    HapticFeedback.selectionClick();
+    showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Delete tag',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 280),
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        return ScaleTransition(
+          scale: animation.drive(
+            Tween<double>(begin: 0.82, end: 1.0).chain(
+              CurveTween(curve: Curves.easeOutBack),
+            ),
+          ),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      pageBuilder: (dialogContext, animation, secondaryAnimation) {
+        final l10n = AppLocalizations.of(context)!;
+        return Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: AppTheme.background,
+              borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
+              border: Border.all(color: AppTheme.border, width: 3),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppTheme.border,
+                  offset: Offset(3, 3),
+                  blurRadius: 0,
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Delete tag?',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingSm),
+                  Text(
+                    'Remove "$tag" from this bookmark?',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 15, color: Colors.black54),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingXl),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(dialogContext, false);
+                          },
+                          child: NeoBox(
+                            color: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            borderRadius: AppDimensions.radiusMd,
+                            borderWidth: 2,
+                            child: Center(
+                              child: Text(
+                                l10n.cancel,
+                                style: const TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppDimensions.paddingMd),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            Navigator.pop(dialogContext, true);
+                            await _removeTag(tag);
+                          },
+                          child: NeoBox(
+                            color: const Color(0xFFFF6B6B),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            borderRadius: AppDimensions.radiusMd,
+                            borderWidth: 2,
+                            child: Center(
+                              child: Text(
+                                l10n.delete,
+                                style: const TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showMoveModal() {
@@ -191,7 +265,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
-      backgroundColor: Colors.black, // Matches image overflow areas
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           // 1. Background Image
@@ -233,35 +307,40 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: SizedBox(height: MediaQuery.of(context).size.height * 0.35),
+                  child: SizedBox(height: MediaQuery.of(context).size.height * 0.28),
                 ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
+                SliverToBoxAdapter(
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 600),
                       child: Container(
+                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                         decoration: const BoxDecoration(
-                          color: AppTheme.background,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                          border: Border(
-                            top: BorderSide(color: AppTheme.border, width: 3),
-                            left: BorderSide(color: AppTheme.border, width: 3),
-                            right: BorderSide(color: AppTheme.border, width: 3),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(Radius.circular(32)),
+                          border: Border.fromBorderSide(
+                            BorderSide(color: AppTheme.border, width: 3),
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.border,
+                              offset: Offset(0, 8),
+                              blurRadius: 0,
+                            ),
+                          ],
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                        padding: EdgeInsets.fromLTRB(32, 32, 32, 24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                         // Source Domain
                         Row(
                           children: [
-                            const Icon(Icons.public, size: 18),
+                            const Icon(Icons.web_asset_outlined, size: 24, color: Color(0xFF83D64D)),
                             const SizedBox(width: AppDimensions.paddingSm),
                             Text(
                               bookmark.sourceDomain ?? l10n.unknownSource,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
                             ),
                           ],
                         ),
@@ -407,6 +486,32 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     ],
                                   ),
                                 ),
+                              )
+                            else
+                              NeoBox(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                borderRadius: AppDimensions.radiusSm,
+                                borderWidth: 2,
+                                color: Colors.white,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 16,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFE5E5E5),
+                                        border: Border.all(color: AppTheme.border, width: 2),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      l10n.unsorted,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                    ),
+                                  ],
+                                ),
                               ),
                             Text(
                               DateFormat('dd MMM yyyy, h:mm a').format(bookmark.createdAt),
@@ -488,7 +593,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: 12),
                         Text(
                           bookmark.description ?? l10n.noDescriptionProvided,
-                          style: const TextStyle(fontSize: 16, height: 1.4, color: Color(0xFF333333)),
+                          style: const TextStyle(fontSize: 18, height: 1.5, color: Color(0xFF333333)),
                         ),
                         const SizedBox(height: AppDimensions.paddingXxl),
 
@@ -500,36 +605,22 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           runSpacing: 8.0,
                           children: [
                             ...bookmark.tags.map((tag) => GestureDetector(
-                              onTap: () { HapticFeedback.lightImpact(); _removeTag(tag); }, // Or edit
-                              child: NeoBox(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                borderRadius: AppDimensions.radiusSm,
-                                borderWidth: 2,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('🔖', style: TextStyle(fontSize: 12)),
-                                    const SizedBox(width: 6),
-                                    Text(tag, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                  ],
-                                ),
-                              ),
-                            )),
-                            GestureDetector(
-                              onTap: () { HapticFeedback.lightImpact(); _showAddTagModal(); },
-                              child: NeoBox(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                borderRadius: AppDimensions.radiusSm,
-                                borderWidth: 2,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text('👑', style: TextStyle(fontSize: 12)),
-                                    const SizedBox(width: 6),
-                                    Text(l10n.add, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                  ],
-                                ),
-                              ),
+                                  onLongPress: () => _confirmRemoveTag(tag),
+                                  child: NeoBox(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    borderRadius: AppDimensions.radiusSm,
+                                    borderWidth: 2,
+                                    child: Text(
+                                      tag.isEmpty
+                                          ? tag
+                                          : '${tag[0].toUpperCase()}${tag.substring(1)}',
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                    ),
+                                  ),
+                                )),
+                            _TagAddButton(
+                              label: l10n.add,
+                              onPressed: _showAddTagModal,
                             ),
                           ],
                         ),
@@ -538,28 +629,103 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         // Notes
                         Text(l10n.notesLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
-                        NeoBox(
-                          color: const Color(0xFFFFF7E0), // Pale yellow
-                          borderRadius: AppDimensions.radiusMd,
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: TextField(
-                            controller: _notesController,
-                            maxLines: null,
-                            onChanged: (val) => _scheduleSaveNotes(val),
-                            onEditingComplete: () {
-                              _saveNotes(_notesController.text);
-                              if (mounted) setState(() {});
-                            },
-                            decoration: InputDecoration(
-                              hintText: l10n.tapToAddNotesHint,
-                              hintStyle: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-                              border: InputBorder.none,
-                            ),
+                        SizedBox(
+                          height: _isEditingNotes ? 220 : 160,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    if (!_isEditingNotes) {
+                                      setState(() => _isEditingNotes = true);
+                                    }
+                                  },
+                                  child: NeoBox(
+                                    color: const Color(0xFFFFF7E0), // Pale yellow
+                                    borderRadius: AppDimensions.radiusMd,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                    child: TextField(
+                                      controller: _notesController,
+                                      readOnly: !_isEditingNotes,
+                                      maxLines: null,
+                                      expands: true,
+                                      textAlignVertical: TextAlignVertical.top,
+                                      onTap: () {
+                                        if (!_isEditingNotes) {
+                                          setState(() => _isEditingNotes = true);
+                                        }
+                                      },
+                                      onChanged: (val) {
+                                        _notesEdited = true;
+                                        _scheduleSaveNotes(val);
+                                      },
+                                      onEditingComplete: () {
+                                        if (_notesEdited) _saveNotes(_notesController.text);
+                                      },
+                                      decoration: const InputDecoration(
+                                        hintText: '',
+                                        border: InputBorder.none,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (_isEditingNotes) ...[
+                                const SizedBox(height: AppDimensions.paddingMd),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _saveTimer?.cancel();
+                                        _notesController.clear();
+                                        setState(() {
+                                          _notesEdited = false;
+                                          _isEditingNotes = false;
+                                        });
+                                      },
+                                      child: NeoBox(
+                                        color: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                        borderRadius: AppDimensions.radiusSm,
+                                        borderWidth: 2,
+                                        child: Text(
+                                          l10n.cancel,
+                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: AppDimensions.paddingSm),
+                                    GestureDetector(
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _saveTimer?.cancel();
+                                        _saveNotes(_notesController.text);
+                                        setState(() {
+                                          _notesEdited = false;
+                                          _isEditingNotes = false;
+                                        });
+                                      },
+                                      child: NeoBox(
+                                        color: AppTheme.accent,
+                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                        borderRadius: AppDimensions.radiusSm,
+                                        borderWidth: 2,
+                                        child: Text(
+                                          l10n.save,
+                                          style: const TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                        SizedBox(
-                          height: AppDimensions.paddingXxxl + bottomInset,
-                        ), // Bottom padding
+                        SizedBox(height: AppDimensions.paddingXxxl + bottomInset),
                           ],
                         ),
                       ),
@@ -790,6 +956,175 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 }
 
 
+
+
+class _AddTagSheet extends StatefulWidget {
+  final ValueChanged<String> onSubmit;
+
+  const _AddTagSheet({required this.onSubmit});
+
+  @override
+  State<_AddTagSheet> createState() => _AddTagSheetState();
+}
+
+class _AddTagSheetState extends State<_AddTagSheet> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final tag = _controller.text.trim();
+    if (tag.isEmpty) return;
+    HapticFeedback.lightImpact();
+    widget.onSubmit(tag);
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final canAdd = _controller.text.trim().isNotEmpty;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.paddingOf(context).bottom,
+      ),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppTheme.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.addTag,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: AppDimensions.paddingLg),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              textInputAction: TextInputAction.done,
+              onChanged: (_) => setState(() {}),
+              onSubmitted: (_) => _submit(),
+              decoration: InputDecoration(
+                hintText: l10n.tagNameHint,
+                hintStyle: const TextStyle(color: Colors.black38),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  borderSide: const BorderSide(color: AppTheme.border, width: 3),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  borderSide: const BorderSide(color: AppTheme.border, width: 3),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                  borderSide: const BorderSide(color: AppTheme.border, width: 3),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppDimensions.paddingMd),
+            GestureDetector(
+              onTap: canAdd ? _submit : null,
+              child: NeoBox(
+                color: AppTheme.accent,
+                borderRadius: AppDimensions.radiusMd,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Center(
+                  child: Text(
+                    l10n.addTag,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.border,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _TagAddButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onPressed;
+
+  const _TagAddButton({required this.label, required this.onPressed});
+
+  @override
+  State<_TagAddButton> createState() => _TagAddButtonState();
+}
+
+class _TagAddButtonState extends State<_TagAddButton> {
+  bool _pressed = false;
+
+  void _press() {
+    HapticFeedback.lightImpact();
+    setState(() => _pressed = true);
+  }
+
+  void _release() {
+    if (!mounted) return;
+    setState(() => _pressed = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _press(),
+      onTapCancel: _release,
+      onTapUp: (_) {
+        _release();
+        widget.onPressed();
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 90),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: _pressed ? const Color(0xFFFFC247) : AppTheme.accent,
+          borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+          border: Border.all(color: AppTheme.border, width: 2),
+          boxShadow: _pressed
+              ? const []
+              : const [
+                  BoxShadow(
+                    color: AppTheme.border,
+                    offset: Offset(2, 2),
+                    blurRadius: 0,
+                  ),
+                ],
+        ),
+        child: Text(
+          widget.label,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
+      ),
+    );
+  }
+}
 
 
 class _RefreshOverlay extends StatefulWidget {

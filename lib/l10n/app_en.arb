@@ -137,7 +137,7 @@
   "@addTag": {
     "description": "Title of modal to add a tag"
   },
-  "tagNameHint": "tag_name",
+  "tagNameHint": "Create tag name",
   "@tagNameHint": {
     "description": "Hint for tag name input"
   },

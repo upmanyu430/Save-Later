@@ -168,7 +168,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> updateNotes(Bookmark bookmark, String notes) async {
     final repo = ref.read(repositoryProvider);
-    bookmark.description = notes;
+    bookmark.notes = notes;
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
     ref.invalidate(unsortedBookmarksProvider);

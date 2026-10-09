@@ -42,23 +42,28 @@ const BookmarkSchema = CollectionSchema(
       name: r'isRead',
       type: IsarType.bool,
     ),
-    r'sourceDomain': PropertySchema(
+    r'notes': PropertySchema(
       id: 5,
+      name: r'notes',
+      type: IsarType.string,
+    ),
+    r'sourceDomain': PropertySchema(
+      id: 6,
       name: r'sourceDomain',
       type: IsarType.string,
     ),
     r'tags': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'tags',
       type: IsarType.stringList,
     ),
     r'title': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'title',
       type: IsarType.string,
     ),
     r'url': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'url',
       type: IsarType.string,
     )
@@ -142,6 +147,7 @@ int _bookmarkEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.notes.length * 3;
   {
     final value = object.sourceDomain;
     if (value != null) {
@@ -176,10 +182,11 @@ void _bookmarkSerialize(
   writer.writeString(offsets[2], object.imageUrl);
   writer.writeBool(offsets[3], object.isPinned);
   writer.writeBool(offsets[4], object.isRead);
-  writer.writeString(offsets[5], object.sourceDomain);
-  writer.writeStringList(offsets[6], object.tags);
-  writer.writeString(offsets[7], object.title);
-  writer.writeString(offsets[8], object.url);
+  writer.writeString(offsets[5], object.notes);
+  writer.writeString(offsets[6], object.sourceDomain);
+  writer.writeStringList(offsets[7], object.tags);
+  writer.writeString(offsets[8], object.title);
+  writer.writeString(offsets[9], object.url);
 }
 
 Bookmark _bookmarkDeserialize(
@@ -195,10 +202,11 @@ Bookmark _bookmarkDeserialize(
   object.imageUrl = reader.readStringOrNull(offsets[2]);
   object.isPinned = reader.readBool(offsets[3]);
   object.isRead = reader.readBool(offsets[4]);
-  object.sourceDomain = reader.readStringOrNull(offsets[5]);
-  object.tags = reader.readStringList(offsets[6]) ?? [];
-  object.title = reader.readStringOrNull(offsets[7]);
-  object.url = reader.readString(offsets[8]);
+  object.notes = reader.readString(offsets[5]);
+  object.sourceDomain = reader.readStringOrNull(offsets[6]);
+  object.tags = reader.readStringList(offsets[7]) ?? [];
+  object.title = reader.readStringOrNull(offsets[8]);
+  object.url = reader.readString(offsets[9]);
   return object;
 }
 
@@ -220,12 +228,14 @@ P _bookmarkDeserializeProp<P>(
     case 4:
       return (reader.readBool(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readStringList(offset) ?? []) as P;
-    case 7:
       return (reader.readStringOrNull(offset)) as P;
+    case 7:
+      return (reader.readStringList(offset) ?? []) as P;
     case 8:
+      return (reader.readStringOrNull(offset)) as P;
+    case 9:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -943,6 +953,136 @@ extension BookmarkQueryFilter
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'isRead',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'notes',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'notes',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'notes',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'notes',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterFilterCondition> notesIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'notes',
+        value: '',
       ));
     });
   }
@@ -1671,6 +1811,18 @@ extension BookmarkQuerySortBy on QueryBuilder<Bookmark, Bookmark, QSortBy> {
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByNotes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortByNotesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notes', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QAfterSortBy> sortBySourceDomain() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceDomain', Sort.asc);
@@ -1782,6 +1934,18 @@ extension BookmarkQuerySortThenBy
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByNotes() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notes', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenByNotesDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'notes', Sort.desc);
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QAfterSortBy> thenBySourceDomain() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'sourceDomain', Sort.asc);
@@ -1853,6 +2017,13 @@ extension BookmarkQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Bookmark, Bookmark, QDistinct> distinctByNotes(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'notes', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Bookmark, Bookmark, QDistinct> distinctBySourceDomain(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1916,6 +2087,12 @@ extension BookmarkQueryProperty
   QueryBuilder<Bookmark, bool, QQueryOperations> isReadProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isRead');
+    });
+  }
+
+  QueryBuilder<Bookmark, String, QQueryOperations> notesProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'notes');
     });
   }
 

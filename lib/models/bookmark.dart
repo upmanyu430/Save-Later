@@ -12,6 +12,9 @@ class Bookmark {
   String? title;
   
   String? description;
+
+  // User-authored notes, kept separate from fetched page metadata.
+  String notes = '';
   
   String? imageUrl;
   
