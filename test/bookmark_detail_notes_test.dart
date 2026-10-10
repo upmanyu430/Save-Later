@@ -86,11 +86,16 @@ void main() {
     expect(textField.onEditingComplete, isNotNull);
 
     // Test onChanged trigger
-    await tester.enterText(textFieldFinder, 'Updated note via onChanged');
+    textField.onTap?.call();
+    await tester.pump();
+    final editableTextField = tester.widget<TextField>(find.byType(TextField));
+    editableTextField.controller!.text = 'Updated note via onChanged';
+    editableTextField.onChanged?.call('Updated note via onChanged');
+    await tester.pump(const Duration(milliseconds: 500));
     expect(fakeRepo.lastUpdatedBookmark?.notes, 'Updated note via onChanged');
 
     // Test onEditingComplete trigger
-    textField.onEditingComplete?.call();
+    editableTextField.onEditingComplete?.call();
     expect(fakeRepo.lastUpdatedBookmark?.notes, 'Updated note via onChanged');
   });
 }

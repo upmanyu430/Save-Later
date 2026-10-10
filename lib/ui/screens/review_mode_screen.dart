@@ -26,7 +26,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   List<Bookmark> unreadBookmarks = [];
   bool loaded = false;
   int completedCount = 0;
-  bool? _pendingReadAction;
   bool _pendingPreviousNavigation = false;
 
   @override
@@ -60,7 +59,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     super.dispose();
   }
 
-  void _applyAction(Bookmark bookmark, {required bool markRead}) {
+  void _applyAction(Bookmark bookmark) {
     final notifier = ref.read(bookmarkNotifierProvider.notifier);
     // Reviewing a card must never delete the saved bookmark. Both swipe
     // directions complete the review by marking it as read; deletion remains
@@ -77,7 +76,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     // or delete the current bookmark when it returns to the previous card.
     if (_pendingPreviousNavigation && nextIndex < previousIndex) {
       _pendingPreviousNavigation = false;
-      _pendingReadAction = null;
       setState(() {
         currentIndex = nextIndex;
       });
@@ -90,33 +88,44 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     // lets the parent rebuild into the caught-up state.
     if (nextIndex == unreadBookmarks.length ||
         previousIndex == unreadBookmarks.length - 1) {
-      final markRead = _pendingReadAction ?? nextIndex < previousIndex;
-      _pendingReadAction = null;
-      _applyAction(unreadBookmarks[previousIndex], markRead: markRead);
+      for (var index = previousIndex;
+          index < unreadBookmarks.length;
+          index++) {
+        _applyAction(unreadBookmarks[index]);
+      }
       setState(() {
         currentIndex = unreadBookmarks.length;
-        completedCount++;
+        completedCount += unreadBookmarks.length - previousIndex;
       });
       return;
     }
 
     // A swipe completes the current card. The bookmark is retained and marked
     // as read regardless of swipe direction.
-    final markRead = _pendingReadAction ?? nextIndex < previousIndex;
-    _pendingReadAction = null;
-    _applyAction(unreadBookmarks[previousIndex], markRead: markRead);
+    if (nextIndex > previousIndex) {
+      final lastUnreviewedIndex =
+          nextIndex.clamp(0, unreadBookmarks.length).toInt();
+      for (var index = previousIndex; index < lastUnreviewedIndex; index++) {
+        _applyAction(unreadBookmarks[index]);
+      }
 
-    setState(() {
-      currentIndex = nextIndex;
-      completedCount++;
-    });
+      setState(() {
+        currentIndex = nextIndex;
+        completedCount += lastUnreviewedIndex - previousIndex;
+      });
+    } else {
+      _applyAction(unreadBookmarks[previousIndex]);
+      setState(() {
+        currentIndex = nextIndex;
+        completedCount++;
+      });
+    }
   }
 
-  void _goToNext({required bool markRead}) {
+  void _goToNext() {
     if (currentIndex >= unreadBookmarks.length) return;
-    _pendingReadAction = markRead;
     if (currentIndex == unreadBookmarks.length - 1) {
-      _applyAction(unreadBookmarks[currentIndex], markRead: markRead);
+      _applyAction(unreadBookmarks[currentIndex]);
       setState(() {
         currentIndex = unreadBookmarks.length;
         completedCount++;
@@ -131,7 +140,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _goToPrevious() {
     if (currentIndex <= 0 || !_pageController.hasClients) return;
-    _pendingReadAction = null;
     _pendingPreviousNavigation = true;
     _pageController.previousPage(
       duration: const Duration(milliseconds: 360),
@@ -253,7 +261,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                         currentIndex = previousIndex;
                         completedCount--;
                       });
-                      _pendingReadAction = null;
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted && _pageController.hasClients) {
                           _pageController.jumpToPage(previousIndex);
@@ -488,7 +495,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               const SizedBox(width: AppDimensions.paddingMd),
               _ReviewIconButton(
                 icon: Icons.arrow_forward,
-                onPressed: () => _goToNext(markRead: true),
+                onPressed: _goToNext,
               ),
             ],
           ),

@@ -16,7 +16,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: "assets/env");
+  try {
+    await dotenv
+        .load(fileName: 'assets/env')
+        .timeout(const Duration(seconds: 2));
+  } catch (error) {
+    // Configuration is optional at runtime; AppConfig provides safe defaults.
+    debugPrint('Unable to load optional app configuration: $error');
+  }
   runApp(const ProviderScope(child: SaveLaterApp()));
 }
 

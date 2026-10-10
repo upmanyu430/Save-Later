@@ -31,7 +31,7 @@ void main() {
     await tester.pump(const Duration(seconds: 3));
 
     // 3. Test Create Collection Modal
-    final createColIcon = find.byIcon(Icons.create_new_folder);
+    final createColIcon = find.byIcon(Icons.create_new_folder_outlined);
     expect(createColIcon, findsOneWidget);
     await tester.tap(createColIcon);
     await tester.pumpAndSettle();

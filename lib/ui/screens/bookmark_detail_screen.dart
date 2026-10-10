@@ -30,12 +30,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   bool _isEditingTitle = false;
   bool _isEditingNotes = false;
   bool _notesEdited = false;
+  late String _lastSavedNotes;
 
   @override
   void initState() {
     super.initState();
     bookmark = widget.bookmark;
     _notesController = TextEditingController(text: bookmark.notes);
+    _lastSavedNotes = bookmark.notes;
     _titleController = TextEditingController(text: bookmark.title ?? bookmark.url);
   }
 
@@ -50,24 +52,30 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       // Save notes after user stops typing for 500ms
       bookmark.notes = val;
       await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
+      _lastSavedNotes = val;
     });
   }
 
   // Ensure any pending changes are saved when the screen is disposed
   @override
   void dispose() {
-    _saveTimer?.cancel();
+    if (_notesEdited && _notesController.text != _lastSavedNotes) {
+      unawaited(_saveNotes(_notesController.text));
+    } else {
+      _saveTimer?.cancel();
+    }
     _notesController.dispose();
     _titleController.dispose();
     super.dispose();
   }
 
   // Immediate save for editing complete (e.g., when user hits Done)
-  void _saveNotes(String val) async {
+  Future<void> _saveNotes(String val) async {
     // Cancel debounce timer since we're saving immediately
     _saveTimer?.cancel();
     bookmark.notes = val;
     await ref.read(bookmarkNotifierProvider.notifier).updateNotes(bookmark, val);
+    _lastSavedNotes = val;
   }
 
   void _showAddTagModal() {
@@ -680,7 +688,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       onTap: () {
                                         HapticFeedback.lightImpact();
                                         _saveTimer?.cancel();
-                                        _notesController.clear();
+                                        _notesController.text = _lastSavedNotes;
+                                        bookmark.notes = _lastSavedNotes;
                                         setState(() {
                                           _notesEdited = false;
                                           _isEditingNotes = false;
@@ -702,7 +711,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       onTap: () {
                                         HapticFeedback.lightImpact();
                                         _saveTimer?.cancel();
-                                        _saveNotes(_notesController.text);
+                                        unawaited(_saveNotes(_notesController.text));
                                         setState(() {
                                           _notesEdited = false;
                                           _isEditingNotes = false;
