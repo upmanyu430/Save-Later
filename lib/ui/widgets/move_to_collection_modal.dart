@@ -114,7 +114,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         border: Border(
           top: BorderSide(color: AppTheme.border, width: 2.5),
           left: BorderSide(color: AppTheme.border, width: 2.5),
@@ -242,7 +242,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                               color: isSelected
                                   ? const Color(0xFFFFF9E6)
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                               border: isSelected
                                   ? Border.all(color: const Color(0xFFFFD166), width: 1.5)
                                   : Border.all(color: Colors.transparent, width: 1.5),
@@ -316,8 +316,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                   child: NeoBox(
                     color: const Color(0xFFFFD166),
                     borderWidth: 2.5,
-                    borderRadius: 16.0,
-                    shadowOffset: 3.0,
+                    borderRadius: 12.0,
+                    shadowOffset: 2.5,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Center(
                       child: Text(
