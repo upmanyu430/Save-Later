@@ -11,6 +11,7 @@ import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
+import '../widgets/pin_icon.dart';
 import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'dart:async';
@@ -733,12 +734,30 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
                       ),
                     ),
-                    NeoBox(
-                      padding: EdgeInsets.all(AppDimensions.paddingSm),
-                      color: AppTheme.background,
-                      borderRadius: AppDimensions.radiusMd,
-                      borderWidth: AppDimensions.borderWidthMd,
-                      child: const Icon(Icons.auto_fix_off_outlined, size: AppDimensions.iconSizeMd),
+                    GestureDetector(
+                      onTap: () async {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          bookmark.isPinned = !bookmark.isPinned;
+                        });
+                        await ref.read(repositoryProvider).updateBookmark(bookmark);
+                        ref.invalidate(bookmarksProvider);
+                        if (bookmark.collection.value != null) {
+                          ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                        }
+                        ref.invalidate(unsortedBookmarksProvider);
+                      },
+                      child: NeoBox(
+                        padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                        color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
+                        borderRadius: AppDimensions.radiusMd,
+                        borderWidth: AppDimensions.borderWidthMd,
+                        child: PinIcon(
+                          isPinned: bookmark.isPinned,
+                          size: AppDimensions.iconSizeMd,
+                          color: AppTheme.border,
+                        ),
+                      ),
                     ),
                   ],
                 ),

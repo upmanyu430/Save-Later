@@ -8,6 +8,7 @@ import '../../models/bookmark.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
 import 'bookmark_radial_menu.dart';
+import 'pin_icon.dart';
 import '../../providers/providers.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -166,7 +167,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           shape: BoxShape.circle,
                           border: Border.all(color: AppTheme.border, width: 1.5),
                         ),
-                        child: const Icon(Icons.push_pin, size: 14, color: AppTheme.border),
+                        child: const PinIcon(isPinned: true, size: 14, color: AppTheme.border),
                       ),
                     ),
                   // Select Mode Checkbox
