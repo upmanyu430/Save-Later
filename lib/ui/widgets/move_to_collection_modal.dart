@@ -7,6 +7,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'collection_editor_modal.dart';
+import 'moved_success_dialog.dart';
 import 'neo_box.dart';
 
 class MoveToCollectionModal extends ConsumerStatefulWidget {
@@ -23,14 +24,14 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     this.onMove,
   });
 
-  static Future<void> show({
+  static Future<bool?> show({
     required BuildContext context,
     Bookmark? bookmark,
     List<Bookmark>? bookmarks,
     BookmarkCollection? initialCollection,
     Future<void> Function(BookmarkCollection collection)? onMove,
-  }) {
-    return showModalBottomSheet<void>(
+  }) async {
+    final moved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -41,6 +42,12 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
         onMove: onMove,
       ),
     );
+
+    if (moved == true && context.mounted) {
+      await MovedSuccessDialog.show(context: context);
+    }
+
+    return moved;
   }
 
   @override
@@ -87,13 +94,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     }
 
     if (!mounted) return;
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Moved to "${collection.name}"'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    Navigator.of(context).pop(true);
   }
 
   void _openCreateCollection() async {
