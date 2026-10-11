@@ -9,6 +9,7 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
+import '../widgets/review_cards_icon.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -377,7 +378,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                     padding: const EdgeInsets.all(AppDimensions.paddingSm),
                                     borderRadius: AppDimensions.radiusSm,
                                     borderWidth: AppDimensions.borderWidthMd,
-                                    child: const Icon(Icons.style, size: AppDimensions.iconSizeLg),
+                                    child: const ReviewCardsIcon(size: AppDimensions.iconSizeLg),
                                   ),
                                 ),
                                 const SizedBox(width: AppDimensions.paddingSm),

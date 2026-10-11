@@ -69,8 +69,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _onPageChanged(int nextIndex) {
     final previousIndex = currentIndex;
-    if (nextIndex == previousIndex || previousIndex >= unreadBookmarks.length)
+    if (nextIndex == previousIndex || previousIndex >= unreadBookmarks.length) {
       return;
+    }
+
+    HapticFeedback.lightImpact();
 
     // The bottom-left arrow is navigation, not a swipe action. Do not mark
     // or delete the current bookmark when it returns to the previous card.
@@ -375,19 +378,28 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   ),
                 ],
               ),
-              InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  context.pop();
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(AppDimensions.paddingMd),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF222222),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                    border: Border.all(color: Colors.white24, width: 1.5),
+                    splashColor: Colors.white12,
+                    highlightColor: Colors.white10,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      context.pop();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(AppDimensions.paddingMd),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF222222),
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+                        border: Border.all(color: Colors.white24, width: 1.5),
+                      ),
+                      child: const Icon(Icons.close, color: Colors.white),
+                    ),
                   ),
-                  child: const Icon(Icons.close, color: Colors.white),
                 ),
               ),
             ],
