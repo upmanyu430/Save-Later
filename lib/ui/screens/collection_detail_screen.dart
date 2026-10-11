@@ -11,6 +11,7 @@ import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/review_cards_icon.dart';
 import '../widgets/move_to_collection_modal.dart';
+import '../widgets/delete_confirmation_dialog.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -233,6 +234,18 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   void _deleteSelected(List<Bookmark> allBookmarks) async {
     if (_selectedIds.isEmpty) return;
     final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
+    if (selectedBookmarks.isEmpty) return;
+
+    final isSingle = selectedBookmarks.length == 1;
+    final confirmed = await DeleteConfirmationDialog.show(
+      context: context,
+      title: isSingle ? 'Delete link' : 'Delete links',
+      message: isSingle
+          ? 'Permanently delete this link?'
+          : 'Permanently delete these ${selectedBookmarks.length} links?',
+    );
+    if (!confirmed) return;
+
     final toDelete = List<Bookmark>.from(selectedBookmarks);
     setState(() {
       _isSelectMode = false;

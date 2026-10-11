@@ -10,6 +10,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/move_to_collection_modal.dart';
+import '../widgets/delete_confirmation_dialog.dart';
 import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'dart:async';
@@ -545,6 +546,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               _buildActionItem(Icons.refresh, l10n.refresh, _showRefreshDialog),
                               _buildDivider(),
                               _buildActionItem(Icons.delete_outline, l10n.delete, () async {
+                                final confirmed = await DeleteConfirmationDialog.show(context: context);
+                                if (!confirmed) return;
+
                                 await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
                                 if (context.mounted) {
                                   context.pop();

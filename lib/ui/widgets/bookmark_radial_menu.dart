@@ -8,6 +8,7 @@ import 'dart:math';
 import '../../utils/url_launcher.dart';
 import '../../providers/providers.dart';
 import 'package:save_later/config/app_constants.dart';
+import 'delete_confirmation_dialog.dart';
 
 
 class RadialMenuAction {
@@ -76,6 +77,8 @@ class BookmarkRadialMenu {
         color: const Color(0xFFEF476F),
         labelColor: const Color(0xFFEF476F),
         onTap: () async {
+          final confirmed = await DeleteConfirmationDialog.show(context: context);
+          if (!confirmed) return;
           await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
         }
       ),
