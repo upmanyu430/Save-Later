@@ -384,14 +384,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         });
                                       }
                                     },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFEEEEEE),
-                                        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                                        border: Border.all(color: Colors.grey.shade600, width: 3),
-                                      ),
-                                      child: Text(l10n.save, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.grey.shade600)),
+                                    child: NeoBox(
+                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                      borderRadius: AppDimensions.radiusMd,
+                                      borderWidth: 3,
+                                      color: const Color(0xFFFFD166),
+                                      child: Text(l10n.save, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
                                     ),
                                   ),
                                 ],
@@ -536,26 +534,32 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         NeoBox(
                           padding: EdgeInsets.all(0),
                           borderRadius: AppDimensions.radiusXl,
-                          child: Row(
-                            children: [
-                              _buildActionItem(Icons.share_outlined, l10n.share, () {
-                                Share.share(widget.bookmark.url);
-                              }),
-                              _buildDivider(),
-                              _buildActionItem(Icons.folder_outlined, l10n.move, _showMoveModal),
-                              _buildDivider(),
-                              _buildActionItem(Icons.refresh, l10n.refresh, _showRefreshDialog),
-                              _buildDivider(),
-                              _buildActionItem(Icons.delete_outline, l10n.delete, () async {
-                                final confirmed = await DeleteConfirmationDialog.show(context: context);
-                                if (!confirmed) return;
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusXl - 3.0),
+                            child: Material(
+                              color: Colors.white,
+                              child: Row(
+                                children: [
+                                  _buildActionItem(Icons.share_outlined, l10n.share, () {
+                                    Share.share(widget.bookmark.url);
+                                  }),
+                                  _buildDivider(),
+                                  _buildActionItem(Icons.folder_outlined, l10n.move, _showMoveModal),
+                                  _buildDivider(),
+                                  _buildActionItem(Icons.refresh, l10n.refresh, _showRefreshDialog),
+                                  _buildDivider(),
+                                  _buildActionItem(Icons.delete_outline, l10n.delete, () async {
+                                    final confirmed = await DeleteConfirmationDialog.show(context: context);
+                                    if (!confirmed) return;
 
-                                await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
-                                if (context.mounted) {
-                                  context.pop();
-                                }
-                              }, isDestructive: true),
-                            ],
+                                    await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
+                                    if (context.mounted) {
+                                      context.pop();
+                                    }
+                                  }, isDestructive: true),
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppDimensions.paddingXxl),
@@ -916,29 +920,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   Widget _buildActionItem(IconData icon, String label, VoidCallback onTap, {bool isDestructive = false}) {
-    final color = isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () { HapticFeedback.lightImpact(); onTap(); },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          color: Colors.transparent,
-          child: Column(
-            children: [
-              Icon(icon, color: color, size: AppDimensions.iconSizeMd),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return _DetailActionButton(
+      icon: icon,
+      label: label,
+      onTap: onTap,
+      isDestructive: isDestructive,
     );
   }
 
@@ -1271,6 +1257,106 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailActionButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _DetailActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  State<_DetailActionButton> createState() => _DetailActionButtonState();
+}
+
+class _DetailActionButtonState extends State<_DetailActionButton> {
+  bool _isPressed = false;
+
+  void _handleTapDown(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _isPressed = true;
+    });
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
+  void _handleTapCancel() {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    final pressedBg = widget.isDestructive
+        ? const Color(0xFFFFE5E9)
+        : const Color(0xFFF0F0F0);
+
+    return Expanded(
+      child: Material(
+        color: _isPressed ? pressedBg : Colors.transparent,
+        child: InkWell(
+          onTapDown: _handleTapDown,
+          onTapUp: _handleTapUp,
+          onTapCancel: _handleTapCancel,
+          onTap: widget.onTap,
+          splashColor: widget.isDestructive
+              ? const Color(0xFFEF476F).withValues(alpha: 0.25)
+              : const Color(0xFFFFD166).withValues(alpha: 0.35),
+          highlightColor: widget.isDestructive
+              ? const Color(0xFFEF476F).withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.04),
+          child: AnimatedContainer(
+            duration: _isPressed
+                ? const Duration(milliseconds: 50)
+                : const Duration(milliseconds: 300),
+            curve: _isPressed ? Curves.easeOut : Curves.elasticOut,
+            transform: Matrix4.translationValues(
+              0,
+              _isPressed ? 2.0 : 0.0,
+              0,
+            ),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: AnimatedScale(
+              scale: _isPressed ? 0.90 : 1.0,
+              duration: _isPressed
+                  ? const Duration(milliseconds: 50)
+                  : const Duration(milliseconds: 300),
+              curve: _isPressed ? Curves.easeOut : Curves.elasticOut,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(widget.icon, color: color, size: AppDimensions.iconSizeMd),
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.label,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
