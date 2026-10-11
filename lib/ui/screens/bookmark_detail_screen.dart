@@ -40,6 +40,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     _notesController = TextEditingController(text: bookmark.notes);
     _lastSavedNotes = bookmark.notes;
     _titleController = TextEditingController(text: bookmark.title ?? bookmark.url);
+    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+      bookmark.collection.load().then((_) {
+        if (mounted) setState(() {});
+      });
+    }
   }
 
 
@@ -540,9 +545,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               _buildActionItem(Icons.refresh, l10n.refresh, _showRefreshDialog),
                               _buildDivider(),
                               _buildActionItem(Icons.delete_outline, l10n.delete, () async {
-                                await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
-                                ref.invalidate(bookmarksProvider);
-                                if (bookmark.collection.value != null) ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                                await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
                                 if (context.mounted) {
                                   context.pop();
                                 }

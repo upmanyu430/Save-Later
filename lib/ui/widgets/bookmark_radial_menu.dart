@@ -76,12 +76,7 @@ class BookmarkRadialMenu {
         color: const Color(0xFFEF476F),
         labelColor: const Color(0xFFEF476F),
         onTap: () async {
-          await ref.read(repositoryProvider).deleteBookmark(bookmark.id);
-          ref.invalidate(bookmarksProvider);
-          if (bookmark.collection.value != null) {
-            ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-          }
-          ref.invalidate(unsortedBookmarksProvider);
+          await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
         }
       ),
     ];

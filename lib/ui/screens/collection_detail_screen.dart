@@ -230,16 +230,17 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     Share.share(urls);
   }
   
-  void _deleteSelected(List<Bookmark> allBookmarks) {
+  void _deleteSelected(List<Bookmark> allBookmarks) async {
     if (_selectedIds.isEmpty) return;
     final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
-    for (var b in selectedBookmarks) {
-      ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(b);
-    }
+    final toDelete = List<Bookmark>.from(selectedBookmarks);
     setState(() {
       _isSelectMode = false;
       _selectedIds.clear();
     });
+    for (var b in toDelete) {
+      await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(b, collectionId: widget.collectionId);
+    }
   }
 
   void _moveSelected(List<Bookmark> allBookmarks) async {
