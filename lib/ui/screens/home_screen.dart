@@ -203,7 +203,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       height: 56.0,
                       child: NeoBox(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.paddingLg, vertical: 0.0),
+                            horizontal: AppDimensions.paddingMd, vertical: 0.0),
                         borderRadius: AppDimensions.radiusMd,
                         child: TextField(
                           controller: _urlController,
@@ -212,11 +212,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
                             hintStyle: GoogleFonts.arvo(
+                              fontSize: 13,
                               fontWeight: FontWeight.w400,
                               color: Colors.black38,
                             ),
                             border: InputBorder.none,
                             suffixIcon: IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(
+                                minWidth: 40,
+                                minHeight: 40,
+                              ),
                               icon: const Icon(Icons.paste_outlined,
                                   color: AppTheme.border),
                               onPressed: () async {

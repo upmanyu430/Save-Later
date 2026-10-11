@@ -672,7 +672,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         if (_notesEdited) _saveNotes(_notesController.text);
                                       },
                                       decoration: const InputDecoration(
-                                        hintText: '',
+                                        hintText: 'Tap here to save notes',
+                                        hintStyle: TextStyle(
+                                          color: Colors.black38,
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.italic,
+                                        ),
                                         border: InputBorder.none,
                                       ),
                                     ),

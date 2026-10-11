@@ -86,8 +86,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     // PageView has one trailing page so the final bookmark can be swiped
     // away naturally. Reaching that page completes the last bookmark and
     // lets the parent rebuild into the caught-up state.
-    if (nextIndex == unreadBookmarks.length ||
-        previousIndex == unreadBookmarks.length - 1) {
+    // Only a forward swipe can complete the review. A backward swipe from
+    // the last card is navigation and must not jump to the caught-up screen.
+    if (nextIndex > previousIndex &&
+        (nextIndex == unreadBookmarks.length ||
+            previousIndex == unreadBookmarks.length - 1)) {
       for (var index = previousIndex;
           index < unreadBookmarks.length;
           index++) {
@@ -250,16 +253,20 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    if (completedCount > 0 && unreadBookmarks.isNotEmpty) {
+                    // `currentIndex` points at the trailing page while the
+                    // caught-up view is shown. Use it as the source of truth
+                    // instead of `completedCount`, which can lag behind when
+                    // the last card was completed by a pager callback.
+                    if (currentIndex > 0 && unreadBookmarks.isNotEmpty) {
                       final previousIndex = (currentIndex - 1)
-                          .clamp(
-                            0,
-                            unreadBookmarks.length - 1,
-                          )
+                          .clamp(0, unreadBookmarks.length - 1)
                           .toInt();
                       setState(() {
+                        _pendingPreviousNavigation = false;
                         currentIndex = previousIndex;
-                        completedCount--;
+                        completedCount = completedCount > 0
+                            ? completedCount - 1
+                            : 0;
                       });
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted && _pageController.hasClients) {
@@ -294,7 +301,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                   onPressed: () {
                     HapticFeedback.lightImpact();
-                    context.go('/');
+                    // Review is pushed from the current folder. Pop back to
+                    // that folder instead of replacing the route with home.
+                    context.pop();
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -390,15 +399,17 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           child: Row(
             children: List.generate(unreadBookmarks.length, (index) {
               return Expanded(
-                child: Container(
-                  height: 4,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 260),
+                  curve: Curves.easeOutCubic,
+                  height: 8,
                   margin: EdgeInsets.only(
                       right: index == unreadBookmarks.length - 1 ? 0 : 6),
                   decoration: BoxDecoration(
                     color: index <= currentIndex
                         ? const Color(0xFFFFD166)
                         : const Color(0xFF333333),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               );
