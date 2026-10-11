@@ -10,6 +10,7 @@ import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/review_cards_icon.dart';
+import '../widgets/move_to_collection_modal.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -242,61 +243,24 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   }
 
   void _moveSelected(List<Bookmark> allBookmarks) async {
-     if (_selectedIds.isEmpty) return;
-     final collections = await ref.read(collectionsProvider.future);
-     if (!mounted) return;
-     
-     showModalBottomSheet(
+    if (_selectedIds.isEmpty) return;
+    final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
+    if (selectedBookmarks.isEmpty) return;
+
+    MoveToCollectionModal.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          border: Border(
-            top: BorderSide(color: AppTheme.border, width: 3),
-            left: BorderSide(color: AppTheme.border, width: 3),
-            right: BorderSide(color: AppTheme.border, width: 3),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppLocalizations.of(context)!.moveTo,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppDimensions.paddingLg),
-            Expanded(
-              child: ListView.builder(
-                itemCount: collections.length,
-                itemBuilder: (context, index) {
-                  final c = collections[index];
-                  if (c.id == widget.collectionId) return const SizedBox.shrink();
-                  return ListTile(
-                    leading: const Icon(Icons.folder, color: AppTheme.border),
-                    title: Text(c.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    onTap: () {
-                      final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
-                      for (var b in selectedBookmarks) {
-                        ref.read(bookmarkNotifierProvider.notifier).moveToCollection(b, c);
-                      }
-                      Navigator.pop(ctx);
-                      setState(() {
-                        _isSelectMode = false;
-                        _selectedIds.clear();
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      bookmarks: selectedBookmarks,
+      onMove: (c) async {
+        for (final b in selectedBookmarks) {
+          await ref.read(bookmarkNotifierProvider.notifier).moveToCollection(b, c);
+        }
+        if (mounted) {
+          setState(() {
+            _isSelectMode = false;
+            _selectedIds.clear();
+          });
+        }
+      },
     );
   }
 

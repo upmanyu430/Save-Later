@@ -9,6 +9,7 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/move_to_collection_modal.dart';
 import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'dart:async';
@@ -211,59 +212,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     );
   }
 
-  void _showMoveModal() {
-    showModalBottomSheet(
+  void _showMoveModal() async {
+    await MoveToCollectionModal.show(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Consumer(
-        builder: (ctx, ref, child) {
-          final collectionsAsync = ref.watch(collectionsProvider);
-          return Container(
-            decoration: const BoxDecoration(
-              color: AppTheme.background,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-              border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
-            ),
-            padding: EdgeInsets.fromLTRB(
-              24,
-              24,
-              24,
-              24 + MediaQuery.paddingOf(ctx).bottom,
-            ),
-            child: collectionsAsync.when(
-              data: (collections) {
-                if (collections.isEmpty) return Text(AppLocalizations.of(context)!.noCollectionsCreated);
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: collections.length,
-                  itemBuilder: (ctx, index) {
-                    final col = collections[index];
-                    return ListTile(
-                      leading: Icon(IconData(col.iconCodePoint, fontFamily: col.iconFontFamily), color: col.color),
-                      title: Text(col.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      onTap: () async {
-                                    HapticFeedback.lightImpact();
-                        bookmark.collection.value = col;
-                        await ref.read(repositoryProvider).updateBookmark(bookmark);
-                        bookmark.collection.save();
-                        ref.invalidate(bookmarksProvider);
-                        ref.invalidate(collectionBookmarksProvider(col.id));
-                        if (!mounted || !ctx.mounted) return;
-                        setState(() {});
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.movedToCollection(col.name))));
-                      },
-                    );
-                  }
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Text(AppLocalizations.of(context)!.errorWithMessage(e.toString())),
-            )
-          );
-        }
-      )
+      bookmark: bookmark,
     );
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
