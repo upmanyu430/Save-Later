@@ -99,9 +99,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   
   Widget _buildCard() {
     final b = widget.bookmark;
-    return NeoBox(
-      padding: const EdgeInsets.all(0),
-      borderRadius: AppDimensions.radiusMd,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        NeoBox(
+          padding: const EdgeInsets.all(0),
+          borderRadius: AppDimensions.radiusMd,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -155,21 +158,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         ),
                       ),
                     ),
-                  // Pinned Indicator (if pinned)
-                  if (b.isPinned && (!widget.isSelectMode))
-                    Positioned(
-                      top: 6,
-                      right: 6,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.border, width: 1.5),
-                        ),
-                        child: const PinIcon(isPinned: true, size: 14, color: AppTheme.border),
-                      ),
-                    ),
+
                   // Select Mode Checkbox
                   if (widget.isSelectMode)
                     Positioned(
@@ -246,6 +235,26 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
         ],
       ),
-    );
+    ),
+    if (b.isPinned && (!widget.isSelectMode))
+      Positioned(
+        top: -8,
+        right: 8,
+        child: NeoBox(
+          color: const Color(0xFFFFD166),
+          borderRadius: 8.0,
+          borderWidth: 2.0,
+          shadowOffset: 2.0,
+          padding: const EdgeInsets.all(4.0),
+          child: const PinIcon(
+            isPinned: true,
+            size: 16,
+            color: AppTheme.border,
+            strokeWidth: 2.2,
+          ),
+        ),
+      ),
+  ],
+);
   }
 }

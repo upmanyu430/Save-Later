@@ -375,14 +375,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                         ),
                 ),
                 
-                // Title
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingSm),
-                  child: Text(
-                    l10n.savesCount(bookmarks.length),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, letterSpacing: 1.2),
-                  ),
-                ),
+
 
                 // Content Grid
                 Expanded(
@@ -417,22 +410,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                     (columnCount - 1) * crossAxisSpacing) /
                                 columnCount;
 
-                            return GridView.builder(
-                              padding: EdgeInsets.fromLTRB(
-                                AppDimensions.paddingXl,
-                                AppDimensions.paddingLg,
-                                AppDimensions.paddingXl,
-                                AppDimensions.paddingLg + bottomInset,
-                              ),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: maxCrossAxisExtent,
-                                crossAxisSpacing: crossAxisSpacing,
-                                mainAxisSpacing: AppDimensions.gridSpacingMd,
-                                childAspectRatio: itemWidth / desiredCardHeight,
-                              ),
-                              itemCount: bookmarks.length,
-                              itemBuilder: (context, index) {
-                              final b = bookmarks[index];
+                            Widget buildGridItem(Bookmark b) {
                               return BookmarkGridItem(
                                 bookmark: b,
                                 isSelectMode: _isSelectMode,
@@ -447,7 +425,105 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   });
                                 },
                               );
-                              },
+                            }
+
+                            final pinnedBookmarks = bookmarks.where((b) => b.isPinned).toList();
+                            final unpinnedBookmarks = bookmarks.where((b) => !b.isPinned).toList();
+
+                            return CustomScrollView(
+                              slivers: [
+                                if (pinnedBookmarks.isNotEmpty) ...[
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppDimensions.paddingXl,
+                                        vertical: AppDimensions.paddingSm,
+                                      ),
+                                      child: Text(
+                                        'PINNED (${pinnedBookmarks.length})',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SliverPadding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingSm,
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingMd,
+                                    ),
+                                    sliver: SliverGrid(
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: columnCount,
+                                        crossAxisSpacing: crossAxisSpacing,
+                                        mainAxisSpacing: AppDimensions.gridSpacingMd,
+                                        childAspectRatio: childAspectRatio,
+                                      ),
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) => buildGridItem(pinnedBookmarks[index]),
+                                        childCount: pinnedBookmarks.length,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                if (unpinnedBookmarks.isNotEmpty || pinnedBookmarks.isEmpty) ...[
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        AppDimensions.paddingXl,
+                                        pinnedBookmarks.isNotEmpty
+                                            ? AppDimensions.paddingLg
+                                            : AppDimensions.paddingSm,
+                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingSm,
+                                      ),
+                                      child: Text(
+                                        l10n.savesCount(
+                                          pinnedBookmarks.isNotEmpty
+                                              ? unpinnedBookmarks.length
+                                              : bookmarks.length,
+                                        ),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SliverPadding(
+                                    padding: EdgeInsets.fromLTRB(
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingSm,
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingLg + bottomInset,
+                                    ),
+                                    sliver: SliverGrid(
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: columnCount,
+                                        crossAxisSpacing: crossAxisSpacing,
+                                        mainAxisSpacing: AppDimensions.gridSpacingMd,
+                                        childAspectRatio: childAspectRatio,
+                                      ),
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          final list = pinnedBookmarks.isNotEmpty
+                                              ? unpinnedBookmarks
+                                              : bookmarks;
+                                          return buildGridItem(list[index]);
+                                        },
+                                        childCount: pinnedBookmarks.isNotEmpty
+                                            ? unpinnedBookmarks.length
+                                            : bookmarks.length,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             );
                           },
                         ),
