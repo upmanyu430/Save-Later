@@ -409,6 +409,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             final itemWidth = (contentWidth -
                                     (columnCount - 1) * crossAxisSpacing) /
                                 columnCount;
+                            final childAspectRatio = itemWidth / desiredCardHeight;
 
                             Widget buildGridItem(Bookmark b) {
                               return BookmarkGridItem(
