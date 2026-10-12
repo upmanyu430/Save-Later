@@ -14,6 +14,9 @@ import '../widgets/collection_editor_modal.dart';
 import '../widgets/review_cards_icon.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
+import '../widgets/empty_collection_view.dart';
+import '../../config/app_config.dart';
+import '../../utils/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -356,7 +359,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                                 ),
                                 Text(
-                                  l10n.itemsCount(bookmarks.length),
+                                  widget.collectionId != null
+                                      ? '${l10n.itemsCount(bookmarks.length)} · ${l10n.subcollectionsCount(subCollections.length)}'
+                                      : l10n.itemsCount(bookmarks.length),
                                   style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -393,22 +398,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
                 // Content Grid
                 Expanded(
-                  child: (bookmarks.isEmpty && subCollections.isEmpty)
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.inbox, size: AppDimensions.iconSizeXxl, color: AppTheme.border),
-                              const SizedBox(height: AppDimensions.paddingLg),
-                              Text(
-                                l10n.noItemsYet,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        )
-                      : LayoutBuilder(
+                  child: LayoutBuilder(
                           builder: (context, constraints) {
                             const horizontalPadding = AppDimensions.paddingXl * 2;
                             const maxCrossAxisExtent = 200.0;
@@ -547,7 +537,39 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                     ),
                                   ),
                                 ],
-                                if (unpinnedBookmarks.isNotEmpty ||
+                                if (bookmarks.isEmpty) ...[
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: EdgeInsets.fromLTRB(
+                                        AppDimensions.paddingXl,
+                                        (pinnedBookmarks.isNotEmpty || subCollections.isNotEmpty)
+                                            ? AppDimensions.paddingLg
+                                            : AppDimensions.paddingSm,
+                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingSm,
+                                      ),
+                                      child: Text(
+                                        l10n.savesCount(0),
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: bottomInset + 32),
+                                      child: Center(
+                                        child: EmptyCollectionView(
+                                          onSeeHowPressed: () => openUrl(AppConfig.howToUrl, context: context),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ] else if (unpinnedBookmarks.isNotEmpty ||
                                     (pinnedBookmarks.isEmpty && bookmarks.isNotEmpty)) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
