@@ -4,6 +4,7 @@ import 'package:metadata_fetch/metadata_fetch.dart';
 import '../models/bookmark.dart';
 import '../models/collection.dart';
 import '../repositories/isar_repository.dart';
+import '../utils/url_helper.dart';
 
 final repositoryProvider = Provider<IsarRepository>((ref) {
   return IsarRepository();
@@ -42,6 +43,11 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     try {
       final repo = ref.read(repositoryProvider);
 
+      String cleanUrl = UrlHelper.extractUrl(url) ?? url.trim();
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        cleanUrl = 'https://$cleanUrl';
+      }
+
       // Attempt to fetch metadata
       String? title;
       String? description;
@@ -49,10 +55,9 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       String? sourceDomain;
 
       try {
-        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
-          final uri = Uri.parse(url);
+        final uri = Uri.parse(cleanUrl);
         sourceDomain = uri.host;
-        var data = await MetadataFetch.extract(url);
+        var data = await MetadataFetch.extract(cleanUrl);
         if (data != null) {
           title = data.title;
           description = data.description;
@@ -64,8 +69,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       }
 
       final bookmark = Bookmark()
-        ..url = url
-        ..title = title ?? url
+        ..url = cleanUrl
+        ..title = title ?? cleanUrl
         ..description = description
         ..imageUrl = imageUrl
         ..sourceDomain = sourceDomain
@@ -100,7 +105,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> refreshMetadata(Bookmark bookmark) async {
       try {
-        String url = bookmark.url;
+        String url = UrlHelper.extractUrl(bookmark.url) ?? bookmark.url.trim();
         if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
         bookmark.url = url; // Update url
         bookmark.sourceDomain = Uri.parse(url).host;

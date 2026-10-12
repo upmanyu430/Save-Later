@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import '../../providers/providers.dart';
+import '../../utils/url_helper.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/no_url_dialog.dart';
@@ -36,9 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .getMediaStream()
         .listen((List<SharedMediaFile> value) {
       if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-        final text = value.first.path;
-        _urlController.text = text;
-        _quickSave();
+        _handleIncomingSharedText(value.first.path);
       }
     }, onError: (err) {
       debugPrint("getIntentDataStream error: $err");
@@ -49,11 +48,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
       if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-        final text = value.first.path;
-        _urlController.text = text;
-        _quickSave();
+        _handleIncomingSharedText(value.first.path);
       }
     });
+  }
+
+  void _handleIncomingSharedText(String text) {
+    final extractedUrl = UrlHelper.extractUrl(text) ?? text.trim();
+    _urlController.text = extractedUrl;
+    _quickSave();
   }
 
   @override
@@ -65,8 +68,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _quickSave() {
-    final url = _urlController.text.trim();
-    if (url.isEmpty) {
+    final rawText = _urlController.text.trim();
+    if (rawText.isEmpty) {
+      showNoUrlDialog(context);
+      return;
+    }
+    final url = UrlHelper.extractUrl(rawText) ?? rawText;
+    if (!UrlHelper.isValidUrl(url)) {
       showNoUrlDialog(context);
       return;
     }
