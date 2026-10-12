@@ -231,4 +231,140 @@ void main() {
     // Verify DeleteConfirmationDialog is shown
     expect(find.byType(DeleteConfirmationDialog), findsOneWidget);
   });
+
+  testWidgets('Tapping background dismisses the radial menu', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      createTestApp(
+        repo: testRepo,
+        child: Center(
+          child: SizedBox(
+            width: 180,
+            height: 160,
+            child: CollectionGridItem(
+              collection: testCollection,
+              itemCount: 4,
+              hasNewItems: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byType(CollectionGridItem));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+
+    // Tap outside (top-left background at 10, 10)
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    // Menu should be dismissed
+    expect(find.byIcon(Icons.edit), findsNothing);
+  });
+
+  testWidgets(
+      'Hovering finger over button displays uppercase action label in center',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      createTestApp(
+        repo: testRepo,
+        child: Center(
+          child: SizedBox(
+            width: 180,
+            height: 160,
+            child: CollectionGridItem(
+              collection: testCollection,
+              itemCount: 4,
+              hasNewItems: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byType(CollectionGridItem));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.edit), findsOneWidget);
+
+    final editPos = tester.getCenter(find.byIcon(Icons.edit));
+    CollectionRadialMenu.updatePosition(editPos);
+    await tester.pump();
+
+    // Verify EDIT label is rendered in the center of the screen
+    expect(find.text('EDIT'), findsOneWidget);
+
+    // Test handleLongPressEnd executes the selected action
+    CollectionRadialMenu.handleLongPressEnd();
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CollectionEditorModal), findsOneWidget);
+  });
+
+  testWidgets(
+      'Radial menu buttons maintain balanced equidistant spacing',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      createTestApp(
+        repo: testRepo,
+        child: Center(
+          child: SizedBox(
+            width: 180,
+            height: 160,
+            child: CollectionGridItem(
+              collection: testCollection,
+              itemCount: 4,
+              hasNewItems: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byType(CollectionGridItem));
+    await tester.pumpAndSettle();
+
+    final editCenter = tester.getCenter(find.byIcon(Icons.edit));
+    final shareCenter = tester.getCenter(find.byIcon(Icons.share));
+    final deleteCenter = tester.getCenter(find.byIcon(Icons.delete_outline));
+
+    final distEditShare = (editCenter - shareCenter).distance;
+    final distShareDelete = (shareCenter - deleteCenter).distance;
+
+    // Center-to-center distance should be equal (~78.0 dp)
+    expect((distEditShare - distShareDelete).abs(), lessThan(1.0));
+    expect(distEditShare, closeTo(78.0, 1.0));
+
+    // Inter-button gap with button diameter 62.0 dp (2 * 31.0)
+    final gap = distEditShare - 62.0;
+    expect(gap, closeTo(16.0, 4.0));
+  });
 }
