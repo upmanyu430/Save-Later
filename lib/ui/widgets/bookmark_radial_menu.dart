@@ -9,6 +9,7 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../../utils/url_launcher.dart';
 import 'delete_confirmation_dialog.dart';
+import 'pin_icon.dart';
 
 typedef IconBuilder = Widget Function(Color color, double size);
 
@@ -62,9 +63,11 @@ class BookmarkRadialMenu {
       ),
       BookmarkRadialMenuAction(
         icon: Icons.push_pin_outlined,
-        iconBuilder: (color, size) => CustomPaint(
-          size: Size(size, size),
-          painter: _PinIconPainter(color: color),
+        iconBuilder: (color, size) => PinIcon(
+          isPinned: true,
+          size: size,
+          color: color,
+          strokeWidth: 2.2,
         ),
         label: bookmark.isPinned ? 'UNPIN' : l10n.pinUpper,
         color: const Color(0xFFFFD166),
@@ -505,7 +508,7 @@ class _ExternalLinkIconPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-/// Lucide `pin` / thumbtack icon custom painter
+/// Lucide `pin` / thumbtack icon custom painter matching PinIcon
 class _PinIconPainter extends CustomPainter {
   final Color color;
 
@@ -514,30 +517,41 @@ class _PinIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final scale = size.width / 24.0;
+    canvas.save();
     canvas.scale(scale, scale);
 
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4
+      ..strokeWidth = 2.2
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    // Top horizontal cap
-    canvas.drawLine(const Offset(6.0, 3.5), const Offset(18.0, 3.5), paint);
+    final path = Path()
+      ..moveTo(12, 17)
+      ..lineTo(12, 22)
+      ..moveTo(9, 10.76)
+      ..arcToPoint(const Offset(7.89, 12.55), radius: const Radius.circular(2), clockwise: true)
+      ..lineTo(6.11, 13.45)
+      ..arcToPoint(const Offset(5, 15.24), radius: const Radius.circular(2), clockwise: false)
+      ..lineTo(5, 16)
+      ..arcToPoint(const Offset(6, 17), radius: const Radius.circular(1), clockwise: false)
+      ..lineTo(18, 17)
+      ..arcToPoint(const Offset(19, 16), radius: const Radius.circular(1), clockwise: false)
+      ..lineTo(19, 15.24)
+      ..arcToPoint(const Offset(17.89, 13.45), radius: const Radius.circular(2), clockwise: false)
+      ..lineTo(16.11, 12.55)
+      ..arcToPoint(const Offset(15, 10.76), radius: const Radius.circular(2), clockwise: true)
+      ..lineTo(15, 7)
+      ..arcToPoint(const Offset(16, 6), radius: const Radius.circular(1), clockwise: true)
+      ..arcToPoint(const Offset(16, 2), radius: const Radius.circular(2), clockwise: false)
+      ..lineTo(8, 2)
+      ..arcToPoint(const Offset(8, 6), radius: const Radius.circular(2), clockwise: false)
+      ..arcToPoint(const Offset(9, 7), radius: const Radius.circular(1), clockwise: true)
+      ..close();
 
-    // Pin body (neck, flared shoulders, bottom base)
-    final body = Path()
-      ..moveTo(8.5, 3.5)
-      ..lineTo(8.5, 7.5)
-      ..lineTo(5.0, 14.5)
-      ..lineTo(19.0, 14.5)
-      ..lineTo(15.5, 7.5)
-      ..lineTo(15.5, 3.5);
-    canvas.drawPath(body, paint);
-
-    // Center needle pointing down
-    canvas.drawLine(const Offset(12.0, 14.5), const Offset(12.0, 20.5), paint);
+    canvas.drawPath(path, paint);
+    canvas.restore();
   }
 
   @override
