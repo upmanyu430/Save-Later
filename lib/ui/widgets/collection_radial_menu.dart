@@ -181,7 +181,7 @@ class _CollectionRadialMenuOverlayWidgetState
   int _selectedIndex = -1;
   bool _isDismissing = false;
 
-  final double buttonRadius = 34.0;
+  final double buttonRadius = 31.0;
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
   late bool _isRightSide;
@@ -212,22 +212,22 @@ class _CollectionRadialMenuOverlayWidgetState
       if (_isRightSide) {
         _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Edit (Pencil) - sits along left edge of tilted folder card
-          Offset(widget.cardRect.left - 18.0, widget.cardRect.top + 36.0),
-          // 1: Share - tangent to Pencil, sits right above top-left corner
-          Offset(widget.cardRect.left + 24.0, widget.cardRect.top - 20.0),
-          // 2: Delete - tangent to Share, sits along top edge of tilted card
-          Offset(widget.cardRect.left + 94.0, widget.cardRect.top - 24.0),
+          // 0: Edit (Pencil) - sits along left edge with guaranteed non-overlapping clearance
+          Offset(widget.cardRect.left - 25.0, widget.cardRect.top + 32.0),
+          // 1: Share - sits above top-left corner with 14dp clearance from Edit and Delete
+          Offset(widget.cardRect.left + 22.0, widget.cardRect.top - 28.0),
+          // 2: Delete - sits along top edge with 14dp clearance from Share
+          Offset(widget.cardRect.left + 98.0, widget.cardRect.top - 32.0),
         ]);
       } else {
         _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Edit (Pencil) - sits along right edge of tilted folder card
-          Offset(widget.cardRect.right + 18.0, widget.cardRect.top + 36.0),
-          // 1: Share - tangent to Pencil, sits right above top-right corner
-          Offset(widget.cardRect.right - 24.0, widget.cardRect.top - 20.0),
-          // 2: Delete - tangent to Share, sits along top edge of tilted card
-          Offset(widget.cardRect.right - 94.0, widget.cardRect.top - 24.0),
+          // 0: Edit (Pencil) - sits along right edge with guaranteed non-overlapping clearance
+          Offset(widget.cardRect.right + 25.0, widget.cardRect.top + 32.0),
+          // 1: Share - sits above top-right corner with 14dp clearance from Edit and Delete
+          Offset(widget.cardRect.right - 22.0, widget.cardRect.top - 28.0),
+          // 2: Delete - sits along top edge with 14dp clearance from Share
+          Offset(widget.cardRect.right - 98.0, widget.cardRect.top - 32.0),
         ]);
       }
     }
@@ -235,10 +235,12 @@ class _CollectionRadialMenuOverlayWidgetState
 
   void updateFingerPosition(Offset pos) {
     int newSelectedIndex = -1;
+    double minDistance = double.infinity;
     for (int i = 0; i < _buttonPositions.length; i++) {
-      if ((_buttonPositions[i] - pos).distance < buttonRadius * 1.5) {
+      final distance = (_buttonPositions[i] - pos).distance;
+      if (distance < buttonRadius * 1.4 && distance < minDistance) {
+        minDistance = distance;
         newSelectedIndex = i;
-        break;
       }
     }
 
@@ -398,7 +400,7 @@ class _CollectionRadialMenuOverlayWidgetState
                         child: AnimatedScale(
                           duration: const Duration(milliseconds: 140),
                           curve: Curves.easeOutBack,
-                          scale: isSelected ? 1.25 : 1.0,
+                          scale: isSelected ? 1.15 : 1.0,
                           child: Container(
                             decoration: BoxDecoration(
                               color: buttonColor,

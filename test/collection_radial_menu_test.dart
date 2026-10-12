@@ -387,13 +387,23 @@ void main() {
     final distEditShare = (editCenter - shareCenter).distance;
     final distShareDelete = (shareCenter - deleteCenter).distance;
 
-    // Center-to-center distance should be equal (~70.0 dp)
+    // Center-to-center distance should be equal (~76.1 dp)
     expect((distEditShare - distShareDelete).abs(), lessThan(1.0));
-    expect(distEditShare, closeTo(70.0, 1.0));
+    expect(distEditShare, closeTo(76.1, 1.0));
 
-    // Inter-button gap with button diameter 68.0 dp (2 * 34.0)
-    final gap = distEditShare - 68.0;
-    expect(gap, closeTo(2.0, 1.0));
+    // Inter-button gap with button diameter 62.0 dp (2 * 31.0)
+    final gap = distEditShare - 62.0;
+    expect(gap, closeTo(14.1, 1.0));
+
+    // When an option is selected (scaled 1.15x), radius becomes 35.65 dp.
+    // Distance between selected center and unselected center is 76.1 dp.
+    // Sum of radii = 35.65 + 31.0 = 66.65 dp.
+    // Clearance = 76.1 - 66.65 = 9.45 dp > 0, ensuring zero overlap!
+    const selectedScale = 1.15;
+    const buttonRadius = 31.0;
+    final selectedRadius = buttonRadius * selectedScale;
+    final clearance = distEditShare - (selectedRadius + buttonRadius);
+    expect(clearance, greaterThan(8.0));
 
     await gesture.up();
     await tester.pumpAndSettle();
