@@ -63,9 +63,6 @@ class MockModalRepository implements IsarRepository {
 
   @override
   Future<void> deleteBookmarks(List<Id> bookmarkIds) async {}
-
-  @override
-  Future<void> clearAllData() async {}
 }
 
 void main() {
