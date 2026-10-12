@@ -198,6 +198,8 @@ void main() {
         ..id = 2
         ..name = 'Docs'
         ..colorHex = '#C3E0E5'
+        ..iconCodePoint = 0xe2c7
+        ..iconFontFamily = 'MaterialIcons'
         ..parentId = 1;
 
       repo.collections.addAll([parentCol, subCol]);
