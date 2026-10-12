@@ -42,42 +42,52 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (modalCtx) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(modalCtx).viewInsets.bottom +
-              MediaQuery.paddingOf(modalCtx).bottom,
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: AppTheme.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-            border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
+      builder: (modalCtx) => SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 16.0,
           ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.addLinkToCollection,
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppDimensions.paddingLg),
-              TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: AppLocalizations.of(context)!.linkUrlHint,
-                  border: const OutlineInputBorder(),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.background,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: AppTheme.border, width: 2.5),
                 ),
-                onSubmitted: (val) {
-                  if (val.trim().isNotEmpty) {
-                    ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: widget.collection);
-                    Navigator.pop(modalCtx);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savingLink)));
-                  }
-                },
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)!.addLinkToCollection,
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: AppDimensions.paddingLg),
+                    TextField(
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context)!.linkUrlHint,
+                        border: const OutlineInputBorder(),
+                      ),
+                      onSubmitted: (val) {
+                        if (val.trim().isNotEmpty) {
+                          ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: widget.collection);
+                          Navigator.pop(modalCtx);
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savingLink)));
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -100,86 +110,97 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: EdgeInsets.only(
-          top: 12,
-          bottom: 24 + MediaQuery.paddingOf(ctx).bottom,
-        ),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+      builder: (ctx) => SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 16.0,
           ),
-          border: Border(
-            top: BorderSide(color: AppTheme.border, width: 3),
-            left: BorderSide(color: AppTheme.border, width: 3),
-            right: BorderSide(color: AppTheme.border, width: 3),
-          ),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag handle
-            Container(
-              width: 48,
-              height: 5,
-              decoration: BoxDecoration(
-                color: AppTheme.border,
-                borderRadius: BorderRadius.circular(4),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Container(
+                padding: const EdgeInsets.only(
+                  top: 14,
+                  bottom: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: AppTheme.border, width: 2.5),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Drag handle
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppTheme.border,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppDimensions.paddingXl),
+                    
+                    // Add Link
+                    _buildMenuItem(
+                      icon: Icons.add,
+                      title: AppLocalizations.of(context)!.addLink,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _showAddLinkModal(context);
+                      },
+                    ),
+                    _buildDivider(),
+                    
+                    // Select Links
+                    _buildMenuItem(
+                      icon: Icons.check_box_outlined,
+                      title: AppLocalizations.of(context)!.selectLinks,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        setState(() {
+                          _isSelectMode = true;
+                          _selectedIds.clear();
+                        });
+                      },
+                    ),
+                    _buildDivider(),
+
+                    // Create Sub-collection
+                    _buildMenuItem(
+                      icon: Icons.create_new_folder_outlined,
+                      title: AppLocalizations.of(context)!.createSubCollection,
+                      trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: AppDimensions.iconSizeLg),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        _showCreateSubCollectionModal(context);
+                      },
+                    ),
+                    _buildDivider(),
+
+                    // Share Collection
+                    _buildMenuItem(
+                      icon: Icons.share_outlined,
+                      title: AppLocalizations.of(context)!.shareCollection,
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: AppDimensions.paddingXl),
-            
-            // Add Link
-            _buildMenuItem(
-              icon: Icons.add,
-              title: AppLocalizations.of(context)!.addLink,
-              onTap: () {
-                Navigator.pop(ctx);
-                _showAddLinkModal(context);
-              },
-            ),
-            _buildDivider(),
-            
-            // Select Links
-            _buildMenuItem(
-              icon: Icons.check_box_outlined,
-              title: AppLocalizations.of(context)!.selectLinks,
-              onTap: () {
-                Navigator.pop(ctx);
-                setState(() {
-                  _isSelectMode = true;
-                  _selectedIds.clear();
-                });
-              },
-            ),
-            _buildDivider(),
-
-            // Create Sub-collection
-            _buildMenuItem(
-              icon: Icons.create_new_folder_outlined,
-              title: AppLocalizations.of(context)!.createSubCollection,
-              trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: AppDimensions.iconSizeLg),
-              onTap: () {
-                Navigator.pop(ctx);
-                _showCreateSubCollectionModal(context);
-              },
-            ),
-            _buildDivider(),
-
-            // Share Collection
-            _buildMenuItem(
-              icon: Icons.share_outlined,
-              title: AppLocalizations.of(context)!.shareCollection,
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
-                );
-              },
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -189,7 +210,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     return InkWell(
       onTap: () { HapticFeedback.lightImpact(); onTap(); },
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
         child: Row(
           children: [
             Icon(icon, size: AppDimensions.iconSizeLg, color: AppTheme.border),
@@ -213,7 +234,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
   Widget _buildDivider() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Container(
         height: 2,
         color: AppTheme.border,
