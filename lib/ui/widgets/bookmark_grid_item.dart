@@ -197,7 +197,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                   Expanded(
                     child: Text(
                       b.title ?? b.url,
-                      style: TextStyle(fontSize: 14, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.bold, height: 1.2),
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
