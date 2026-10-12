@@ -168,7 +168,7 @@ class _CollectionRadialMenuOverlayWidgetState
 
   int _selectedIndex = -1;
 
-  final double buttonRadius = 33.0;
+  final double buttonRadius = 31.0;
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
 
@@ -193,24 +193,22 @@ class _CollectionRadialMenuOverlayWidgetState
       if (isRightSide) {
         _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Edit (Pencil)
-          Offset(widget.cardRect.left - 22.0, widget.cardRect.top + 24.0),
-          // 1: Share
-          Offset(widget.cardRect.left + 24.0, widget.cardRect.top - 20.0),
-          // 2: Delete
-          Offset(widget.cardRect.left + (widget.cardRect.width * 0.49),
-              widget.cardRect.top - 31.0),
+          // 0: Edit (Pencil) - comfortably spaced along upper-left border
+          Offset(widget.cardRect.left - 26.0, widget.cardRect.top + 27.0),
+          // 1: Share - above top-left corner with 16dp gap from Pencil & Delete
+          Offset(widget.cardRect.left + 20.0, widget.cardRect.top - 36.0),
+          // 2: Delete - along top edge with 16dp gap from Share
+          Offset(widget.cardRect.left + 98.0, widget.cardRect.top - 36.0),
         ]);
       } else {
         _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
           // 0: Edit (Pencil)
-          Offset(widget.cardRect.right + 22.0, widget.cardRect.top + 24.0),
+          Offset(widget.cardRect.right + 26.0, widget.cardRect.top + 27.0),
           // 1: Share
-          Offset(widget.cardRect.right - 24.0, widget.cardRect.top - 20.0),
+          Offset(widget.cardRect.right - 20.0, widget.cardRect.top - 36.0),
           // 2: Delete
-          Offset(widget.cardRect.right - (widget.cardRect.width * 0.49),
-              widget.cardRect.top - 31.0),
+          Offset(widget.cardRect.right - 98.0, widget.cardRect.top - 36.0),
         ]);
       }
     }
