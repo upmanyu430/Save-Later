@@ -127,40 +127,44 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
             _selectedIconCode,
           );
     }
-    Navigator.pop(context);
+    if (mounted && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
     
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(
-          top: BorderSide(color: AppTheme.border, width: 3),
-          left: BorderSide(color: AppTheme.border, width: 3),
-          right: BorderSide(color: AppTheme.border, width: 3),
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
         ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 24.0,
-            right: 24.0,
-            top: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24.0,
-          ),
-          child: AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOutCubic,
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Container(
+              decoration: BoxDecoration(
+                color: AppTheme.cardColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppTheme.border, width: 2.5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOutCubic,
+                  alignment: Alignment.topCenter,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                   // Drag handle
                   Center(
                     child: Container(
@@ -178,16 +182,24 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        isEditing
-                            ? AppLocalizations.of(context)!.editCollection
-                            : (widget.parentId != null
-                                ? AppLocalizations.of(context)!.newSubCollection
-                                : AppLocalizations.of(context)!.newCollection),
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      Expanded(
+                        child: Text(
+                          isEditing
+                              ? AppLocalizations.of(context)!.editCollection
+                              : (widget.parentId != null
+                                  ? AppLocalizations.of(context)!.newSubCollection
+                                  : AppLocalizations.of(context)!.newCollection),
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
+                      const SizedBox(width: AppDimensions.paddingSm),
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
                         child: Container(
                           padding: const EdgeInsets.all(AppDimensions.paddingSm),
                           decoration: BoxDecoration(
@@ -367,7 +379,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         ),
       ),
     ),
-  );
-}
+  ),
+),
+),
+);
+  }
 }
 
