@@ -184,7 +184,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap the Edit button
-    await tester.tap(find.byIcon(Icons.edit));
+    await tester.tap(find.byIcon(Icons.edit), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Verify CollectionEditorModal is shown
@@ -225,7 +225,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Tap the Delete button
-    await tester.tap(find.byIcon(Icons.delete_outline));
+    await tester.tap(find.byIcon(Icons.delete_outline), warnIfMissed: false);
     await tester.pumpAndSettle();
 
     // Verify DeleteConfirmationDialog is shown

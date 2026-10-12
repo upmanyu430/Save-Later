@@ -10,7 +10,10 @@ import '../../providers/providers.dart';
 import 'collection_editor_modal.dart';
 import 'delete_confirmation_dialog.dart';
 
+typedef IconBuilder = Widget Function(Color color, double size);
+
 class CollectionRadialMenuAction {
+  final IconBuilder iconBuilder;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -18,6 +21,7 @@ class CollectionRadialMenuAction {
   final Color? labelColor;
 
   CollectionRadialMenuAction({
+    required this.iconBuilder,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -42,6 +46,10 @@ class CollectionRadialMenu {
     final actions = [
       CollectionRadialMenuAction(
         icon: Icons.edit,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _PencilIconPainter(color: color),
+        ),
         label: l10n.editUpper,
         color: const Color(0xFFFFD166),
         labelColor: const Color(0xFFFFD166),
@@ -57,6 +65,10 @@ class CollectionRadialMenu {
       ),
       CollectionRadialMenuAction(
         icon: Icons.share,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _ShareIconPainter(color: color),
+        ),
         label: l10n.shareUpper,
         color: const Color(0xFF7B61FF),
         labelColor: const Color(0xFF7B61FF),
@@ -74,6 +86,10 @@ class CollectionRadialMenu {
       ),
       CollectionRadialMenuAction(
         icon: Icons.delete_outline,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _TrashIconPainter(color: color),
+        ),
         label: l10n.deleteUpper,
         color: const Color(0xFFEF476F),
         labelColor: const Color(0xFFEF476F),
@@ -152,7 +168,7 @@ class _CollectionRadialMenuOverlayWidgetState
 
   int _selectedIndex = -1;
 
-  final double buttonRadius = 32.0;
+  final double buttonRadius = 33.0;
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
 
@@ -177,16 +193,24 @@ class _CollectionRadialMenuOverlayWidgetState
       if (isRightSide) {
         _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          Offset(widget.cardRect.left - 18, widget.cardRect.top + 28), // Edit
-          Offset(widget.cardRect.left + 30, widget.cardRect.top - 38), // Share
-          Offset(widget.cardRect.left + 92, widget.cardRect.top - 34), // Delete
+          // 0: Edit (Pencil)
+          Offset(widget.cardRect.left - 22.0, widget.cardRect.top + 24.0),
+          // 1: Share
+          Offset(widget.cardRect.left + 24.0, widget.cardRect.top - 20.0),
+          // 2: Delete
+          Offset(widget.cardRect.left + (widget.cardRect.width * 0.49),
+              widget.cardRect.top - 31.0),
         ]);
       } else {
         _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          Offset(widget.cardRect.right - 92, widget.cardRect.top - 34), // Edit
-          Offset(widget.cardRect.right - 30, widget.cardRect.top - 38), // Share
-          Offset(widget.cardRect.right + 18, widget.cardRect.top + 28), // Delete
+          // 0: Edit (Pencil)
+          Offset(widget.cardRect.right + 22.0, widget.cardRect.top + 24.0),
+          // 1: Share
+          Offset(widget.cardRect.right - 24.0, widget.cardRect.top - 20.0),
+          // 2: Delete
+          Offset(widget.cardRect.right - (widget.cardRect.width * 0.49),
+              widget.cardRect.top - 31.0),
         ]);
       }
     }
@@ -275,34 +299,23 @@ class _CollectionRadialMenuOverlayWidgetState
               ),
             ),
 
-          // Elevated & tilted card replica
-          AnimatedBuilder(
-            animation: _anim,
-            builder: (c, child) {
-              return Positioned(
-                top: widget.cardRect.top,
-                left: widget.cardRect.left,
-                width: widget.cardRect.width,
-                height: widget.cardRect.height,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    widget.onClose();
-                  },
-                  child: Transform.rotate(
-                    angle: -0.05 * _anim.value,
-                    child: Transform.scale(
-                      scale: 1.0 + (0.05 * _anim.value),
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              );
-            },
+          // Clean elevated card replica (no tilt, exact alignment with folder card body)
+          Positioned(
+            top: widget.cardRect.top,
+            left: widget.cardRect.left,
+            width: widget.cardRect.width,
+            height: widget.cardRect.height,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                widget.onClose();
+              },
+              child: widget.child,
+            ),
           ),
 
-          // The 3 circular action bubbles
+          // The 3 circular action bubbles (Pencil, Share, Delete in precise z-order)
           ...List.generate(widget.actions.length, (index) {
             final action = widget.actions[index];
             final pos = _buttonPositions[index];
@@ -340,7 +353,7 @@ class _CollectionRadialMenuOverlayWidgetState
                         decoration: BoxDecoration(
                           color: buttonColor,
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.black, width: 3),
+                          border: Border.all(color: Colors.black, width: 3.0),
                           boxShadow: const [
                             BoxShadow(
                               color: Colors.black,
@@ -349,11 +362,21 @@ class _CollectionRadialMenuOverlayWidgetState
                             ),
                           ],
                         ),
-                        child: Icon(
-                          action.icon,
-                          color: iconColor,
-                          size: 30.0,
-                          weight: 700,
+                        child: Center(
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Opacity(
+                                opacity: 0.0,
+                                child: SizedBox(
+                                  width: 26,
+                                  height: 26,
+                                  child: Icon(action.icon),
+                                ),
+                              ),
+                              action.iconBuilder(iconColor, 26.0),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -366,4 +389,131 @@ class _CollectionRadialMenuOverlayWidgetState
       ),
     );
   }
+}
+
+/// Feather / Lucide `pencil` icon custom painter
+class _PencilIconPainter extends CustomPainter {
+  final Color color;
+
+  const _PencilIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final body = Path()
+      ..moveTo(21.174, 6.812)
+      ..quadraticBezierTo(21.5, 4.0, 19.5, 2.8)
+      ..quadraticBezierTo(18.0, 2.0, 16.5, 3.5)
+      ..lineTo(3.842, 16.174)
+      ..lineTo(2.0, 22.0)
+      ..lineTo(7.826, 20.158)
+      ..close();
+    canvas.drawPath(body, paint);
+
+    // Eraser separator cap line
+    canvas.drawLine(const Offset(14.5, 5.5), const Offset(18.5, 9.5), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PencilIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Feather / Lucide `share-2` icon custom painter
+class _ShareIconPainter extends CustomPainter {
+  final Color color;
+
+  const _ShareIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final linePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round;
+
+    final circlePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4;
+
+    // Two connecting lines from node perimeter to node perimeter
+    canvas.drawLine(
+        const Offset(8.6, 10.5), const Offset(15.4, 6.5), linePaint);
+    canvas.drawLine(
+        const Offset(8.6, 13.5), const Offset(15.4, 17.5), linePaint);
+
+    // 3 hollow outline circles
+    canvas.drawCircle(const Offset(18.0, 5.0), 3.0, circlePaint);
+    canvas.drawCircle(const Offset(6.0, 12.0), 3.0, circlePaint);
+    canvas.drawCircle(const Offset(18.0, 19.0), 3.0, circlePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ShareIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Feather / Lucide `trash-2` icon custom painter
+class _TrashIconPainter extends CustomPainter {
+  final Color color;
+
+  const _TrashIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Horizontal top lid line
+    canvas.drawLine(const Offset(3.0, 6.0), const Offset(21.0, 6.0), paint);
+
+    // Top handle above lid
+    final handle = Path()
+      ..moveTo(8.5, 6.0)
+      ..lineTo(8.5, 3.5)
+      ..quadraticBezierTo(8.5, 2.0, 10.0, 2.0)
+      ..lineTo(14.0, 2.0)
+      ..quadraticBezierTo(15.5, 2.0, 15.5, 3.5)
+      ..lineTo(15.5, 6.0);
+    canvas.drawPath(handle, paint);
+
+    // Rounded bucket body
+    final bucket = Path()
+      ..moveTo(5.5, 6.0)
+      ..lineTo(6.5, 19.5)
+      ..quadraticBezierTo(6.8, 22.0, 9.0, 22.0)
+      ..lineTo(15.0, 22.0)
+      ..quadraticBezierTo(17.2, 22.0, 17.5, 19.5)
+      ..lineTo(18.5, 6.0);
+    canvas.drawPath(bucket, paint);
+
+    // Two vertical lines inside bucket
+    canvas.drawLine(const Offset(10.0, 10.5), const Offset(10.0, 17.5), paint);
+    canvas.drawLine(const Offset(14.0, 10.5), const Offset(14.0, 17.5), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrashIconPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

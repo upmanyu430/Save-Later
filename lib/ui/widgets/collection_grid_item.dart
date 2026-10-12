@@ -27,8 +27,9 @@ class CollectionGridItem extends ConsumerStatefulWidget {
 
 class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   final GlobalKey _cardKey = GlobalKey();
+  final GlobalKey _cardBodyKey = GlobalKey();
 
-  Widget _buildFolderBox() {
+  Widget _buildFolderBox({bool showTab = true}) {
     final l10n = AppLocalizations.of(context)!;
     return FolderBox(
       forceBold: true,
@@ -41,21 +42,37 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
       ),
       onTap: widget.onTap,
       hasNewItems: widget.hasNewItems,
+      showTab: showTab,
     );
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
     HapticFeedback.mediumImpact();
-    final renderBox =
+    final bodyBox =
+        _cardBodyKey.currentContext?.findRenderObject() as RenderBox?;
+    final cardBox =
         _cardKey.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox != null) {
-      final size = renderBox.size;
-      final position = renderBox.localToGlobal(Offset.zero);
-      final rect = position & size;
 
+    Rect? rect;
+    if (bodyBox != null) {
+      final size = bodyBox.size;
+      final position = bodyBox.localToGlobal(Offset.zero);
+      rect = position & size;
+    } else if (cardBox != null) {
+      final size = cardBox.size;
+      final position = cardBox.localToGlobal(Offset.zero);
+      rect = Rect.fromLTWH(
+        position.dx,
+        position.dy + 15.0,
+        size.width,
+        (size.height - 15.0).clamp(1.0, double.infinity),
+      );
+    }
+
+    if (rect != null) {
       CollectionRadialMenu.show(
         context: context,
-        child: _buildFolderBox(),
+        child: _buildFolderBox(showTab: false),
         collection: widget.collection,
         cardRect: rect,
         ref: ref,
@@ -83,6 +100,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
     return Container(
       key: _cardKey,
       child: FolderBox(
+        bodyKey: _cardBodyKey,
         forceBold: true,
         title: widget.collection.name,
         itemCountText: l10n.itemsCount(widget.itemCount),
