@@ -125,10 +125,9 @@ void main() {
 
   group('Empty Collection Folder Tests', () {
     testWidgets('renders EmptyFolderGraphic and EmptyCollectionView correctly', (tester) async {
-      bool seeHowTapped = false;
       await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: const [
+        const MaterialApp(
+          localizationsDelegates: [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
@@ -136,11 +135,7 @@ void main() {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
-            body: EmptyCollectionView(
-              onSeeHowPressed: () {
-                seeHowTapped = true;
-              },
-            ),
+            body: EmptyCollectionView(),
           ),
         ),
       );
@@ -149,11 +144,7 @@ void main() {
       expect(find.byType(EmptyFolderGraphic), findsOneWidget);
       expect(find.text('No items yet'), findsOneWidget);
       expect(find.text('Tap + or share to save one.'), findsOneWidget);
-      expect(find.text('See how'), findsOneWidget);
-
-      await tester.tap(find.text('See how'));
-      await tester.pump();
-      expect(seeHowTapped, isTrue);
+      expect(find.text('See how'), findsNothing);
     });
 
     testWidgets('CollectionDetailScreen displays empty state when collection has 0 items and 0 subcollections', (tester) async {
@@ -185,7 +176,7 @@ void main() {
       expect(find.byType(EmptyFolderGraphic), findsOneWidget);
       expect(find.text('No items yet'), findsOneWidget);
       expect(find.text('Tap + or share to save one.'), findsOneWidget);
-      expect(find.text('See how'), findsOneWidget);
+      expect(find.text('See how'), findsNothing);
     });
 
     testWidgets('CollectionDetailScreen displays subcollections and SAVES (0) empty state when 0 bookmarks', (tester) async {
