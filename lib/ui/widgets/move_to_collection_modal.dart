@@ -92,52 +92,60 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   @override
   Widget build(BuildContext context) {
     final collectionsAsync = ref.watch(allCollectionsProvider);
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        border: Border(
-          top: BorderSide(color: AppTheme.border, width: 2.5),
-          left: BorderSide(color: AppTheme.border, width: 2.5),
-          right: BorderSide(color: AppTheme.border, width: 2.5),
+    return SafeArea(
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
         ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 16 + bottomInset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top Grab Handle
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4.5,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.border,
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppTheme.border, width: 2.5),
               ),
-
-              // Header Row: Title & Action Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Move to Collection',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.border,
-                      letterSpacing: -0.3,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Top Grab Handle
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: AppTheme.border,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                  ),
+
+                    // Header Row: Title & Action Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Move to Collection',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.border,
+                              letterSpacing: -0.3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: AppDimensions.paddingSm),
                   GestureDetector(
                     onTap: _openCreateCollection,
                     child: NeoBox(
@@ -354,6 +362,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           ),
         ),
       ),
-    );
+    ),
+  ),
+),
+);
   }
 }
