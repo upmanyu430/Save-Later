@@ -45,8 +45,8 @@ class BookmarkRadialMenu {
         icon: Icons.open_in_new, 
         label: l10n.openUpper, 
         color: const Color(0xFF26D5A8),
-        onTap: () {
-          openUrl(bookmark.url);
+        onTap: () async {
+          await openUrl(bookmark.url, context: context);
         }
       ),
       RadialMenuAction(

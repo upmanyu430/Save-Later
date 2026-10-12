@@ -11,6 +11,7 @@ import '../widgets/neo_box.dart';
 import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_config.dart';
+import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -59,11 +60,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _openUrl(String url) async {
     if (_hapticFeedback) HapticFeedback.selectionClick();
-    try {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } catch (e) {
-      debugPrint('Could not launch \$url: \$e');
-    }
+    await openUrl(url, context: context);
   }
 
   Future<void> _sendFeedback() async {

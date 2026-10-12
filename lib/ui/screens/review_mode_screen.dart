@@ -498,7 +498,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     color: const Color(0xFFFFD166),
                     borderRadius: AppDimensions.radiusXl,
                     padding: EdgeInsets.zero,
-                    onPressed: () => openUrl(unreadBookmarks[currentIndex].url),
+                    onPressed: () async {
+                      await openUrl(unreadBookmarks[currentIndex].url, context: context);
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

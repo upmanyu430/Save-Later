@@ -544,7 +544,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
                         // Open Link Button
                         GestureDetector(
-                          onTap: () { HapticFeedback.lightImpact(); openUrl(bookmark.url); },
+                          onTap: () async {
+                            HapticFeedback.lightImpact();
+                            await openUrl(bookmark.url, context: context);
+                          },
                           child: NeoBox(
                             color: const Color(0xFFFFD166), // Yellow
                             padding: EdgeInsets.all(AppDimensions.paddingLg),

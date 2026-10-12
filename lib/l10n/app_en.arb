@@ -377,6 +377,10 @@
   "@couldNotOpenEmailClient": {
     "description": "Snackbar message when opening email client fails"
   },
+  "couldNotOpenLink": "Could not open link",
+  "@couldNotOpenLink": {
+    "description": "Snackbar message when opening a link fails"
+  },
   "deleteAllDataTitle": "Delete All Data?",
   "@deleteAllDataTitle": {
     "description": "Confirmation title to delete all data"
