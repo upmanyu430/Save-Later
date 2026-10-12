@@ -12,6 +12,7 @@ import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/no_url_dialog.dart';
 import '../widgets/folder_box.dart';
+import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
@@ -348,16 +349,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               final bookmarks = countAsync.valueOrNull ?? [];
                               final count = bookmarks.length;
                               final hasNew = bookmarks.any((b) => !b.isRead);
-                              return FolderBox(
-                                forceBold: true,
-                                title: col.name,
-                                itemCountText: l10n.itemsCount(count),
-                                folderColor: col.color,
-                                icon: IconData(col.iconCodePoint,
-                                    fontFamily: col.iconFontFamily),
+                              return CollectionGridItem(
+                                collection: col,
+                                itemCount: count,
+                                hasNewItems: hasNew,
                                 onTap: () => _pushRoute('/collection/${col.id}',
                                     extra: col),
-                                hasNewItems: hasNew,
                               );
                             });
                           },

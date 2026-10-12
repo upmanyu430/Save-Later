@@ -426,6 +426,23 @@
   "@deleteUpper": {
     "description": "Radial menu action label to delete bookmark"
   },
+  "editUpper": "EDIT",
+  "@editUpper": {
+    "description": "Radial menu action label to edit collection"
+  },
+  "deleteCollection": "Delete collection",
+  "@deleteCollection": {
+    "description": "Title for delete collection dialog"
+  },
+  "deleteCollectionMessage": "Permanently delete \"{name}\"? Links inside will be moved to Unsorted.",
+  "@deleteCollectionMessage": {
+    "description": "Message for delete collection dialog",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "editCollection": "Edit collection",
   "@editCollection": {
     "description": "Modal title for editing an existing collection"

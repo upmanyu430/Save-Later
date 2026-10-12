@@ -326,6 +326,21 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(e, st);
     }
   }
+
+  Future<void> deleteCollection(BookmarkCollection collection) async {
+    state = const AsyncValue.loading();
+    try {
+      final repo = ref.read(repositoryProvider);
+      await repo.deleteCollection(collection.id);
+      ref.invalidate(collectionsProvider);
+      ref.invalidate(unsortedBookmarksProvider);
+      ref.invalidate(collectionBookmarksProvider(collection.id));
+      ref.invalidate(bookmarksProvider);
+      state = const AsyncValue.data(null);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
 }
 
 final collectionNotifierProvider =

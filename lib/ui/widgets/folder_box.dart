@@ -13,6 +13,10 @@ class FolderBox extends StatelessWidget {
   final bool hasNewItems;
   final IconData icon;
   final bool forceBold;
+  final GestureLongPressStartCallback? onLongPressStart;
+  final GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
+  final GestureLongPressEndCallback? onLongPressEnd;
+  final VoidCallback? onLongPressCancel;
 
   const FolderBox({
     super.key,
@@ -23,12 +27,20 @@ class FolderBox extends StatelessWidget {
     this.hasNewItems = false,
     this.icon = Icons.folder_outlined,
     this.forceBold = false,
+    this.onLongPressStart,
+    this.onLongPressMoveUpdate,
+    this.onLongPressEnd,
+    this.onLongPressCancel,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () { HapticFeedback.lightImpact(); onTap(); },
+      onLongPressStart: onLongPressStart,
+      onLongPressMoveUpdate: onLongPressMoveUpdate,
+      onLongPressEnd: onLongPressEnd,
+      onLongPressCancel: onLongPressCancel,
       child: Stack(
         clipBehavior: Clip.none,
         children: [

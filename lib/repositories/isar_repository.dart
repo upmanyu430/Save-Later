@@ -36,6 +36,21 @@ class IsarRepository {
     });
   }
 
+  Future<void> deleteCollection(Id collectionId) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      final bookmarks = await isar.bookmarks
+          .filter()
+          .collection((q) => q.idEqualTo(collectionId))
+          .findAll();
+      for (final b in bookmarks) {
+        b.collection.value = null;
+        await b.collection.save();
+      }
+      await isar.bookmarkCollections.delete(collectionId);
+    });
+  }
+
   // --- Bookmark Methods ---
   Future<List<Bookmark>> getBookmarks() async {
     final isar = await db;
