@@ -153,6 +153,23 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
+  Future<void> togglePin(Bookmark bookmark) async {
+    final repo = ref.read(repositoryProvider);
+    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+      try {
+        await bookmark.collection.load();
+      } catch (_) {}
+    }
+    bookmark.isPinned = !bookmark.isPinned;
+    await repo.updateBookmark(bookmark);
+    ref.invalidate(bookmarksProvider);
+    ref.invalidate(unsortedBookmarksProvider);
+    if (bookmark.collection.value != null) {
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
+    }
+  }
+
   Future<void> moveToCollection(Bookmark bookmark, BookmarkCollection collection) async {
     await moveBookmarksToCollection([bookmark], collection);
   }

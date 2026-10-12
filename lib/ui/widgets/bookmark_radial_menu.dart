@@ -54,13 +54,7 @@ class BookmarkRadialMenu {
         label: l10n.pinUpper, 
         color: const Color(0xFFFFD166),
         onTap: () async {
-          bookmark.isPinned = !bookmark.isPinned;
-          await ref.read(repositoryProvider).updateBookmark(bookmark);
-          ref.invalidate(bookmarksProvider);
-          if (bookmark.collection.value != null) {
-            ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-          }
-          ref.invalidate(unsortedBookmarksProvider);
+          await ref.read(bookmarkNotifierProvider.notifier).togglePin(bookmark);
         }
       ),
       RadialMenuAction(

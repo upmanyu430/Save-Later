@@ -803,15 +803,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           GestureDetector(
                             onTap: () async {
                               HapticFeedback.lightImpact();
-                              setState(() {
-                                bookmark.isPinned = !bookmark.isPinned;
-                              });
-                              await ref.read(repositoryProvider).updateBookmark(bookmark);
-                              ref.invalidate(bookmarksProvider);
-                              if (bookmark.collection.value != null) {
-                                ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                              await ref.read(bookmarkNotifierProvider.notifier).togglePin(bookmark);
+                              if (mounted) {
+                                setState(() {});
                               }
-                              ref.invalidate(unsortedBookmarksProvider);
                             },
                             child: NeoBox(
                               padding: const EdgeInsets.all(AppDimensions.paddingSm),
