@@ -1,3 +1,4 @@
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -35,6 +36,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   bool _isEditingNotes = false;
   bool _notesEdited = false;
   late String _lastSavedNotes;
+  bool _isTopBarVisible = true;
 
   @override
   void initState() {
@@ -276,7 +278,27 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             child: SafeArea(
               top: false,
               bottom: false,
-              child: CustomScrollView(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification is UserScrollNotification) {
+                    if (notification.direction == ScrollDirection.reverse &&
+                        notification.metrics.pixels > 20) {
+                      if (_isTopBarVisible) {
+                        setState(() => _isTopBarVisible = false);
+                      }
+                    } else if (notification.direction == ScrollDirection.forward) {
+                      if (!_isTopBarVisible) {
+                        setState(() => _isTopBarVisible = true);
+                      }
+                    }
+                  } else if (notification is ScrollUpdateNotification) {
+                    if (notification.metrics.pixels <= 20 && !_isTopBarVisible) {
+                      setState(() => _isTopBarVisible = true);
+                    }
+                  }
+                  return false;
+                },
+                child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
                   child: SizedBox(height: MediaQuery.of(context).size.height * 0.28),
@@ -733,54 +755,67 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 ),
               ],
             ),
+          ),
             ),
           ),
 
           // 3. Top Floating App Bar
           Positioned(
             top: 0, left: 0, right: 0,
-            child: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () { HapticFeedback.lightImpact(); context.pop(); },
-                      child: NeoBox(
-                        padding: EdgeInsets.all(AppDimensions.paddingSm),
-                        color: AppTheme.background,
-                        borderRadius: AppDimensions.radiusMd,
-                        borderWidth: AppDimensions.borderWidthMd,
-                        child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+            child: AnimatedSlide(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              offset: _isTopBarVisible ? Offset.zero : const Offset(0, -1.3),
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: _isTopBarVisible ? 1.0 : 0.0,
+                child: IgnorePointer(
+                  ignoring: !_isTopBarVisible,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () { HapticFeedback.lightImpact(); context.pop(); },
+                            child: NeoBox(
+                              padding: EdgeInsets.all(AppDimensions.paddingSm),
+                              color: AppTheme.background,
+                              borderRadius: AppDimensions.radiusMd,
+                              borderWidth: AppDimensions.borderWidthMd,
+                              child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () async {
+                              HapticFeedback.lightImpact();
+                              setState(() {
+                                bookmark.isPinned = !bookmark.isPinned;
+                              });
+                              await ref.read(repositoryProvider).updateBookmark(bookmark);
+                              ref.invalidate(bookmarksProvider);
+                              if (bookmark.collection.value != null) {
+                                ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                              }
+                              ref.invalidate(unsortedBookmarksProvider);
+                            },
+                            child: NeoBox(
+                              padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                              color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
+                              borderRadius: AppDimensions.radiusMd,
+                              borderWidth: AppDimensions.borderWidthMd,
+                              child: PinIcon(
+                                isPinned: bookmark.isPinned,
+                                size: AppDimensions.iconSizeMd,
+                                color: AppTheme.border,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () async {
-                        HapticFeedback.lightImpact();
-                        setState(() {
-                          bookmark.isPinned = !bookmark.isPinned;
-                        });
-                        await ref.read(repositoryProvider).updateBookmark(bookmark);
-                        ref.invalidate(bookmarksProvider);
-                        if (bookmark.collection.value != null) {
-                          ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-                        }
-                        ref.invalidate(unsortedBookmarksProvider);
-                      },
-                      child: NeoBox(
-                        padding: const EdgeInsets.all(AppDimensions.paddingSm),
-                        color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
-                        borderRadius: AppDimensions.radiusMd,
-                        borderWidth: AppDimensions.borderWidthMd,
-                        child: PinIcon(
-                          isPinned: bookmark.isPinned,
-                          size: AppDimensions.iconSizeMd,
-                          color: AppTheme.border,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
