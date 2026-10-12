@@ -367,12 +367,12 @@ void main() {
     final distEditShare = (editCenter - shareCenter).distance;
     final distShareDelete = (shareCenter - deleteCenter).distance;
 
-    // Center-to-center distance should be equal (~78.0 dp)
+    // Center-to-center distance should be equal (~70.0 dp)
     expect((distEditShare - distShareDelete).abs(), lessThan(1.0));
-    expect(distEditShare, closeTo(78.0, 1.0));
+    expect(distEditShare, closeTo(70.0, 1.0));
 
-    // Inter-button gap with button diameter 62.0 dp (2 * 31.0)
-    final gap = distEditShare - 62.0;
-    expect(gap, closeTo(16.0, 4.0));
+    // Inter-button gap with button diameter 68.0 dp (2 * 34.0)
+    final gap = distEditShare - 68.0;
+    expect(gap, closeTo(2.0, 1.0));
   });
 }

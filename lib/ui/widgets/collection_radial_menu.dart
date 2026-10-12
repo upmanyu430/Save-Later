@@ -118,7 +118,11 @@ class CollectionRadialMenu {
     Overlay.of(context).insert(_overlayEntry!);
   }
 
-  static void dismiss() {
+  static void dismiss({bool animated = false}) {
+    if (animated && _overlayStateKey.currentState != null) {
+      _overlayStateKey.currentState!.dismissAnimated();
+      return;
+    }
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
@@ -167,19 +171,26 @@ class _CollectionRadialMenuOverlayWidgetState
   late Animation<double> _anim;
 
   int _selectedIndex = -1;
+  bool _isDismissing = false;
 
-  final double buttonRadius = 31.0;
+  final double buttonRadius = 34.0;
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
+  late bool _isRightSide;
 
   @override
   void initState() {
     super.initState();
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 240),
+      reverseDuration: const Duration(milliseconds: 180),
     );
-    _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
+    _anim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutBack,
+      reverseCurve: Curves.easeInCubic,
+    );
     _animController.forward();
   }
 
@@ -188,27 +199,27 @@ class _CollectionRadialMenuOverlayWidgetState
     super.didChangeDependencies();
     if (_buttonPositions.isEmpty) {
       final screenWidth = MediaQuery.sizeOf(context).width;
-      final isRightSide = widget.cardRect.center.dx > screenWidth / 2;
+      _isRightSide = widget.cardRect.center.dx > screenWidth / 2;
 
-      if (isRightSide) {
+      if (_isRightSide) {
         _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Edit (Pencil) - comfortably spaced along upper-left border
-          Offset(widget.cardRect.left - 26.0, widget.cardRect.top + 27.0),
-          // 1: Share - above top-left corner with 16dp gap from Pencil & Delete
-          Offset(widget.cardRect.left + 20.0, widget.cardRect.top - 36.0),
-          // 2: Delete - along top edge with 16dp gap from Share
-          Offset(widget.cardRect.left + 98.0, widget.cardRect.top - 36.0),
+          // 0: Edit (Pencil) - sits along left edge of tilted folder card
+          Offset(widget.cardRect.left - 18.0, widget.cardRect.top + 36.0),
+          // 1: Share - tangent to Pencil, sits right above top-left corner
+          Offset(widget.cardRect.left + 24.0, widget.cardRect.top - 20.0),
+          // 2: Delete - tangent to Share, sits along top edge of tilted card
+          Offset(widget.cardRect.left + 94.0, widget.cardRect.top - 24.0),
         ]);
       } else {
         _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Edit (Pencil)
-          Offset(widget.cardRect.right + 26.0, widget.cardRect.top + 27.0),
-          // 1: Share
-          Offset(widget.cardRect.right - 20.0, widget.cardRect.top - 36.0),
-          // 2: Delete
-          Offset(widget.cardRect.right - 98.0, widget.cardRect.top - 36.0),
+          // 0: Edit (Pencil) - sits along right edge of tilted folder card
+          Offset(widget.cardRect.right + 18.0, widget.cardRect.top + 36.0),
+          // 1: Share - tangent to Pencil, sits right above top-right corner
+          Offset(widget.cardRect.right - 24.0, widget.cardRect.top - 20.0),
+          // 2: Delete - tangent to Share, sits along top edge of tilted card
+          Offset(widget.cardRect.right - 94.0, widget.cardRect.top - 24.0),
         ]);
       }
     }
@@ -242,6 +253,15 @@ class _CollectionRadialMenuOverlayWidgetState
     return false;
   }
 
+  Future<void> dismissAnimated() async {
+    if (_isDismissing) return;
+    _isDismissing = true;
+    try {
+      await _animController.reverse();
+    } catch (_) {}
+    widget.onClose();
+  }
+
   @override
   void dispose() {
     _animController.dispose();
@@ -257,133 +277,159 @@ class _CollectionRadialMenuOverlayWidgetState
         ? Colors.white
         : widget.actions[_selectedIndex].labelColor ?? Colors.white;
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          // Background dim
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              widget.onClose();
-            },
-            child: AnimatedBuilder(
-              animation: _anim,
-              builder: (c, _) => Container(
-                color: Colors.black.withValues(alpha: 0.85 * _anim.value),
-              ),
-            ),
-          ),
+    // Tilt angle matches bookmarks long press aesthetic (+2.6 deg for right side, -2.6 deg for left)
+    final tiltAngle = _isRightSide ? 0.045 : -0.045;
 
-          // Action label in center of screen
-          if (_selectedIndex != -1)
-            Positioned.fill(
-              child: Center(
-                child: AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: AppDurations.animationFast,
-                  child: Text(
-                    widget.actions[_selectedIndex].label,
-                    textScaler: TextScaler.noScaling,
-                    style: TextStyle(
-                      color: selectedLabelColor,
-                      fontSize: selectedLabelFontSize,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4,
-                    ),
-                  ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          dismissAnimated();
+        }
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          children: [
+            // Background dim
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                dismissAnimated();
+              },
+              child: AnimatedBuilder(
+                animation: _anim,
+                builder: (c, _) => Container(
+                  color: Colors.black.withValues(alpha: 0.85 * _anim.value),
                 ),
               ),
             ),
 
-          // Clean elevated card replica (no tilt, exact alignment with folder card body)
-          Positioned(
-            top: widget.cardRect.top,
-            left: widget.cardRect.left,
-            width: widget.cardRect.width,
-            height: widget.cardRect.height,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                widget.onClose();
-              },
-              child: widget.child,
-            ),
-          ),
+            // Action label in center of screen
+            if (_selectedIndex != -1)
+              Positioned.fill(
+                child: Center(
+                  child: AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: AppDurations.animationFast,
+                    child: Text(
+                      widget.actions[_selectedIndex].label,
+                      textScaler: TextScaler.noScaling,
+                      style: TextStyle(
+                        color: selectedLabelColor,
+                        fontSize: selectedLabelFontSize,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 4,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
 
-          // The 3 circular action bubbles (Pencil, Share, Delete in precise z-order)
-          ...List.generate(widget.actions.length, (index) {
-            final action = widget.actions[index];
-            final pos = _buttonPositions[index];
-            final isSelected = index == _selectedIndex;
-
-            return AnimatedBuilder(
+            // Elevated card replica with smooth entrance animation and tilt matching bookmarks
+            AnimatedBuilder(
               animation: _anim,
               builder: (context, _) {
-                final currentDx =
-                    _origin.dx + (pos.dx - _origin.dx) * _anim.value;
-                final currentDy =
-                    _origin.dy + (pos.dy - _origin.dy) * _anim.value;
-
-                final scale = _anim.value * (isSelected ? 1.25 : 1.0);
-                final buttonColor = isSelected ? action.color : Colors.white;
-                final iconColor = buttonColor.computeLuminance() < 0.5
-                    ? Colors.white
-                    : Colors.black;
-
                 return Positioned(
-                  left: currentDx - buttonRadius,
-                  top: currentDy - buttonRadius,
-                  width: buttonRadius * 2,
-                  height: buttonRadius * 2,
+                  top: widget.cardRect.top,
+                  left: widget.cardRect.left,
+                  width: widget.cardRect.width,
+                  height: widget.cardRect.height,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      widget.onClose();
-                      action.onTap();
+                      dismissAnimated();
                     },
-                    child: Transform.scale(
-                      scale: scale,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: buttonColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.black, width: 3.0),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black,
-                              offset: Offset(2, 2),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Opacity(
-                                opacity: 0.0,
-                                child: SizedBox(
-                                  width: 26,
-                                  height: 26,
-                                  child: Icon(action.icon),
-                                ),
-                              ),
-                              action.iconBuilder(iconColor, 26.0),
-                            ],
-                          ),
-                        ),
+                    child: Transform.rotate(
+                      angle: tiltAngle * _anim.value,
+                      child: Transform.scale(
+                        scale: 1.0 + (0.045 * _anim.value),
+                        child: widget.child,
                       ),
                     ),
                   ),
                 );
               },
-            );
-          }),
-        ],
+            ),
+
+            // The 3 circular action bubbles (Pencil, Share, Delete in precise tangent z-order)
+            ...List.generate(widget.actions.length, (index) {
+              final action = widget.actions[index];
+              final pos = _buttonPositions[index];
+              final isSelected = index == _selectedIndex;
+
+              return AnimatedBuilder(
+                animation: _anim,
+                builder: (context, _) {
+                  final currentDx =
+                      _origin.dx + (pos.dx - _origin.dx) * _anim.value;
+                  final currentDy =
+                      _origin.dy + (pos.dy - _origin.dy) * _anim.value;
+
+                  final buttonColor = isSelected ? action.color : Colors.white;
+                  final iconColor = buttonColor.computeLuminance() < 0.5
+                      ? Colors.white
+                      : Colors.black;
+
+                  return Positioned(
+                    left: currentDx - buttonRadius,
+                    top: currentDy - buttonRadius,
+                    width: buttonRadius * 2,
+                    height: buttonRadius * 2,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        CollectionRadialMenu.dismiss();
+                        action.onTap();
+                      },
+                      child: Transform.scale(
+                        scale: _anim.value,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 140),
+                          curve: Curves.easeOutBack,
+                          scale: isSelected ? 1.25 : 1.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: buttonColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.black, width: 3.0),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(1.5, 1.5),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Opacity(
+                                    opacity: 0.0,
+                                    child: SizedBox(
+                                      width: 26,
+                                      height: 26,
+                                      child: Icon(action.icon),
+                                    ),
+                                  ),
+                                  action.iconBuilder(iconColor, 26.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
