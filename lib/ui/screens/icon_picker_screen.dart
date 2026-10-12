@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../config/app_constants.dart';
 import '../../theme/app_theme.dart';
-import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 
 class IconItem {
@@ -140,7 +139,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     IconItem(icon: Icons.radio_outlined, name: 'Radio', category: 'Media & Art', keywords: ['broadcast', 'fm', 'podcast', 'audio']),
     IconItem(icon: Icons.album_outlined, name: 'Vinyl', category: 'Media & Art', keywords: ['album', 'record', 'disc', 'music']),
     IconItem(icon: Icons.tv, name: 'TV', category: 'Media & Art', keywords: ['television', 'screen', 'stream', 'display']),
-    IconItem(icon: Icons.theater_masks_outlined, name: 'Theatre', category: 'Media & Art', keywords: ['drama', 'acting', 'performance', 'show']),
+    IconItem(icon: Icons.theater_comedy_outlined, name: 'Theatre', category: 'Media & Art', keywords: ['drama', 'acting', 'performance', 'show']),
 
     // Food & Drink
     IconItem(icon: Icons.local_cafe_outlined, name: 'Coffee', category: 'Food & Drink', keywords: ['tea', 'cafe', 'espresso', 'mug', 'cup', 'drink', 'beverage']),

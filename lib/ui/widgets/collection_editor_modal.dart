@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import '../screens/icon_picker_screen.dart';
 import 'neo_button.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -29,13 +30,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     'F5DEB3', 'BDC3C7', '7F8C8D', '9B59B6', 'A0522D', '1C1C1C', 'E74C3C', '6A5ACD',
   ];
 
-  final List<IconData> _icons = [
+  final List<IconData> _quickIcons = [
     Icons.folder_outlined, Icons.star_outline, Icons.favorite_outline, Icons.menu_book, Icons.music_note_outlined, Icons.camera_alt_outlined, Icons.flag_outlined, Icons.nightlight_outlined,
     Icons.wb_sunny_outlined, Icons.cloud_outlined, Icons.location_on_outlined, Icons.calendar_today_outlined, Icons.public, Icons.card_giftcard, Icons.eco_outlined, Icons.work_outline,
-    Icons.shopping_cart_outlined, Icons.flight_takeoff, Icons.directions_car_outlined, Icons.local_cafe_outlined, Icons.movie_outlined, Icons.headphones_outlined, Icons.palette_outlined, Icons.sports_esports_outlined,
-    Icons.fitness_center, Icons.attach_money, Icons.phone_outlined, Icons.desktop_windows_outlined, Icons.access_time, Icons.lightbulb_outline, Icons.school_outlined, Icons.shield_outlined,
-    Icons.restaurant_outlined, Icons.tv, Icons.notifications_none, Icons.vpn_key_outlined, Icons.inventory_2_outlined, Icons.layers_outlined, Icons.code, Icons.bolt,
-    Icons.bookmark_border, Icons.local_offer_outlined, Icons.home_outlined,
+    Icons.shopping_cart_outlined, Icons.flight_takeoff, Icons.directions_car_outlined, Icons.local_cafe_outlined, Icons.movie_outlined, Icons.headphones_outlined, Icons.palette_outlined,
   ];
 
   @override
@@ -43,13 +41,31 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     super.initState();
     _nameController = TextEditingController(text: widget.existingCollection?.name ?? '');
     _selectedColorHex = widget.existingCollection?.colorHex ?? _colors[0];
-    _selectedIconCode = widget.existingCollection?.iconCodePoint ?? _icons[0].codePoint;
+    _selectedIconCode = widget.existingCollection?.iconCodePoint ?? _quickIcons[0].codePoint;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> _openFullIconPicker() async {
+    HapticFeedback.lightImpact();
+    final picked = await Navigator.push<int>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IconPickerScreen(
+          selectedColorHex: _selectedColorHex,
+          currentIconCode: _selectedIconCode,
+        ),
+      ),
+    );
+    if (picked != null && mounted) {
+      setState(() {
+        _selectedIconCode = picked;
+      });
+    }
   }
 
   void _save() {
@@ -82,7 +98,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
       decoration: const BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
+        border: Border(
+          top: BorderSide(color: AppTheme.border, width: 3),
+          left: BorderSide(color: AppTheme.border, width: 3),
+          right: BorderSide(color: AppTheme.border, width: 3),
+        ),
       ),
       child: SafeArea(
         child: Padding(
@@ -156,6 +176,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     maxLength: 40,
                     onChanged: (val) => setState(() {}),
                     decoration: const InputDecoration(
+                      hintText: 'e.g. Travel, Design Inspiration...',
+                      hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
                       contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       border: InputBorder.none,
                       counterText: '',
@@ -182,21 +204,30 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     final isSelected = _selectedColorHex == colorHex;
                     
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedColorHex = colorHex),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedColorHex = colorHex);
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           color: color,
                           borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
                         ),
-                        child: isSelected ? const Icon(Icons.check, size: 16) : null,
+                        child: isSelected
+                            ? Icon(
+                                Icons.check,
+                                size: 16,
+                                color: color.computeLuminance() < 0.4 ? Colors.white : Colors.black,
+                              )
+                            : null,
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: AppDimensions.paddingXl),
                 
-                // Icon Picker
+                // Icon Picker (3 rows of 8 = 24 items, with 24th item as 3-dots more button)
                 Text(AppLocalizations.of(context)!.iconUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                 const SizedBox(height: 12),
                 GridView.builder(
@@ -207,16 +238,42 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
                   ),
-                  itemCount: _icons.length,
+                  itemCount: 24,
                   itemBuilder: (context, index) {
-                    final icon = _icons[index];
+                    final currentColor = Color(int.parse('0xFF$_selectedColorHex'));
+
+                    // 24th item is the 3-dots / full page icon picker button
+                    if (index == 23) {
+                      final isQuickIconSelected = _quickIcons.any((icon) => icon.codePoint == _selectedIconCode);
+                      final IconData displayIcon = isQuickIconSelected
+                          ? Icons.more_horiz
+                          : IconData(_selectedIconCode, fontFamily: 'MaterialIcons');
+                      final isSelected = !isQuickIconSelected;
+
+                      return GestureDetector(
+                        onTap: () => _openFullIconPicker(),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? currentColor : Colors.transparent,
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                            border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
+                          ),
+                          child: Icon(displayIcon, size: 20),
+                        ),
+                      );
+                    }
+
+                    final icon = _quickIcons[index];
                     final isSelected = _selectedIconCode == icon.codePoint;
                     
                     return GestureDetector(
-                      onTap: () => setState(() => _selectedIconCode = icon.codePoint),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedIconCode = icon.codePoint);
+                      },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected ? const Color(0xFFFFD166) : Colors.transparent,
+                          color: isSelected ? currentColor : Colors.transparent,
                           borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
                         ),
@@ -228,20 +285,34 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 const SizedBox(height: AppDimensions.paddingXxl),
                 
                 // Save Button
-                NeoButton(
-                  onPressed: _nameController.text.isNotEmpty ? () { HapticFeedback.lightImpact(); _save(); } : () {},
-                  color: const Color(0xFFFFD166),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  child: Center(
-                    child: Text(
-                      isEditing
-                          ? AppLocalizations.of(context)!.updateCollection
-                          : (widget.parentId != null
-                              ? AppLocalizations.of(context)!.createSubCollectionButton
-                              : AppLocalizations.of(context)!.createCollection),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                Builder(
+                  builder: (context) {
+                    final isNameEmpty = _nameController.text.trim().isEmpty;
+                    return NeoButton(
+                      onPressed: !isNameEmpty
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              _save();
+                            }
+                          : () {},
+                      color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      child: Center(
+                        child: Text(
+                          isEditing
+                              ? AppLocalizations.of(context)!.updateCollection
+                              : (widget.parentId != null
+                                  ? AppLocalizations.of(context)!.createSubCollectionButton
+                                  : AppLocalizations.of(context)!.createCollection),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: !isNameEmpty ? AppTheme.border : Colors.black38,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
