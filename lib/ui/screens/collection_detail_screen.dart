@@ -177,7 +177,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                     _buildMenuItem(
                       icon: Icons.create_new_folder_outlined,
                       title: AppLocalizations.of(context)!.createSubCollection,
-                      trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: AppDimensions.iconSizeLg),
                       onTap: () {
                         Navigator.pop(ctx);
                         _showCreateSubCollectionModal(context);
