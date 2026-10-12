@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -298,6 +300,30 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
     // Tilt angle matches bookmark long press reference (+2.6 deg for right, -2.6 deg for left)
     final tiltAngle = _isRightSide ? 0.045 : -0.045;
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenCenterY = screenHeight / 2;
+
+    // Detect if this bookmark card sits in the middle band of the screen (overlapping center area)
+    final isMiddleBookmark = (widget.cardRect.top < screenCenterY + 40 &&
+            widget.cardRect.bottom > screenCenterY - 40) ||
+        (widget.cardRect.center.dy >= screenHeight * 0.38 &&
+            widget.cardRect.center.dy <= screenHeight * 0.62);
+
+    final topBoundary = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final highestBubbleY = _buttonPositions.isNotEmpty
+        ? _buttonPositions.map((p) => p.dy).reduce(math.min)
+        : widget.cardRect.top;
+    final bubblesTop = highestBubbleY - (buttonRadius * 1.3);
+
+    // For middle bookmarks only, position label on the upper side above the card and radial bubbles.
+    // For other bookmarks, position label at the center of the screen.
+    final targetCenterY = isMiddleBookmark
+        ? ((topBoundary + bubblesTop) / 2)
+            .clamp(topBoundary + 40.0, screenCenterY - 60.0)
+        : screenCenterY;
+    final labelAlignmentY =
+        ((targetCenterY - screenCenterY) / screenCenterY).clamp(-1.0, 1.0);
+
     // Render order: unselected buttons first, selected button last so it stays on top
     final renderOrder = List.generate(widget.actions.length, (i) => i);
     if (_selectedIndex != -1) {
@@ -331,10 +357,11 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
               ),
             ),
 
-            // Action label in center of screen
+            // Action label (upper side for middle bookmarks, center for others)
             if (_selectedIndex != -1)
               Positioned.fill(
-                child: Center(
+                child: Align(
+                  alignment: Alignment(0.0, labelAlignmentY),
                   child: AnimatedOpacity(
                     opacity: 1.0,
                     duration: AppDurations.animationFast,
@@ -508,56 +535,6 @@ class _ExternalLinkIconPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
-/// Lucide `pin` / thumbtack icon custom painter matching PinIcon
-class _PinIconPainter extends CustomPainter {
-  final Color color;
-
-  const _PinIconPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scale = size.width / 24.0;
-    canvas.save();
-    canvas.scale(scale, scale);
-
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final path = Path()
-      ..moveTo(12, 17)
-      ..lineTo(12, 22)
-      ..moveTo(9, 10.76)
-      ..arcToPoint(const Offset(7.89, 12.55), radius: const Radius.circular(2), clockwise: true)
-      ..lineTo(6.11, 13.45)
-      ..arcToPoint(const Offset(5, 15.24), radius: const Radius.circular(2), clockwise: false)
-      ..lineTo(5, 16)
-      ..arcToPoint(const Offset(6, 17), radius: const Radius.circular(1), clockwise: false)
-      ..lineTo(18, 17)
-      ..arcToPoint(const Offset(19, 16), radius: const Radius.circular(1), clockwise: false)
-      ..lineTo(19, 15.24)
-      ..arcToPoint(const Offset(17.89, 13.45), radius: const Radius.circular(2), clockwise: false)
-      ..lineTo(16.11, 12.55)
-      ..arcToPoint(const Offset(15, 10.76), radius: const Radius.circular(2), clockwise: true)
-      ..lineTo(15, 7)
-      ..arcToPoint(const Offset(16, 6), radius: const Radius.circular(1), clockwise: true)
-      ..arcToPoint(const Offset(16, 2), radius: const Radius.circular(2), clockwise: false)
-      ..lineTo(8, 2)
-      ..arcToPoint(const Offset(8, 6), radius: const Radius.circular(2), clockwise: false)
-      ..arcToPoint(const Offset(9, 7), radius: const Radius.circular(1), clockwise: true)
-      ..close();
-
-    canvas.drawPath(path, paint);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(covariant _PinIconPainter oldDelegate) =>
-      oldDelegate.color != color;
-}
 
 /// Lucide `share-2` icon custom painter
 class _ShareIconPainter extends CustomPainter {

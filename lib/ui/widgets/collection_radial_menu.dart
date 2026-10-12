@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -290,6 +292,30 @@ class _CollectionRadialMenuOverlayWidgetState
     // Tilt angle matches bookmarks long press aesthetic (+2.6 deg for right side, -2.6 deg for left)
     final tiltAngle = _isRightSide ? 0.045 : -0.045;
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenCenterY = screenHeight / 2;
+
+    // Detect if this collection card sits in the middle band of the screen (overlapping center area)
+    final isMiddleCollection = (widget.cardRect.top < screenCenterY + 40 &&
+            widget.cardRect.bottom > screenCenterY - 40) ||
+        (widget.cardRect.center.dy >= screenHeight * 0.38 &&
+            widget.cardRect.center.dy <= screenHeight * 0.62);
+
+    final topBoundary = MediaQuery.paddingOf(context).top + kToolbarHeight;
+    final highestBubbleY = _buttonPositions.isNotEmpty
+        ? _buttonPositions.map((p) => p.dy).reduce(math.min)
+        : widget.cardRect.top;
+    final bubblesTop = highestBubbleY - (buttonRadius * 1.3);
+
+    // For middle collections, position label on the upper side above the folder and radial bubbles.
+    // For other collections, position label at the center of the screen.
+    final targetCenterY = isMiddleCollection
+        ? ((topBoundary + bubblesTop) / 2)
+            .clamp(topBoundary + 40.0, screenCenterY - 60.0)
+        : screenCenterY;
+    final labelAlignmentY =
+        ((targetCenterY - screenCenterY) / screenCenterY).clamp(-1.0, 1.0);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -316,10 +342,11 @@ class _CollectionRadialMenuOverlayWidgetState
               ),
             ),
 
-            // Action label in center of screen
+            // Action label (upper side for middle collections, center for others)
             if (_selectedIndex != -1)
               Positioned.fill(
-                child: Center(
+                child: Align(
+                  alignment: Alignment(0.0, labelAlignmentY),
                   child: AnimatedOpacity(
                     opacity: 1.0,
                     duration: AppDurations.animationFast,
