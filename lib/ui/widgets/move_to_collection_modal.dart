@@ -231,23 +231,27 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 : AppTheme.border;
 
                         return GestureDetector(
+                          key: ValueKey('collection_${col.id}'),
+                          behavior: HitTestBehavior.opaque,
                           onTap: () {
                             HapticFeedback.selectionClick();
                             setState(() {
                               _selectedCollection = col;
                             });
                           },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
+                          child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                             decoration: BoxDecoration(
                               color: isSelected
-                                  ? const Color(0xFFFFF9E6)
-                                  : Colors.transparent,
+                                  ? const Color(0xFFFFF4D0)
+                                  : Colors.white,
                               borderRadius: BorderRadius.circular(10),
-                              border: isSelected
-                                  ? Border.all(color: const Color(0xFFFFD166), width: 1.5)
-                                  : Border.all(color: Colors.transparent, width: 1.5),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppTheme.border
+                                    : Colors.black.withValues(alpha: 0.08),
+                                width: 2.0,
+                              ),
                             ),
                             child: Row(
                               children: [
@@ -273,6 +277,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 Expanded(
                                   child: Text(
                                     col.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w800,
@@ -280,6 +286,12 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     ),
                                   ),
                                 ),
+                                if (isSelected)
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: AppTheme.border,
+                                    size: 20,
+                                  ),
                               ],
                             ),
                           ),
@@ -309,44 +321,28 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
               ),
 
               // Bottom Move Action Button
-              if (_selectedCollection != null)
-                NeoButton(
-                  onPressed: () => _handleMove(_selectedCollection!),
-                  color: const Color(0xFFFFD166),
-                  borderWidth: 2.5,
-                  borderRadius: 12.0,
-                  shadowOffset: 2.5,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Text(
-                    'Move to "${_selectedCollection!.name}"',
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.border,
-                    ),
-                  ),
-                )
-              else
-                Opacity(
-                  opacity: 0.5,
-                  child: NeoBox(
-                    color: const Color(0xFFFFD166),
-                    borderWidth: 2.5,
-                    borderRadius: 12.0,
-                    shadowOffset: 2.5,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: const Center(
-                      child: Text(
-                        'Move to Collection',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.border,
-                        ),
-                      ),
-                    ),
+              NeoButton(
+                onPressed: _selectedCollection != null
+                    ? () => _handleMove(_selectedCollection!)
+                    : null,
+                color: const Color(0xFFFFD166),
+                borderWidth: 2.5,
+                borderRadius: 12.0,
+                shadowOffset: 2.5,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Text(
+                  _selectedCollection != null
+                      ? 'Move to "${_selectedCollection!.name}"'
+                      : 'Move to Collection',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.border,
                   ),
                 ),
+              ),
             ],
           ),
         ),
