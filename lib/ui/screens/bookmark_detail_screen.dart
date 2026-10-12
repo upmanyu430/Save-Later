@@ -9,6 +9,7 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/neo_button.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/pin_icon.dart';
@@ -350,46 +351,62 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                    HapticFeedback.lightImpact();
-                                      setState(() {
-                                        _isEditingTitle = false;
-                                        _titleController.text = bookmark.title ?? bookmark.url;
-                                      });
-                                    },
-                                    child: NeoBox(
-                                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                  SizedBox(
+                                    width: 104,
+                                    child: NeoButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _isEditingTitle = false;
+                                          _titleController.text = bookmark.title ?? bookmark.url;
+                                        });
+                                      },
+                                      color: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
                                       borderRadius: AppDimensions.radiusMd,
                                       borderWidth: 3,
-                                      color: Colors.white,
-                                      child: Text(l10n.cancel, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
+                                      shadowOffset: 2,
+                                      child: Text(
+                                        l10n.cancel,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: AppDimensions.paddingMd),
-                                  GestureDetector(
-                                    onTap: () async {
-                                    HapticFeedback.lightImpact();
-                                      final newTitle = _titleController.text.trim();
-                                      if (newTitle.isNotEmpty) {
-                                        bookmark.title = newTitle;
-                                        await ref.read(repositoryProvider).updateBookmark(bookmark);
-                                        ref.invalidate(bookmarksProvider);
-                                        if (bookmark.collection.value != null) {
+                                  SizedBox(
+                                    width: 104,
+                                    child: NeoButton(
+                                      onPressed: () async {
+                                        final newTitle = _titleController.text.trim();
+                                        if (newTitle.isNotEmpty) {
+                                          bookmark.title = newTitle;
+                                          await ref.read(repositoryProvider).updateBookmark(bookmark);
+                                          ref.invalidate(bookmarksProvider);
+                                          if (bookmark.collection.value != null) {
                                             ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
+                                          }
+                                          ref.invalidate(unsortedBookmarksProvider);
+                                          setState(() {
+                                            _isEditingTitle = false;
+                                          });
                                         }
-                                        ref.invalidate(unsortedBookmarksProvider);
-                                        setState(() {
-                                          _isEditingTitle = false;
-                                        });
-                                      }
-                                    },
-                                    child: NeoBox(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                      },
+                                      color: const Color(0xFFFFD166),
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
                                       borderRadius: AppDimensions.radiusMd,
                                       borderWidth: 3,
-                                      color: const Color(0xFFFFD166),
-                                      child: Text(l10n.save, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.black)),
+                                      shadowOffset: 2,
+                                      child: Text(
+                                        l10n.save,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
