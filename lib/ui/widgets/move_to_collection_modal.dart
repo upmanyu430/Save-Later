@@ -9,6 +9,7 @@ import 'package:save_later/config/app_constants.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
 import 'neo_box.dart';
+import 'neo_button.dart';
 
 class MoveToCollectionModal extends ConsumerStatefulWidget {
   final Bookmark? bookmark;
@@ -60,7 +61,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   @override
   void initState() {
     super.initState();
-    _selectedCollection = widget.initialCollection ?? widget.bookmark?.collection.value;
+    _selectedCollection = widget.initialCollection;
   }
 
   Future<void> _handleMove(BookmarkCollection collection) async {
@@ -308,24 +309,36 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
               ),
 
               // Bottom Move Action Button
-              GestureDetector(
-                onTap: _selectedCollection == null
-                    ? null
-                    : () => _handleMove(_selectedCollection!),
-                child: Opacity(
-                  opacity: _selectedCollection == null ? 0.5 : 1.0,
+              if (_selectedCollection != null)
+                NeoButton(
+                  onPressed: () => _handleMove(_selectedCollection!),
+                  color: const Color(0xFFFFD166),
+                  borderWidth: 2.5,
+                  borderRadius: 12.0,
+                  shadowOffset: 2.5,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'Move to "${_selectedCollection!.name}"',
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.border,
+                    ),
+                  ),
+                )
+              else
+                Opacity(
+                  opacity: 0.5,
                   child: NeoBox(
                     color: const Color(0xFFFFD166),
                     borderWidth: 2.5,
                     borderRadius: 12.0,
                     shadowOffset: 2.5,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Center(
+                    child: const Center(
                       child: Text(
-                        _selectedCollection != null
-                            ? 'Move to "${_selectedCollection!.name}"'
-                            : 'Move to Collection',
-                        style: const TextStyle(
+                        'Move to Collection',
+                        style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                           color: AppTheme.border,
@@ -334,7 +347,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ),
