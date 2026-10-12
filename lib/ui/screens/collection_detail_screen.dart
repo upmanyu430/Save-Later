@@ -9,6 +9,8 @@ import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/bookmark_grid_item.dart';
+import '../widgets/collection_grid_item.dart';
+import '../widgets/collection_editor_modal.dart';
 import '../widgets/review_cards_icon.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
@@ -81,6 +83,18 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     );
   }
 
+  void _showCreateSubCollectionModal(BuildContext context) {
+    if (widget.collectionId == null) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CollectionEditorModal(
+        parentId: widget.collectionId,
+      ),
+    );
+  }
+
   void _showMenuModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -148,9 +162,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               trailing: const Icon(Icons.workspace_premium_outlined, color: Color(0xFFFFD166), size: AppDimensions.iconSizeLg),
               onTap: () {
                 Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(AppLocalizations.of(context)!.subCollectionsPremiumFeature)),
-                );
+                _showCreateSubCollectionModal(context);
               },
             ),
             _buildDivider(),
@@ -277,7 +289,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bookmarksAsync = widget.collectionId != null ? ref.watch(collectionBookmarksProvider(widget.collectionId!)) : ref.watch(unsortedBookmarksProvider);
+    final bookmarksAsync = widget.collectionId != null
+        ? ref.watch(collectionBookmarksProvider(widget.collectionId!))
+        : ref.watch(unsortedBookmarksProvider);
+    final subCollectionsAsync = widget.collectionId != null
+        ? ref.watch(subCollectionsProvider(widget.collectionId!))
+        : const AsyncValue.data(<BookmarkCollection>[]);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -286,6 +303,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
         bottom: false,
         child: bookmarksAsync.when(
           data: (bookmarks) {
+            final subCollections = subCollectionsAsync.valueOrNull ?? [];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -375,7 +393,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
                 // Content Grid
                 Expanded(
-                  child: bookmarks.isEmpty
+                  child: (bookmarks.isEmpty && subCollections.isEmpty)
                       ? Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -395,7 +413,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             const horizontalPadding = AppDimensions.paddingXl * 2;
                             const maxCrossAxisExtent = 200.0;
                             const crossAxisSpacing = AppDimensions.gridSpacingMd;
-                            const desiredCardHeight = 180.0;
+                            const desiredBookmarkCardHeight = 180.0;
+                            const desiredFolderCardHeight =
+                                AppDimensions.gridFolderCardHeight;
                             final contentWidth = constraints.maxWidth - horizontalPadding;
                             final columnCount = (contentWidth /
                                     (maxCrossAxisExtent + crossAxisSpacing))
@@ -405,7 +425,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             final itemWidth = (contentWidth -
                                     (columnCount - 1) * crossAxisSpacing) /
                                 columnCount;
-                            final childAspectRatio = itemWidth / desiredCardHeight;
+                            final bookmarkAspectRatio = itemWidth / desiredBookmarkCardHeight;
+                            final folderAspectRatio = itemWidth / desiredFolderCardHeight;
 
                             Widget buildGridItem(Bookmark b) {
                               return BookmarkGridItem(
@@ -429,6 +450,65 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
                             return CustomScrollView(
                               slivers: [
+                                if (subCollections.isNotEmpty) ...[
+                                  SliverToBoxAdapter(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: AppDimensions.paddingXl,
+                                        vertical: AppDimensions.paddingSm,
+                                      ),
+                                      child: Text(
+                                        '${l10n.subCollections.toUpperCase()} (${subCollections.length})',
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SliverPadding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingSm,
+                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingMd,
+                                    ),
+                                    sliver: SliverGrid(
+                                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: columnCount,
+                                        crossAxisSpacing: crossAxisSpacing,
+                                        mainAxisSpacing: AppDimensions.gridSpacingLg,
+                                        childAspectRatio: folderAspectRatio,
+                                      ),
+                                      delegate: SliverChildBuilderDelegate(
+                                        (context, index) {
+                                          final subCol = subCollections[index];
+                                          return Consumer(
+                                            builder: (context, ref, _) {
+                                              final countAsync = ref.watch(
+                                                  collectionBookmarksProvider(subCol.id));
+                                              final count =
+                                                  countAsync.valueOrNull?.length ?? 0;
+                                              final hasNew = countAsync.valueOrNull
+                                                      ?.any((b) => !b.isRead) ??
+                                                  false;
+                                              return CollectionGridItem(
+                                                collection: subCol,
+                                                itemCount: count,
+                                                hasNewItems: hasNew,
+                                                onTap: () => context.push(
+                                                    '/collection/${subCol.id}',
+                                                    extra: subCol),
+                                              );
+                                            },
+                                          );
+                                        },
+                                        childCount: subCollections.length,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                                 if (pinnedBookmarks.isNotEmpty) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
@@ -458,7 +538,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                         crossAxisCount: columnCount,
                                         crossAxisSpacing: crossAxisSpacing,
                                         mainAxisSpacing: AppDimensions.gridSpacingMd,
-                                        childAspectRatio: childAspectRatio,
+                                        childAspectRatio: bookmarkAspectRatio,
                                       ),
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) => buildGridItem(pinnedBookmarks[index]),
@@ -467,12 +547,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                     ),
                                   ),
                                 ],
-                                if (unpinnedBookmarks.isNotEmpty || pinnedBookmarks.isEmpty) ...[
+                                if (unpinnedBookmarks.isNotEmpty ||
+                                    (pinnedBookmarks.isEmpty && bookmarks.isNotEmpty)) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: EdgeInsets.fromLTRB(
                                         AppDimensions.paddingXl,
-                                        pinnedBookmarks.isNotEmpty
+                                        (pinnedBookmarks.isNotEmpty || subCollections.isNotEmpty)
                                             ? AppDimensions.paddingLg
                                             : AppDimensions.paddingSm,
                                         AppDimensions.paddingXl,
@@ -504,7 +585,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                         crossAxisCount: columnCount,
                                         crossAxisSpacing: crossAxisSpacing,
                                         mainAxisSpacing: AppDimensions.gridSpacingMd,
-                                        childAspectRatio: childAspectRatio,
+                                        childAspectRatio: bookmarkAspectRatio,
                                       ),
                                       delegate: SliverChildBuilderDelegate(
                                         (context, index) {

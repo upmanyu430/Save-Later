@@ -91,7 +91,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
 
   @override
   Widget build(BuildContext context) {
-    final collectionsAsync = ref.watch(collectionsProvider);
+    final collectionsAsync = ref.watch(allCollectionsProvider);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Container(
@@ -256,15 +256,41 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 ),
                                 const SizedBox(width: 14),
                                 Expanded(
-                                  child: Text(
-                                    col.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppTheme.border,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        col.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppTheme.border,
+                                        ),
+                                      ),
+                                      if (col.parentId != null) ...[
+                                        Builder(
+                                          builder: (context) {
+                                            final parent = collections
+                                                .where((c) => c.id == col.parentId)
+                                                .firstOrNull;
+                                            if (parent == null) {
+                                              return const SizedBox.shrink();
+                                            }
+                                            return Text(
+                                              'in ${parent.name}',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.black.withValues(alpha: 0.5),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ],
                                   ),
                                 ),
                                 if (isSelected)

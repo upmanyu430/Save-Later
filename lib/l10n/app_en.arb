@@ -451,6 +451,18 @@
   "@newCollection": {
     "description": "Modal title for creating a new collection"
   },
+  "newSubCollection": "New sub-collection",
+  "@newSubCollection": {
+    "description": "Modal title for creating a new sub-collection"
+  },
+  "subCollections": "Sub-collections",
+  "@subCollections": {
+    "description": "Section header for sub-collections"
+  },
+  "createSubCollectionButton": "Create sub-collection",
+  "@createSubCollectionButton": {
+    "description": "Button label to create sub-collection"
+  },
   "nameUpper": "NAME",
   "@nameUpper": {
     "description": "Label for collection name field"

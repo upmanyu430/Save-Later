@@ -21,7 +21,13 @@ class TagTestIsarRepository implements IsarRepository {
   Future<Isar> openDB() async => Future.error('No DB in test');
 
   @override
-  Future<List<BookmarkCollection>> getCollections() async => [];
+  Future<List<BookmarkCollection>> getCollections({int? parentId}) async => [];
+
+  @override
+  Future<List<BookmarkCollection>> getSubCollections(Id parentId) async => [];
+
+  @override
+  Future<List<BookmarkCollection>> getAllCollections() async => [];
 
   @override
   Future<void> addCollection(BookmarkCollection collection) async {}

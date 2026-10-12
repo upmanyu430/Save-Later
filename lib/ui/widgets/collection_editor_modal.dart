@@ -11,8 +11,9 @@ import 'package:save_later/config/app_constants.dart';
 
 class CollectionEditorModal extends ConsumerStatefulWidget {
   final BookmarkCollection? existingCollection;
+  final int? parentId;
 
-  const CollectionEditorModal({super.key, this.existingCollection});
+  const CollectionEditorModal({super.key, this.existingCollection, this.parentId});
 
   @override
   ConsumerState<CollectionEditorModal> createState() => _CollectionEditorModalState();
@@ -56,9 +57,19 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     if (name.isEmpty) return;
 
     if (widget.existingCollection == null) {
-      ref.read(collectionNotifierProvider.notifier).addCollection(name, _selectedColorHex, _selectedIconCode);
+      ref.read(collectionNotifierProvider.notifier).addCollection(
+            name,
+            _selectedColorHex,
+            _selectedIconCode,
+            parentId: widget.parentId,
+          );
     } else {
-      ref.read(collectionNotifierProvider.notifier).updateCollection(widget.existingCollection!, name, _selectedColorHex, _selectedIconCode);
+      ref.read(collectionNotifierProvider.notifier).updateCollection(
+            widget.existingCollection!,
+            name,
+            _selectedColorHex,
+            _selectedIconCode,
+          );
     }
     Navigator.pop(context);
   }
@@ -106,7 +117,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     Text(
                       isEditing
                           ? AppLocalizations.of(context)!.editCollection
-                          : AppLocalizations.of(context)!.newCollection,
+                          : (widget.parentId != null
+                              ? AppLocalizations.of(context)!.newSubCollection
+                              : AppLocalizations.of(context)!.newCollection),
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                     GestureDetector(
@@ -223,7 +236,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     child: Text(
                       isEditing
                           ? AppLocalizations.of(context)!.updateCollection
-                          : AppLocalizations.of(context)!.createCollection,
+                          : (widget.parentId != null
+                              ? AppLocalizations.of(context)!.createSubCollectionButton
+                              : AppLocalizations.of(context)!.createCollection),
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),

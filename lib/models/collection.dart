@@ -21,6 +21,12 @@ class BookmarkCollection {
   @Index()
   DateTime createdAt = DateTime.now();
 
+  @Index()
+  int? parentId;
+
   @ignore
-  Color get color => Color(int.parse('0xFF$colorHex'));
+  Color get color {
+    final hex = colorHex.replaceFirst('#', '');
+    return Color(int.parse(hex.length == 6 ? '0xFF$hex' : hex));
+  }
 }

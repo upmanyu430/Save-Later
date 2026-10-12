@@ -24,7 +24,32 @@ class IsarRepository {
   }
 
   // --- Collection Methods ---
-  Future<List<BookmarkCollection>> getCollections() async {
+  Future<List<BookmarkCollection>> getCollections({int? parentId}) async {
+    final isar = await db;
+    if (parentId != null) {
+      return await isar.bookmarkCollections
+          .filter()
+          .parentIdEqualTo(parentId)
+          .sortByCreatedAtDesc()
+          .findAll();
+    }
+    return await isar.bookmarkCollections
+        .filter()
+        .parentIdIsNull()
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  Future<List<BookmarkCollection>> getSubCollections(Id parentId) async {
+    final isar = await db;
+    return await isar.bookmarkCollections
+        .filter()
+        .parentIdEqualTo(parentId)
+        .sortByCreatedAtDesc()
+        .findAll();
+  }
+
+  Future<List<BookmarkCollection>> getAllCollections() async {
     final isar = await db;
     return await isar.bookmarkCollections.where().findAll();
   }
@@ -46,6 +71,14 @@ class IsarRepository {
       for (final b in bookmarks) {
         b.collection.value = null;
         await b.collection.save();
+      }
+      final subCollections = await isar.bookmarkCollections
+          .filter()
+          .parentIdEqualTo(collectionId)
+          .findAll();
+      for (final sub in subCollections) {
+        sub.parentId = null;
+        await isar.bookmarkCollections.put(sub);
       }
       await isar.bookmarkCollections.delete(collectionId);
     });

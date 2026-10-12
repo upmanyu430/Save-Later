@@ -64,7 +64,7 @@ final _router = GoRouter(
       path: '/collection/:id',
       pageBuilder: (context, state) {
         final id = int.parse(state.pathParameters['id']!);
-        final collection = state.extra as BookmarkCollection;
+        final collection = state.extra as BookmarkCollection?;
         return _buildPageWithTransition(
           context: context,
           state: state,

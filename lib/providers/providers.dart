@@ -17,6 +17,18 @@ final collectionsProvider =
   return repo.getCollections();
 });
 
+final allCollectionsProvider =
+    FutureProvider<List<BookmarkCollection>>((ref) async {
+  final repo = ref.watch(repositoryProvider);
+  return repo.getAllCollections();
+});
+
+final subCollectionsProvider =
+    FutureProvider.family<List<BookmarkCollection>, int>((ref, parentId) async {
+  final repo = ref.watch(repositoryProvider);
+  return repo.getSubCollections(parentId);
+});
+
 final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
   final repo = ref.watch(repositoryProvider);
   return repo.getBookmarks();
@@ -293,7 +305,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
   CollectionNotifier(this.ref) : super(const AsyncValue.data(null));
 
-  Future<void> addCollection(String name, String colorHex, int iconCode) async {
+  Future<void> addCollection(String name, String colorHex, int iconCode, {int? parentId}) async {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
@@ -302,10 +314,15 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
         ..colorHex = colorHex
         ..iconCodePoint = iconCode
         ..iconFontFamily = 'MaterialIcons'
+        ..parentId = parentId
         ..createdAt = DateTime.now();
 
       await repo.addCollection(collection);
       ref.invalidate(collectionsProvider);
+      ref.invalidate(allCollectionsProvider);
+      if (parentId != null) {
+        ref.invalidate(subCollectionsProvider(parentId));
+      }
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -321,6 +338,10 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       collection.iconCodePoint = iconCode;
       await repo.addCollection(collection); 
       ref.invalidate(collectionsProvider);
+      ref.invalidate(allCollectionsProvider);
+      if (collection.parentId != null) {
+        ref.invalidate(subCollectionsProvider(collection.parentId!));
+      }
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -331,11 +352,17 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
+      final parentId = collection.parentId;
       await repo.deleteCollection(collection.id);
       ref.invalidate(collectionsProvider);
+      ref.invalidate(allCollectionsProvider);
       ref.invalidate(unsortedBookmarksProvider);
       ref.invalidate(collectionBookmarksProvider(collection.id));
       ref.invalidate(bookmarksProvider);
+      if (parentId != null) {
+        ref.invalidate(subCollectionsProvider(parentId));
+      }
+      ref.invalidate(subCollectionsProvider(collection.id));
       state = const AsyncValue.data(null);
     } catch (e, st) {
       state = AsyncValue.error(e, st);

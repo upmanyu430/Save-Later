@@ -28,7 +28,13 @@ class BatchTestIsarRepo implements IsarRepository {
   Future<Isar> openDB() async => Future.error('No DB in test');
 
   @override
-  Future<List<BookmarkCollection>> getCollections() async => List.from(collectionsList);
+  Future<List<BookmarkCollection>> getCollections({int? parentId}) async => List.from(collectionsList);
+
+  @override
+  Future<List<BookmarkCollection>> getSubCollections(Id parentId) async => [];
+
+  @override
+  Future<List<BookmarkCollection>> getAllCollections() async => List.from(collectionsList);
 
   @override
   Future<void> addCollection(BookmarkCollection collection) async {}

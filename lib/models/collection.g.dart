@@ -42,6 +42,11 @@ const BookmarkCollectionSchema = CollectionSchema(
       id: 4,
       name: r'name',
       type: IsarType.string,
+    ),
+    r'parentId': PropertySchema(
+      id: 5,
+      name: r'parentId',
+      type: IsarType.long,
     )
   },
   estimateSize: _bookmarkCollectionEstimateSize,
@@ -58,6 +63,19 @@ const BookmarkCollectionSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'createdAt',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'parentId': IndexSchema(
+      id: -809199838039056779,
+      name: r'parentId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'parentId',
           type: IndexType.value,
           caseSensitive: false,
         )
@@ -95,6 +113,7 @@ void _bookmarkCollectionSerialize(
   writer.writeLong(offsets[2], object.iconCodePoint);
   writer.writeString(offsets[3], object.iconFontFamily);
   writer.writeString(offsets[4], object.name);
+  writer.writeLong(offsets[5], object.parentId);
 }
 
 BookmarkCollection _bookmarkCollectionDeserialize(
@@ -110,6 +129,7 @@ BookmarkCollection _bookmarkCollectionDeserialize(
   object.iconFontFamily = reader.readString(offsets[3]);
   object.id = id;
   object.name = reader.readString(offsets[4]);
+  object.parentId = reader.readLongOrNull(offsets[5]);
   return object;
 }
 
@@ -130,6 +150,8 @@ P _bookmarkCollectionDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
+    case 5:
+      return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -162,6 +184,15 @@ extension BookmarkCollectionQueryWhereSort
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'createdAt'),
+      );
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhere>
+      anyParentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'parentId'),
       );
     });
   }
@@ -325,6 +356,121 @@ extension BookmarkCollectionQueryWhere
         lower: [lowerCreatedAt],
         includeLower: includeLower,
         upper: [upperCreatedAt],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'parentId',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'parentId',
+        lower: [null],
+        includeLower: false,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdEqualTo(int? parentId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'parentId',
+        value: [parentId],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdNotEqualTo(int? parentId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'parentId',
+              lower: [],
+              upper: [parentId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'parentId',
+              lower: [parentId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'parentId',
+              lower: [parentId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'parentId',
+              lower: [],
+              upper: [parentId],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdGreaterThan(
+    int? parentId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'parentId',
+        lower: [parentId],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdLessThan(
+    int? parentId, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'parentId',
+        lower: [],
+        upper: [parentId],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterWhereClause>
+      parentIdBetween(
+    int? lowerParentId,
+    int? upperParentId, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'parentId',
+        lower: [lowerParentId],
+        includeLower: includeLower,
+        upper: [upperParentId],
         includeUpper: includeUpper,
       ));
     });
@@ -908,6 +1054,80 @@ extension BookmarkCollectionQueryFilter
       ));
     });
   }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'parentId',
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'parentId',
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdEqualTo(int? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'parentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdGreaterThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'parentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdLessThan(
+    int? value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'parentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterFilterCondition>
+      parentIdBetween(
+    int? lower,
+    int? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'parentId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension BookmarkCollectionQueryObject
@@ -985,6 +1205,20 @@ extension BookmarkCollectionQuerySortBy
       sortByNameDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'name', Sort.desc);
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterSortBy>
+      sortByParentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'parentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterSortBy>
+      sortByParentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'parentId', Sort.desc);
     });
   }
 }
@@ -1074,6 +1308,20 @@ extension BookmarkCollectionQuerySortThenBy
       return query.addSortBy(r'name', Sort.desc);
     });
   }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterSortBy>
+      thenByParentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'parentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QAfterSortBy>
+      thenByParentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'parentId', Sort.desc);
+    });
+  }
 }
 
 extension BookmarkCollectionQueryWhereDistinct
@@ -1111,6 +1359,13 @@ extension BookmarkCollectionQueryWhereDistinct
       distinctByName({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'name', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, BookmarkCollection, QDistinct>
+      distinctByParentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'parentId');
     });
   }
 }
@@ -1154,6 +1409,12 @@ extension BookmarkCollectionQueryProperty
   QueryBuilder<BookmarkCollection, String, QQueryOperations> nameProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'name');
+    });
+  }
+
+  QueryBuilder<BookmarkCollection, int?, QQueryOperations> parentIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'parentId');
     });
   }
 }

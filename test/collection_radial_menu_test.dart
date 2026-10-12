@@ -25,7 +25,15 @@ class CollectionTestIsarRepository implements IsarRepository {
   Future<Isar> openDB() async => Future.error('No DB in test');
 
   @override
-  Future<List<BookmarkCollection>> getCollections() async =>
+  Future<List<BookmarkCollection>> getCollections({int? parentId}) async =>
+      List.from(collections.where((c) => parentId != null ? c.parentId == parentId : c.parentId == null));
+
+  @override
+  Future<List<BookmarkCollection>> getSubCollections(Id parentId) async =>
+      List.from(collections.where((c) => c.parentId == parentId));
+
+  @override
+  Future<List<BookmarkCollection>> getAllCollections() async =>
       List.from(collections);
 
   @override
