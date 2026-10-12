@@ -216,26 +216,26 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
       if (_isRightSide) {
         _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Open - sits along left edge with 75.5dp clearance from Pin
-          Offset(widget.cardRect.left - 25.0, widget.cardRect.top + 120.0),
-          // 1: Pin - sits along upper-left edge with 75.5dp clearance from Open and 98dp from Share
+          // 0: Open - sits along lower-left edge
+          Offset(widget.cardRect.left - 24.0, widget.cardRect.top + 120.0),
+          // 1: Pin - sits along upper-left edge (75.3dp from Open)
           Offset(widget.cardRect.left - 10.0, widget.cardRect.top + 46.0),
-          // 2: Share - sits along top edge with 76dp clearance from Delete
-          Offset(widget.cardRect.right - 122.0, widget.cardRect.top - 20.0),
-          // 3: Delete - sits along top-right edge with 76dp clearance from Share
-          Offset(widget.cardRect.right - 46.0, widget.cardRect.top - 24.0),
+          // 2: Share - sits along upper-left top edge (75.3dp from Pin, gap fixed)
+          Offset(widget.cardRect.left + 48.0, widget.cardRect.top - 2.0),
+          // 3: Delete - sits along top edge (75.3dp from Share)
+          Offset(widget.cardRect.left + 123.0, widget.cardRect.top + 5.0),
         ]);
       } else {
         _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
         _buttonPositions.addAll([
-          // 0: Open - sits along top-left edge with 76dp clearance from Pin
-          Offset(widget.cardRect.left + 46.0, widget.cardRect.top - 24.0),
-          // 1: Pin - sits along top edge with 76dp clearance from Open and 98dp from Share
-          Offset(widget.cardRect.left + 122.0, widget.cardRect.top - 20.0),
-          // 2: Share - sits along upper-right edge with 75.5dp clearance from Delete
+          // 0: Open - sits along top edge (75.3dp from Pin)
+          Offset(widget.cardRect.right - 123.0, widget.cardRect.top + 5.0),
+          // 1: Pin - sits along upper-right top edge (75.3dp from Share, gap fixed)
+          Offset(widget.cardRect.right - 48.0, widget.cardRect.top - 2.0),
+          // 2: Share - sits along upper-right edge (75.3dp from Delete)
           Offset(widget.cardRect.right + 10.0, widget.cardRect.top + 46.0),
-          // 3: Delete - sits along right edge with 75.5dp clearance from Share
-          Offset(widget.cardRect.right + 25.0, widget.cardRect.top + 120.0),
+          // 3: Delete - sits along lower-right edge
+          Offset(widget.cardRect.right + 24.0, widget.cardRect.top + 120.0),
         ]);
       }
     }
