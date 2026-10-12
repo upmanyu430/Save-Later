@@ -15,8 +15,6 @@ import '../widgets/review_cards_icon.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/empty_collection_view.dart';
-import '../../config/app_config.dart';
-import '../../utils/url_launcher.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -562,10 +560,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                     hasScrollBody: false,
                                     child: Padding(
                                       padding: EdgeInsets.only(bottom: bottomInset + 32),
-                                      child: Center(
-                                        child: EmptyCollectionView(
-                                          onSeeHowPressed: () => openUrl(AppConfig.howToUrl, context: context),
-                                        ),
+                                      child: const Center(
+                                        child: EmptyCollectionView(),
                                       ),
                                     ),
                                   ),
