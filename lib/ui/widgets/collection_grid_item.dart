@@ -91,7 +91,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   }
 
   void _handleLongPressCancel() {
-    CollectionRadialMenu.dismiss();
+    CollectionRadialMenu.handleLongPressCancel();
   }
 
   @override

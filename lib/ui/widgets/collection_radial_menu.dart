@@ -138,8 +138,16 @@ class CollectionRadialMenu {
       final executed = _overlayStateKey.currentState!.executeSelectedIfAny();
       if (executed) {
         dismiss();
+      } else {
+        dismiss(animated: true);
       }
+    } else {
+      dismiss();
     }
+  }
+
+  static void handleLongPressCancel() {
+    dismiss(animated: true);
   }
 }
 

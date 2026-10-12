@@ -149,18 +149,24 @@ void main() {
 
     expect(find.text('Design Resources'), findsOneWidget);
 
-    // Perform long press to open CollectionRadialMenu
+    // Perform long press with gesture to hold finger down
     final itemFinder = find.byType(CollectionGridItem);
-    await tester.longPress(itemFinder);
-    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(itemFinder));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
 
-    // Verify all 3 action icons are present in the radial menu
+    // Verify all 3 action icons are present in the radial menu while finger is held
     expect(find.byIcon(Icons.edit), findsOneWidget);
     expect(find.byIcon(Icons.share), findsOneWidget);
     expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+
+    // Releasing finger without selecting an action dismisses the menu
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.edit), findsNothing);
   });
 
-  testWidgets('Tapping Edit button in radial menu opens CollectionEditorModal',
+  testWidgets('Dragging finger to Edit button and releasing opens CollectionEditorModal',
       (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
@@ -188,11 +194,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.longPress(find.byType(CollectionGridItem));
-    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(CollectionGridItem)));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
 
-    // Tap the Edit button
-    await tester.tap(find.byIcon(Icons.edit), warnIfMissed: false);
+    // Slide finger to Edit button and release
+    final editCenter = tester.getCenter(find.byIcon(Icons.edit));
+    await gesture.moveTo(editCenter);
+    await tester.pump();
+    await gesture.up();
     await tester.pumpAndSettle();
 
     // Verify CollectionEditorModal is shown
@@ -201,7 +211,7 @@ void main() {
   });
 
   testWidgets(
-      'Tapping Delete button in radial menu opens DeleteConfirmationDialog',
+      'Dragging finger to Delete button and releasing opens DeleteConfirmationDialog',
       (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
@@ -229,11 +239,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.longPress(find.byType(CollectionGridItem));
-    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(CollectionGridItem)));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
 
-    // Tap the Delete button
-    await tester.tap(find.byIcon(Icons.delete_outline), warnIfMissed: false);
+    // Slide finger to Delete button and release
+    final deleteCenter = tester.getCenter(find.byIcon(Icons.delete_outline));
+    await gesture.moveTo(deleteCenter);
+    await tester.pump();
+    await gesture.up();
     await tester.pumpAndSettle();
 
     // Verify DeleteConfirmationDialog is shown
@@ -251,15 +265,19 @@ void main() {
     await tester.pumpWidget(
       createTestApp(
         repo: testRepo,
-        child: Center(
-          child: SizedBox(
-            width: 180,
-            height: 160,
-            child: CollectionGridItem(
-              collection: testCollection,
-              itemCount: 4,
-              hasNewItems: false,
-              onTap: () {},
+        child: Consumer(
+          builder: (context, ref, _) => Center(
+            child: ElevatedButton(
+              onPressed: () {
+                CollectionRadialMenu.show(
+                  context: context,
+                  child: const SizedBox(width: 180, height: 160),
+                  collection: testCollection,
+                  cardRect: const Rect.fromLTWH(100, 200, 180, 160),
+                  ref: ref,
+                );
+              },
+              child: const Text('Open Menu'),
             ),
           ),
         ),
@@ -267,7 +285,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.longPress(find.byType(CollectionGridItem));
+    await tester.tap(find.text('Open Menu'));
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.edit), findsOneWidget);
@@ -309,20 +327,21 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.longPress(find.byType(CollectionGridItem));
-    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(CollectionGridItem)));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.byIcon(Icons.edit), findsOneWidget);
 
-    final editPos = tester.getCenter(find.byIcon(Icons.edit));
-    CollectionRadialMenu.updatePosition(editPos);
+    final editCenter = tester.getCenter(find.byIcon(Icons.edit));
+    await gesture.moveTo(editCenter);
     await tester.pump();
 
     // Verify EDIT label is rendered in the center of the screen
     expect(find.text('EDIT'), findsOneWidget);
 
-    // Test handleLongPressEnd executes the selected action
-    CollectionRadialMenu.handleLongPressEnd();
+    // Releasing executes the selected action
+    await gesture.up();
     await tester.pumpAndSettle();
 
     expect(find.byType(CollectionEditorModal), findsOneWidget);
@@ -357,8 +376,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.longPress(find.byType(CollectionGridItem));
-    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(CollectionGridItem)));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
 
     final editCenter = tester.getCenter(find.byIcon(Icons.edit));
     final shareCenter = tester.getCenter(find.byIcon(Icons.share));
@@ -374,5 +394,8 @@ void main() {
     // Inter-button gap with button diameter 68.0 dp (2 * 34.0)
     final gap = distEditShare - 68.0;
     expect(gap, closeTo(2.0, 1.0));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
   });
 }
