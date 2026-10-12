@@ -25,15 +25,15 @@ class AppTheme {
         onSecondary: border,
         onSurface: border,
       ),
-      textTheme: GoogleFonts.arvoTextTheme().apply(
+      textTheme: GoogleFonts.bricolageGrotesqueTextTheme().apply(
         bodyColor: border,
         displayColor: border,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: background,
         elevation: 0,
-        iconTheme: IconThemeData(color: border, size: AppDimensions.iconSizeLg),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: border, size: AppDimensions.iconSizeLg),
+        titleTextStyle: GoogleFonts.bricolageGrotesque(
           color: border,
           fontSize: 24,
           fontWeight: FontWeight.bold,
