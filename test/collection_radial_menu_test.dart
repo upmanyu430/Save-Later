@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -79,12 +82,17 @@ class CollectionTestIsarRepository implements IsarRepository {
 Widget createTestApp({
   required Widget child,
   required CollectionTestIsarRepository repo,
+  GlobalKey? repaintKey,
 }) {
   return ProviderScope(
     overrides: [
       repositoryProvider.overrideWithValue(repo),
     ],
     child: MaterialApp(
+      builder: repaintKey != null
+          ? (context, appChild) =>
+              RepaintBoundary(key: repaintKey, child: appChild!)
+          : null,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -404,6 +412,86 @@ void main() {
     final selectedRadius = buttonRadius * selectedScale;
     final clearance = distEditShare - (selectedRadius + buttonRadius);
     expect(clearance, greaterThan(8.0));
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+      'Captures visual renders of radial menu with Edit, Share, and Delete selected',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repaintKey = GlobalKey();
+
+    await tester.pumpWidget(
+      createTestApp(
+        repo: testRepo,
+        repaintKey: repaintKey,
+        child: Center(
+          child: SizedBox(
+            width: 180,
+            height: 160,
+            child: CollectionGridItem(
+              collection: testCollection,
+              itemCount: 4,
+              hasNewItems: false,
+              onTap: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(CollectionGridItem)));
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final editCenter = tester.getCenter(find.byIcon(Icons.edit));
+    final shareCenter = tester.getCenter(find.byIcon(Icons.share));
+    final deleteCenter = tester.getCenter(find.byIcon(Icons.delete_outline));
+
+    // 1. Move to Share
+    await gesture.moveTo(shareCenter);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('SHARE'), findsOneWidget);
+
+    await tester.binding.runAsync(() async {
+      final boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage();
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      File('test_selected_share.png').writeAsBytesSync(byteData!.buffer.asUint8List());
+    });
+
+    // 2. Move to Edit
+    await gesture.moveTo(editCenter);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('EDIT'), findsOneWidget);
+
+    await tester.binding.runAsync(() async {
+      final boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage();
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      File('test_selected_edit.png').writeAsBytesSync(byteData!.buffer.asUint8List());
+    });
+
+    // 3. Move to Delete
+    await gesture.moveTo(deleteCenter);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('DELETE'), findsOneWidget);
+
+    await tester.binding.runAsync(() async {
+      final boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final image = await boundary.toImage();
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      File('test_selected_delete.png').writeAsBytesSync(byteData!.buffer.asUint8List());
+    });
 
     await gesture.up();
     await tester.pumpAndSettle();
