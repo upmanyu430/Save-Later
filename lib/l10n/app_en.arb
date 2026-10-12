@@ -141,6 +141,23 @@
   "@tagNameHint": {
     "description": "Hint for tag name input"
   },
+  "existingTags": "Existing Tags",
+  "@existingTags": {
+    "description": "Header for existing tags list"
+  },
+  "tagAlreadyAdded": "This tag is already added to this bookmark",
+  "@tagAlreadyAdded": {
+    "description": "Notice when tag is already on the bookmark"
+  },
+  "matchesExistingTag": "Will use existing tag: \"{tag}\"",
+  "@matchesExistingTag": {
+    "description": "Indicator when typed tag resolves to an existing canonical tag",
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
   "noCollectionsCreated": "No collections created yet.",
   "@noCollectionsCreated": {
     "description": "Message when no collections exist to move to"

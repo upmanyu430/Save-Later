@@ -4,6 +4,7 @@ import 'package:metadata_fetch/metadata_fetch.dart';
 import '../models/bookmark.dart';
 import '../models/collection.dart';
 import '../repositories/isar_repository.dart';
+import '../utils/tag_helper.dart';
 import '../utils/url_helper.dart';
 
 final repositoryProvider = Provider<IsarRepository>((ref) {
@@ -30,6 +31,22 @@ final collectionBookmarksProvider =
     FutureProvider.family<List<Bookmark>, int>((ref, collectionId) async {
   final repo = ref.watch(repositoryProvider);
   return repo.getBookmarksByCollection(collectionId);
+});
+
+final allTagsProvider = FutureProvider<List<String>>((ref) async {
+  final bookmarks = await ref.watch(bookmarksProvider.future);
+  final tagSet = <String>{};
+  for (final b in bookmarks) {
+    for (final t in b.tags) {
+      final clean = t.trim();
+      if (clean.isNotEmpty) {
+        tagSet.add(clean);
+      }
+    }
+  }
+  final sorted = tagSet.toList()
+    ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+  return sorted;
 });
 
 // A notifier to handle adding a bookmark and fetching metadata
@@ -90,16 +107,31 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> addTag(Bookmark bookmark, String tag) async {
+    final clean = tag.trim();
+    if (clean.isEmpty) return;
+
+    // Guard against duplicate variations on the same bookmark
+    if (TagHelper.isDuplicate(clean, bookmark.tags)) {
+      return;
+    }
+
+    // Resolve tag to existing canonical version if available across all bookmarks
+    final allBookmarks = await ref.read(bookmarksProvider.future);
+    final allExistingTags = <String>{};
+    for (final b in allBookmarks) {
+      allExistingTags.addAll(b.tags);
+    }
+    final resolvedTag = TagHelper.resolveTag(clean, allExistingTags);
+
     final repo = ref.read(repositoryProvider);
-    if (!bookmark.tags.contains(tag)) {
-      bookmark.tags = List.from(bookmark.tags)..add(tag);
-      await repo.updateBookmark(bookmark);
-      ref.invalidate(bookmarksProvider);
-      ref.invalidate(unsortedBookmarksProvider);
-      if (bookmark.collection.value != null) {
-        ref.invalidate(
-            collectionBookmarksProvider(bookmark.collection.value!.id));
-      }
+    bookmark.tags = List.from(bookmark.tags)..add(resolvedTag);
+    await repo.updateBookmark(bookmark);
+    ref.invalidate(bookmarksProvider);
+    ref.invalidate(unsortedBookmarksProvider);
+    ref.invalidate(allTagsProvider);
+    if (bookmark.collection.value != null) {
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
     }
   }
 
@@ -131,7 +163,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     bookmark.tags = List.from(bookmark.tags)..remove(tag);
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
-      ref.invalidate(unsortedBookmarksProvider);
+    ref.invalidate(unsortedBookmarksProvider);
+    ref.invalidate(allTagsProvider);
     if (bookmark.collection.value != null) {
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
