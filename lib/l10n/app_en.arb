@@ -129,9 +129,27 @@
       }
     }
   },
-  "noItemsYet": "No items yet.",
+  "noItemsYet": "No items yet",
   "@noItemsYet": {
     "description": "Empty state text when collection has no items"
+  },
+  "tapOrShareToSave": "Tap + or share to save one.",
+  "@tapOrShareToSave": {
+    "description": "Instruction subtitle when collection has no items"
+  },
+  "seeHow": "See how",
+  "@seeHow": {
+    "description": "Button to learn how to save items"
+  },
+  "subcollectionsCount": "{count, plural, =1{1 subcollection} other{{count} subcollections}}",
+  "@subcollectionsCount": {
+    "description": "Count of subcollections in subtitle",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
   },
   "addTag": "Add Tag",
   "@addTag": {
