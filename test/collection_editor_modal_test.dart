@@ -92,7 +92,7 @@ void main() {
     );
   }
 
-  testWidgets('CollectionEditorModal shows 3-dots icon in grid and opens full page IconPickerScreen on tap', (tester) async {
+  testWidgets('CollectionEditorModal shows 3-dots icon in grid and expands to show all 43 icons on tap', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         child: const Scaffold(
@@ -104,6 +104,8 @@ void main() {
 
     // Verify 3 dots icon is rendered in the icon grid
     expect(find.byIcon(Icons.more_horiz), findsOneWidget);
+    // sports_esports_outlined is not rendered yet in collapsed state
+    expect(find.byIcon(Icons.sports_esports_outlined), findsNothing);
 
     // Scroll to and tap the 3 dots icon
     await tester.ensureVisible(find.byIcon(Icons.more_horiz));
@@ -111,28 +113,21 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_horiz));
     await tester.pumpAndSettle();
 
-    // Verify IconPickerScreen full page opened
-    expect(find.byType(IconPickerScreen), findsOneWidget);
-    expect(find.text('Choose Icon'), findsOneWidget);
-    expect(find.text('All'), findsOneWidget);
-    expect(find.text('Travel'), findsOneWidget);
-    expect(find.text('Tech & Code'), findsOneWidget);
+    // Verify modal expanded in-place:
+    // more_horiz is gone, replaced by sports_esports_outlined at slot 24
+    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    expect(find.byIcon(Icons.sports_esports_outlined), findsOneWidget);
 
-    // Search for code
-    await tester.enterText(find.byType(TextField).last, 'code');
-    await tester.pumpAndSettle();
-
-    // Find the code icon and tap it
+    // Verify icons from rows 4, 5, 6 are now rendered
     expect(find.byIcon(Icons.code), findsOneWidget);
+    expect(find.byIcon(Icons.bolt), findsOneWidget);
+    expect(find.byIcon(Icons.fitness_center), findsOneWidget);
+
+    // Tap the code icon
+    await tester.ensureVisible(find.byIcon(Icons.code));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.code));
     await tester.pumpAndSettle();
-
-    // Verify IconPickerScreen closed and returned to CollectionEditorModal
-    expect(find.byType(IconPickerScreen), findsNothing);
-    expect(find.byType(CollectionEditorModal), findsOneWidget);
-
-    // Verify the code icon is now visible in CollectionEditorModal in the 24th slot
-    expect(find.byIcon(Icons.code), findsOneWidget);
 
     // Fill in name and create collection
     await tester.enterText(find.byType(TextField).first, 'Coding Resources');

@@ -199,7 +199,7 @@ void main() {
       expect(find.text('Create sub-collection'), findsOneWidget);
     });
 
-    testWidgets('shows "New collection" for root collection', (tester) async {
+    testWidgets('shows "Add new collection" for root collection', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(
           child: const Scaffold(
@@ -209,7 +209,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('New collection'), findsOneWidget);
+      expect(find.text('Add new collection'), findsOneWidget);
       expect(find.text('Create collection'), findsOneWidget);
     });
 

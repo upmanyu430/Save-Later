@@ -465,7 +465,7 @@
   "@editCollection": {
     "description": "Modal title for editing an existing collection"
   },
-  "newCollection": "New collection",
+  "newCollection": "Add new collection",
   "@newCollection": {
     "description": "Modal title for creating a new collection"
   },
