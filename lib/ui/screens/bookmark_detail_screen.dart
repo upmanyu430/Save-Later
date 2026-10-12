@@ -280,7 +280,24 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               bottom: false,
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
-                  if (notification is UserScrollNotification) {
+                  if (notification is ScrollUpdateNotification) {
+                    final delta = notification.scrollDelta ?? 0;
+                    if (notification.metrics.pixels <= 20) {
+                      if (!_isTopBarVisible) {
+                        setState(() => _isTopBarVisible = true);
+                      }
+                    } else if (delta > 2) {
+                      // Scrolling down -> hide top buttons
+                      if (_isTopBarVisible) {
+                        setState(() => _isTopBarVisible = false);
+                      }
+                    } else if (delta < -2) {
+                      // Scrolling up -> show top buttons
+                      if (!_isTopBarVisible) {
+                        setState(() => _isTopBarVisible = true);
+                      }
+                    }
+                  } else if (notification is UserScrollNotification) {
                     if (notification.direction == ScrollDirection.reverse &&
                         notification.metrics.pixels > 20) {
                       if (_isTopBarVisible) {
@@ -290,10 +307,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       if (!_isTopBarVisible) {
                         setState(() => _isTopBarVisible = true);
                       }
-                    }
-                  } else if (notification is ScrollUpdateNotification) {
-                    if (notification.metrics.pixels <= 20 && !_isTopBarVisible) {
-                      setState(() => _isTopBarVisible = true);
                     }
                   }
                   return false;
