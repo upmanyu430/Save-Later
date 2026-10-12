@@ -59,12 +59,22 @@ class MockEmptyCollectionRepo implements IsarRepository {
       bookmarks.where((b) => b.collection.value == null).toList();
 
   @override
-  Future<void> saveBookmark(Bookmark bookmark, {int? collectionId}) async {
+  Future<void> addBookmark(Bookmark bookmark) async {
     bookmarks.add(bookmark);
   }
 
   @override
-  Future<void> updateBookmark(Bookmark bookmark) async {}
+  Future<void> updateBookmark(Bookmark bookmark) async {
+    final idx = bookmarks.indexWhere((b) => b.id == bookmark.id);
+    if (idx != -1) bookmarks[idx] = bookmark;
+  }
+
+  @override
+  Future<void> updateBookmarks(List<Bookmark> updated) async {
+    for (final b in updated) {
+      await updateBookmark(b);
+    }
+  }
 
   @override
   Future<void> deleteBookmark(Id id) async {
