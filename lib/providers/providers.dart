@@ -154,15 +154,31 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> moveToCollection(Bookmark bookmark, BookmarkCollection collection) async {
+    await moveBookmarksToCollection([bookmark], collection);
+  }
+
+  Future<void> moveBookmarksToCollection(List<Bookmark> bookmarks, BookmarkCollection collection) async {
+    if (bookmarks.isEmpty) return;
     final repo = ref.read(repositoryProvider);
-    final oldCollectionId = bookmark.collection.value?.id;
-    bookmark.collection.value = collection;
-    await repo.updateBookmark(bookmark);
+    final oldCollectionIds = <int>{};
+    for (final bookmark in bookmarks) {
+      if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+        try {
+          await bookmark.collection.load();
+        } catch (_) {}
+      }
+      final oldId = bookmark.collection.value?.id;
+      if (oldId != null && oldId != collection.id) {
+        oldCollectionIds.add(oldId);
+      }
+      bookmark.collection.value = collection;
+    }
+    await repo.updateBookmarks(bookmarks);
     ref.invalidate(bookmarksProvider);
     ref.invalidate(unsortedBookmarksProvider);
     ref.invalidate(collectionBookmarksProvider(collection.id));
-    if (oldCollectionId != null) {
-      ref.invalidate(collectionBookmarksProvider(oldCollectionId));
+    for (final oldId in oldCollectionIds) {
+      ref.invalidate(collectionBookmarksProvider(oldId));
     }
   }
 
@@ -179,18 +195,33 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> deleteBookmark(Bookmark bookmark, {int? collectionId}) async {
+    await deleteBookmarks([bookmark], collectionId: collectionId);
+  }
+
+  Future<void> deleteBookmarks(List<Bookmark> bookmarks, {int? collectionId}) async {
+    if (bookmarks.isEmpty) return;
     final repo = ref.read(repositoryProvider);
-    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
-      try {
-        await bookmark.collection.load();
-      } catch (_) {}
+    final affectedCollectionIds = <int>{};
+    if (collectionId != null) {
+      affectedCollectionIds.add(collectionId);
     }
-    final colId = collectionId ?? bookmark.collection.value?.id;
-    await repo.deleteBookmark(bookmark.id);
+    for (final bookmark in bookmarks) {
+      if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+        try {
+          await bookmark.collection.load();
+        } catch (_) {}
+      }
+      final colId = bookmark.collection.value?.id;
+      if (colId != null) {
+        affectedCollectionIds.add(colId);
+      }
+    }
+    final ids = bookmarks.map((b) => b.id).toList();
+    await repo.deleteBookmarks(ids);
     ref.invalidate(bookmarksProvider);
     ref.invalidate(unsortedBookmarksProvider);
     ref.invalidate(collectionsProvider);
-    if (colId != null) {
+    for (final colId in affectedCollectionIds) {
       ref.invalidate(collectionBookmarksProvider(colId));
     }
     ref.invalidate(collectionBookmarksProvider);

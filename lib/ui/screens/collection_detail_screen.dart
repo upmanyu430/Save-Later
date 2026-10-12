@@ -251,9 +251,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       _isSelectMode = false;
       _selectedIds.clear();
     });
-    for (var b in toDelete) {
-      await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(b, collectionId: widget.collectionId);
-    }
+    await ref.read(bookmarkNotifierProvider.notifier).deleteBookmarks(toDelete, collectionId: widget.collectionId);
   }
 
   void _moveSelected(List<Bookmark> allBookmarks) async {
@@ -265,9 +263,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       context: context,
       bookmarks: selectedBookmarks,
       onMove: (c) async {
-        for (final b in selectedBookmarks) {
-          await ref.read(bookmarkNotifierProvider.notifier).moveToCollection(b, c);
-        }
+        await ref.read(bookmarkNotifierProvider.notifier).moveBookmarksToCollection(selectedBookmarks, c);
         if (mounted) {
           setState(() {
             _isSelectMode = false;

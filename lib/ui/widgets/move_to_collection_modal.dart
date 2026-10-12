@@ -70,28 +70,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     if (widget.onMove != null) {
       await widget.onMove!(collection);
     } else if (widget.bookmark != null) {
-      final b = widget.bookmark!;
-      final previousCollectionId = b.collection.value?.id;
-      b.collection.value = collection;
-      await ref.read(repositoryProvider).updateBookmark(b);
-      b.collection.save();
-      ref.invalidate(bookmarksProvider);
-      ref.invalidate(collectionBookmarksProvider(collection.id));
-      if (previousCollectionId != null && previousCollectionId != collection.id) {
-        ref.invalidate(collectionBookmarksProvider(previousCollectionId));
-      }
+      await ref.read(bookmarkNotifierProvider.notifier).moveToCollection(widget.bookmark!, collection);
     } else if (widget.bookmarks != null && widget.bookmarks!.isNotEmpty) {
-      for (final b in widget.bookmarks!) {
-        final previousCollectionId = b.collection.value?.id;
-        b.collection.value = collection;
-        await ref.read(repositoryProvider).updateBookmark(b);
-        b.collection.save();
-        if (previousCollectionId != null && previousCollectionId != collection.id) {
-          ref.invalidate(collectionBookmarksProvider(previousCollectionId));
-        }
-      }
-      ref.invalidate(bookmarksProvider);
-      ref.invalidate(collectionBookmarksProvider(collection.id));
+      await ref.read(bookmarkNotifierProvider.notifier).moveBookmarksToCollection(widget.bookmarks!, collection);
     }
 
     if (!mounted) return;

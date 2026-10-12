@@ -86,11 +86,30 @@ class IsarRepository {
       await isar.bookmarks.put(bookmark); await bookmark.collection.save();
     });
   }
+
+  Future<void> updateBookmarks(List<Bookmark> bookmarks) async {
+    if (bookmarks.isEmpty) return;
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.bookmarks.putAll(bookmarks);
+      for (final bookmark in bookmarks) {
+        await bookmark.collection.save();
+      }
+    });
+  }
   
   Future<void> deleteBookmark(Id id) async {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.bookmarks.delete(id);
+    });
+  }
+
+  Future<void> deleteBookmarks(List<Id> ids) async {
+    if (ids.isEmpty) return;
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.bookmarks.deleteAll(ids);
     });
   }
 }

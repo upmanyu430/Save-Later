@@ -42,9 +42,23 @@ class MockIsarRepo implements IsarRepository {
   Future<void> updateBookmark(Bookmark bookmark) async {}
 
   @override
+  Future<void> updateBookmarks(List<Bookmark> updated) async {
+    for (final b in updated) {
+      await updateBookmark(b);
+    }
+  }
+
+  @override
   Future<void> deleteBookmark(Id id) async {
     deleteCallCount++;
     bookmarks.removeWhere((b) => b.id == id);
+  }
+
+  @override
+  Future<void> deleteBookmarks(List<Id> ids) async {
+    for (final id in ids) {
+      await deleteBookmark(id);
+    }
   }
 }
 

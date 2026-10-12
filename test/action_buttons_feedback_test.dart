@@ -39,7 +39,13 @@ class FakeIsarRepository implements IsarRepository {
   Future<void> updateBookmark(Bookmark bookmark) async {}
 
   @override
+  Future<void> updateBookmarks(List<Bookmark> updated) async {}
+
+  @override
   Future<void> deleteBookmark(Id id) async {}
+
+  @override
+  Future<void> deleteBookmarks(List<Id> ids) async {}
 }
 
 void main() {
