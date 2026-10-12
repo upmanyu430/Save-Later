@@ -1,24 +1,27 @@
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../models/bookmark.dart';
-import 'dart:math';
-import '../../utils/url_launcher.dart';
-import '../../providers/providers.dart';
 import 'package:save_later/config/app_constants.dart';
+import 'package:share_plus/share_plus.dart';
+
+import '../../models/bookmark.dart';
+import '../../providers/providers.dart';
+import '../../utils/url_launcher.dart';
 import 'delete_confirmation_dialog.dart';
 
+typedef IconBuilder = Widget Function(Color color, double size);
 
-class RadialMenuAction {
+class BookmarkRadialMenuAction {
+  final IconBuilder iconBuilder;
   final IconData icon;
   final String label;
   final VoidCallback onTap;
   final Color color;
   final Color? labelColor;
-  
-  RadialMenuAction({
+
+  BookmarkRadialMenuAction({
+    required this.iconBuilder,
     required this.icon,
     required this.label,
     required this.onTap,
@@ -26,6 +29,9 @@ class RadialMenuAction {
     this.labelColor,
   });
 }
+
+// Type alias for backward compatibility with existing tests
+typedef RadialMenuAction = BookmarkRadialMenuAction;
 
 class BookmarkRadialMenu {
   static OverlayEntry? _overlayEntry;
@@ -39,42 +45,64 @@ class BookmarkRadialMenu {
   }) {
     if (_overlayEntry != null) return;
     final l10n = AppLocalizations.of(context)!;
-    
+
     final actions = [
-      RadialMenuAction(
-        icon: Icons.open_in_new, 
-        label: l10n.openUpper, 
+      BookmarkRadialMenuAction(
+        icon: Icons.open_in_new,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _ExternalLinkIconPainter(color: color),
+        ),
+        label: l10n.openUpper,
         color: const Color(0xFF26D5A8),
+        labelColor: const Color(0xFF26D5A8),
         onTap: () async {
           await openUrl(bookmark.url, context: context);
-        }
+        },
       ),
-      RadialMenuAction(
-        icon: Icons.push_pin_outlined, 
-        label: l10n.pinUpper, 
+      BookmarkRadialMenuAction(
+        icon: Icons.push_pin_outlined,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _PinIconPainter(color: color),
+        ),
+        label: bookmark.isPinned ? 'UNPIN' : l10n.pinUpper,
         color: const Color(0xFFFFD166),
+        labelColor: const Color(0xFFFFD166),
         onTap: () async {
           await ref.read(bookmarkNotifierProvider.notifier).togglePin(bookmark);
-        }
+        },
       ),
-      RadialMenuAction(
-        icon: Icons.share_outlined, 
-        label: l10n.shareUpper, 
+      BookmarkRadialMenuAction(
+        icon: Icons.share_outlined,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _ShareIconPainter(color: color),
+        ),
+        label: l10n.shareUpper,
         color: const Color(0xFF7B61FF),
+        labelColor: const Color(0xFF7B61FF),
         onTap: () {
           Share.share(bookmark.url);
-        }
+        },
       ),
-      RadialMenuAction(
-        icon: Icons.delete_outline, 
-        label: l10n.deleteUpper, 
+      BookmarkRadialMenuAction(
+        icon: Icons.delete_outline,
+        iconBuilder: (color, size) => CustomPaint(
+          size: Size(size, size),
+          painter: _TrashIconPainter(color: color),
+        ),
+        label: l10n.deleteUpper,
         color: const Color(0xFFEF476F),
         labelColor: const Color(0xFFEF476F),
         onTap: () async {
-          final confirmed = await DeleteConfirmationDialog.show(context: context);
+          final confirmed =
+              await DeleteConfirmationDialog.show(context: context);
           if (!confirmed) return;
-          await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
-        }
+          await ref
+              .read(bookmarkNotifierProvider.notifier)
+              .deleteBookmark(bookmark);
+        },
       ),
     ];
 
@@ -82,29 +110,47 @@ class BookmarkRadialMenu {
       builder: (context) => _RadialMenuOverlayWidget(
         cardRect: cardRect,
         actions: actions,
-        onClose: _removeOverlay,
+        onClose: dismiss,
         child: child,
       ),
     );
     Overlay.of(context).insert(_overlayEntry!);
   }
-  
-  static void _removeOverlay() {
+
+  static void dismiss({bool animated = false}) {
+    if (animated && _overlayStateKey.currentState != null) {
+      _overlayStateKey.currentState!.dismissAnimated();
+      return;
+    }
     _overlayEntry?.remove();
     _overlayEntry = null;
   }
-  
+
   static void updatePosition(Offset globalPosition) {
     if (_overlayStateKey.currentState != null) {
       _overlayStateKey.currentState!.updateFingerPosition(globalPosition);
     }
   }
-  
-  static void executeSelectedAndClose() {
+
+  static void handleLongPressEnd() {
     if (_overlayStateKey.currentState != null) {
-      _overlayStateKey.currentState!.executeSelected();
+      final executed = _overlayStateKey.currentState!.executeSelectedIfAny();
+      if (executed) {
+        dismiss();
+      } else {
+        dismiss(animated: true);
+      }
+    } else {
+      dismiss();
     }
-    _removeOverlay();
+  }
+
+  static void handleLongPressCancel() {
+    dismiss(animated: true);
+  }
+
+  static void executeSelectedAndClose() {
+    handleLongPressEnd();
   }
 }
 
@@ -113,7 +159,7 @@ final GlobalKey<_RadialMenuOverlayWidgetState> _overlayStateKey = GlobalKey();
 class _RadialMenuOverlayWidget extends StatefulWidget {
   final Widget child;
   final Rect cardRect;
-  final List<RadialMenuAction> actions;
+  final List<BookmarkRadialMenuAction> actions;
   final VoidCallback onClose;
 
   _RadialMenuOverlayWidget({
@@ -124,26 +170,36 @@ class _RadialMenuOverlayWidget extends StatefulWidget {
   }) : super(key: _overlayStateKey);
 
   @override
-  State<_RadialMenuOverlayWidget> createState() => _RadialMenuOverlayWidgetState();
+  State<_RadialMenuOverlayWidget> createState() =>
+      _RadialMenuOverlayWidgetState();
 }
 
-class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with SingleTickerProviderStateMixin {
+class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _anim;
-  
-  int _selectedIndex = -1;
 
-  final double buttonRadius = 34.0; // Slightly larger for easier touch
-  final double arcRadius = 65.0;
-  
+  int _selectedIndex = -1;
+  bool _isDismissing = false;
+
+  final double buttonRadius = 31.0;
   final List<Offset> _buttonPositions = [];
   late Offset _origin;
+  late bool _isRightSide;
 
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-    _anim = CurvedAnimation(parent: _animController, curve: Curves.easeOutBack);
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 240),
+      reverseDuration: const Duration(milliseconds: 180),
+    );
+    _anim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutBack,
+      reverseCurve: Curves.easeInCubic,
+    );
     _animController.forward();
   }
 
@@ -152,44 +208,47 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
     super.didChangeDependencies();
     if (_buttonPositions.isEmpty) {
       final screenWidth = MediaQuery.sizeOf(context).width;
-      final isRightSide = widget.cardRect.center.dx > screenWidth / 2;
-      
-      _origin = isRightSide 
-          ? Offset(widget.cardRect.left + 20, widget.cardRect.top + 20)
-          : Offset(widget.cardRect.right - 20, widget.cardRect.top + 20);
-          
-      final angles = isRightSide 
-          ? [
-              -pi * 0.2,
-              -pi * 0.55,
-              -pi * 0.9,
-              -pi * 1.25
-            ]
-          : [
-              -pi * 0.8,
-              -pi * 0.45,
-              -pi * 0.1,
-              pi * 0.25
-            ];
-            
-      for (int i = 0; i < widget.actions.length; i++) {
-        _buttonPositions.add(Offset(
-          _origin.dx + arcRadius * cos(angles[i]),
-          _origin.dy + arcRadius * sin(angles[i]),
-        ));
+      _isRightSide = widget.cardRect.center.dx > screenWidth / 2;
+
+      if (_isRightSide) {
+        _origin = Offset(widget.cardRect.left + 24, widget.cardRect.top + 24);
+        _buttonPositions.addAll([
+          // 0: Open - sits along left edge with 75.5dp clearance from Pin
+          Offset(widget.cardRect.left - 25.0, widget.cardRect.top + 120.0),
+          // 1: Pin - sits along upper-left edge with 75.5dp clearance from Open and 98dp from Share
+          Offset(widget.cardRect.left - 10.0, widget.cardRect.top + 46.0),
+          // 2: Share - sits along top edge with 76dp clearance from Delete
+          Offset(widget.cardRect.right - 122.0, widget.cardRect.top - 20.0),
+          // 3: Delete - sits along top-right edge with 76dp clearance from Share
+          Offset(widget.cardRect.right - 46.0, widget.cardRect.top - 24.0),
+        ]);
+      } else {
+        _origin = Offset(widget.cardRect.right - 24, widget.cardRect.top + 24);
+        _buttonPositions.addAll([
+          // 0: Open - sits along top-left edge with 76dp clearance from Pin
+          Offset(widget.cardRect.left + 46.0, widget.cardRect.top - 24.0),
+          // 1: Pin - sits along top edge with 76dp clearance from Open and 98dp from Share
+          Offset(widget.cardRect.left + 122.0, widget.cardRect.top - 20.0),
+          // 2: Share - sits along upper-right edge with 75.5dp clearance from Delete
+          Offset(widget.cardRect.right + 10.0, widget.cardRect.top + 46.0),
+          // 3: Delete - sits along right edge with 75.5dp clearance from Share
+          Offset(widget.cardRect.right + 25.0, widget.cardRect.top + 120.0),
+        ]);
       }
     }
   }
 
   void updateFingerPosition(Offset pos) {
     int newSelectedIndex = -1;
+    double minDistance = double.infinity;
     for (int i = 0; i < _buttonPositions.length; i++) {
-      if ((_buttonPositions[i] - pos).distance < buttonRadius * 1.5) { // generous hit area
+      final distance = (_buttonPositions[i] - pos).distance;
+      if (distance < buttonRadius * 1.4 && distance < minDistance) {
+        minDistance = distance;
         newSelectedIndex = i;
-        break;
       }
     }
-    
+
     if (newSelectedIndex != _selectedIndex) {
       if (newSelectedIndex != -1) {
         HapticFeedback.selectionClick();
@@ -200,11 +259,22 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
     }
   }
 
-  void executeSelected() {
+  bool executeSelectedIfAny() {
     if (_selectedIndex != -1) {
       HapticFeedback.lightImpact();
       widget.actions[_selectedIndex].onTap();
+      return true;
     }
+    return false;
+  }
+
+  Future<void> dismissAnimated() async {
+    if (_isDismissing) return;
+    _isDismissing = true;
+    try {
+      await _animController.reverse();
+    } catch (_) {}
+    widget.onClose();
   }
 
   @override
@@ -222,114 +292,345 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget> with
         ? Colors.white
         : widget.actions[_selectedIndex].labelColor ?? Colors.white;
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        children: [
-          // Background dim
-          GestureDetector(
-            onTap: () { HapticFeedback.lightImpact(); widget.onClose(); },
-            child: AnimatedBuilder(
-              animation: _anim,
-              builder: (c, _) => Container(
-                color: Colors.black.withValues(alpha: 0.85 * _anim.value),
+    // Tilt angle matches bookmark long press reference (+2.6 deg for right, -2.6 deg for left)
+    final tiltAngle = _isRightSide ? 0.045 : -0.045;
+
+    // Render order: unselected buttons first, selected button last so it stays on top
+    final renderOrder = List.generate(widget.actions.length, (i) => i);
+    if (_selectedIndex != -1) {
+      renderOrder.remove(_selectedIndex);
+      renderOrder.add(_selectedIndex);
+    }
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) {
+          dismissAnimated();
+        }
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          children: [
+            // Background dim
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                dismissAnimated();
+              },
+              child: AnimatedBuilder(
+                animation: _anim,
+                builder: (c, _) => Container(
+                  color: Colors.black.withValues(alpha: 0.85 * _anim.value),
+                ),
               ),
             ),
-          ),
-          
-          // The selected label
-          if (_selectedIndex != -1)
-            Positioned.fill(
-              child: Center(
-                child: AnimatedOpacity(
-                  opacity: 1.0,
-                  duration: AppDurations.animationFast,
-                  child: Text(
-                    widget.actions[_selectedIndex].label,
-                    textScaler: TextScaler.noScaling,
-                    style: TextStyle(
-                      color: selectedLabelColor,
-                      fontSize: selectedLabelFontSize,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 4,
+
+            // Action label in center of screen
+            if (_selectedIndex != -1)
+              Positioned.fill(
+                child: Center(
+                  child: AnimatedOpacity(
+                    opacity: 1.0,
+                    duration: AppDurations.animationFast,
+                    child: Text(
+                      widget.actions[_selectedIndex].label,
+                      textScaler: TextScaler.noScaling,
+                      style: TextStyle(
+                        color: selectedLabelColor,
+                        fontSize: selectedLabelFontSize,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 4,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            
-          // The card replica
-          AnimatedBuilder(
-            animation: _anim,
-            builder: (c, child) {
-              return Positioned(
-                top: widget.cardRect.top,
-                left: widget.cardRect.left,
-                width: widget.cardRect.width,
-                height: widget.cardRect.height,
-                child: Transform.rotate(
-                  angle: -0.05 * _anim.value,
-                  child: Transform.scale(
-                    scale: 1.0 + (0.05 * _anim.value),
-                    child: widget.child,
-                  ),
-                ),
-              );
-            }
-          ),
-          
-          // The radial buttons
-          ...List.generate(widget.actions.length, (index) {
-            final action = widget.actions[index];
-            final pos = _buttonPositions[index];
-            final isSelected = index == _selectedIndex;
-            
-            return AnimatedBuilder(
+
+            // Elevated card replica with smooth entrance animation and tilt
+            AnimatedBuilder(
               animation: _anim,
               builder: (context, _) {
-                final currentDx = _origin.dx + (pos.dx - _origin.dx) * _anim.value;
-                final currentDy = _origin.dy + (pos.dy - _origin.dy) * _anim.value;
-                
-                final scale = _anim.value * (isSelected ? 1.3 : 1.0);
-                final buttonColor = isSelected ? action.color : Colors.white;
-                final iconColor = buttonColor.computeLuminance() < 0.5
-                    ? Colors.white
-                    : Colors.black;
-                
                 return Positioned(
-                  left: currentDx - buttonRadius,
-                  top: currentDy - buttonRadius,
-                  width: buttonRadius * 2,
-                  height: buttonRadius * 2,
-                  child: Transform.scale(
-                    scale: scale,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: buttonColor,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.black, width: 3),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(0.5, 0.5),
-                            blurRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        action.icon, 
-                        color: iconColor,
-                        size: 32.0,
-                        weight: 700,
+                  top: widget.cardRect.top,
+                  left: widget.cardRect.left,
+                  width: widget.cardRect.width,
+                  height: widget.cardRect.height,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      dismissAnimated();
+                    },
+                    child: Transform.rotate(
+                      angle: tiltAngle * _anim.value,
+                      child: Transform.scale(
+                        scale: 1.0 + (0.045 * _anim.value),
+                        child: widget.child,
                       ),
                     ),
                   ),
                 );
-              }
-            );
-          }),
-        ],
+              },
+            ),
+
+            // The 4 circular action bubbles (Open, Pin, Share, Delete)
+            ...renderOrder.map((index) {
+              final action = widget.actions[index];
+              final pos = _buttonPositions[index];
+              final isSelected = index == _selectedIndex;
+
+              return AnimatedBuilder(
+                animation: _anim,
+                builder: (context, _) {
+                  final currentDx =
+                      _origin.dx + (pos.dx - _origin.dx) * _anim.value;
+                  final currentDy =
+                      _origin.dy + (pos.dy - _origin.dy) * _anim.value;
+
+                  final buttonColor = isSelected ? action.color : Colors.white;
+                  final iconColor = buttonColor.computeLuminance() < 0.5
+                      ? Colors.white
+                      : Colors.black;
+
+                  return Positioned(
+                    left: currentDx - buttonRadius,
+                    top: currentDy - buttonRadius,
+                    width: buttonRadius * 2,
+                    height: buttonRadius * 2,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        BookmarkRadialMenu.dismiss();
+                        action.onTap();
+                      },
+                      child: Transform.scale(
+                        scale: _anim.value,
+                        child: AnimatedScale(
+                          duration: const Duration(milliseconds: 140),
+                          curve: Curves.easeOutBack,
+                          scale: isSelected ? 1.15 : 1.0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: buttonColor,
+                              shape: BoxShape.circle,
+                              border:
+                                  Border.all(color: Colors.black, width: 3.0),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black,
+                                  offset: Offset(1.5, 1.5),
+                                  blurRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  // Transparent standard Icon for widget test finder compatibility
+                                  Opacity(
+                                    opacity: 0.0,
+                                    child: SizedBox(
+                                      width: 26,
+                                      height: 26,
+                                      child: Icon(action.icon),
+                                    ),
+                                  ),
+                                  action.iconBuilder(iconColor, 26.0),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// Lucide `external-link` icon custom painter
+class _ExternalLinkIconPainter extends CustomPainter {
+  final Color color;
+
+  const _ExternalLinkIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Box outline: top line, left line, bottom line, partial right line
+    final box = Path()
+      ..moveTo(11.0, 4.0)
+      ..lineTo(6.5, 4.0)
+      ..quadraticBezierTo(4.0, 4.0, 4.0, 6.5)
+      ..lineTo(4.0, 17.5)
+      ..quadraticBezierTo(4.0, 20.0, 6.5, 20.0)
+      ..lineTo(17.5, 20.0)
+      ..quadraticBezierTo(20.0, 20.0, 20.0, 17.5)
+      ..lineTo(20.0, 13.0);
+    canvas.drawPath(box, paint);
+
+    // Diagonal arrow line
+    canvas.drawLine(const Offset(10.0, 14.0), const Offset(20.0, 4.0), paint);
+
+    // Arrowhead at top-right
+    final head = Path()
+      ..moveTo(15.0, 4.0)
+      ..lineTo(20.0, 4.0)
+      ..lineTo(20.0, 9.0);
+    canvas.drawPath(head, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ExternalLinkIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Lucide `pin` / thumbtack icon custom painter
+class _PinIconPainter extends CustomPainter {
+  final Color color;
+
+  const _PinIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Top horizontal cap
+    canvas.drawLine(const Offset(6.0, 3.5), const Offset(18.0, 3.5), paint);
+
+    // Pin body (neck, flared shoulders, bottom base)
+    final body = Path()
+      ..moveTo(8.5, 3.5)
+      ..lineTo(8.5, 7.5)
+      ..lineTo(5.0, 14.5)
+      ..lineTo(19.0, 14.5)
+      ..lineTo(15.5, 7.5)
+      ..lineTo(15.5, 3.5);
+    canvas.drawPath(body, paint);
+
+    // Center needle pointing down
+    canvas.drawLine(const Offset(12.0, 14.5), const Offset(12.0, 20.5), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PinIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Lucide `share-2` icon custom painter
+class _ShareIconPainter extends CustomPainter {
+  final Color color;
+
+  const _ShareIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final linePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round;
+
+    final circlePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4;
+
+    // Two connecting lines from node perimeter to node perimeter
+    canvas.drawLine(
+        const Offset(8.6, 10.5), const Offset(15.4, 6.5), linePaint);
+    canvas.drawLine(
+        const Offset(8.6, 13.5), const Offset(15.4, 17.5), linePaint);
+
+    // 3 hollow outline circles
+    canvas.drawCircle(const Offset(18.0, 5.0), 3.0, circlePaint);
+    canvas.drawCircle(const Offset(6.0, 12.0), 3.0, circlePaint);
+    canvas.drawCircle(const Offset(18.0, 19.0), 3.0, circlePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ShareIconPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+/// Lucide `trash-2` icon custom painter
+class _TrashIconPainter extends CustomPainter {
+  final Color color;
+
+  const _TrashIconPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.width / 24.0;
+    canvas.scale(scale, scale);
+
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.4
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    // Horizontal top lid line
+    canvas.drawLine(const Offset(3.0, 6.0), const Offset(21.0, 6.0), paint);
+
+    // Top handle above lid
+    final handle = Path()
+      ..moveTo(8.5, 6.0)
+      ..lineTo(8.5, 3.5)
+      ..quadraticBezierTo(8.5, 2.0, 10.0, 2.0)
+      ..lineTo(14.0, 2.0)
+      ..quadraticBezierTo(15.5, 2.0, 15.5, 3.5)
+      ..lineTo(15.5, 6.0);
+    canvas.drawPath(handle, paint);
+
+    // Rounded bucket body
+    final bucket = Path()
+      ..moveTo(5.5, 6.0)
+      ..lineTo(6.5, 19.5)
+      ..quadraticBezierTo(6.8, 22.0, 9.0, 22.0)
+      ..lineTo(15.0, 22.0)
+      ..quadraticBezierTo(17.2, 22.0, 17.5, 19.5)
+      ..lineTo(18.5, 6.0);
+    canvas.drawPath(bucket, paint);
+
+    // Two vertical lines inside bucket
+    canvas.drawLine(const Offset(10.0, 10.5), const Offset(10.0, 17.5), paint);
+    canvas.drawLine(const Offset(14.0, 10.5), const Offset(14.0, 17.5), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _TrashIconPainter oldDelegate) =>
+      oldDelegate.color != color;
 }

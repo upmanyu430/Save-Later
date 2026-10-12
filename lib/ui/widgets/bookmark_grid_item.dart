@@ -66,12 +66,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     if (widget.isSelectMode) return;
-    BookmarkRadialMenu.executeSelectedAndClose();
+    BookmarkRadialMenu.handleLongPressEnd();
   }
   
   void _handleLongPressCancel() {
     if (widget.isSelectMode) return;
-    BookmarkRadialMenu.executeSelectedAndClose();
+    BookmarkRadialMenu.handleLongPressCancel();
   }
 
   @override
