@@ -552,7 +552,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           },
                           child: NeoBox(
                             color: const Color(0xFFFFD166), // Yellow
-                            padding: EdgeInsets.all(AppDimensions.paddingLg),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimensions.paddingLg,
+                              vertical: AppDimensions.paddingMd,
+                            ),
                             borderRadius: AppDimensions.radiusXl,
                             child: Row(
                               children: [
@@ -574,12 +577,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   ),
                                 ),
                                 Container(
-                                  padding: EdgeInsets.all(AppDimensions.paddingSm),
+                                  padding: const EdgeInsets.all(7.0),
                                   decoration: const BoxDecoration(
                                     color: AppTheme.border,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: AppDimensions.iconSizeMd),
+                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: 22.0),
                                 ),
                               ],
                             ),
