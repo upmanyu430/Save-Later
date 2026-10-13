@@ -40,6 +40,7 @@ class AppDimensions {
   static const double gridSpacingMd = 16.0;
   static const double gridSpacingLg = 24.0;
   static const double gridFolderCardHeight = 160.0;
+  static const double gridBookmarkCardHeight = 160.0;
 }
 
 class AppDurations {

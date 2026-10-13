@@ -19,6 +19,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
   final bool isSelected;
   final VoidCallback? onSelectTapped;
   final bool forceBold;
+  final bool showCollectionPill;
 
   const BookmarkGridItem({
     super.key, 
@@ -27,6 +28,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
     this.isSelected = false,
     this.onSelectTapped,
     this.forceBold = false,
+    this.showCollectionPill = false,
   });
 
   @override
@@ -104,7 +106,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       children: [
         NeoBox(
           padding: const EdgeInsets.all(0),
-          borderRadius: AppDimensions.radiusMd,
+          borderRadius: AppDimensions.radiusXl,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -112,15 +114,15 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
             flex: 5,
             child: Container(
               decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppTheme.border, width: AppDimensions.borderWidthMd)),
+                border: Border(bottom: BorderSide(color: AppTheme.border, width: 3.0)),
                 color: Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(9.5)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(13.0)),
               ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(9.5)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(13.0)),
                     child: b.imageUrl != null
                         ? Image.network(
                             b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!, 
@@ -134,6 +136,28 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                             ),
                           ),
                   ),
+                  // Overlay Unsorted/Collection pill
+                  if (widget.showCollectionPill)
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black38,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          b.collection.value?.name ?? AppLocalizations.of(context)!.unsorted,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                   if (!b.isRead)
                     Positioned(
                       top: 6,
@@ -197,7 +221,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                   Expanded(
                     child: Text(
                       b.title ?? b.url,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, height: 1.2),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w800,
+                        color: AppTheme.border,
+                        height: 1.2,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

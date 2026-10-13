@@ -120,7 +120,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       },
       child: Container(
         width: _recentCardWidth(context),
-        height: AppDimensions.gridFolderCardHeight,
+        height: AppDimensions.gridBookmarkCardHeight,
         margin: const EdgeInsets.only(right: 16),
         child: NeoBox(
           padding: EdgeInsets.zero,
@@ -345,7 +345,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const horizontalPadding = 48.0;
         const maxCrossAxisExtent = 200.0;
         const crossAxisSpacing = AppDimensions.gridSpacingMd;
-        const desiredCardHeight = 210.0;
+        const desiredCardHeight = AppDimensions.gridBookmarkCardHeight;
         final contentWidth = constraints.maxWidth - horizontalPadding;
         final columnCount = (contentWidth /
                 (maxCrossAxisExtent + crossAxisSpacing))
@@ -366,8 +366,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ),
           itemCount: results.length,
           itemBuilder: (context, index) {
-                              final b = results[index];
-                              return BookmarkGridItem(bookmark: b);
+            final b = results[index];
+            return BookmarkGridItem(
+              bookmark: b,
+              showCollectionPill: true,
+            );
           },
         );
       },
@@ -490,7 +493,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         // Horizontal Cards
                         if (allBookmarks.isNotEmpty)
                           SizedBox(
-                            height: AppDimensions.gridFolderCardHeight,
+                            height: AppDimensions.gridBookmarkCardHeight,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: allBookmarks.length > 10

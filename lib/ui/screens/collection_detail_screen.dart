@@ -421,7 +421,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             const horizontalPadding = AppDimensions.paddingXl * 2;
                             const maxCrossAxisExtent = 200.0;
                             const crossAxisSpacing = AppDimensions.gridSpacingMd;
-                            const desiredBookmarkCardHeight = 180.0;
+                            const desiredBookmarkCardHeight =
+                                AppDimensions.gridBookmarkCardHeight;
                             const desiredFolderCardHeight =
                                 AppDimensions.gridFolderCardHeight;
                             final contentWidth = constraints.maxWidth - horizontalPadding;
