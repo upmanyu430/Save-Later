@@ -9,6 +9,7 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/screens/bookmark_detail_screen.dart';
+import 'package:save_later/ui/widgets/neo_button.dart';
 
 class FakeIsarRepository implements IsarRepository {
   @override
@@ -91,12 +92,12 @@ void main() {
     expect(find.text('Refresh'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
 
-    // Verify InkWell widgets exist inside each action button for ripple/press feedback
-    final inkWells = find.descendant(
+    // Verify NeoButton widgets exist inside each action button for neo-brutal press feedback
+    final actionButtons = find.descendant(
       of: find.byType(Row),
-      matching: find.byType(InkWell),
+      matching: find.byType(NeoButton),
     );
-    expect(inkWells, findsAtLeastNWidgets(4));
+    expect(actionButtons, findsAtLeastNWidgets(4));
 
     // Test pressing down on the Refresh button
     final refreshFinder = find.text('Refresh');

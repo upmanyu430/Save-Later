@@ -28,31 +28,54 @@ class NeoButton extends StatefulWidget {
   State<NeoButton> createState() => _NeoButtonState();
 }
 
-class _NeoButtonState extends State<NeoButton> {
-  bool _isPressed = false;
+class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
   bool get _isEnabled => widget.onPressed != null;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 70),
+      reverseDuration: const Duration(milliseconds: 140),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+      reverseCurve: Curves.easeOutBack,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   void _handleTapDown(TapDownDetails details) {
     if (!_isEnabled) return;
     HapticFeedback.lightImpact();
-    setState(() {
-      _isPressed = true;
-    });
+    _controller.forward();
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isEnabled) return;
-    setState(() {
-      _isPressed = false;
+    HapticFeedback.selectionClick();
+    _controller.forward().whenComplete(() {
+      if (!mounted) return;
+      _controller.reverse().whenComplete(() {
+        if (mounted) {
+          widget.onPressed?.call();
+        }
+      });
     });
-    widget.onPressed!();
   }
 
   void _handleTapCancel() {
     if (!_isEnabled) return;
-    setState(() {
-      _isPressed = false;
-    });
+    _controller.reverse();
   }
 
   @override
@@ -64,39 +87,44 @@ class _NeoButtonState extends State<NeoButton> {
         onTapDown: _isEnabled ? _handleTapDown : null,
         onTapUp: _isEnabled ? _handleTapUp : null,
         onTapCancel: _isEnabled ? _handleTapCancel : null,
-      child: AnimatedContainer(
-        transform: Matrix4.translationValues(
-          _isPressed ? widget.shadowOffset : 0,
-          _isPressed ? widget.shadowOffset : 0,
-          0,
-        ),
-        duration: _isPressed
-            ? const Duration(milliseconds: 50)
-            : const Duration(milliseconds: 400),
-        curve: _isPressed ? Curves.easeOut : Curves.elasticOut,
-        padding: widget.padding,
-        decoration: BoxDecoration(
-          color: widget.color,
-          borderRadius: BorderRadius.circular(widget.borderRadius),
-          border: Border.all(
-            color: AppTheme.border,
-            width: widget.borderWidth,
-          ),
-          boxShadow: _isPressed
-              ? []
-              : [
-                  BoxShadow(
-                    color: AppTheme.border,
-                    offset: Offset(widget.shadowOffset, widget.shadowOffset),
-                    blurRadius: 0,
-                    spreadRadius: 0,
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            final t = _animation.value;
+            final offset = t * widget.shadowOffset;
+            final shadowOffset = (1.0 - t).clamp(0.0, 1.0) * widget.shadowOffset;
+            final scale = 1.0 - (t * 0.04);
+
+            return Transform.translate(
+              offset: Offset(offset, offset),
+              child: Transform.scale(
+                scale: scale,
+                child: Container(
+                  padding: widget.padding,
+                  decoration: BoxDecoration(
+                    color: widget.color,
+                    borderRadius: BorderRadius.circular(widget.borderRadius),
+                    border: Border.all(
+                      color: AppTheme.border,
+                      width: widget.borderWidth,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(shadowOffset, shadowOffset),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
-                ],
+                  child: Center(child: widget.child),
+                ),
+              ),
+            );
+          },
         ),
-        child: Center(child: widget.child),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 

@@ -1013,7 +1013,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         color: color,
         borderWidth: 2.5,
         borderRadius: 14.0,
-        shadowOffset: 2.0,
+        shadowOffset: 2.5,
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
         child: Column(
           mainAxisSize: MainAxisSize.min,
