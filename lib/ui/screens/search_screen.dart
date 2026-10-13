@@ -129,7 +129,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               // Top half image/color
               Expanded(
-                flex: 5,
                 child: Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFFFFD166),
@@ -228,72 +227,73 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               // Horizontal divider
               Container(height: 3, color: AppTheme.border),
               // Bottom half details
-              Expanded(
-                flex: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(AppDimensions.paddingMd),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(13),
-                      bottomRight: Radius.circular(13),
-                    ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(13),
+                    bottomRight: Radius.circular(13),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          bookmark.title ?? bookmark.url,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.border,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 33,
+                      child: Text(
+                        bookmark.title ?? bookmark.url,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: AppTheme.border,
+                          height: 1.25,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      Row(
-                        children: [
-                          Container(
-                            width: 16,
-                            height: 16,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFF8A65), // Placeholder color
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                bookmark.sourceDomain != null &&
-                                        bookmark.sourceDomain!.isNotEmpty
-                                    ? bookmark.sourceDomain![0].toUpperCase()
-                                    : '?',
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Container(
+                          width: 16,
+                          height: 16,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFFF8A65), // Placeholder color
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 6),
-                          Expanded(
+                          child: Center(
                             child: Text(
-                              bookmark.sourceDomain ?? AppLocalizations.of(context)!.unknown,
+                              bookmark.sourceDomain != null &&
+                                      bookmark.sourceDomain!.isNotEmpty
+                                  ? bookmark.sourceDomain![0].toUpperCase()
+                                  : '?',
                               style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            bookmark.sourceDomain ?? AppLocalizations.of(context)!.unknown,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],

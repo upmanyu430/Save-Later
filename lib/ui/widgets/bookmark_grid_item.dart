@@ -111,7 +111,6 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            flex: 5,
             child: Container(
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppTheme.border, width: 3.0)),
@@ -211,55 +210,59 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
               ),
             ),
           ),
-          Expanded(
-            flex: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.paddingMd),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      b.title ?? b.url,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w800,
-                        color: AppTheme.border,
-                        height: 1.2,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+          Container(
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(13.0)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 33,
+                  child: Text(
+                    b.title ?? b.url,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w800,
+                      color: AppTheme.border,
+                      height: 1.25,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  Row(
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.border,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
-                            style: TextStyle(fontSize: 9, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
-                          ),
-                        ),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppTheme.border,
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 6),
-                      Expanded(
+                      child: Center(
                         child: Text(
-                          b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                          style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
+                          style: TextStyle(fontSize: 9, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
                         ),
                       ),
-                    ],
-                  )
-                ],
-              ),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
+                        style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
