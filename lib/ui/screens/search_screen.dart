@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/neo_button.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
@@ -434,19 +435,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     ),
                   ),
                   const SizedBox(width: AppDimensions.paddingMd),
-                  GestureDetector(
-                    onTap: () { HapticFeedback.lightImpact(); context.pop(); },
-                    child: NeoBox(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 14),
-                      color: Colors.white,
-                      child: Text(
-                        l10n.cancel,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.border,
-                        ),
+                  NeoButton(
+                    onPressed: () => context.pop(),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    color: Colors.white,
+                    child: Text(
+                      l10n.cancel,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.border,
                       ),
                     ),
                   ),

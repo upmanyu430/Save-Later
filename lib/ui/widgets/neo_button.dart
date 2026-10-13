@@ -8,6 +8,8 @@ class NeoButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final Color color;
+  final Color? borderColor;
+  final Color? shadowColor;
   final double borderWidth;
   final double borderRadius;
   final double shadowOffset;
@@ -18,6 +20,8 @@ class NeoButton extends StatefulWidget {
     this.onPressed,
     required this.child,
     this.color = AppTheme.primary,
+    this.borderColor,
+    this.shadowColor,
     this.borderWidth = 3.0,
     this.borderRadius = 12.0,
     this.shadowOffset = 2.0,
@@ -105,12 +109,12 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
                     color: widget.color,
                     borderRadius: BorderRadius.circular(widget.borderRadius),
                     border: Border.all(
-                      color: AppTheme.border,
+                      color: widget.borderColor ?? AppTheme.border,
                       width: widget.borderWidth,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppTheme.border,
+                        color: widget.shadowColor ?? AppTheme.border,
                         offset: Offset(shadowOffset, shadowOffset),
                         blurRadius: 0,
                         spreadRadius: 0,

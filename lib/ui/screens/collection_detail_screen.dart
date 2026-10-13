@@ -8,6 +8,7 @@ import '../../models/collection.dart';
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/neo_button.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
@@ -242,17 +243,16 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   }
   
   Widget _buildSelectButton(String label, {Color? color, Color? textColor, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap == null ? null : () { HapticFeedback.lightImpact(); onTap(); },
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: NeoBox(
-          color: color ?? Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          borderRadius: AppDimensions.radiusSm,
-          borderWidth: AppDimensions.borderWidthMd,
-          child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
-        ),
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: NeoButton(
+        onPressed: onTap,
+        color: color ?? Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        borderRadius: AppDimensions.radiusSm,
+        borderWidth: AppDimensions.borderWidthMd,
+        shadowOffset: 2.0,
+        child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
       ),
     );
   }
@@ -361,10 +361,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
-                              onTap: () { HapticFeedback.lightImpact(); context.pop(); },
-                              child: NeoBox(
-                                padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                            SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: NeoButton(
+                                onPressed: () => context.pop(),
+                                padding: EdgeInsets.zero,
+                                color: AppTheme.cardColor,
                                 borderRadius: AppDimensions.radiusSm,
                                 borderWidth: AppDimensions.borderWidthMd,
                                 child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeLg),
@@ -386,21 +389,26 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             ),
                             Row(
                               children: [
-                                GestureDetector(
-                                  onTap: () { HapticFeedback.lightImpact(); context.push('/review', extra: widget.collection); },
-                                  child: NeoBox(
+                                SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: NeoButton(
+                                    onPressed: () => context.push('/review', extra: widget.collection),
                                     color: const Color(0xFFFFD166), // Yellow
-                                    padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                                    padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusSm,
                                     borderWidth: AppDimensions.borderWidthMd,
                                     child: const ReviewCardsIcon(size: AppDimensions.iconSizeLg),
                                   ),
                                 ),
                                 const SizedBox(width: AppDimensions.paddingSm),
-                                GestureDetector(
-                                  onTap: () { HapticFeedback.lightImpact(); _showMenuModal(context); },
-                                  child: NeoBox(
-                                    padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                                SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: NeoButton(
+                                    onPressed: () => _showMenuModal(context),
+                                    padding: EdgeInsets.zero,
+                                    color: AppTheme.cardColor,
                                     borderRadius: AppDimensions.radiusSm,
                                     borderWidth: AppDimensions.borderWidthMd,
                                     child: const Icon(Icons.more_vert, size: AppDimensions.iconSizeLg),

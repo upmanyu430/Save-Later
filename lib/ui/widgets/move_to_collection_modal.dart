@@ -146,10 +146,13 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           ),
                         ),
                         const SizedBox(width: AppDimensions.paddingSm),
-                  GestureDetector(
-                    onTap: _openCreateCollection,
-                    child: NeoBox(
-                      padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: NeoButton(
+                      onPressed: _openCreateCollection,
+                      padding: EdgeInsets.zero,
+                      color: AppTheme.cardColor,
                       borderRadius: AppDimensions.radiusSm,
                       borderWidth: AppDimensions.borderWidthMd,
                       child: const Icon(
@@ -180,18 +183,16 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          GestureDetector(
-                            onTap: _openCreateCollection,
-                            child: NeoBox(
-                              color: AppTheme.accent,
-                              borderWidth: 2,
-                              borderRadius: 12,
-                              shadowOffset: 2,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                              child: const Text(
-                                'Create New Collection',
-                                style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.border),
-                              ),
+                          NeoButton(
+                            onPressed: _openCreateCollection,
+                            color: AppTheme.accent,
+                            borderWidth: 2,
+                            borderRadius: 12,
+                            shadowOffset: 2,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            child: const Text(
+                              'Create New Collection',
+                              style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.border),
                             ),
                           ),
                         ],

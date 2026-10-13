@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
+import 'neo_button.dart';
 
 class DeleteConfirmationDialog extends StatelessWidget {
   final String title;
@@ -114,27 +115,22 @@ class DeleteConfirmationDialog extends StatelessWidget {
             children: [
               // Cancel Button
               Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.lightImpact();
+                child: NeoButton(
+                  onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  child: NeoBox(
-                    color: Colors.white,
-                    borderWidth: 2.5,
-                    borderRadius: 12.0,
-                    shadowOffset: 3.0,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Center(
-                      child: Text(
-                        cancelText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.border,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
+                  color: Colors.white,
+                  borderWidth: 2.5,
+                  borderRadius: 12.0,
+                  shadowOffset: 3.0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    cancelText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.border,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),
@@ -143,27 +139,22 @@ class DeleteConfirmationDialog extends StatelessWidget {
 
               // Delete Button
               Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.mediumImpact();
+                child: NeoButton(
+                  onPressed: () {
                     Navigator.of(context).pop(true);
                   },
-                  child: NeoBox(
-                    color: const Color(0xFFEF476F),
-                    borderWidth: 2.5,
-                    borderRadius: 12.0,
-                    shadowOffset: 3.0,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    child: Center(
-                      child: Text(
-                        confirmText,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: 0.3,
-                        ),
-                      ),
+                  color: const Color(0xFFEF476F),
+                  borderWidth: 2.5,
+                  borderRadius: 12.0,
+                  shadowOffset: 3.0,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Text(
+                    confirmText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.3,
                     ),
                   ),
                 ),

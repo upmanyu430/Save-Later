@@ -378,28 +378,18 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   ),
                 ],
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                    splashColor: Colors.white12,
-                    highlightColor: Colors.white10,
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      context.pop();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(AppDimensions.paddingMd),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF222222),
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                        border: Border.all(color: Colors.white24, width: 1.5),
-                      ),
-                      child: const Icon(Icons.close, color: Colors.white),
-                    ),
-                  ),
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: NeoButton(
+                  onPressed: () => context.pop(),
+                  padding: EdgeInsets.zero,
+                  color: const Color(0xFF222222),
+                  borderColor: Colors.white24,
+                  shadowColor: Colors.black,
+                  borderWidth: 1.5,
+                  borderRadius: AppDimensions.radiusXl,
+                  child: const Icon(Icons.close, color: Colors.white),
                 ),
               ),
             ],
@@ -717,58 +707,27 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   }
 }
 
-class _ReviewIconButton extends StatefulWidget {
+class _ReviewIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onPressed;
 
   const _ReviewIconButton({required this.icon, required this.onPressed});
 
   @override
-  State<_ReviewIconButton> createState() => _ReviewIconButtonState();
-}
-
-class _ReviewIconButtonState extends State<_ReviewIconButton> {
-  bool _pressed = false;
-
-  void _press() {
-    HapticFeedback.lightImpact();
-    setState(() => _pressed = true);
-  }
-
-  void _release() {
-    if (!mounted) return;
-    setState(() => _pressed = false);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _press(),
-      onTapCancel: _release,
-      onTapUp: (_) {
-        _release();
-        widget.onPressed();
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 90),
-        width: 60,
-        height: 60,
-        transform: Matrix4.translationValues(0, _pressed ? 3 : 0, 0),
-        decoration: BoxDecoration(
-          color: _pressed ? const Color(0xFF333333) : const Color(0xFF222222),
-          borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-          border: Border.all(color: Colors.white12, width: 2),
-          boxShadow: _pressed
-              ? const []
-              : const [
-                  BoxShadow(
-                    color: Colors.black,
-                    offset: Offset(0, 4),
-                    blurRadius: 0,
-                  ),
-                ],
-        ),
-        child: Icon(widget.icon, color: Colors.white, size: 30),
+    return SizedBox(
+      width: 60,
+      height: 60,
+      child: NeoButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        color: const Color(0xFF222222),
+        borderColor: Colors.white12,
+        shadowColor: Colors.black,
+        borderWidth: 2,
+        borderRadius: AppDimensions.radiusXl,
+        shadowOffset: 4.0,
+        child: Icon(icon, color: Colors.white, size: 30),
       ),
     );
   }

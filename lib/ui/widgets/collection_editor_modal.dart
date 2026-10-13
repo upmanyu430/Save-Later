@@ -194,18 +194,19 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingSm),
-                      GestureDetector(
-                        onTap: () {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(AppDimensions.paddingSm),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppTheme.border, width: 2),
-                            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                          ),
+                      SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: NeoButton(
+                          onPressed: () {
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          padding: EdgeInsets.zero,
+                          color: Colors.white,
+                          borderWidth: 2,
+                          borderRadius: AppDimensions.radiusSm,
                           child: const Icon(Icons.close, size: AppDimensions.iconSizeMd),
                         ),
                       ),

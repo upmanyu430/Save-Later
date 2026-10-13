@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/neo_button.dart';
 import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_config.dart';
@@ -233,14 +234,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () {
-                                    HapticFeedback.lightImpact();
-                        if (_hapticFeedback) HapticFeedback.selectionClick();
-                        context.pop();
-                      },
-                      child: NeoBox(
-                        padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: NeoButton(
+                        onPressed: () {
+                          if (_hapticFeedback) HapticFeedback.selectionClick();
+                          context.pop();
+                        },
+                        padding: EdgeInsets.zero,
+                        color: AppTheme.cardColor,
                         borderRadius: AppDimensions.radiusSm,
                         borderWidth: AppDimensions.borderWidthMd,
                         child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeLg),

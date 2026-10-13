@@ -141,13 +141,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      _pushRoute('/settings');
-                    },
-                    child: NeoBox(
-                      padding: const EdgeInsets.all(AppDimensions.paddingSm),
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: NeoButton(
+                      onPressed: () => _pushRoute('/settings'),
+                      padding: EdgeInsets.zero,
+                      color: AppTheme.cardColor,
                       borderRadius: AppDimensions.radiusSm,
                       borderWidth: AppDimensions.borderWidthMd,
                       child: const Icon(Icons.settings_outlined,
@@ -156,14 +156,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   Row(
                     children: [
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _showAddCollectionModal();
-                        },
-                        child: NeoBox(
-                          padding:
-                              const EdgeInsets.all(AppDimensions.paddingSm),
+                      SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: NeoButton(
+                          onPressed: _showAddCollectionModal,
+                          padding: EdgeInsets.zero,
+                          color: AppTheme.cardColor,
                           borderRadius: AppDimensions.radiusSm,
                           borderWidth: AppDimensions.borderWidthMd,
                           child: const Icon(Icons.create_new_folder_outlined,
@@ -171,14 +170,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingSm),
-                      GestureDetector(
-                        onTap: () {
-                          HapticFeedback.lightImpact();
-                          _pushRoute('/search');
-                        },
-                        child: NeoBox(
-                          padding:
-                              const EdgeInsets.all(AppDimensions.paddingSm),
+                      SizedBox(
+                        width: 44,
+                        height: 44,
+                        child: NeoButton(
+                          onPressed: () => _pushRoute('/search'),
+                          padding: EdgeInsets.zero,
+                          color: AppTheme.cardColor,
                           borderRadius: AppDimensions.radiusSm,
                           borderWidth: AppDimensions.borderWidthMd,
                           child: const Icon(Icons.search,

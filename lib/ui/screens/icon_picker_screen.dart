@@ -256,18 +256,15 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
               ),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(AppDimensions.paddingSm),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: AppTheme.border, width: 2),
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                      ),
+                  SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: NeoButton(
+                      onPressed: () => Navigator.pop(context),
+                      padding: EdgeInsets.zero,
+                      color: Colors.white,
+                      borderWidth: 2,
+                      borderRadius: AppDimensions.radiusSm,
                       child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
                     ),
                   ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
+import 'neo_button.dart';
 
 class MovedSuccessDialog extends StatelessWidget {
   final String title;
@@ -132,30 +133,25 @@ class MovedSuccessDialog extends StatelessWidget {
           const SizedBox(height: 24),
 
           // Action Button
-          GestureDetector(
-            onTap: () {
-              HapticFeedback.lightImpact();
+          NeoButton(
+            onPressed: () {
               Navigator.of(context).pop();
               if (onConfirm != null) {
                 onConfirm!();
               }
             },
-            child: NeoBox(
-              color: AppTheme.accent,
-              borderWidth: 2.5,
-              borderRadius: 12.0,
-              shadowOffset: 3.0,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Center(
-                child: Text(
-                  buttonText,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.border,
-                    letterSpacing: 0.5,
-                  ),
-                ),
+            color: AppTheme.accent,
+            borderWidth: 2.5,
+            borderRadius: 12.0,
+            shadowOffset: 3.0,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Text(
+              buttonText,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
               ),
             ),
           ),
