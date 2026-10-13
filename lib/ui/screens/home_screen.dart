@@ -332,7 +332,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   itemCountText: l10n.itemsCount(count),
                                   folderColor: Colors.grey.shade400,
                                   onTap: () {
-                                    HapticFeedback.lightImpact();
                                     _pushRoute('/unsorted');
                                   },
                                   hasNewItems: hasNew,

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
-import 'neo_box.dart';
 import 'neo_button.dart';
 
 class DeleteConfirmationDialog extends StatelessWidget {

@@ -29,7 +29,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   final GlobalKey _cardKey = GlobalKey();
   final GlobalKey _cardBodyKey = GlobalKey();
 
-  Widget _buildFolderBox({bool showTab = true}) {
+  Widget _buildFolderBox({bool showTab = true, bool isInteractive = true}) {
     final l10n = AppLocalizations.of(context)!;
     return FolderBox(
       forceBold: true,
@@ -43,6 +43,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
       onTap: widget.onTap,
       hasNewItems: widget.hasNewItems,
       showTab: showTab,
+      isInteractive: isInteractive,
     );
   }
 
@@ -72,7 +73,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
     if (rect != null) {
       CollectionRadialMenu.show(
         context: context,
-        child: _buildFolderBox(showTab: false),
+        child: _buildFolderBox(showTab: false, isInteractive: false),
         collection: widget.collection,
         cardRect: rect,
         ref: ref,

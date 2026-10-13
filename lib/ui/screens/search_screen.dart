@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/neo_pressable.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
@@ -113,19 +113,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildRecentCard(Bookmark bookmark) {
-    return GestureDetector(
+    return NeoPressable(
       onTap: () {
-                                    HapticFeedback.lightImpact();
         ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
         context.push('/bookmark/${bookmark.id}', extra: bookmark);
       },
-      child: Container(
-        width: _recentCardWidth(context),
-        height: AppDimensions.gridBookmarkCardHeight,
-        margin: const EdgeInsets.only(right: 16),
-        child: NeoBox(
-          padding: EdgeInsets.zero,
-          child: Column(
+      scaleSquash: 0.025,
+      builder: (context, t, shadowOffset) {
+        return Container(
+          width: _recentCardWidth(context),
+          height: AppDimensions.gridBookmarkCardHeight,
+          margin: const EdgeInsets.only(right: 16),
+          child: NeoBox(
+            padding: EdgeInsets.zero,
+            shadowOffset: shadowOffset,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Top half image/color
@@ -300,9 +302,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   double _recentCardWidth(BuildContext context) {
     final availableWidth = MediaQuery.sizeOf(context).width -

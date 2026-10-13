@@ -121,7 +121,11 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
                       ),
                     ],
                   ),
-                  child: Center(child: widget.child),
+                  child: Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: widget.child,
+                  ),
                 ),
               ),
             );

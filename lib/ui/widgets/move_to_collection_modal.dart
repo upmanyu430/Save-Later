@@ -8,7 +8,6 @@ import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
-import 'neo_box.dart';
 import 'neo_button.dart';
 
 class MoveToCollectionModal extends ConsumerStatefulWidget {

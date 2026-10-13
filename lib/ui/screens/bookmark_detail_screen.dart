@@ -11,6 +11,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/neo_pressable.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/pin_icon.dart';
@@ -537,48 +538,52 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: AppDimensions.paddingXl),
 
                         // Open Link Button
-                        GestureDetector(
+                        NeoPressable(
                           onTap: () async {
-                            HapticFeedback.lightImpact();
                             await openUrl(bookmark.url, context: context);
                           },
-                          child: NeoBox(
-                            color: const Color(0xFFFFD166), // Yellow
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppDimensions.paddingLg,
-                              vertical: 10.0,
-                            ),
-                            borderRadius: AppDimensions.radiusXl,
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        l10n.openLink,
-                                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        bookmark.sourceDomain ?? bookmark.url,
-                                        style: const TextStyle(fontSize: 13),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                          shadowOffset: 2.0,
+                          scaleSquash: 0.02,
+                          builder: (context, t, shadowOffset) {
+                            return NeoBox(
+                              color: const Color(0xFFFFD166), // Yellow
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppDimensions.paddingLg,
+                                vertical: 10.0,
+                              ),
+                              borderRadius: AppDimensions.radiusXl,
+                              shadowOffset: shadowOffset,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l10n.openLink,
+                                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          bookmark.sourceDomain ?? bookmark.url,
+                                          style: const TextStyle(fontSize: 13),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(6.0),
-                                  decoration: const BoxDecoration(
-                                    color: AppTheme.border,
-                                    shape: BoxShape.circle,
+                                  Container(
+                                    padding: const EdgeInsets.all(6.0),
+                                    decoration: const BoxDecoration(
+                                      color: AppTheme.border,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.arrow_outward, color: Colors.white, size: 20.0),
                                   ),
-                                  child: const Icon(Icons.arrow_outward, color: Colors.white, size: 20.0),
-                                ),
-                              ],
-                            ),
-                          ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: AppDimensions.paddingXl),
 
@@ -1302,17 +1307,32 @@ class _TagAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NeoButton(
-      onPressed: onPressed,
-      color: AppTheme.accent,
-      borderRadius: AppDimensions.radiusSm,
-      borderWidth: 2,
-      shadowOffset: 2,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Text(
-        label,
-        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-      ),
+    return NeoPressable(
+      onTap: onPressed,
+      shadowOffset: 2.0,
+      scaleSquash: 0.04,
+      builder: (context, t, shadowOffset) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.accent,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+            border: Border.all(color: AppTheme.border, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.border,
+                offset: Offset(shadowOffset, shadowOffset),
+                blurRadius: 0,
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        );
+      },
     );
   }
 }

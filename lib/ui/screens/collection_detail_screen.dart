@@ -7,7 +7,6 @@ import 'package:share_plus/share_plus.dart';
 import '../../models/collection.dart';
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
-import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_grid_item.dart';

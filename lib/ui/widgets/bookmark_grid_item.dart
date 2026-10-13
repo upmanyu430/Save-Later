@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../models/bookmark.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
+import 'neo_pressable.dart';
 import 'bookmark_radial_menu.dart';
 import 'pin_icon.dart';
 import '../../providers/providers.dart';
@@ -78,9 +79,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return NeoPressable(
       onTap: () {
-        HapticFeedback.lightImpact();
         if (widget.isSelectMode) {
           if (widget.onSelectTapped != null) widget.onSelectTapped!();
         } else {
@@ -92,14 +92,17 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       onLongPressMoveUpdate: _handleLongPressMoveUpdate,
       onLongPressEnd: _handleLongPressEnd,
       onLongPressCancel: _handleLongPressCancel,
-      child: Container(
-        key: _cardKey,
-        child: _buildCard(),
-      ),
+      scaleSquash: 0.025,
+      builder: (context, t, shadowOffset) {
+        return Container(
+          key: _cardKey,
+          child: _buildCard(shadowOffset: shadowOffset),
+        );
+      },
     ).animate().slideY(curve: Curves.easeOutBack, duration: 400.ms).fadeIn();
   }
   
-  Widget _buildCard() {
+  Widget _buildCard({double shadowOffset = 2.0}) {
     final b = widget.bookmark;
     return Stack(
       clipBehavior: Clip.none,
@@ -107,6 +110,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         NeoBox(
           padding: const EdgeInsets.all(0),
           borderRadius: AppDimensions.radiusXl,
+          shadowOffset: shadowOffset,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -276,7 +280,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           color: const Color(0xFFFFD166),
           borderRadius: 8.0,
           borderWidth: 2.0,
-          shadowOffset: 2.0,
+          shadowOffset: shadowOffset,
           padding: const EdgeInsets.all(4.0),
           child: const PinIcon(
             isPinned: true,
