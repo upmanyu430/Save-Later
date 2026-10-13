@@ -43,14 +43,22 @@ class DeleteConfirmationDialog extends StatelessWidget {
         );
       },
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: DeleteConfirmationDialog(
-              title: title,
-              message: message,
-              confirmText: confirmText,
-              cancelText: cancelText,
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.of(dialogContext).pop(false),
+          child: Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Material(
+                color: Colors.transparent,
+                child: DeleteConfirmationDialog(
+                  title: title,
+                  message: message,
+                  confirmText: confirmText,
+                  cancelText: cancelText,
+                ),
+              ),
             ),
           ),
         );

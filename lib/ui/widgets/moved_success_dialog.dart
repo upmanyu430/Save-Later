@@ -43,14 +43,25 @@ class MovedSuccessDialog extends StatelessWidget {
         );
       },
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return Center(
-          child: Material(
-            color: Colors.transparent,
-            child: MovedSuccessDialog(
-              title: title,
-              message: message,
-              buttonText: buttonText,
-              onConfirm: onConfirm,
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            onConfirm?.call();
+            Navigator.of(dialogContext).pop();
+          },
+          child: Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Material(
+                color: Colors.transparent,
+                child: MovedSuccessDialog(
+                  title: title,
+                  message: message,
+                  buttonText: buttonText,
+                  onConfirm: onConfirm,
+                ),
+              ),
             ),
           ),
         );

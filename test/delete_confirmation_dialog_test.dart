@@ -47,5 +47,17 @@ void main() {
 
     expect(result, isTrue);
     expect(find.text('Delete link'), findsNothing);
+
+    // Test tapping outside on grey area
+    await tester.tap(find.text('Show Dialog'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Delete link'), findsOneWidget);
+    // Tap top left corner (grey area outside dialog card)
+    await tester.tapAt(const Offset(10, 10));
+    await tester.pumpAndSettle();
+
+    expect(result, isFalse);
+    expect(find.text('Delete link'), findsNothing);
   });
 }

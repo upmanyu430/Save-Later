@@ -136,24 +136,30 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
     
-    return SafeArea(
-      bottom: false,
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppTheme.cardColor,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: AppTheme.border, width: 2.5),
-              ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).pop(),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardColor,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: AppTheme.border, width: 2.5),
+                  ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
                 child: AnimatedSize(
@@ -381,6 +387,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
       ),
     ),
   ),
+),
+),
 ),
 ),
 );

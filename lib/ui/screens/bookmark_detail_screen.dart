@@ -136,8 +136,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       },
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
         final l10n = AppLocalizations.of(context)!;
-        return Center(
-          child: Container(
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(dialogContext, false),
+          child: Center(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Container(
             margin: const EdgeInsets.symmetric(horizontal: 32),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -210,10 +216,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
-  }
+  },
+);
+}
 
   void _showMoveModal() async {
     await MoveToCollectionModal.show(
@@ -882,8 +890,14 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           child: FadeTransition(opacity: animation, child: child),
         );
       },
-      pageBuilder: (ctx, animation, secondaryAnimation) => Center(
-        child: Container(
+      pageBuilder: (ctx, animation, secondaryAnimation) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(ctx),
+        child: Center(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {},
+            child: Container(
           margin: EdgeInsets.symmetric(horizontal: 32),
           padding: EdgeInsets.all(28),
           decoration: BoxDecoration(
@@ -970,8 +984,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+  );
+}
 
   Widget _buildActionItem(
     IconData icon,
@@ -1077,45 +1093,76 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
     final canAdd = cleanQuery.isNotEmpty && !isDuplicateOnBookmark;
     final tagToSubmit = canonicalMatch ?? cleanQuery;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom +
-            MediaQuery.paddingOf(context).bottom,
-      ),
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppTheme.background,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border(top: BorderSide(color: AppTheme.border, width: 3)),
-        ),
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    l10n.addTag,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.of(context).pop(),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: AppTheme.border, width: 2.5),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                        border: Border.all(color: AppTheme.border, width: 2),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Top Grab Handle
+                      Center(
+                        child: Container(
+                          width: 48,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.border,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                      child: const Icon(Icons.close, size: 18),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppDimensions.paddingLg),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            l10n.addTag,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.border,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: NeoButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              padding: EdgeInsets.zero,
+                              color: AppTheme.cardColor,
+                              borderRadius: AppDimensions.radiusSm,
+                              borderWidth: 2,
+                              child: const Icon(Icons.close, size: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDimensions.paddingLg),
               TextField(
                 controller: _controller,
                 autofocus: true,
@@ -1290,11 +1337,17 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                   ),
                 ),
               ),
-            ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 

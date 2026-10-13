@@ -97,18 +97,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: FadeTransition(opacity: animation, child: child),
         );
       },
-      pageBuilder: (c, animation, secondaryAnimation) => AlertDialog(
-        title: Text(l10n.deleteAllDataTitle),
-        content: Text(l10n.deleteAllDataConfirmation),
-        actions: [
-          TextButton(
-              onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, false); },
-              child: Text(l10n.cancel)),
-          TextButton(
-            onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, true); },
-            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+      pageBuilder: (c, animation, secondaryAnimation) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => Navigator.pop(c, false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {},
+          child: AlertDialog(
+            title: Text(l10n.deleteAllDataTitle),
+            content: Text(l10n.deleteAllDataConfirmation),
+            actions: [
+              TextButton(
+                  onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, false); },
+                  child: Text(l10n.cancel)),
+              TextButton(
+                onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, true); },
+                child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
