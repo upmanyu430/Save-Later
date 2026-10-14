@@ -79,7 +79,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: AppTheme.border,
-            offset: Offset(3.2, 3.2),
+            offset: Offset(2.8, 2.8),
             blurRadius: 0,
             spreadRadius: 0,
           ),

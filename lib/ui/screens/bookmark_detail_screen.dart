@@ -155,7 +155,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               boxShadow: const [
                 BoxShadow(
                   color: AppTheme.border,
-                  offset: Offset(3.2, 3.2),
+                  offset: Offset(2.8, 2.8),
                   blurRadius: 0,
                   spreadRadius: 0,
                 ),
@@ -923,7 +923,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             boxShadow: const [
               BoxShadow(
                 color: AppTheme.border,
-                offset: Offset(3.2, 3.2),
+                offset: Offset(2.8, 2.8),
                 blurRadius: 0,
                 spreadRadius: 0,
               ),
@@ -1136,7 +1136,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                     boxShadow: const [
                       BoxShadow(
                         color: AppTheme.border,
-                        offset: Offset(3.2, 3.2),
+                        offset: Offset(2.8, 2.8),
                         blurRadius: 0,
                         spreadRadius: 0,
                       ),
@@ -1480,7 +1480,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
           boxShadow: const [
             BoxShadow(
               color: AppTheme.border,
-              offset: Offset(3.2, 3.2),
+              offset: Offset(2.8, 2.8),
               blurRadius: 0,
               spreadRadius: 0,
             ),
