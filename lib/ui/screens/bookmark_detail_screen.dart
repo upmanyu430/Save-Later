@@ -560,8 +560,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                         ),
                                         Text(
-                                          bookmark.url,
-                                          style: const TextStyle(fontSize: 12.0),
+                                          bookmark.url.replaceFirst(RegExp(r'^https?:\/\/', caseSensitive: false), ''),
+                                          style: const TextStyle(
+                                            fontSize: 12.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
