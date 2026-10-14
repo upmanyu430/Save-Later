@@ -58,7 +58,7 @@ class FakeIsarRepository implements IsarRepository {
 }
 
 void main() {
-  testWidgets('Top bar hides on scroll down, ignores slight swipe up, and reappears on deliberate swipe up', (WidgetTester tester) async {
+  testWidgets('Top bar hides on scroll down, stays hidden during upward scroll mid-card, and only reappears at top', (WidgetTester tester) async {
     final fakeRepo = FakeIsarRepository();
     final bookmark = Bookmark()
       ..id = 1
@@ -102,16 +102,24 @@ void main() {
     slideWidget = tester.widget<AnimatedSlide>(slideFinder);
     expect(slideWidget.offset, const Offset(0, -1.3));
 
-    // Slight swipe up (scroll up by 30px, finger moves down by 30px)
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 30));
+    // Swipe up in the middle of the card (scroll up by 50px, finger moves down by 50px)
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 50));
     await tester.pumpAndSettle();
 
-    // Top bar should STILL be hidden (30px < 80px threshold)
+    // Top bar should STILL be hidden (still at pixels ~150 > 20)
     slideWidget = tester.widget<AnimatedSlide>(slideFinder);
     expect(slideWidget.offset, const Offset(0, -1.3));
 
-    // Deliberate swipe up (scroll up by 90px, finger moves down by 90px)
-    await tester.drag(find.byType(CustomScrollView), const Offset(0, 90));
+    // Another upward scroll mid-card (scroll up by 50px, pixels now ~100 > 20)
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 50));
+    await tester.pumpAndSettle();
+
+    // Top bar should STILL be hidden
+    slideWidget = tester.widget<AnimatedSlide>(slideFinder);
+    expect(slideWidget.offset, const Offset(0, -1.3));
+
+    // Now scroll all the way back to the top (drag down by 150px to reach pixels <= 20)
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 150));
     await tester.pumpAndSettle();
 
     // Top bar should now be visible again

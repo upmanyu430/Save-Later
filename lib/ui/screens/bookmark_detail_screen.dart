@@ -39,8 +39,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   bool _notesEdited = false;
   late String _lastSavedNotes;
   bool _isTopBarVisible = true;
-  double _upwardScrollDistance = 0.0;
-  static const double _upwardScrollThreshold = 80.0;
 
   @override
   void initState() {
@@ -284,39 +282,25 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               bottom: false,
               child: NotificationListener<ScrollNotification>(
                 onNotification: (notification) {
-                  if (notification is ScrollUpdateNotification) {
+                  final pixels = notification.metrics.pixels;
+                  if (pixels <= 20) {
+                    if (!_isTopBarVisible) {
+                      setState(() => _isTopBarVisible = true);
+                    }
+                  } else if (notification is ScrollUpdateNotification) {
                     final delta = notification.scrollDelta ?? 0;
-                    final pixels = notification.metrics.pixels;
-
-                    if (pixels <= 20) {
-                      _upwardScrollDistance = 0.0;
-                      if (!_isTopBarVisible) {
-                        setState(() => _isTopBarVisible = true);
-                      }
-                    } else if (delta > 2) {
-                      // Scrolling down -> hide top buttons & reset upward distance
-                      _upwardScrollDistance = 0.0;
+                    if (delta > 2) {
+                      // Scrolling down -> hide top buttons
                       if (_isTopBarVisible) {
                         setState(() => _isTopBarVisible = false);
-                      }
-                    } else if (delta < -2) {
-                      // Scrolling up -> accumulate upward distance and only show after deliberate threshold
-                      _upwardScrollDistance += (-delta);
-                      if (_upwardScrollDistance >= _upwardScrollThreshold) {
-                        if (!_isTopBarVisible) {
-                          setState(() => _isTopBarVisible = true);
-                        }
                       }
                     }
                   } else if (notification is UserScrollNotification) {
                     if (notification.direction == ScrollDirection.reverse &&
-                        notification.metrics.pixels > 20) {
-                      _upwardScrollDistance = 0.0;
+                        pixels > 20) {
                       if (_isTopBarVisible) {
                         setState(() => _isTopBarVisible = false);
                       }
-                    } else if (notification.direction == ScrollDirection.idle) {
-                      _upwardScrollDistance = 0.0;
                     }
                   }
                   return false;
