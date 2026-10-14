@@ -362,7 +362,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 child: TextField(
                                   controller: _titleController,
                                   style: const TextStyle(
-                                    fontSize: 22,
+                                    fontSize: 23,
                                     fontWeight: FontWeight.w900,
                                     height: 1.2,
                                     letterSpacing: -0.5,
@@ -450,7 +450,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 child: Text(
                                   bookmark.title ?? bookmark.url,
                                   style: const TextStyle(
-                                    fontSize: 28,
+                                    fontSize: 23,
                                     fontWeight: FontWeight.w900,
                                     height: 1.1,
                                     letterSpacing: -0.5,
