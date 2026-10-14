@@ -545,7 +545,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               color: const Color(0xFFFFD166), // Yellow
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppDimensions.paddingLg,
-                                vertical: 6.0,
+                                vertical: 7.5,
                               ),
                               borderRadius: AppDimensions.radiusXl,
                               shadowOffset: shadowOffset,
@@ -557,11 +557,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       children: [
                                         Text(
                                           l10n.openLink,
-                                          style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           bookmark.sourceDomain ?? bookmark.url,
-                                          style: const TextStyle(fontSize: 12.0),
+                                          style: const TextStyle(fontSize: 12.5),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -569,12 +569,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.all(5.0),
+                                    padding: const EdgeInsets.all(5.5),
                                     decoration: const BoxDecoration(
                                       color: AppTheme.border,
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.arrow_outward, color: Colors.white, size: 18.0),
+                                    child: const Icon(Icons.arrow_outward, color: Colors.white, size: 19.0),
                                   ),
                                 ],
                               ),
