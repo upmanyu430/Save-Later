@@ -545,7 +545,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               color: const Color(0xFFFFD166), // Yellow
                               padding: const EdgeInsets.symmetric(
                                 horizontal: AppDimensions.paddingLg,
-                                vertical: 7.5,
+                                vertical: 6.8,
                               ),
                               borderRadius: AppDimensions.radiusXl,
                               shadowOffset: shadowOffset,
@@ -561,7 +561,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         ),
                                         Text(
                                           bookmark.sourceDomain ?? bookmark.url,
-                                          style: const TextStyle(fontSize: 12.5),
+                                          style: const TextStyle(fontSize: 12.0),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                         ),
@@ -569,7 +569,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     ),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.all(5.5),
+                                    padding: const EdgeInsets.all(5.0),
                                     decoration: const BoxDecoration(
                                       color: AppTheme.border,
                                       shape: BoxShape.circle,
