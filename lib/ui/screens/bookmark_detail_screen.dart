@@ -557,7 +557,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       children: [
                                         Text(
                                           l10n.openLink,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w900),
+                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w800),
                                         ),
                                         Text(
                                           bookmark.url.replaceFirst(RegExp(r'^https?:\/\/', caseSensitive: false), ''),
