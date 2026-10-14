@@ -325,7 +325,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           boxShadow: const [
                             BoxShadow(
                               color: AppTheme.border,
-                              offset: Offset(0, 2.8),
+                              offset: Offset(2.8, 2.8),
                               blurRadius: 0,
                             ),
                           ],

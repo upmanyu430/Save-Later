@@ -160,7 +160,7 @@ void main() {
     expect(shadow.offset, const Offset(2.8, 2.8));
   });
 
-  testWidgets('BookmarkDetailScreen card container has reduced dark shadow (Offset(0, 2.8))', (WidgetTester tester) async {
+  testWidgets('BookmarkDetailScreen card container has reduced dark shadow (Offset(2.8, 2.8))', (WidgetTester tester) async {
     final fakeRepo = FakeIsarRepository();
     final bookmark = Bookmark()
       ..id = 1
@@ -203,7 +203,7 @@ void main() {
     expect(boxDecoration.boxShadow, isNotNull);
     final shadow = boxDecoration.boxShadow!.first;
     expect(shadow.color, AppTheme.border);
-    expect(shadow.offset, const Offset(0, 2.8));
+    expect(shadow.offset, const Offset(2.8, 2.8));
     expect(shadow.blurRadius, 0.0);
   });
 }
