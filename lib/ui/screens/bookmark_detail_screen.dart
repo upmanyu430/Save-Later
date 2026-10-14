@@ -644,14 +644,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ...bookmark.tags.map((tag) => GestureDetector(
                                   onLongPress: () => _confirmRemoveTag(tag),
                                   child: NeoBox(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                    borderRadius: AppDimensions.radiusSm,
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    borderRadius: 6.0,
                                     borderWidth: 2,
+                                    shadowOffset: 1.5,
                                     child: Text(
                                       tag.isEmpty
                                           ? tag
                                           : '${tag[0].toUpperCase()}${tag.substring(1)}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
                                     ),
                                   ),
                                 )),
@@ -1363,14 +1364,14 @@ class _TagAddButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return NeoPressable(
       onTap: onPressed,
-      shadowOffset: 2.0,
+      shadowOffset: 1.5,
       scaleSquash: 0.04,
       builder: (context, t, shadowOffset) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: AppTheme.accent,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+            borderRadius: BorderRadius.circular(6.0),
             border: Border.all(color: AppTheme.border, width: 2),
             boxShadow: [
               BoxShadow(
@@ -1383,7 +1384,7 @@ class _TagAddButton extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
           ),
         );
       },
