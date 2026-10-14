@@ -25,43 +25,46 @@ void showNoUrlDialog(BuildContext context) {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {},
-            child: NeoBox(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-              borderRadius: AppDimensions.radiusMd,
-              borderWidth: 3,
-              shadowOffset: 2.8,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, color: Color(0xFFF9A826), size: 48), // Accent/Orange color
-                  const SizedBox(height: 20),
-                  Text(
-                    l10n.noUrl,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.border),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    l10n.pleaseEnterLinkToSave,
-                    style: const TextStyle(fontSize: 15, color: Colors.black54),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppDimensions.paddingXxl),
-                  SizedBox(
-                    width: double.infinity,
-                    child: NeoButton(
-                      color: AppTheme.accent,
-                      borderWidth: AppDimensions.borderWidthMd,
-                      padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
-                      onPressed: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
-                      child: Text(
-                        l10n.ok,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.border),
-                        textAlign: TextAlign.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
+              child: NeoBox(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                borderRadius: AppDimensions.radiusMd,
+                borderWidth: 3,
+                shadowOffset: 2.8,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, color: Color(0xFFF9A826), size: 48), // Accent/Orange color
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.noUrl,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.border),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.pleaseEnterLinkToSave,
+                      style: const TextStyle(fontSize: 15, color: Colors.black54),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppDimensions.paddingXxl),
+                    SizedBox(
+                      width: double.infinity,
+                      child: NeoButton(
+                        color: AppTheme.accent,
+                        borderWidth: AppDimensions.borderWidthMd,
+                        padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
+                        onPressed: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
+                        child: Text(
+                          l10n.ok,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.border),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
