@@ -322,10 +322,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           border: Border.fromBorderSide(
                             BorderSide(color: AppTheme.border, width: 3),
                           ),
-                          boxShadow: [
+                          boxShadow: const [
                             BoxShadow(
                               color: AppTheme.border,
-                              offset: Offset(0, 8),
+                              offset: Offset(0, 2.8),
                               blurRadius: 0,
                             ),
                           ],

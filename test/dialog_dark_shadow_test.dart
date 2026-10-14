@@ -15,6 +15,7 @@ import 'package:save_later/ui/widgets/delete_confirmation_dialog.dart';
 import 'package:save_later/ui/widgets/moved_success_dialog.dart';
 import 'package:save_later/ui/widgets/no_url_dialog.dart';
 import 'package:save_later/ui/screens/collection_detail_screen.dart';
+import 'package:save_later/ui/screens/bookmark_detail_screen.dart';
 
 class FakeIsarRepository implements IsarRepository {
   @override
@@ -157,5 +158,52 @@ void main() {
     final shadow = boxDecoration.boxShadow!.first;
     expect(shadow.color, AppTheme.border);
     expect(shadow.offset, const Offset(2.8, 2.8));
+  });
+
+  testWidgets('BookmarkDetailScreen card container has reduced dark shadow (Offset(0, 2.8))', (WidgetTester tester) async {
+    final fakeRepo = FakeIsarRepository();
+    final bookmark = Bookmark()
+      ..id = 1
+      ..url = 'https://example.com'
+      ..title = 'Example'
+      ..createdAt = DateTime.now();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          home: BookmarkDetailScreen(bookmark: bookmark),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final cardContainer = tester.widget<Container>(
+      find.byWidgetPredicate((widget) {
+        if (widget is Container && widget.decoration is BoxDecoration) {
+          final box = widget.decoration as BoxDecoration;
+          return box.borderRadius == const BorderRadius.all(Radius.circular(32)) &&
+              box.boxShadow != null &&
+              box.boxShadow!.isNotEmpty;
+        }
+        return false;
+      }),
+    );
+    final boxDecoration = cardContainer.decoration as BoxDecoration;
+    expect(boxDecoration.boxShadow, isNotNull);
+    final shadow = boxDecoration.boxShadow!.first;
+    expect(shadow.color, AppTheme.border);
+    expect(shadow.offset, const Offset(0, 2.8));
+    expect(shadow.blurRadius, 0.0);
   });
 }
