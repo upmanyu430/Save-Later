@@ -588,10 +588,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                            border: Border.all(
-                              color: AppTheme.border,
-                              width: AppDimensions.borderWidthMd,
-                            ),
                             boxShadow: const [
                               BoxShadow(
                                 color: AppTheme.border,
@@ -601,50 +597,59 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               ),
                             ],
                           ),
-                          clipBehavior: Clip.antiAlias,
-                          child: IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                _buildActionItem(
-                                  Icons.share_outlined,
-                                  l10n.share,
-                                  () {
-                                    Share.share(widget.bookmark.url);
-                                  },
-                                  color: const Color(0xFFE8E0FF),
-                                ),
-                                _buildSegmentDivider(),
-                                _buildActionItem(
-                                  Icons.folder_outlined,
-                                  l10n.move,
-                                  _showMoveModal,
-                                  color: const Color(0xFFFFF2C2),
-                                ),
-                                _buildSegmentDivider(),
-                                _buildActionItem(
-                                  Icons.refresh,
-                                  l10n.refresh,
-                                  _showRefreshDialog,
-                                  color: const Color(0xFFD3F4E4),
-                                ),
-                                _buildSegmentDivider(),
-                                _buildActionItem(
-                                  Icons.delete_outline,
-                                  l10n.delete,
-                                  () async {
-                                    final confirmed = await DeleteConfirmationDialog.show(context: context);
-                                    if (!confirmed) return;
+                          foregroundDecoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                            border: Border.all(
+                              color: AppTheme.border,
+                              width: AppDimensions.borderWidthMd,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+                            child: IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _buildActionItem(
+                                    Icons.share_outlined,
+                                    l10n.share,
+                                    () {
+                                      Share.share(widget.bookmark.url);
+                                    },
+                                    color: const Color(0xFFE8E0FF),
+                                  ),
+                                  _buildSegmentDivider(),
+                                  _buildActionItem(
+                                    Icons.folder_outlined,
+                                    l10n.move,
+                                    _showMoveModal,
+                                    color: const Color(0xFFFFF2C2),
+                                  ),
+                                  _buildSegmentDivider(),
+                                  _buildActionItem(
+                                    Icons.refresh,
+                                    l10n.refresh,
+                                    _showRefreshDialog,
+                                    color: const Color(0xFFD3F4E4),
+                                  ),
+                                  _buildSegmentDivider(),
+                                  _buildActionItem(
+                                    Icons.delete_outline,
+                                    l10n.delete,
+                                    () async {
+                                      final confirmed = await DeleteConfirmationDialog.show(context: context);
+                                      if (!confirmed) return;
 
-                                    await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
-                                    if (context.mounted) {
-                                      context.pop();
-                                    }
-                                  },
-                                  color: const Color(0xFFFFD8DE),
-                                  isDestructive: true,
-                                ),
-                              ],
+                                      await ref.read(bookmarkNotifierProvider.notifier).deleteBookmark(bookmark);
+                                      if (context.mounted) {
+                                        context.pop();
+                                      }
+                                    },
+                                    color: const Color(0xFFFFD8DE),
+                                    isDestructive: true,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
