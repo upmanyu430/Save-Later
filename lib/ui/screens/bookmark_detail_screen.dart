@@ -143,85 +143,88 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () {},
-              child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 32),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: AppTheme.background,
-              borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
-              border: Border.all(color: AppTheme.border, width: 3),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppTheme.border,
-                  offset: Offset(2.8, 2.8),
-                  blurRadius: 0,
-                  spreadRadius: 0,
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Delete tag?',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-                  ),
-                  const SizedBox(height: AppDimensions.paddingSm),
-                  Text(
-                    'Remove "$tag" from this bookmark?',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 15, color: Colors.black54),
-                  ),
-                  const SizedBox(height: AppDimensions.paddingXl),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: NeoButton(
-                          onPressed: () {
-                            Navigator.pop(dialogContext, false);
-                          },
-                          color: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          borderRadius: AppDimensions.radiusMd,
-                          borderWidth: 2,
-                          child: Text(
-                            l10n.cancel,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppDimensions.paddingMd),
-                      Expanded(
-                        child: NeoButton(
-                          onPressed: () async {
-                            Navigator.pop(dialogContext, true);
-                            await _removeTag(tag);
-                          },
-                          color: const Color(0xFFFF6B6B),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          borderRadius: AppDimensions.radiusMd,
-                          borderWidth: 2,
-                          child: Text(
-                            l10n.delete,
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 32),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppTheme.background,
+                    borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
+                    border: Border.all(color: AppTheme.border, width: 3),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(2.8, 2.8),
+                        blurRadius: 0,
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
-                ],
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Delete tag?',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                        ),
+                        const SizedBox(height: AppDimensions.paddingSm),
+                        Text(
+                          'Remove "$tag" from this bookmark?',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 15, color: Colors.black54),
+                        ),
+                        const SizedBox(height: AppDimensions.paddingXl),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: NeoButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext, false);
+                                },
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                borderRadius: AppDimensions.radiusMd,
+                                borderWidth: 2,
+                                child: Text(
+                                  l10n.cancel,
+                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppDimensions.paddingMd),
+                            Expanded(
+                              child: NeoButton(
+                                onPressed: () async {
+                                  Navigator.pop(dialogContext, true);
+                                  await _removeTag(tag);
+                                },
+                                color: const Color(0xFFFF6B6B),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                borderRadius: AppDimensions.radiusMd,
+                                borderWidth: 2,
+                                child: Text(
+                                  l10n.delete,
+                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  },
-);
 }
 
   void _showMoveModal() async {
@@ -322,7 +325,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           border: Border.fromBorderSide(
                             BorderSide(color: AppTheme.border, width: 3),
                           ),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
                               color: AppTheme.border,
                               offset: Offset(2.8, 2.8),
@@ -795,45 +798,50 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 child: IgnorePointer(
                   ignoring: !_isTopBarVisible,
                   child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: NeoButton(
-                              onPressed: () => context.pop(),
-                              padding: EdgeInsets.zero,
-                              color: AppTheme.background,
-                              borderRadius: AppDimensions.radiusMd,
-                              borderWidth: AppDimensions.borderWidthMd,
-                              child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: NeoButton(
-                              onPressed: () async {
-                                await ref.read(bookmarkNotifierProvider.notifier).togglePin(bookmark);
-                                if (mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
-                              borderRadius: AppDimensions.radiusMd,
-                              borderWidth: AppDimensions.borderWidthMd,
-                              child: PinIcon(
-                                isPinned: bookmark.isPinned,
-                                size: AppDimensions.iconSizeMd,
-                                color: AppTheme.border,
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: AppDimensions.maxContentWidth),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: NeoButton(
+                                  onPressed: () => context.pop(),
+                                  padding: EdgeInsets.zero,
+                                  color: AppTheme.background,
+                                  borderRadius: AppDimensions.radiusMd,
+                                  borderWidth: AppDimensions.borderWidthMd,
+                                  child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+                                ),
                               ),
-                            ),
+                              SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: NeoButton(
+                                  onPressed: () async {
+                                    await ref.read(bookmarkNotifierProvider.notifier).togglePin(bookmark);
+                                    if (mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
+                                  borderRadius: AppDimensions.radiusMd,
+                                  borderWidth: AppDimensions.borderWidthMd,
+                                  child: PinIcon(
+                                    isPinned: bookmark.isPinned,
+                                    size: AppDimensions.iconSizeMd,
+                                    color: AppTheme.border,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -889,7 +897,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {},
-            child: Container(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
+              child: Container(
           margin: EdgeInsets.symmetric(horizontal: 32),
           padding: EdgeInsets.all(28),
           decoration: BoxDecoration(
@@ -979,7 +989,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       ),
     ),
   ),
-  );
+),
+);
 }
 
   Widget _buildActionItem(
@@ -1446,7 +1457,9 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
+        child: Container(
         margin: EdgeInsets.symmetric(horizontal: 48),
         padding: EdgeInsets.symmetric(horizontal: 32, vertical: 36),
         decoration: BoxDecoration(
@@ -1544,6 +1557,7 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
