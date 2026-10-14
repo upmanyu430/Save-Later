@@ -92,16 +92,20 @@ void main() {
     expect(find.text('Refresh'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
 
-    // Verify InkWell widgets exist inside each action button segment for press/ripple feedback
+    // Verify ActionStripButton widgets exist inside each action button segment for mechanical press feedback
     final actionButtons = find.descendant(
       of: find.byType(Row),
-      matching: find.byType(InkWell),
+      matching: find.byType(ActionStripButton),
     );
     expect(actionButtons, findsAtLeastNWidgets(4));
 
-    // Test tapping the Refresh button
+    // Test pressing down on the Refresh button
     final refreshFinder = find.text('Refresh');
-    await tester.tap(refreshFinder);
+    final gesture = await tester.startGesture(tester.getCenter(refreshFinder));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Button should be in pressed state (scales down and translates)
+    await gesture.up();
     await tester.pumpAndSettle();
 
     // Verify that tapping Refresh opened the RefreshDialog

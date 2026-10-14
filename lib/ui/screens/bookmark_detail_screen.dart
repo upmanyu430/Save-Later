@@ -1035,39 +1035,129 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     Color color = Colors.white,
     bool isDestructive = false,
   }) {
-    final fgColor = isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    return ActionStripButton(
+      icon: icon,
+      label: label,
+      onTap: onTap,
+      color: color,
+      isDestructive: isDestructive,
+    );
+  }
+}
+
+class ActionStripButton extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color color;
+  final bool isDestructive;
+
+  const ActionStripButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color = Colors.white,
+    this.isDestructive = false,
+  });
+
+  @override
+  State<ActionStripButton> createState() => _ActionStripButtonState();
+}
+
+class _ActionStripButtonState extends State<ActionStripButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 70),
+      reverseDuration: const Duration(milliseconds: 140),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+      reverseCurve: Curves.easeOutBack,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleTapDown(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    _controller.forward();
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    HapticFeedback.selectionClick();
+    _controller.forward().whenComplete(() {
+      if (!mounted) return;
+      _controller.reverse().whenComplete(() {
+        if (mounted) {
+          widget.onTap();
+        }
+      });
+    });
+  }
+
+  void _handleTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
 
     return Expanded(
-      child: Material(
-        color: color,
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            onTap();
-          },
-          splashColor: Colors.black.withOpacity(0.08),
-          highlightColor: Colors.black.withOpacity(0.04),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: fgColor, size: 22),
-                const SizedBox(height: 5),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: fgColor,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 11.5,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapDown: _handleTapDown,
+        onTapUp: _handleTapUp,
+        onTapCancel: _handleTapCancel,
+        child: AnimatedBuilder(
+          animation: _animation,
+          builder: (context, child) {
+            final t = _animation.value;
+            final backgroundColor = Color.lerp(widget.color, Colors.black, t * 0.14)!;
+            final scale = 1.0 - (t * 0.08);
+            final offsetY = t * 2.0;
+
+            return Container(
+              color: backgroundColor,
+              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
+              child: Transform.translate(
+                offset: Offset(0, offsetY),
+                child: Transform.scale(
+                  scale: scale,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(widget.icon, color: fgColor, size: 22),
+                      const SizedBox(height: 5),
+                      Text(
+                        widget.label,
+                        style: TextStyle(
+                          color: fgColor,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
