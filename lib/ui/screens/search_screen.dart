@@ -308,7 +308,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 }
 
   double _recentCardWidth(BuildContext context) {
-    final availableWidth = MediaQuery.sizeOf(context).width -
+    final availableWidth = (MediaQuery.sizeOf(context)
+            .width
+            .clamp(0.0, AppDimensions.maxContentWidth)) -
         (AppDimensions.paddingXl * 2);
     final columnCount = (availableWidth /
             (AppDimensions.gridMaxCrossAxisExtent + AppDimensions.gridSpacingMd))
@@ -406,7 +408,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.maxContentWidth,
+            ),
+            child: Column(
           children: [
             // Header
             Padding(
@@ -534,8 +541,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }
 
 
