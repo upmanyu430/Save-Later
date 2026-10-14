@@ -726,7 +726,7 @@ class _ReviewIconButton extends StatelessWidget {
         shadowColor: Colors.black,
         borderWidth: 2,
         borderRadius: AppDimensions.radiusXl,
-        shadowOffset: 4.0,
+        shadowOffset: 3.2,
         child: Icon(icon, color: Colors.white, size: 30),
       ),
     );

@@ -64,7 +64,7 @@ class FakeIsarRepository implements IsarRepository {
 }
 
 void main() {
-  testWidgets('CollectionEditorModal card container has dark shadow (Offset(4, 4))', (WidgetTester tester) async {
+  testWidgets('CollectionEditorModal card container has dark shadow (Offset(3.2, 3.2))', (WidgetTester tester) async {
     final fakeRepo = FakeIsarRepository();
 
     await tester.pumpWidget(
@@ -95,11 +95,11 @@ void main() {
     expect(boxDecoration.boxShadow, isNotNull);
     final shadow = boxDecoration.boxShadow!.first;
     expect(shadow.color, AppTheme.border);
-    expect(shadow.offset, const Offset(4, 4));
+    expect(shadow.offset, const Offset(3.2, 3.2));
     expect(shadow.blurRadius, 0.0);
   });
 
-  testWidgets('DeleteConfirmationDialog has dark shadow (Offset(4, 4))', (WidgetTester tester) async {
+  testWidgets('DeleteConfirmationDialog has dark shadow (Offset(3.2, 3.2))', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -126,10 +126,10 @@ void main() {
     expect(boxDecoration.boxShadow, isNotNull);
     final shadow = boxDecoration.boxShadow!.first;
     expect(shadow.color, AppTheme.border);
-    expect(shadow.offset, const Offset(4, 4));
+    expect(shadow.offset, const Offset(3.2, 3.2));
   });
 
-  testWidgets('MovedSuccessDialog has dark shadow (Offset(4, 4))', (WidgetTester tester) async {
+  testWidgets('MovedSuccessDialog has dark shadow (Offset(3.2, 3.2))', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         localizationsDelegates: const [
@@ -156,6 +156,6 @@ void main() {
     expect(boxDecoration.boxShadow, isNotNull);
     final shadow = boxDecoration.boxShadow!.first;
     expect(shadow.color, AppTheme.border);
-    expect(shadow.offset, const Offset(4, 4));
+    expect(shadow.offset, const Offset(3.2, 3.2));
   });
 }

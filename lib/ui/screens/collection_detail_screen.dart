@@ -68,7 +68,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       boxShadow: const [
                         BoxShadow(
                           color: AppTheme.border,
-                          offset: Offset(4, 4),
+                          offset: Offset(3.2, 3.2),
                           blurRadius: 0,
                           spreadRadius: 0,
                         ),
@@ -156,7 +156,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                   boxShadow: const [
                     BoxShadow(
                       color: AppTheme.border,
-                      offset: Offset(4, 4),
+                      offset: Offset(3.2, 3.2),
                       blurRadius: 0,
                       spreadRadius: 0,
                     ),
