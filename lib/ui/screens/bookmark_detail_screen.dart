@@ -380,61 +380,53 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  SizedBox(
-                                    width: 104,
-                                    child: NeoButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          _isEditingTitle = false;
-                                          _titleController.text = bookmark.title ?? bookmark.url;
-                                        });
-                                      },
-                                      color: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
-                                      borderRadius: AppDimensions.radiusMd,
-                                      borderWidth: 3,
-                                      shadowOffset: 2,
-                                      child: Text(
-                                        l10n.cancel,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
+                                  NeoButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _isEditingTitle = false;
+                                        _titleController.text = bookmark.title ?? bookmark.url;
+                                      });
+                                    },
+                                    color: Colors.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                                    borderRadius: AppDimensions.radiusSm,
+                                    borderWidth: 2,
+                                    child: Text(
+                                      l10n.cancel,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: AppDimensions.paddingMd),
-                                  SizedBox(
-                                    width: 104,
-                                    child: NeoButton(
-                                      onPressed: () async {
-                                        final newTitle = _titleController.text.trim();
-                                        if (newTitle.isNotEmpty) {
-                                          bookmark.title = newTitle;
-                                          await ref.read(repositoryProvider).updateBookmark(bookmark);
-                                          ref.invalidate(bookmarksProvider);
-                                          if (bookmark.collection.value != null) {
-                                            ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-                                          }
-                                          ref.invalidate(unsortedBookmarksProvider);
-                                          setState(() {
-                                            _isEditingTitle = false;
-                                          });
+                                  const SizedBox(width: AppDimensions.paddingSm),
+                                  NeoButton(
+                                    onPressed: () async {
+                                      final newTitle = _titleController.text.trim();
+                                      if (newTitle.isNotEmpty) {
+                                        bookmark.title = newTitle;
+                                        await ref.read(repositoryProvider).updateBookmark(bookmark);
+                                        ref.invalidate(bookmarksProvider);
+                                        if (bookmark.collection.value != null) {
+                                          ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
                                         }
-                                      },
-                                      color: const Color(0xFFFFD166),
-                                      padding: const EdgeInsets.symmetric(vertical: 8),
-                                      borderRadius: AppDimensions.radiusMd,
-                                      borderWidth: 3,
-                                      shadowOffset: 2,
-                                      child: Text(
-                                        l10n.save,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                        ),
+                                        ref.invalidate(unsortedBookmarksProvider);
+                                        setState(() {
+                                          _isEditingTitle = false;
+                                        });
+                                      }
+                                    },
+                                    color: const Color(0xFFFFD166),
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                                    borderRadius: AppDimensions.radiusSm,
+                                    borderWidth: 2,
+                                    child: Text(
+                                      l10n.save,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 13,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   ),
