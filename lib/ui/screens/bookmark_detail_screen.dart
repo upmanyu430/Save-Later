@@ -630,7 +630,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: 12),
                         Text(
                           bookmark.description ?? l10n.noDescriptionProvided,
-                          style: const TextStyle(fontSize: 18, height: 1.5, color: Color(0xFF333333)),
+                          style: const TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF333333)),
                         ),
                         const SizedBox(height: AppDimensions.paddingXxl),
 
