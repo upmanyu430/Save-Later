@@ -92,20 +92,16 @@ void main() {
     expect(find.text('Refresh'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
 
-    // Verify NeoButton widgets exist inside each action button for neo-brutal press feedback
+    // Verify InkWell widgets exist inside each action button segment for press/ripple feedback
     final actionButtons = find.descendant(
       of: find.byType(Row),
-      matching: find.byType(NeoButton),
+      matching: find.byType(InkWell),
     );
     expect(actionButtons, findsAtLeastNWidgets(4));
 
-    // Test pressing down on the Refresh button
+    // Test tapping the Refresh button
     final refreshFinder = find.text('Refresh');
-    final gesture = await tester.startGesture(tester.getCenter(refreshFinder));
-    await tester.pump(const Duration(milliseconds: 50));
-
-    // Button should be in pressed state (scales down and translates)
-    await gesture.up();
+    await tester.tap(refreshFinder);
     await tester.pumpAndSettle();
 
     // Verify that tapping Refresh opened the RefreshDialog
