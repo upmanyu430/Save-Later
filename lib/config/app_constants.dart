@@ -41,6 +41,11 @@ class AppDimensions {
   static const double gridSpacingLg = 24.0;
   static const double gridFolderCardHeight = 160.0;
   static const double gridBookmarkCardHeight = 160.0;
+
+  // Responsive Layout
+  static const double maxContentWidth = 600.0;
+  static const double maxDialogWidth = 400.0;
+  static const double maxModalWidth = 420.0;
 }
 
 class AppDurations {

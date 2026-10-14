@@ -121,8 +121,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final collectionsAsync = ref.watch(collectionsProvider);
     final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
+    final effectiveWidth = MediaQuery.sizeOf(context)
+        .width
+        .clamp(0.0, AppDimensions.maxContentWidth);
     final titleFontSize = MediaQuery.textScalerOf(context).scale(
-      (MediaQuery.sizeOf(context).width * 0.1).clamp(32.0, 52.0),
+      (effectiveWidth * 0.1).clamp(32.0, 44.0),
     );
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -130,12 +133,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.paddingXl,
-              vertical: AppDimensions.paddingLg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+                maxWidth: AppDimensions.maxContentWidth),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimensions.paddingXl,
+                  vertical: AppDimensions.paddingLg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Top Action Bar
               Row(
@@ -369,6 +376,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }

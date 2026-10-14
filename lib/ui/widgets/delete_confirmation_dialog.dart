@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../config/app_constants.dart';
 import '../../theme/app_theme.dart';
 import 'neo_button.dart';
 
@@ -69,7 +70,9 @@ class DeleteConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
+      child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 28),
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       decoration: BoxDecoration(
@@ -169,6 +172,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
