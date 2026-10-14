@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/delete_confirmation_dialog.dart';
 import '../../providers/providers.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import '../../config/app_config.dart';
@@ -85,39 +86,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _deleteData(BuildContext ctx, WidgetRef ref) async {
     if (_hapticFeedback) HapticFeedback.selectionClick();
     final l10n = AppLocalizations.of(ctx)!;
-    final confirm = await showGeneralDialog<bool>(
+    final confirm = await DeleteConfirmationDialog.show(
       context: ctx,
-      barrierDismissible: true,
-      barrierLabel: 'Delete',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      pageBuilder: (c, animation, secondaryAnimation) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.pop(c, false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () {},
-          child: AlertDialog(
-            title: Text(l10n.deleteAllDataTitle),
-            content: Text(l10n.deleteAllDataConfirmation),
-            actions: [
-              TextButton(
-                  onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, false); },
-                  child: Text(l10n.cancel)),
-              TextButton(
-                onPressed: () { HapticFeedback.lightImpact(); Navigator.pop(c, true); },
-                child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
-              ),
-            ],
-          ),
-        ),
-      ),
+      title: l10n.deleteAllDataTitle,
+      message: l10n.deleteAllDataConfirmation,
+      confirmText: l10n.delete,
+      cancelText: l10n.cancel,
     );
 
     if (confirm == true) {

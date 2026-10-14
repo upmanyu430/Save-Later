@@ -117,4 +117,68 @@ void main() {
     editableTextField.onEditingComplete?.call();
     expect(fakeRepo.lastUpdatedBookmark?.notes, 'Updated note via onChanged');
   });
+
+  testWidgets('Cancel and Save buttons appear on upper side of note box during editing', (WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(800, 1200));
+    addTearDown(() async => await tester.binding.setSurfaceSize(null));
+
+    final fakeRepo = FakeIsarRepository();
+    final bookmark = Bookmark()
+      ..id = 2
+      ..url = 'https://example.com/2'
+      ..title = 'Note Box Test'
+      ..notes = 'Hello Note';
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en', '')],
+          home: BookmarkDetailScreen(bookmark: bookmark),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Initially buttons should not be present
+    expect(find.text('Cancel'), findsNothing);
+    expect(find.text('Save'), findsNothing);
+
+    // Scroll down so notes section is fully visible
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    final noteBoxFinder = find.byWidgetPredicate(
+      (w) => w is TextField && w.controller?.text == 'Hello Note',
+    );
+    await tester.tap(noteBoxFinder);
+    await tester.pumpAndSettle();
+
+    // Now Cancel and Save buttons should be visible
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+
+    // Verify Cancel and Save buttons are positioned above the note box
+    final cancelCenter = tester.getCenter(find.text('Cancel'));
+    final noteBoxTop = tester.getTopLeft(noteBoxFinder);
+    expect(cancelCenter.dy < noteBoxTop.dy, isTrue, reason: 'Buttons must be on the upper side of the note box');
+
+    // Tap Cancel
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    // Buttons should disappear after cancel
+    expect(find.text('Cancel'), findsNothing);
+    expect(find.text('Save'), findsNothing);
+  });
 }
+

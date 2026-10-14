@@ -114,6 +114,14 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(color: AppTheme.border, width: 2.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(4, 4),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),

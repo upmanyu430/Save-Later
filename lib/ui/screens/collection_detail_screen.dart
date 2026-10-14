@@ -65,6 +65,14 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       color: AppTheme.background,
                       borderRadius: BorderRadius.circular(28),
                       border: Border.all(color: AppTheme.border, width: 2.5),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppTheme.border,
+                          offset: Offset(4, 4),
+                          blurRadius: 0,
+                          spreadRadius: 0,
+                        ),
+                      ],
                     ),
                     padding: const EdgeInsets.all(24),
                     child: Column(
@@ -145,6 +153,14 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(28),
                   border: Border.all(color: AppTheme.border, width: 2.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppTheme.border,
+                      offset: Offset(4, 4),
+                      blurRadius: 0,
+                      spreadRadius: 0,
+                    ),
+                  ],
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

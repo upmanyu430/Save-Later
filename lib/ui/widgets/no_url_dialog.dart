@@ -29,6 +29,7 @@ void showNoUrlDialog(BuildContext context) {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               borderRadius: AppDimensions.radiusMd,
               borderWidth: 3,
+              shadowOffset: 4.0,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

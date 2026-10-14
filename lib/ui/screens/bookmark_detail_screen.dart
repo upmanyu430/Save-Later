@@ -39,6 +39,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   bool _notesEdited = false;
   late String _lastSavedNotes;
   bool _isTopBarVisible = true;
+  double _upwardScrollDistance = 0.0;
+  static const double _upwardScrollThreshold = 80.0;
 
   @override
   void initState() {
@@ -153,8 +155,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               boxShadow: const [
                 BoxShadow(
                   color: AppTheme.border,
-                  offset: Offset(3, 3),
+                  offset: Offset(4, 4),
                   blurRadius: 0,
+                  spreadRadius: 0,
                 ),
               ],
             ),
@@ -283,31 +286,37 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 onNotification: (notification) {
                   if (notification is ScrollUpdateNotification) {
                     final delta = notification.scrollDelta ?? 0;
-                    if (notification.metrics.pixels <= 20) {
+                    final pixels = notification.metrics.pixels;
+
+                    if (pixels <= 20) {
+                      _upwardScrollDistance = 0.0;
                       if (!_isTopBarVisible) {
                         setState(() => _isTopBarVisible = true);
                       }
                     } else if (delta > 2) {
-                      // Scrolling down -> hide top buttons
+                      // Scrolling down -> hide top buttons & reset upward distance
+                      _upwardScrollDistance = 0.0;
                       if (_isTopBarVisible) {
                         setState(() => _isTopBarVisible = false);
                       }
                     } else if (delta < -2) {
-                      // Scrolling up -> show top buttons
-                      if (!_isTopBarVisible) {
-                        setState(() => _isTopBarVisible = true);
+                      // Scrolling up -> accumulate upward distance and only show after deliberate threshold
+                      _upwardScrollDistance += (-delta);
+                      if (_upwardScrollDistance >= _upwardScrollThreshold) {
+                        if (!_isTopBarVisible) {
+                          setState(() => _isTopBarVisible = true);
+                        }
                       }
                     }
                   } else if (notification is UserScrollNotification) {
                     if (notification.direction == ScrollDirection.reverse &&
                         notification.metrics.pixels > 20) {
+                      _upwardScrollDistance = 0.0;
                       if (_isTopBarVisible) {
                         setState(() => _isTopBarVisible = false);
                       }
-                    } else if (notification.direction == ScrollDirection.forward) {
-                      if (!_isTopBarVisible) {
-                        setState(() => _isTopBarVisible = true);
-                      }
+                    } else if (notification.direction == ScrollDirection.idle) {
+                      _upwardScrollDistance = 0.0;
                     }
                   }
                   return false;
@@ -679,59 +688,23 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Notes
-                        Text(l10n.notesLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
-                        SizedBox(
-                          height: _isEditingNotes ? 220 : 160,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(minHeight: 36),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    if (!_isEditingNotes) {
-                                      setState(() => _isEditingNotes = true);
-                                    }
-                                  },
-                                  child: NeoBox(
-                                    color: const Color(0xFFFFF7E0), // Pale yellow
-                                    borderRadius: AppDimensions.radiusMd,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    child: TextField(
-                                      controller: _notesController,
-                                      readOnly: !_isEditingNotes,
-                                      maxLines: null,
-                                      expands: true,
-                                      textAlignVertical: TextAlignVertical.top,
-                                      onTap: () {
-                                        if (!_isEditingNotes) {
-                                          setState(() => _isEditingNotes = true);
-                                        }
-                                      },
-                                      onChanged: (val) {
-                                        _notesEdited = true;
-                                        _scheduleSaveNotes(val);
-                                      },
-                                      onEditingComplete: () {
-                                        if (_notesEdited) _saveNotes(_notesController.text);
-                                      },
-                                      decoration: const InputDecoration(
-                                        hintText: 'Tap here to save notes',
-                                        hintStyle: TextStyle(
-                                          color: Colors.black38,
-                                          fontSize: 14,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
+                              Text(
+                                l10n.notesLabel,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  letterSpacing: 1.2,
                                 ),
                               ),
-                              if (_isEditingNotes) ...[
-                                const SizedBox(height: AppDimensions.paddingMd),
+                              if (_isEditingNotes)
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
                                     NeoButton(
                                       onPressed: () {
@@ -744,12 +717,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         });
                                       },
                                       color: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                       borderRadius: AppDimensions.radiusSm,
                                       borderWidth: 2,
                                       child: Text(
                                         l10n.cancel,
-                                        style: const TextStyle(fontWeight: FontWeight.w800),
+                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                                       ),
                                     ),
                                     const SizedBox(width: AppDimensions.paddingSm),
@@ -763,18 +736,61 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         });
                                       },
                                       color: AppTheme.accent,
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                                       borderRadius: AppDimensions.radiusSm,
                                       borderWidth: 2,
                                       child: Text(
                                         l10n.save,
-                                        style: const TextStyle(fontWeight: FontWeight.w800),
+                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
                                       ),
                                     ),
                                   ],
                                 ),
-                              ],
                             ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 160,
+                          child: GestureDetector(
+                            onTap: () {
+                              if (!_isEditingNotes) {
+                                setState(() => _isEditingNotes = true);
+                              }
+                            },
+                            child: NeoBox(
+                              color: const Color(0xFFFFF7E0), // Pale yellow
+                              borderRadius: AppDimensions.radiusMd,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              child: TextField(
+                                controller: _notesController,
+                                readOnly: !_isEditingNotes,
+                                maxLines: null,
+                                expands: true,
+                                textAlignVertical: TextAlignVertical.top,
+                                onTap: () {
+                                  if (!_isEditingNotes) {
+                                    setState(() => _isEditingNotes = true);
+                                  }
+                                },
+                                onChanged: (val) {
+                                  _notesEdited = true;
+                                  _scheduleSaveNotes(val);
+                                },
+                                onEditingComplete: () {
+                                  if (_notesEdited) _saveNotes(_notesController.text);
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: 'Tap here to save notes',
+                                  hintStyle: TextStyle(
+                                    color: Colors.black38,
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(height: AppDimensions.paddingXxxl + bottomInset),
@@ -904,11 +920,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             color: AppTheme.background,
             borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
             border: Border.all(color: AppTheme.border, width: 3),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: AppTheme.border,
-                offset: Offset(AppDimensions.shadowOffsetMd, AppDimensions.shadowOffsetMd),
+                offset: Offset(4, 4),
                 blurRadius: 0,
+                spreadRadius: 0,
               ),
             ],
           ),
@@ -1116,6 +1133,14 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(color: AppTheme.border, width: 2.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(4, 4),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                      ),
+                    ],
                   ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
@@ -1452,11 +1477,12 @@ class _RefreshOverlayState extends State<_RefreshOverlay>
           color: AppTheme.background,
           borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
           border: Border.all(color: AppTheme.border, width: 3),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: AppTheme.border,
-              offset: Offset(AppDimensions.shadowOffsetMd, AppDimensions.shadowOffsetMd),
+              offset: Offset(4, 4),
               blurRadius: 0,
+              spreadRadius: 0,
             ),
           ],
         ),
