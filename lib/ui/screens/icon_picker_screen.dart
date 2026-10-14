@@ -246,7 +246,12 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Column(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.maxContentWidth,
+            ),
+            child: Column(
           children: [
             // Top App Bar
             Padding(
@@ -501,6 +506,8 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }
