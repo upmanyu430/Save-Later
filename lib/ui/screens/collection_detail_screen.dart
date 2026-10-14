@@ -353,7 +353,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: bookmarksAsync.when(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.maxContentWidth,
+            ),
+            child: bookmarksAsync.when(
           data: (bookmarks) {
             final subCollections = subCollectionsAsync.valueOrNull ?? [];
             return Column(
@@ -691,6 +696,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
           error: (e, st) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }
