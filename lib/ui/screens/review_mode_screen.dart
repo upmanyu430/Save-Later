@@ -170,8 +170,16 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       backgroundColor: const Color(0xFF111111), // Almost black
       body: SafeArea(
         bottom: false,
-        child:
-            isDone ? _buildCaughtUp(bottomInset) : _buildReviewUI(bottomInset),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppDimensions.maxContentWidth,
+            ),
+            child: isDone
+                ? _buildCaughtUp(bottomInset)
+                : _buildReviewUI(bottomInset),
+          ),
+        ),
       ),
     );
   }
