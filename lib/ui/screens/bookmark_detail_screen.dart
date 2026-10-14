@@ -560,7 +560,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                           style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                                         ),
                                         Text(
-                                          bookmark.sourceDomain ?? bookmark.url,
+                                          bookmark.url,
                                           style: const TextStyle(fontSize: 12.0),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
