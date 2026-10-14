@@ -948,6 +948,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         color: AppTheme.background,
                         borderRadius: AppDimensions.radiusLg,
                         borderWidth: AppDimensions.borderWidthMd,
+                        shadowOffset: 2.8,
                         padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
                         child: Text(
                           AppLocalizations.of(context)!.cancel,
@@ -968,7 +969,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         color: const Color(0xFFD3F4E4),
                         borderRadius: AppDimensions.radiusLg,
                         borderWidth: AppDimensions.borderWidthMd,
-                        shadowOffset: AppDimensions.shadowOffsetSm,
+                        shadowOffset: 2.8,
                         padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
                         child: Text(
                           AppLocalizations.of(context)!.refresh,
