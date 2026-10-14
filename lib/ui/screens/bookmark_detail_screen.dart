@@ -965,7 +965,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           Navigator.pop(ctx);
                           _performRefresh();
                         },
-                        color: const Color(0xFFFF3366),
+                        color: const Color(0xFFD3F4E4),
                         borderRadius: AppDimensions.radiusLg,
                         borderWidth: AppDimensions.borderWidthMd,
                         shadowOffset: AppDimensions.shadowOffsetSm,
@@ -975,7 +975,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppTheme.border,
                           ),
                         ),
                       ),
