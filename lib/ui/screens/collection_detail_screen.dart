@@ -129,38 +129,29 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       builder: (ctx) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.pop(ctx),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 16.0,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {},
-                  child: Container(
-                padding: const EdgeInsets.only(
-                  top: 14,
-                  bottom: 16,
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Container(
+                padding: EdgeInsets.only(
+                  top: 12,
+                  bottom: 24 + MediaQuery.paddingOf(ctx).bottom,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: AppTheme.border, width: 2.5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: AppTheme.border,
-                      offset: Offset(2.8, 2.8),
-                      blurRadius: 0,
-                      spreadRadius: 0,
-                    ),
-                  ],
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                  border: Border(
+                    top: BorderSide(color: AppTheme.border, width: 3),
+                    left: BorderSide(color: AppTheme.border, width: 3),
+                    right: BorderSide(color: AppTheme.border, width: 3),
+                  ),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -169,10 +160,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                     Center(
                       child: Container(
                         width: 48,
-                        height: 4,
+                        height: 5,
                         decoration: BoxDecoration(
                           color: AppTheme.border,
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
@@ -232,9 +223,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 
   Widget _buildMenuItem({required IconData icon, required String title, Widget? trailing, required VoidCallback onTap}) {
