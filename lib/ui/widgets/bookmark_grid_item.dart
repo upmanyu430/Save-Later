@@ -52,15 +52,16 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       final rect = position & size;
 
       setState(() => _isMenuOpen = true);
-      
       BookmarkRadialMenu.show(
         context: context,
         child: _buildCard(), // Replica
         bookmark: widget.bookmark,
         cardRect: rect,
         ref: ref,
+        onDismissed: () {
+          if (mounted) setState(() => _isMenuOpen = false);
+        },
       );
-      
       BookmarkRadialMenu.updatePosition(details.globalPosition);
     }
   }
@@ -72,13 +73,11 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     if (widget.isSelectMode) return;
-    setState(() => _isMenuOpen = false);
     BookmarkRadialMenu.handleLongPressEnd();
   }
   
   void _handleLongPressCancel() {
     if (widget.isSelectMode) return;
-    setState(() => _isMenuOpen = false);
     BookmarkRadialMenu.handleLongPressCancel();
   }
 

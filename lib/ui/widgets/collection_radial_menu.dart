@@ -34,6 +34,7 @@ class CollectionRadialMenuAction {
 
 class CollectionRadialMenu {
   static OverlayEntry? _overlayEntry;
+  static VoidCallback? _onDismissedCallback;
 
   static void show({
     required BuildContext context,
@@ -41,8 +42,10 @@ class CollectionRadialMenu {
     required BookmarkCollection collection,
     required Rect cardRect,
     required WidgetRef ref,
+    VoidCallback? onDismissed,
   }) {
     if (_overlayEntry != null) return;
+    _onDismissedCallback = onDismissed;
     final l10n = AppLocalizations.of(context)!;
 
     final actions = [
@@ -127,6 +130,9 @@ class CollectionRadialMenu {
     }
     _overlayEntry?.remove();
     _overlayEntry = null;
+    final cb = _onDismissedCallback;
+    _onDismissedCallback = null;
+    cb?.call();
   }
 
   static void updatePosition(Offset globalPosition) {
@@ -179,6 +185,7 @@ class _CollectionRadialMenuOverlayWidgetState
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _anim;
+  late Animation<double> _scrimAnim;
 
   int _selectedIndex = -1;
   bool _isDismissing = false;
@@ -200,6 +207,11 @@ class _CollectionRadialMenuOverlayWidgetState
       parent: _animController,
       curve: Curves.easeOutBack,
       reverseCurve: Curves.easeInCubic,
+    );
+    _scrimAnim = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeIn,
     );
     _animController.forward();
   }
@@ -335,9 +347,11 @@ class _CollectionRadialMenuOverlayWidgetState
                 dismissAnimated();
               },
               child: AnimatedBuilder(
-                animation: _anim,
+                animation: _scrimAnim,
                 builder: (c, _) => Container(
-                  color: Colors.black.withValues(alpha: 0.85 * _anim.value),
+                  color: Colors.black.withValues(
+                    alpha: 0.85 * _scrimAnim.value.clamp(0.0, 1.0),
+                  ),
                 ),
               ),
             ),

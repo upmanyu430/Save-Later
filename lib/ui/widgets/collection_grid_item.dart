@@ -73,15 +73,16 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
 
     if (rect != null) {
       setState(() => _isMenuOpen = true);
-
       CollectionRadialMenu.show(
         context: context,
         child: _buildFolderBox(showTab: false, isInteractive: false),
         collection: widget.collection,
         cardRect: rect,
         ref: ref,
+        onDismissed: () {
+          if (mounted) setState(() => _isMenuOpen = false);
+        },
       );
-
       CollectionRadialMenu.updatePosition(details.globalPosition);
     }
   }
@@ -91,12 +92,10 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    setState(() => _isMenuOpen = false);
     CollectionRadialMenu.handleLongPressEnd();
   }
 
   void _handleLongPressCancel() {
-    setState(() => _isMenuOpen = false);
     CollectionRadialMenu.handleLongPressCancel();
   }
 

@@ -80,7 +80,8 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    _controller.reverse();
+    _controller.stop();
+    _controller.value = 0.0; // snap back to idle, no animation
     widget.onLongPressStart?.call(details);
   }
 
