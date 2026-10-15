@@ -152,20 +152,20 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                   // Overlay Unsorted/Collection pill
                   if (widget.showCollectionPill)
                     Positioned(
-                      bottom: 8,
-                      left: 8,
+                      bottom: 6,
+                      left: 6,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
+                            horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.black38,
-                          borderRadius: BorderRadius.circular(6),
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           b.collection.value?.name ?? AppLocalizations.of(context)!.unsorted,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 9.5,
                             fontWeight: FontWeight.w700,
                           ),
                         ),

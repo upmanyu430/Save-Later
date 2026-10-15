@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
-import '../widgets/neo_pressable.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
@@ -113,205 +112,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildRecentCard(Bookmark bookmark) {
-    return NeoPressable(
-      onTap: () {
-        ref.read(bookmarkNotifierProvider.notifier).markAsRead(bookmark);
-        context.push('/bookmark/${bookmark.id}', extra: bookmark);
-      },
-      scaleSquash: 0.025,
-      builder: (context, t, shadowOffset) {
-        return Container(
-          width: _recentCardWidth(context),
-          height: AppDimensions.gridBookmarkCardHeight,
-          margin: const EdgeInsets.only(right: 16),
-          child: NeoBox(
-            padding: EdgeInsets.zero,
-            shadowOffset: shadowOffset,
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Top half image/color
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD166),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(13),
-                      topRight: Radius.circular(13),
-                    ),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(13)),
-                        child: bookmark.imageUrl != null
-                            ? Image.network(
-                                bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Center(
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Text(
-                                      bookmark.title != null && bookmark.title!.isNotEmpty
-                                          ? bookmark.title![0].toUpperCase()
-                                          : '?',
-                                      style: const TextStyle(
-                                        fontSize: 36,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppTheme.border,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : Center(
-                                child: FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  child: Text(
-                                    bookmark.title != null && bookmark.title!.isNotEmpty
-                                        ? bookmark.title![0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppTheme.border,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                      ),
-                      // Overlay Unsorted/Collection pill
-                      Positioned(
-                        bottom: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.black38,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            bookmark.collection.value?.name ?? AppLocalizations.of(context)!.unsorted,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      // NEW pill
-                      if (!bookmark.isRead)
-                        Positioned(
-                          top: 6,
-                          left: 6,
-                          child: Transform.rotate(
-                            angle: -0.1,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFD166),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                    color: AppTheme.border, width: 1.5),
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context)!.newBadge,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              // Horizontal divider
-              Container(height: 3, color: AppTheme.border),
-              // Bottom half details
-              Container(
-                padding: const EdgeInsets.fromLTRB(9, 5, 9, 5),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(13),
-                    bottomRight: Radius.circular(13),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SizedBox(
-                      height: 27,
-                      child: Text(
-                        bookmark.title ?? bookmark.url,
-                        style: const TextStyle(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.border,
-                          height: 1.15,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Container(
-                          width: 14,
-                          height: 14,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFFF8A65), // Placeholder color
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Text(
-                              bookmark.sourceDomain != null &&
-                                      bookmark.sourceDomain!.isNotEmpty
-                                  ? bookmark.sourceDomain![0].toUpperCase()
-                                  : '?',
-                              style: const TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Expanded(
-                          child: Text(
-                            bookmark.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.black54,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    },
-  );
-}
+    return Container(
+      width: _recentCardWidth(context),
+      height: AppDimensions.gridBookmarkCardHeight,
+      margin: const EdgeInsets.only(right: AppDimensions.gridSpacingMd),
+      child: BookmarkGridItem(
+        bookmark: bookmark,
+        showCollectionPill: true,
+      ),
+    );
+  }
 
   double _recentCardWidth(BuildContext context) {
     final availableWidth = (MediaQuery.sizeOf(context)
@@ -364,17 +174,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             .ceil()
             .clamp(1, 10)
             .toInt();
-        final itemWidth = (contentWidth -
-                (columnCount - 1) * crossAxisSpacing) /
-            columnCount;
 
         return GridView.builder(
           padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: maxCrossAxisExtent,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columnCount,
             crossAxisSpacing: crossAxisSpacing,
             mainAxisSpacing: AppDimensions.gridSpacingMd,
-            childAspectRatio: itemWidth / desiredCardHeight,
+            mainAxisExtent: desiredCardHeight,
           ),
           itemCount: results.length,
           itemBuilder: (context, index) {
