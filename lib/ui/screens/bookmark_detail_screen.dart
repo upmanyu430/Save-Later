@@ -250,7 +250,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           // 1. Background Image
           Positioned(
             top: 0, left: 0, right: 0,
-            height: MediaQuery.of(context).size.height * 0.70,
+            height: MediaQuery.of(context).size.height * 0.55,
             child: bookmark.imageUrl != null
                 ? Image.network(
                     bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
@@ -311,7 +311,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 child: CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: SizedBox(height: MediaQuery.of(context).size.height * 0.52),
+                  child: SizedBox(height: MediaQuery.of(context).size.height * 0.38),
                 ),
                 SliverToBoxAdapter(
                   child: Center(
