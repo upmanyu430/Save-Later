@@ -133,9 +133,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
           bottom: false,
           child: Padding(
             padding: EdgeInsets.only(
-              left: 6.0,
-              right: 6.0,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom + 8.0,
+              left: 5.0,
+              right: 5.0,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
             ),
             child: Align(
               alignment: Alignment.bottomCenter,
@@ -145,13 +145,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                   behavior: HitTestBehavior.opaque,
                   onTap: () {},
                   child: Container(
-                    padding: const EdgeInsets.only(
+                    padding: EdgeInsets.only(
                       top: 14,
-                      bottom: 16,
+                      bottom: 20 + MediaQuery.paddingOf(ctx).bottom,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(32),
+                      borderRadius: BorderRadius.circular(55),
                       border: Border.all(color: AppTheme.border, width: 2.5),
                     ),
                     child: Column(
