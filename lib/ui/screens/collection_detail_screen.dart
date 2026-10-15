@@ -129,94 +129,97 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       builder: (ctx) => GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.pop(ctx),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: Container(
-                padding: EdgeInsets.only(
-                  top: 12,
-                  bottom: 24 + MediaQuery.paddingOf(ctx).bottom,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
-                  border: Border(
-                    top: BorderSide(color: AppTheme.border, width: 3),
-                    left: BorderSide(color: AppTheme.border, width: 3),
-                    right: BorderSide(color: AppTheme.border, width: 3),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Drag handle
-                    Center(
-                      child: Container(
-                        width: 48,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          color: AppTheme.border,
-                          borderRadius: BorderRadius.circular(4),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: 6.0,
+              right: 6.0,
+              bottom: MediaQuery.of(ctx).viewInsets.bottom + 8.0,
+            ),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 420),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {},
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                      top: 14,
+                      bottom: 16,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: AppTheme.border, width: 2.5),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Drag handle
+                        Center(
+                          child: Container(
+                            width: 48,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppTheme.border,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: AppDimensions.paddingXl),
-                    
-                    // Add Link
-                    _buildMenuItem(
-                      icon: Icons.add,
-                      title: AppLocalizations.of(context)!.addLink,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _showAddLinkModal(context);
-                      },
-                    ),
-                    _buildDivider(),
-                    
-                    // Select Links
-                    _buildMenuItem(
-                      icon: Icons.check_box_outlined,
-                      title: AppLocalizations.of(context)!.selectLinks,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        setState(() {
-                          _isSelectMode = true;
-                          _selectedIds.clear();
-                        });
-                      },
-                    ),
-                    _buildDivider(),
+                        const SizedBox(height: AppDimensions.paddingXl),
+                        
+                        // Add Link
+                        _buildMenuItem(
+                          icon: Icons.add,
+                          title: AppLocalizations.of(context)!.addLink,
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            _showAddLinkModal(context);
+                          },
+                        ),
+                        _buildDivider(),
+                        
+                        // Select Links
+                        _buildMenuItem(
+                          icon: Icons.check_box_outlined,
+                          title: AppLocalizations.of(context)!.selectLinks,
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            setState(() {
+                              _isSelectMode = true;
+                              _selectedIds.clear();
+                            });
+                          },
+                        ),
+                        _buildDivider(),
 
-                    // Create Sub-collection
-                    _buildMenuItem(
-                      icon: Icons.create_new_folder_outlined,
-                      title: AppLocalizations.of(context)!.createSubCollection,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        _showCreateSubCollectionModal(context);
-                      },
-                    ),
-                    _buildDivider(),
+                        // Create Sub-collection
+                        _buildMenuItem(
+                          icon: Icons.create_new_folder_outlined,
+                          title: AppLocalizations.of(context)!.createSubCollection,
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            _showCreateSubCollectionModal(context);
+                          },
+                        ),
+                        _buildDivider(),
 
-                    // Share Collection
-                    _buildMenuItem(
-                      icon: Icons.share_outlined,
-                      title: AppLocalizations.of(context)!.shareCollection,
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
-                        );
-                      },
+                        // Share Collection
+                        _buildMenuItem(
+                          icon: Icons.share_outlined,
+                          title: AppLocalizations.of(context)!.shareCollection,
+                          onTap: () {
+                            Navigator.pop(ctx);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
