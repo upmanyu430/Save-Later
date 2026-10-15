@@ -242,15 +242,22 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final placeholderIconSize =
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
+    final topInset = MediaQuery.paddingOf(context).top;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 1. Background Image
-          Positioned(
-            top: 0, left: 0, right: 0,
-            height: MediaQuery.of(context).size.height * 0.34,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            // 1. Background Image
+            Positioned(
+              top: topInset, left: 0, right: 0,
+              height: MediaQuery.of(context).size.height * 0.34,
             child: bookmark.imageUrl != null
                 ? Image.network(
                     bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
@@ -879,7 +886,28 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               ),
             ),
           ),
-        ],
+
+          // 4. Top Status Bar & Black Divider Line
+          if (topInset > 0)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: topInset,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppTheme.border,
+                        width: AppDimensions.borderWidthLg,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
