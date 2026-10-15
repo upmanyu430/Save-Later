@@ -247,35 +247,42 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // 1. Background Image
+          // 1. Background Image Box
           Positioned(
             top: 0, left: 0, right: 0,
-            height: MediaQuery.of(context).size.height * 0.55,
-            child: bookmark.imageUrl != null
-                ? Image.network(
-                    bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_,__,___) => Container(
-                      color: Colors.grey.shade900,
-                      child: Center(
-                        child: Icon(
-                          Icons.image_not_supported,
-                          size: placeholderIconSize,
-                          color: Colors.grey,
+            height: MediaQuery.of(context).size.height * 0.42,
+            child: Container(
+              color: Colors.black,
+              child: SafeArea(
+                bottom: false,
+                child: bookmark.imageUrl != null
+                    ? Image.network(
+                        bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        errorBuilder: (_,__,___) => Container(
+                          color: Colors.grey.shade900,
+                          child: Center(
+                            child: Icon(
+                              Icons.image_not_supported,
+                              size: placeholderIconSize,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      )
+                    : Container(
+                        color: Colors.grey.shade900,
+                        child: Center(
+                          child: Icon(
+                            Icons.link,
+                            size: placeholderIconSize,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                : Container(
-                    color: Colors.grey.shade900,
-                    child: Center(
-                      child: Icon(
-                        Icons.link,
-                        size: placeholderIconSize,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
+              ),
+            ),
           ),
 
           // 2. Main Content Card
