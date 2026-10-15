@@ -281,7 +281,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: AppDimensions.paddingXxxl),
+              const SizedBox(height: AppDimensions.paddingLg),
 
               // Collections Header
               Text(
@@ -291,7 +291,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: AppDimensions.paddingXl),
+              const SizedBox(height: AppDimensions.paddingMd),
 
               // Collections Grid
               Expanded(
