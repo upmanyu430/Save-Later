@@ -225,7 +225,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
             ),
           ),
           Container(
-            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            padding: const EdgeInsets.fromLTRB(9, 5, 9, 5),
             decoration: const BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.vertical(bottom: Radius.circular(13.0)),
@@ -235,25 +235,25 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SizedBox(
-                  height: 33,
+                  height: 27,
                   child: Text(
                     b.title ?? b.url,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 11.5,
                       fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w800,
                       color: AppTheme.border,
-                      height: 1.25,
+                      height: 1.15,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     Container(
-                      width: 16,
-                      height: 16,
+                      width: 14,
+                      height: 14,
                       decoration: const BoxDecoration(
                         color: AppTheme.border,
                         shape: BoxShape.circle,
@@ -261,15 +261,15 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                       child: Center(
                         child: Text(
                           b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
-                          style: TextStyle(fontSize: 9, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
+                          style: TextStyle(fontSize: 8, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     Expanded(
                       child: Text(
                         b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                        style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
+                        style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

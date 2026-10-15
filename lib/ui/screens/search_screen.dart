@@ -237,7 +237,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               Container(height: 3, color: AppTheme.border),
               // Bottom half details
               Container(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                padding: const EdgeInsets.fromLTRB(9, 5, 9, 5),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -250,25 +250,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SizedBox(
-                      height: 33,
+                      height: 27,
                       child: Text(
                         bookmark.title ?? bookmark.url,
                         style: const TextStyle(
-                          fontSize: 13,
+                          fontSize: 11.5,
                           fontWeight: FontWeight.w800,
                           color: AppTheme.border,
-                          height: 1.25,
+                          height: 1.15,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 2),
                     Row(
                       children: [
                         Container(
-                          width: 16,
-                          height: 16,
+                          width: 14,
+                          height: 14,
                           decoration: const BoxDecoration(
                             color: Color(0xFFFF8A65), // Placeholder color
                             shape: BoxShape.circle,
@@ -280,19 +280,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   ? bookmark.sourceDomain![0].toUpperCase()
                                   : '?',
                               style: const TextStyle(
-                                fontSize: 9,
+                                fontSize: 8,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                         Expanded(
                           child: Text(
                             bookmark.sourceDomain ?? AppLocalizations.of(context)!.unknown,
                             style: const TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: Colors.black54,
                               fontWeight: FontWeight.w500,
                             ),
