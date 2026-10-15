@@ -143,9 +143,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         bottom: false,
         child: Padding(
           padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+            left: 5.0,
+            right: 5.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
@@ -157,20 +157,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: AppTheme.cardColor,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(55),
                     border: Border.all(color: AppTheme.border, width: 2.5),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(2.8, 2.8),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                      ),
-                    ],
                   ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
-                child: AnimatedSize(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      18.0,
+                      14.0,
+                      18.0,
+                      20.0 + MediaQuery.paddingOf(context).bottom,
+                    ),
+                    child: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOutCubic,
                   alignment: Alignment.topCenter,

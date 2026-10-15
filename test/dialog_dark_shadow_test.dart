@@ -65,7 +65,7 @@ class FakeIsarRepository implements IsarRepository {
 }
 
 void main() {
-  testWidgets('CollectionEditorModal card container has dark shadow (Offset(2.8, 2.8))', (WidgetTester tester) async {
+  testWidgets('CollectionEditorModal card container has 55dp rounded border and dark outline', (WidgetTester tester) async {
     final fakeRepo = FakeIsarRepository();
 
     await tester.pumpWidget(
@@ -90,14 +90,11 @@ void main() {
 
     final containers = tester.widgetList<Container>(find.byType(Container));
     final modalContainer = containers.firstWhere(
-      (c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).boxShadow != null && (c.decoration as BoxDecoration).boxShadow!.isNotEmpty,
+      (c) => c.decoration is BoxDecoration && (c.decoration as BoxDecoration).borderRadius == BorderRadius.circular(55),
     );
     final boxDecoration = modalContainer.decoration as BoxDecoration;
-    expect(boxDecoration.boxShadow, isNotNull);
-    final shadow = boxDecoration.boxShadow!.first;
-    expect(shadow.color, AppTheme.border);
-    expect(shadow.offset, const Offset(2.8, 2.8));
-    expect(shadow.blurRadius, 0.0);
+    expect(boxDecoration.borderRadius, BorderRadius.circular(55));
+    expect(boxDecoration.border, Border.all(color: AppTheme.border, width: 2.5));
   });
 
   testWidgets('DeleteConfirmationDialog has dark shadow (Offset(2.8, 2.8))', (WidgetTester tester) async {
