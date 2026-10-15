@@ -40,7 +40,7 @@ class AppDimensions {
   static const double gridSpacingMd = 16.0;
   static const double gridSpacingLg = 24.0;
   static const double gridFolderCardHeight = 160.0;
-  static const double gridBookmarkCardHeight = 128.0; // 20% smaller than 160.0
+  static const double gridBookmarkCardHeight = 130.0;
 
   // Responsive Layout
   static const double maxContentWidth = 600.0;
