@@ -242,41 +242,69 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     final l10n = AppLocalizations.of(context)!;
     final placeholderIconSize =
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
+    final topInset = MediaQuery.paddingOf(context).top;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // 1. Background Image
-          Positioned(
-            top: 0, left: 0, right: 0,
-            height: MediaQuery.of(context).size.height * 0.34,
-            child: bookmark.imageUrl != null
-                ? Image.network(
-                    bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_,__,___) => Container(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            // 1. Background Image Box
+            Positioned(
+              top: topInset,
+              left: 0,
+              right: 0,
+              height: MediaQuery.of(context).size.height * 0.34,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (bookmark.imageUrl != null)
+                    Image.network(
+                      bookmark.imageUrl!.startsWith('//')
+                          ? 'https:${bookmark.imageUrl!}'
+                          : bookmark.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey.shade900,
+                        child: Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            size: placeholderIconSize,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
                       color: Colors.grey.shade900,
                       child: Center(
                         child: Icon(
-                          Icons.image_not_supported,
+                          Icons.link,
                           size: placeholderIconSize,
                           color: Colors.grey,
                         ),
                       ),
                     ),
-                  )
-                : Container(
-                    color: Colors.grey.shade900,
-                    child: Center(
-                      child: Icon(
-                        Icons.link,
-                        size: placeholderIconSize,
-                        color: Colors.grey,
-                      ),
+
+                  // Lower Black Line on the bookmark background image
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: AppDimensions.borderWidthLg,
+                      color: AppTheme.border,
                     ),
                   ),
-          ),
+                ],
+              ),
+            ),
 
           // 2. Main Content Card
           Positioned.fill(
@@ -879,10 +907,33 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               ),
             ),
           ),
+
+          // 4. Top Status Bar & Black Divider Line
+          if (topInset > 0)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                child: Container(
+                  height: topInset,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppTheme.border,
+                        width: AppDimensions.borderWidthLg,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _performRefresh() {
     // Show loading overlay
