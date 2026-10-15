@@ -38,6 +38,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
 
 class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   final GlobalKey _cardKey = GlobalKey();
+  bool _isMenuOpen = false;
 
   void _handleLongPressStart(LongPressStartDetails details) {
     if (widget.isSelectMode) return;
@@ -49,6 +50,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       final size = renderBox.size;
       final position = renderBox.localToGlobal(Offset.zero);
       final rect = position & size;
+
+      setState(() => _isMenuOpen = true);
       
       BookmarkRadialMenu.show(
         context: context,
@@ -69,11 +72,13 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     if (widget.isSelectMode) return;
+    setState(() => _isMenuOpen = false);
     BookmarkRadialMenu.handleLongPressEnd();
   }
   
   void _handleLongPressCancel() {
     if (widget.isSelectMode) return;
+    setState(() => _isMenuOpen = false);
     BookmarkRadialMenu.handleLongPressCancel();
   }
 
@@ -94,9 +99,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       onLongPressCancel: _handleLongPressCancel,
       scaleSquash: 0.025,
       builder: (context, t, shadowOffset) {
-        return Container(
-          key: _cardKey,
-          child: _buildCard(shadowOffset: shadowOffset),
+        return Opacity(
+          opacity: _isMenuOpen ? 0.0 : 1.0,
+          child: Container(
+            key: _cardKey,
+            child: _buildCard(shadowOffset: shadowOffset),
+          ),
         );
       },
     ).animate().slideY(curve: Curves.easeOutBack, duration: 400.ms).fadeIn();

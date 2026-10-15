@@ -28,6 +28,7 @@ class CollectionGridItem extends ConsumerStatefulWidget {
 class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   final GlobalKey _cardKey = GlobalKey();
   final GlobalKey _cardBodyKey = GlobalKey();
+  bool _isMenuOpen = false;
 
   Widget _buildFolderBox({bool showTab = true, bool isInteractive = true}) {
     final l10n = AppLocalizations.of(context)!;
@@ -71,6 +72,8 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
     }
 
     if (rect != null) {
+      setState(() => _isMenuOpen = true);
+
       CollectionRadialMenu.show(
         context: context,
         child: _buildFolderBox(showTab: false, isInteractive: false),
@@ -88,34 +91,39 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    setState(() => _isMenuOpen = false);
     CollectionRadialMenu.handleLongPressEnd();
   }
 
   void _handleLongPressCancel() {
+    setState(() => _isMenuOpen = false);
     CollectionRadialMenu.handleLongPressCancel();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Container(
-      key: _cardKey,
-      child: FolderBox(
-        bodyKey: _cardBodyKey,
-        forceBold: true,
-        title: widget.collection.name,
-        itemCountText: l10n.itemsCount(widget.itemCount),
-        folderColor: widget.collection.color,
-        icon: IconData(
-          widget.collection.iconCodePoint,
-          fontFamily: widget.collection.iconFontFamily,
+    return Opacity(
+      opacity: _isMenuOpen ? 0.0 : 1.0,
+      child: Container(
+        key: _cardKey,
+        child: FolderBox(
+          bodyKey: _cardBodyKey,
+          forceBold: true,
+          title: widget.collection.name,
+          itemCountText: l10n.itemsCount(widget.itemCount),
+          folderColor: widget.collection.color,
+          icon: IconData(
+            widget.collection.iconCodePoint,
+            fontFamily: widget.collection.iconFontFamily,
+          ),
+          onTap: widget.onTap,
+          hasNewItems: widget.hasNewItems,
+          onLongPressStart: _handleLongPressStart,
+          onLongPressMoveUpdate: _handleLongPressMoveUpdate,
+          onLongPressEnd: _handleLongPressEnd,
+          onLongPressCancel: _handleLongPressCancel,
         ),
-        onTap: widget.onTap,
-        hasNewItems: widget.hasNewItems,
-        onLongPressStart: _handleLongPressStart,
-        onLongPressMoveUpdate: _handleLongPressMoveUpdate,
-        onLongPressEnd: _handleLongPressEnd,
-        onLongPressCancel: _handleLongPressCancel,
       ),
     );
   }
