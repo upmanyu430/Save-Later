@@ -150,27 +150,33 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 bookmark.imageUrl!.startsWith('//') ? 'https:${bookmark.imageUrl!}' : bookmark.imageUrl!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) => Center(
-                                  child: Text(
-                                    bookmark.title != null && bookmark.title!.isNotEmpty
-                                        ? bookmark.title![0].toUpperCase()
-                                        : '?',
-                                    style: const TextStyle(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.w900,
-                                      color: AppTheme.border,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      bookmark.title != null && bookmark.title!.isNotEmpty
+                                          ? bookmark.title![0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppTheme.border,
+                                      ),
                                     ),
                                   ),
                                 ),
                               )
                             : Center(
-                                child: Text(
-                                  bookmark.title != null && bookmark.title!.isNotEmpty
-                                      ? bookmark.title![0].toUpperCase()
-                                      : '?',
-                                  style: const TextStyle(
-                                    fontSize: 48,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppTheme.border,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    bookmark.title != null && bookmark.title!.isNotEmpty
+                                        ? bookmark.title![0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.w900,
+                                      color: AppTheme.border,
+                                    ),
                                   ),
                                 ),
                               ),

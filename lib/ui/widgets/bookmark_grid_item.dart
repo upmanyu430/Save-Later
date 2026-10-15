@@ -140,9 +140,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                             errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey)
                           )
                         : Center(
-                            child: Text(
-                              b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
-                              style: TextStyle(fontSize: 48, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
+                                style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
+                              ),
                             ),
                           ),
                   ),
