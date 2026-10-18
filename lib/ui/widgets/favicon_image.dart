@@ -7,6 +7,7 @@ class FaviconImage extends StatelessWidget {
   final double size;
   final double borderRadius;
   final Color? fallbackColor;
+  final Widget? fallback;
 
   const FaviconImage({
     super.key,
@@ -15,6 +16,7 @@ class FaviconImage extends StatelessWidget {
     this.size = 22.0,
     this.borderRadius = 4.0,
     this.fallbackColor,
+    this.fallback,
   });
 
   String? get resolvedDomain {
@@ -36,14 +38,15 @@ class FaviconImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final d = resolvedDomain;
-    final fallback = Icon(
-      Icons.public,
-      size: size,
-      color: fallbackColor ?? AppTheme.border,
-    );
+    final defaultFallback = fallback ??
+        Icon(
+          Icons.public,
+          size: size,
+          color: fallbackColor ?? AppTheme.border,
+        );
 
     if (d == null || d.isEmpty) {
-      return fallback;
+      return defaultFallback;
     }
 
     final faviconUrl = 'https://www.google.com/s2/favicons?domain=$d&sz=128';
@@ -55,7 +58,7 @@ class FaviconImage extends StatelessWidget {
         width: size,
         height: size,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => fallback,
+        errorBuilder: (context, error, stackTrace) => defaultFallback,
       ),
     );
   }

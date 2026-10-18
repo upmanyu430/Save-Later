@@ -10,6 +10,7 @@ import 'neo_box.dart';
 import 'neo_pressable.dart';
 import 'bookmark_radial_menu.dart';
 import 'pin_icon.dart';
+import 'favicon_image.dart';
 import '../../providers/providers.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -254,17 +255,23 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                 const SizedBox(height: 2),
                 Row(
                   children: [
-                    Container(
-                      width: 14,
-                      height: 14,
-                      decoration: const BoxDecoration(
-                        color: AppTheme.border,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: Text(
-                          b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
-                          style: TextStyle(fontSize: 8, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
+                    FaviconImage(
+                      domain: b.sourceDomain,
+                      url: b.url,
+                      size: 14.0,
+                      borderRadius: 2.0,
+                      fallback: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.border,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
+                            style: TextStyle(fontSize: 8, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
+                          ),
                         ),
                       ),
                     ),
