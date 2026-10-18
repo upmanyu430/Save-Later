@@ -15,6 +15,7 @@ import '../widgets/neo_pressable.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/pin_icon.dart';
+import '../widgets/favicon_image.dart';
 import '../../utils/url_launcher.dart';
 import '../../utils/tag_helper.dart';
 import 'package:save_later/config/app_constants.dart';
@@ -368,7 +369,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         // Source Domain
                         Row(
                           children: [
-                            const Icon(Icons.web_asset_outlined, size: 24, color: Color(0xFF83D64D)),
+                            FaviconImage(
+                              domain: bookmark.sourceDomain,
+                              url: bookmark.url,
+                              size: 24.0,
+                            ),
                             const SizedBox(width: AppDimensions.paddingSm),
                             Text(
                               bookmark.sourceDomain ?? l10n.unknownSource,

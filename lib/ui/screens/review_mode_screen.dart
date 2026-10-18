@@ -8,6 +8,7 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_box.dart';
+import '../widgets/favicon_image.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
 import 'package:save_later/config/app_constants.dart';
@@ -566,9 +567,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                     border: Border.all(color: AppTheme.border, width: 2),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.web_asset_outlined,
-                        color: Color(0xFF83D64D), size: 20),
+                  child: Center(
+                    child: FaviconImage(
+                      domain: b.sourceDomain,
+                      url: b.url,
+                      size: 20,
+                    ),
                   ),
                 ),
                 const SizedBox(width: AppDimensions.paddingMd),
