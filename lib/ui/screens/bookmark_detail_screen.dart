@@ -507,29 +507,30 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: AppDimensions.paddingLg),
 
                         // Collection & Date
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 12.0,
+                          runSpacing: 8.0,
                           children: [
                             if (bookmark.collection.value != null)
-                              Padding(
-                                padding: EdgeInsets.only(right: 12.0),
-                                child: NeoBox(
-                                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                  borderRadius: AppDimensions.radiusSm,
-                                  borderWidth: 2,
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        IconData(bookmark.collection.value!.iconCodePoint, fontFamily: bookmark.collection.value!.iconFontFamily),
-                                        size: 16,
-                                        color: bookmark.collection.value!.color,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        bookmark.collection.value!.name,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                      ),
-                                    ],
-                                  ),
+                              NeoBox(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                borderRadius: AppDimensions.radiusSm,
+                                borderWidth: 2,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      IconData(bookmark.collection.value!.iconCodePoint, fontFamily: bookmark.collection.value!.iconFontFamily),
+                                      size: 16,
+                                      color: bookmark.collection.value!.color,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      bookmark.collection.value!.name,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                    ),
+                                  ],
                                 ),
                               )
                             else
