@@ -11,6 +11,7 @@ class AppDimensions {
 
   // Border Radius
   static const double radiusSm = 8.0;
+  static const double radiusBookmarkCard = 10.0;
   static const double radiusMd = 12.0;
   static const double radiusLg = 14.0;
   static const double radiusXl = 16.0;
@@ -40,7 +41,7 @@ class AppDimensions {
   static const double gridSpacingMd = 16.0;
   static const double gridSpacingLg = 24.0;
   static const double gridFolderCardHeight = 160.0;
-  static const double gridBookmarkCardHeight = 130.0;
+  static const double gridBookmarkCardHeight = 155.0;
 
   // Responsive Layout
   static const double maxContentWidth = 600.0;

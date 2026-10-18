@@ -109,6 +109,9 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     ).animate().slideY(curve: Curves.easeOutBack, duration: 400.ms).fadeIn();
   }
   
+  static const double _cardRadius = AppDimensions.radiusBookmarkCard;
+  static const double _innerRadius = _cardRadius - 3.0;
+
   Widget _buildCard({double shadowOffset = 2.0}) {
     final b = widget.bookmark;
     return Stack(
@@ -116,7 +119,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
       children: [
         NeoBox(
           padding: const EdgeInsets.all(0),
-          borderRadius: AppDimensions.radiusXl,
+          borderRadius: _cardRadius,
           shadowOffset: shadowOffset,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -126,13 +129,13 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
               decoration: const BoxDecoration(
                 border: Border(bottom: BorderSide(color: AppTheme.border, width: 3.0)),
                 color: Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(13.0)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(_innerRadius)),
               ),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(13.0)),
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(_innerRadius)),
                     child: b.imageUrl != null
                         ? Image.network(
                             b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!, 
@@ -228,7 +231,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
             padding: const EdgeInsets.fromLTRB(9, 5, 9, 5),
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(13.0)),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(_innerRadius)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
