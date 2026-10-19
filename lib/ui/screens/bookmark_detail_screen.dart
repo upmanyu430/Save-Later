@@ -40,6 +40,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   bool _notesEdited = false;
   late String _lastSavedNotes;
   bool _isTopBarVisible = true;
+  bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
@@ -244,7 +245,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     final placeholderIconSize =
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
     final topInset = MediaQuery.paddingOf(context).top;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -695,10 +695,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         // Description
                         Text(l10n.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
                         const SizedBox(height: 12),
-                        Text(
-                          bookmark.description ?? l10n.noDescriptionProvided,
-                          style: const TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF333333)),
-                        ),
+                        _buildDescription(l10n),
                         const SizedBox(height: AppDimensions.paddingXxl),
 
                         // Tags
@@ -1080,6 +1077,67 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 ),
 );
 }
+
+  Widget _buildDescription(AppLocalizations l10n) {
+    final description = bookmark.description?.trim();
+    const style = TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF333333));
+
+    if (description == null || description.isEmpty) {
+      return Text(
+        l10n.noDescriptionProvided,
+        style: style,
+      );
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final span = TextSpan(text: description, style: style);
+        final tp = TextPainter(
+          text: span,
+          maxLines: 5,
+          textDirection: Directionality.of(context),
+        )..layout(maxWidth: constraints.maxWidth);
+
+        final isOverflowing = tp.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description,
+              style: style,
+              maxLines: _isDescriptionExpanded ? null : 5,
+              overflow: _isDescriptionExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+            ),
+            if (isOverflowing) ...[
+              const SizedBox(height: 8),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    _isDescriptionExpanded = !_isDescriptionExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: Text(
+                    _isDescriptionExpanded ? l10n.showLess : l10n.showMore,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      decoration: TextDecoration.underline,
+                      color: AppTheme.border,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
 
   Widget _buildSegmentDivider() {
     return Container(

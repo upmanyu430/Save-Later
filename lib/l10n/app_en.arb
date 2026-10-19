@@ -512,5 +512,13 @@
   "ok": "OK",
   "@ok": {
     "description": "Button text for OK"
+  },
+  "showMore": "Show more",
+  "@showMore": {
+    "description": "Button to expand long text"
+  },
+  "showLess": "Show less",
+  "@showLess": {
+    "description": "Button to collapse expanded text"
   }
 }
