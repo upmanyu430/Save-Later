@@ -836,7 +836,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ),
                         ),
-                        SizedBox(height: AppDimensions.paddingXxxl + bottomInset),
+                        SizedBox(height: AppDimensions.paddingLg + bottomInset),
                           ],
                         ),
                       ),
