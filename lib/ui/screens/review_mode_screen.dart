@@ -258,79 +258,89 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           child: Row(
             children: [
               Expanded(
-                child: NeoButton(
-                  color: Colors.white,
-                  borderRadius: 16,
-                  shadowOffset: 3,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    // `currentIndex` points at the trailing page while the
-                    // caught-up view is shown. Use it as the source of truth
-                    // instead of `completedCount`, which can lag behind when
-                    // the last card was completed by a pager callback.
-                    if (currentIndex > 0 && unreadBookmarks.isNotEmpty) {
-                      final previousIndex = (currentIndex - 1)
-                          .clamp(0, unreadBookmarks.length - 1)
-                          .toInt();
-                      setState(() {
-                        _pendingPreviousNavigation = false;
-                        currentIndex = previousIndex;
-                        completedCount = completedCount > 0
-                            ? completedCount - 1
-                            : 0;
-                      });
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted && _pageController.hasClients) {
-                          _pageController.jumpToPage(previousIndex);
-                        }
-                      });
-                    }
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.arrow_back, color: Colors.black),
-                      const SizedBox(width: AppDimensions.paddingSm),
-                      Flexible(
-                          child: Text(AppLocalizations.of(context)!.previous,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800),
-                              overflow: TextOverflow.ellipsis)),
-                    ],
+                child: SizedBox(
+                  height: 57.6,
+                  child: NeoButton(
+                    color: Colors.white,
+                    borderRadius: AppDimensions.radiusXl,
+                    padding: EdgeInsets.zero,
+                    shadowOffset: 0,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      // currentIndex points at the trailing page while the
+                      // caught-up view is shown. Use it as the source of truth
+                      // instead of completedCount, which can lag behind when
+                      // the last card was completed by a pager callback.
+                      if (currentIndex > 0 && unreadBookmarks.isNotEmpty) {
+                        final previousIndex = (currentIndex - 1)
+                            .clamp(0, unreadBookmarks.length - 1)
+                            .toInt();
+                        setState(() {
+                          _pendingPreviousNavigation = false;
+                          currentIndex = previousIndex;
+                          completedCount = completedCount > 0
+                              ? completedCount - 1
+                              : 0;
+                        });
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted && _pageController.hasClients) {
+                            _pageController.jumpToPage(previousIndex);
+                          }
+                        });
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+                        const SizedBox(width: AppDimensions.paddingSm),
+                        Flexible(
+                          child: Text(
+                            AppLocalizations.of(context)!.previous,
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: AppDimensions.paddingLg),
+              const SizedBox(width: AppDimensions.paddingMd),
               Expanded(
-                child: NeoButton(
-                  color: const Color(0xFFFFD166),
-                  borderRadius: 16,
-                  shadowOffset: 3,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                  onPressed: () {
-                    HapticFeedback.lightImpact();
-                    // Review is pushed from the current folder. Pop back to
-                    // that folder instead of replacing the route with home.
-                    context.pop();
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.home_outlined, color: Colors.black),
-                      const SizedBox(width: AppDimensions.paddingSm),
-                      Flexible(
-                          child: Text(AppLocalizations.of(context)!.done,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800),
-                              overflow: TextOverflow.ellipsis)),
-                    ],
+                child: SizedBox(
+                  height: 57.6,
+                  child: NeoButton(
+                    color: const Color(0xFFFFD166),
+                    borderRadius: AppDimensions.radiusXl,
+                    padding: EdgeInsets.zero,
+                    shadowOffset: 0,
+                    onPressed: () {
+                      HapticFeedback.lightImpact();
+                      // Review is pushed from the current folder. Pop back to
+                      // that folder instead of replacing the route with home.
+                      context.pop();
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.home_outlined, color: Colors.black, size: 24),
+                        const SizedBox(width: AppDimensions.paddingSm),
+                        Flexible(
+                          child: Text(
+                            AppLocalizations.of(context)!.done,
+                            style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w900),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
