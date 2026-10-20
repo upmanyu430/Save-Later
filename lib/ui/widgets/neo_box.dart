@@ -32,14 +32,16 @@ class NeoBox extends StatelessWidget {
           color: AppTheme.border,
           width: borderWidth,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.border,
-            offset: Offset(shadowOffset, shadowOffset),
-            blurRadius: 0,
-            spreadRadius: 0,
-          ),
-        ],
+        boxShadow: shadowOffset <= 0
+            ? null
+            : [
+                BoxShadow(
+                  color: AppTheme.border,
+                  offset: Offset(shadowOffset, shadowOffset),
+                  blurRadius: 0,
+                  spreadRadius: 0,
+                ),
+              ],
       ),
       child: child,
     );

@@ -519,6 +519,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 borderRadius: AppDimensions.radiusSm,
                                 borderWidth: 2,
+                                shadowOffset: 0,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -540,6 +541,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                 borderRadius: AppDimensions.radiusSm,
                                 borderWidth: 2,
+                                shadowOffset: 0,
                                 color: Colors.white,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
