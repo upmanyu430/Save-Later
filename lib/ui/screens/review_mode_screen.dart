@@ -592,13 +592,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: AppTheme.border, width: 3),
-        boxShadow: const [
-          BoxShadow(
-            color: AppTheme.border,
-            offset: Offset(0, 8),
-            blurRadius: 0,
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
