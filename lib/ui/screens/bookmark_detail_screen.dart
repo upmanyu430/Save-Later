@@ -877,7 +877,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 child: NeoButton(
                                   onPressed: () => context.pop(),
                                   padding: EdgeInsets.zero,
-                                  color: AppTheme.background,
+                                  color: Colors.white,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: AppDimensions.borderWidthMd,
                                   child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
