@@ -61,6 +61,8 @@ final allTagsProvider = FutureProvider<List<String>>((ref) async {
   return sorted;
 });
 
+final savingBookmarkIdsProvider = StateProvider<Set<int>>((ref) => {});
+
 // A notifier to handle adding a bookmark and fetching metadata
 class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
@@ -76,6 +78,50 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
         cleanUrl = 'https://$cleanUrl';
       }
+
+      final initialUri = Uri.tryParse(cleanUrl);
+      final initialDomain = initialUri?.host.isNotEmpty == true ? initialUri!.host : cleanUrl;
+
+      // Create initial bookmark immediately so it shows instantly in the grid
+      final bookmark = Bookmark()
+        ..url = cleanUrl
+        ..title = cleanUrl
+        ..sourceDomain = initialDomain
+        ..createdAt = DateTime.now()
+        ..isRead = false;
+
+      if (collection != null) {
+        bookmark.collection.value = collection;
+      }
+
+      await repo.addBookmark(bookmark);
+
+      // Track as actively saving
+      ref.read(savingBookmarkIdsProvider.notifier).update((set) => {...set, bookmark.id});
+
+      // Invalidate providers so the placeholder appears in the grid immediately
+      ref.invalidate(bookmarksProvider);
+      ref.invalidate(unsortedBookmarksProvider);
+      if (collection != null) {
+        ref.invalidate(collectionBookmarksProvider(collection.id));
+      }
+
+      state = const AsyncValue.data(null);
+
+      // Trigger background metadata fetching and resolution
+      _fetchMetadataAndUpdate(bookmark, cleanUrl, collection);
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+    }
+  }
+
+  Future<void> _fetchMetadataAndUpdate(
+    Bookmark bookmark,
+    String cleanUrl,
+    BookmarkCollection? collection,
+  ) async {
+    try {
+      final repo = ref.read(repositoryProvider);
 
       // Resolve redirect chains (e.g. share.google, bit.ly, t.co) to canonical target
       final resolvedUrl = await UrlHelper.resolveFinalUrl(cleanUrl);
@@ -104,30 +150,30 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
           imageUrl = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
         }
       } catch (e) {
-        // Fallback or ignore
         debugPrint('Error fetching metadata: $e');
       }
 
-      final bookmark = Bookmark()
-        ..url = finalUrl
-        ..title = title ?? cleanUrl
-        ..description = description
-        ..imageUrl = imageUrl
-        ..sourceDomain = sourceDomain
-        ..createdAt = DateTime.now()
-        ..isRead = false;
+      bookmark.url = finalUrl;
+      bookmark.title = title ?? cleanUrl;
+      bookmark.description = description;
+      bookmark.imageUrl = imageUrl;
+      bookmark.sourceDomain = sourceDomain;
 
-      if (collection != null) { bookmark.collection.value = collection; } await repo.addBookmark(bookmark); if (collection != null) { ref.invalidate(collectionBookmarksProvider(collection.id)); }
-
-      // Invalidate the provider to refresh the UI
+      await repo.updateBookmark(bookmark);
+    } catch (e) {
+      debugPrint('Error updating bookmark metadata: $e');
+    } finally {
+      ref.read(savingBookmarkIdsProvider.notifier).update(
+            (set) => set.where((id) => id != bookmark.id).toSet(),
+          );
       ref.invalidate(bookmarksProvider);
       ref.invalidate(unsortedBookmarksProvider);
-
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (collection != null) {
+        ref.invalidate(collectionBookmarksProvider(collection.id));
+      }
     }
   }
+
 
   Future<void> addTag(Bookmark bookmark, String tag) async {
     final clean = tag.trim();

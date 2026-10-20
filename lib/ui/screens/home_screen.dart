@@ -68,7 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
-  void _quickSave() {
+  void _quickSave() async {
     final rawText = _urlController.text.trim();
     if (rawText.isEmpty) {
       showNoUrlDialog(context);
@@ -79,9 +79,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       showNoUrlDialog(context);
       return;
     }
-    ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
     _urlController.clear();
     FocusScope.of(context).unfocus();
+    await ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
+    if (mounted) {
+      _pushRoute('/unsorted');
+    }
   }
 
   void _showAddCollectionModal() {
@@ -110,10 +113,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (next.hasError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.errorSavingLink)),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.linkSavedMessage)),
           );
         }
       }

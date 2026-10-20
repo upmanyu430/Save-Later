@@ -85,9 +85,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
   @override
   Widget build(BuildContext context) {
+    final isSaving = ref.watch(savingBookmarkIdsProvider).contains(widget.bookmark.id);
+
     return NeoPressable(
       enableFeedback: false,
       onTap: () {
+        if (isSaving) return;
         if (widget.isSelectMode) {
           if (widget.onSelectTapped != null) widget.onSelectTapped!();
         } else {
@@ -95,17 +98,17 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
         }
       },
-      onLongPressStart: _handleLongPressStart,
-      onLongPressMoveUpdate: _handleLongPressMoveUpdate,
-      onLongPressEnd: _handleLongPressEnd,
-      onLongPressCancel: _handleLongPressCancel,
-      scaleSquash: 0.025,
+      onLongPressStart: isSaving ? null : _handleLongPressStart,
+      onLongPressMoveUpdate: isSaving ? null : _handleLongPressMoveUpdate,
+      onLongPressEnd: isSaving ? null : _handleLongPressEnd,
+      onLongPressCancel: isSaving ? null : _handleLongPressCancel,
+      scaleSquash: isSaving ? 0.0 : 0.025,
       builder: (context, t, shadowOffset) {
         return Opacity(
           opacity: _isMenuOpen ? 0.0 : 1.0,
           child: Container(
             key: _cardKey,
-            child: _buildCard(shadowOffset: shadowOffset),
+            child: _buildCard(shadowOffset: shadowOffset, isSaving: isSaving),
           ),
         );
       },
@@ -115,7 +118,28 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   static const double _cardRadius = AppDimensions.radiusBookmarkCard;
   static const double _innerRadius = _cardRadius - 3.0;
 
-  Widget _buildCard({double shadowOffset = 2.0}) {
+  String _getInitialLetter(Bookmark b) {
+    if (b.sourceDomain != null && b.sourceDomain!.isNotEmpty) {
+      final clean = b.sourceDomain!.replaceFirst(RegExp(r'^www\.', caseSensitive: false), '');
+      if (clean.isNotEmpty) {
+        return clean[0].toUpperCase();
+      }
+    }
+    if (b.title != null && b.title!.isNotEmpty) {
+      final t = b.title!.trim();
+      if (t.startsWith(RegExp(r'https?:\/\/', caseSensitive: false))) {
+        final uri = Uri.tryParse(t);
+        if (uri != null && uri.host.isNotEmpty) {
+          final host = uri.host.replaceFirst(RegExp(r'^www\.', caseSensitive: false), '');
+          if (host.isNotEmpty) return host[0].toUpperCase();
+        }
+      }
+      return t[0].toUpperCase();
+    }
+    return '?';
+  }
+
+  Widget _buildCard({double shadowOffset = 2.0, bool isSaving = false}) {
     final b = widget.bookmark;
     return Stack(
       clipBehavior: Clip.none,
@@ -124,7 +148,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           padding: const EdgeInsets.all(0),
           borderRadius: _cardRadius,
           shadowOffset: shadowOffset,
-      child: Column(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(_innerRadius),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
@@ -150,14 +179,14 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Text(
-                                b.title != null && b.title!.isNotEmpty ? b.title![0].toUpperCase() : '?',
+                                _getInitialLetter(b),
                                 style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
                               ),
                             ),
                           ),
                   ),
                   // Overlay Unsorted/Collection pill
-                  if (widget.showCollectionPill)
+                  if (widget.showCollectionPill && !isSaving)
                     Positioned(
                       bottom: 6,
                       left: 6,
@@ -178,7 +207,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         ),
                       ),
                     ),
-                  if (!b.isRead)
+                  if (!b.isRead && !isSaving)
                     Positioned(
                       top: 6,
                       left: 6,
@@ -294,7 +323,56 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
         ],
       ),
-    ),
+                if (isSaving)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.5),
+                      alignment: Alignment.center,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFD166),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppTheme.border, width: 2.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppTheme.border,
+                              offset: Offset(2, 2),
+                              blurRadius: 0,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const SizedBox(
+                              width: 13,
+                              height: 13,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.0,
+                                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.border),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'SAVING...',
+                              style: TextStyle(
+                                color: AppTheme.border,
+                                fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900,
+                                fontSize: 11.5,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
     if (b.isPinned && (!widget.isSelectMode))
       Positioned(
         top: -8,
