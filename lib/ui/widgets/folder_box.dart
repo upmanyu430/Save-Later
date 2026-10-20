@@ -118,7 +118,7 @@ class FolderBox extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
                                   color: AppTheme.border,
-                                  width: 1.2,
+                                  width: 1.5,
                                 ),
                               ),
                               child: Text(
