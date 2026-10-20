@@ -12,6 +12,7 @@ import 'bookmark_radial_menu.dart';
 import 'pin_icon.dart';
 import 'favicon_image.dart';
 import '../../providers/providers.dart';
+import '../../utils/url_helper.dart';
 import 'package:save_later/config/app_constants.dart';
 
 
@@ -140,7 +141,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(_innerRadius)),
                     child: b.imageUrl != null
                         ? Image.network(
-                            b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!, 
+                            UrlHelper.resolveImageUrl(b.imageUrl, b.url) ??
+                                (b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!), 
                             fit: BoxFit.cover, 
                             errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey)
                           )

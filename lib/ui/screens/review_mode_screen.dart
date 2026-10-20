@@ -11,6 +11,7 @@ import '../widgets/neo_box.dart';
 import '../widgets/favicon_image.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
+import '../../utils/url_helper.dart';
 import 'package:save_later/config/app_constants.dart';
 
 class ReviewModeScreen extends ConsumerStatefulWidget {
@@ -605,9 +606,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
                     child: b.imageUrl != null
                         ? Image.network(
-                            b.imageUrl!.startsWith('//')
-                                ? 'https:${b.imageUrl!}'
-                                : b.imageUrl!,
+                            UrlHelper.resolveImageUrl(b.imageUrl, b.url) ??
+                                (b.imageUrl!.startsWith('//')
+                                    ? 'https:${b.imageUrl!}'
+                                    : b.imageUrl!),
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Center(
                               child: Icon(

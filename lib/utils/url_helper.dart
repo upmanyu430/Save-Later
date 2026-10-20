@@ -1,3 +1,5 @@
+import 'dart:io';
+
 class UrlHelper {
   // Regex matching http/https URLs or www. domains in text
   static final RegExp _urlRegex = RegExp(
@@ -64,6 +66,157 @@ class UrlHelper {
       return uri.host == 'localhost' || uri.host.contains('.');
     } catch (_) {
       return false;
+    }
+  }
+
+  /// Checks whether [urlOrHost] is a known URL shortener or sharing wrapper service.
+  static bool isRedirectWrapper(String? urlOrHost) {
+    if (urlOrHost == null) return false;
+    final trimmed = urlOrHost.trim().toLowerCase();
+    if (trimmed.isEmpty) return false;
+
+    String host = trimmed;
+    if (host.startsWith('https://')) host = host.substring(8);
+    if (host.startsWith('http://')) host = host.substring(7);
+    if (host.contains('/')) host = host.split('/')[0];
+    if (host.contains(':')) host = host.split(':')[0];
+
+    const wrappers = {
+      'share.google',
+      't.co',
+      'bit.ly',
+      'bitly.com',
+      'goo.gl',
+      'tinyurl.com',
+      'ow.ly',
+      'is.gd',
+      'buff.ly',
+      'ift.tt',
+      'dlvr.it',
+      'fb.me',
+      'lnkd.in',
+      'trib.al',
+      'linktr.ee',
+    };
+
+    return wrappers.contains(host);
+  }
+
+  /// Resolves relative image URLs against a base URL.
+  /// Handles protocol-relative URLs (`//domain.com/img.png`),
+  /// root-relative URLs (`/img.png`), and path-relative URLs (`img.png`).
+  static String? resolveImageUrl(String? imageUrl, String? baseUrl) {
+    if (imageUrl == null) return null;
+    final trimmed = imageUrl.trim();
+    if (trimmed.isEmpty) return null;
+
+    if (trimmed.startsWith('//')) {
+      return 'https:$trimmed';
+    }
+
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null) return null;
+
+    if (uri.hasScheme && (uri.scheme == 'http' || uri.scheme == 'https')) {
+      return trimmed;
+    }
+
+    if (baseUrl == null || baseUrl.trim().isEmpty) {
+      return trimmed;
+    }
+
+    final cleanBase = baseUrl.trim().startsWith(RegExp(r'https?:\/\/', caseSensitive: false))
+        ? baseUrl.trim()
+        : 'https://${baseUrl.trim()}';
+
+    final baseUri = Uri.tryParse(cleanBase);
+    if (baseUri == null) return trimmed;
+
+    try {
+      return baseUri.resolveUri(uri).toString();
+    } catch (_) {
+      return trimmed;
+    }
+  }
+
+  /// Resolves HTTP redirect chains (e.g. share.google, bit.ly, t.co) to find the canonical URL.
+  /// Falls back to the original [url] if network fails or resolution times out.
+  static Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+  }) async {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return trimmed;
+
+    final normalized = trimmed.startsWith(RegExp(r'https?:\/\/', caseSensitive: false))
+        ? trimmed
+        : 'https://$trimmed';
+
+    try {
+      final client = HttpClient();
+      client.connectionTimeout = timeout;
+      client.badCertificateCallback = (cert, host, port) => true;
+
+      Uri currentUri = Uri.parse(normalized);
+      const maxHops = 5;
+
+      for (int i = 0; i < maxHops; i++) {
+        HttpClientRequest request;
+        try {
+          request = await client.openUrl('HEAD', currentUri).timeout(timeout);
+          request.followRedirects = false;
+          request.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
+        } catch (_) {
+          break;
+        }
+
+        HttpClientResponse response;
+        try {
+          response = await request.close().timeout(timeout);
+        } catch (_) {
+          break;
+        }
+
+        final statusCode = response.statusCode;
+        if (statusCode >= 300 && statusCode < 400) {
+          final location = response.headers.value(HttpHeaders.locationHeader);
+          await response.drain().catchError((_) {});
+          if (location != null && location.trim().isNotEmpty) {
+            currentUri = currentUri.resolve(location.trim());
+            continue;
+          }
+        }
+
+        // If HEAD was rejected (e.g. 405 Method Not Allowed or 403), try GET without following body
+        if (statusCode == HttpStatus.methodNotAllowed || statusCode == HttpStatus.forbidden || statusCode == HttpStatus.badRequest) {
+          await response.drain().catchError((_) {});
+          try {
+            final getReq = await client.openUrl('GET', currentUri).timeout(timeout);
+            getReq.followRedirects = false;
+            getReq.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
+            final getRes = await getReq.close().timeout(timeout);
+            final getStatus = getRes.statusCode;
+            if (getStatus >= 300 && getStatus < 400) {
+              final location = getRes.headers.value(HttpHeaders.locationHeader);
+              await getRes.drain().catchError((_) {});
+              if (location != null && location.trim().isNotEmpty) {
+                currentUri = currentUri.resolve(location.trim());
+                continue;
+              }
+            }
+            await getRes.drain().catchError((_) {});
+          } catch (_) {}
+        } else {
+          await response.drain().catchError((_) {});
+        }
+
+        break;
+      }
+
+      client.close();
+      return currentUri.toString();
+    } catch (_) {
+      return normalized;
     }
   }
 }

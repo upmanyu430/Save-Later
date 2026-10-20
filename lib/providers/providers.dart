@@ -77,20 +77,31 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         cleanUrl = 'https://$cleanUrl';
       }
 
+      // Resolve redirect chains (e.g. share.google, bit.ly, t.co) to canonical target
+      final resolvedUrl = await UrlHelper.resolveFinalUrl(cleanUrl);
+      final cleanUri = Uri.tryParse(cleanUrl);
+      final resolvedUri = Uri.tryParse(resolvedUrl);
+
+      final isWrapperOrCrossHost = (cleanUri != null &&
+          resolvedUri != null &&
+          (cleanUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
+              UrlHelper.isRedirectWrapper(cleanUri.host)));
+
+      final finalUrl = isWrapperOrCrossHost ? resolvedUrl : cleanUrl;
+      final targetUri = resolvedUri ?? cleanUri ?? Uri.parse(finalUrl);
+
       // Attempt to fetch metadata
       String? title;
       String? description;
       String? imageUrl;
-      String? sourceDomain;
+      String? sourceDomain = targetUri.host;
 
       try {
-        final uri = Uri.parse(cleanUrl);
-        sourceDomain = uri.host;
-        var data = await MetadataFetch.extract(cleanUrl);
+        var data = await MetadataFetch.extract(resolvedUrl);
         if (data != null) {
           title = data.title;
           description = data.description;
-          imageUrl = data.image;
+          imageUrl = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
         }
       } catch (e) {
         // Fallback or ignore
@@ -98,7 +109,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       }
 
       final bookmark = Bookmark()
-        ..url = cleanUrl
+        ..url = finalUrl
         ..title = title ?? cleanUrl
         ..description = description
         ..imageUrl = imageUrl
@@ -151,13 +162,28 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       try {
         String url = UrlHelper.extractUrl(bookmark.url) ?? bookmark.url.trim();
         if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
-        bookmark.url = url; // Update url
-        bookmark.sourceDomain = Uri.parse(url).host;
-        var data = await MetadataFetch.extract(url);
+        final resolvedUrl = await UrlHelper.resolveFinalUrl(url);
+        final originalUri = Uri.tryParse(url);
+        final resolvedUri = Uri.tryParse(resolvedUrl);
+
+        final isWrapperOrCrossHost = (originalUri != null &&
+            resolvedUri != null &&
+            (originalUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
+                UrlHelper.isRedirectWrapper(originalUri.host)));
+
+        if (isWrapperOrCrossHost) {
+          bookmark.url = resolvedUrl;
+          bookmark.sourceDomain = resolvedUri.host;
+        } else {
+          bookmark.sourceDomain = (resolvedUri ?? originalUri)?.host ?? bookmark.sourceDomain;
+        }
+
+        var data = await MetadataFetch.extract(resolvedUrl);
         if (data != null) {
           bookmark.title = data.title ?? bookmark.title;
           bookmark.description = data.description ?? bookmark.description;
-          bookmark.imageUrl = data.image ?? bookmark.imageUrl;
+          final resolvedImg = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
+          bookmark.imageUrl = resolvedImg ?? bookmark.imageUrl;
         }
         await ref.read(repositoryProvider).updateBookmark(bookmark);
         ref.invalidate(bookmarksProvider);
@@ -167,6 +193,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         }
       } catch (e) {
         debugPrint('Error refreshing metadata: $e');
+        rethrow;
       }
     }
 

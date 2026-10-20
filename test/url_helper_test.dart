@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:save_later/utils/url_helper.dart';
 
@@ -94,6 +95,119 @@ Hope you like it!
     test('returns false for invalid text', () {
       expect(UrlHelper.isValidUrl('just words'), isFalse);
       expect(UrlHelper.isValidUrl(''), isFalse);
+    });
+  });
+
+  group('UrlHelper.isRedirectWrapper', () {
+    test('returns true for known shortener and share wrapper domains', () {
+      expect(UrlHelper.isRedirectWrapper('share.google'), isTrue);
+      expect(UrlHelper.isRedirectWrapper('https://share.google/abc123'), isTrue);
+      expect(UrlHelper.isRedirectWrapper('bit.ly'), isTrue);
+      expect(UrlHelper.isRedirectWrapper('https://t.co/xyz'), isTrue);
+      expect(UrlHelper.isRedirectWrapper('tinyurl.com'), isTrue);
+    });
+
+    test('returns false for standard web domains', () {
+      expect(UrlHelper.isRedirectWrapper('https://opencode.ai'), isFalse);
+      expect(UrlHelper.isRedirectWrapper('github.com'), isFalse);
+      expect(UrlHelper.isRedirectWrapper('flutter.dev'), isFalse);
+      expect(UrlHelper.isRedirectWrapper(null), isFalse);
+      expect(UrlHelper.isRedirectWrapper(''), isFalse);
+    });
+  });
+
+  group('UrlHelper.resolveImageUrl', () {
+    test('returns null for null or empty imageUrl', () {
+      expect(UrlHelper.resolveImageUrl(null, 'https://example.com'), isNull);
+      expect(UrlHelper.resolveImageUrl('', 'https://example.com'), isNull);
+      expect(UrlHelper.resolveImageUrl('   ', 'https://example.com'), isNull);
+    });
+
+    test('returns absolute HTTP/HTTPS URLs unchanged', () {
+      expect(
+        UrlHelper.resolveImageUrl('https://opencode.ai/social.png', 'https://opencode.ai'),
+        'https://opencode.ai/social.png',
+      );
+      expect(
+        UrlHelper.resolveImageUrl('http://example.com/pic.jpg', 'https://other.com'),
+        'http://example.com/pic.jpg',
+      );
+    });
+
+    test('normalizes protocol-relative URLs with https', () {
+      expect(
+        UrlHelper.resolveImageUrl('//cdn.example.com/image.png', 'https://example.com'),
+        'https://cdn.example.com/image.png',
+      );
+    });
+
+    test('resolves root-relative URLs against base URL', () {
+      expect(
+        UrlHelper.resolveImageUrl('/social-share.png', 'https://opencode.ai'),
+        'https://opencode.ai/social-share.png',
+      );
+      expect(
+        UrlHelper.resolveImageUrl('/social-share.png', 'https://opencode.ai/subpage/path'),
+        'https://opencode.ai/social-share.png',
+      );
+    });
+
+    test('resolves path-relative URLs against base URL', () {
+      expect(
+        UrlHelper.resolveImageUrl('assets/img.png', 'https://example.com/blog/'),
+        'https://example.com/blog/assets/img.png',
+      );
+      expect(
+        UrlHelper.resolveImageUrl('../img.png', 'https://example.com/blog/sub/'),
+        'https://example.com/blog/img.png',
+      );
+    });
+  });
+
+  group('UrlHelper.resolveFinalUrl', () {
+    late HttpServer server;
+    late String serverUrl;
+
+    setUp(() async {
+      server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      serverUrl = 'http://${server.address.host}:${server.port}';
+
+      server.listen((HttpRequest request) {
+        if (request.uri.path == '/step1') {
+          request.response
+            ..statusCode = HttpStatus.movedTemporarily
+            ..headers.set(HttpHeaders.locationHeader, '$serverUrl/step2')
+            ..close();
+        } else if (request.uri.path == '/step2') {
+          request.response
+            ..statusCode = HttpStatus.movedPermanently
+            ..headers.set(HttpHeaders.locationHeader, '$serverUrl/final')
+            ..close();
+        } else if (request.uri.path == '/final') {
+          request.response
+            ..statusCode = HttpStatus.ok
+            ..write('Hello')
+            ..close();
+        } else {
+          request.response
+            ..statusCode = HttpStatus.notFound
+            ..close();
+        }
+      });
+    });
+
+    tearDown(() async {
+      await server.close(force: true);
+    });
+
+    test('follows redirect chain to final target', () async {
+      final resolved = await UrlHelper.resolveFinalUrl('$serverUrl/step1');
+      expect(resolved, '$serverUrl/final');
+    });
+
+    test('returns direct URL when no redirects occur', () async {
+      final resolved = await UrlHelper.resolveFinalUrl('$serverUrl/final');
+      expect(resolved, '$serverUrl/final');
     });
   });
 }

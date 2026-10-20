@@ -18,6 +18,7 @@ import '../widgets/pin_icon.dart';
 import '../widgets/favicon_image.dart';
 import '../../utils/url_launcher.dart';
 import '../../utils/tag_helper.dart';
+import '../../utils/url_helper.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'dart:async';
 
@@ -266,9 +267,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 children: [
                   if (bookmark.imageUrl != null)
                     Image.network(
-                      bookmark.imageUrl!.startsWith('//')
-                          ? 'https:${bookmark.imageUrl!}'
-                          : bookmark.imageUrl!,
+                      UrlHelper.resolveImageUrl(bookmark.imageUrl, bookmark.url) ??
+                          (bookmark.imageUrl!.startsWith('//')
+                              ? 'https:${bookmark.imageUrl!}'
+                              : bookmark.imageUrl!),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Colors.grey.shade900,
@@ -955,6 +957,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       pageBuilder: (ctx, animation, secondaryAnimation) => _RefreshOverlay(
         onRefresh: () async {
           await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+          _titleController.text = bookmark.title ?? bookmark.url;
           setState(() {});
         },
       ),
