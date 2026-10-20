@@ -591,7 +591,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: AppTheme.border, width: 3),
+        border: Border.all(color: AppTheme.border, width: 4.0),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
