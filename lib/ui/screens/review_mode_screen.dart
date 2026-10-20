@@ -33,7 +33,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
+    _pageController = PageController(viewportFraction: 0.84);
     Future.microtask(() async {
       List<Bookmark> list;
       if (widget.collection == null) {
@@ -435,10 +435,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 600),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 56.0, vertical: 32.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: PageView.builder(
                   controller: _pageController,
+                  clipBehavior: Clip.none,
                   // The extra trailing page makes the last left swipe
                   // produce an onPageChanged event instead of stopping on
                   // the final card.
@@ -457,20 +457,68 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                 _pageController.page != null
                             ? _pageController.page!
                             : _pageController.initialPage.toDouble();
-                        final difference =
-                            (index - page).clamp(-1.0, 1.0).toDouble();
-                        final progress = difference.abs();
+                        final difference = index - page;
 
-                        return Transform.translate(
-                          offset: Offset(difference * 18, 0),
-                          child: Transform.scale(
-                            scale: 1 - (progress * 0.04),
-                            child: child,
+                        // iPhone App Switcher stacked deck effect
+                        final double scale;
+                        final double dx;
+                        final double opacity;
+
+                        if (difference <= 0) {
+                          // Cards to the left: scale down and slide right to tuck under active card
+                          final progress = (-difference).clamp(0.0, 3.0);
+                          scale = (1.0 - (progress.clamp(0.0, 1.0) * 0.08))
+                              .clamp(0.84, 1.0);
+                          // Tucks underneath the card to the right
+                          final baseShift = progress.clamp(0.0, 1.0) * 36.0;
+                          final extraShift =
+                              progress > 1.0 ? (progress - 1.0) * 14.0 : 0.0;
+                          dx = baseShift + extraShift;
+                          opacity = (1.0 - (progress * 0.12)).clamp(0.65, 1.0);
+                        } else {
+                          // Cards to the right: peek in from the edge
+                          final progress = difference.clamp(0.0, 2.0);
+                          scale = (1.0 - (progress.clamp(0.0, 1.0) * 0.08))
+                              .clamp(0.84, 1.0);
+                          // Slight shift left to show more of upcoming card
+                          dx = -progress.clamp(0.0, 1.0) * 12.0;
+                          opacity = (1.0 - (progress.clamp(0.0, 1.0) * 0.12))
+                              .clamp(0.70, 1.0);
+                        }
+
+                        return Center(
+                          child: Transform.translate(
+                            offset: Offset(dx, 0),
+                            child: Transform.scale(
+                              scale: scale,
+                              child: Opacity(
+                                opacity: opacity,
+                                child: child,
+                              ),
+                            ),
                           ),
                         );
                       },
-                      child: RepaintBoundary(
-                        child: _buildCard(unreadBookmarks[index]),
+                      child: GestureDetector(
+                        onTap: () {
+                          final page = _pageController.hasClients &&
+                                  _pageController.page != null
+                              ? _pageController.page!
+                              : _pageController.initialPage.toDouble();
+                          if ((index - page).abs() > 0.3) {
+                            _pageController.animateToPage(
+                              index,
+                              duration: const Duration(milliseconds: 320),
+                              curve: Curves.easeOutCubic,
+                            );
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 6.0),
+                          child: RepaintBoundary(
+                            child: _buildCard(unreadBookmarks[index]),
+                          ),
+                        ),
                       ),
                     );
                   },
@@ -542,12 +590,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
+        borderRadius: BorderRadius.circular(26),
         border: Border.all(color: AppTheme.border, width: 3),
         boxShadow: const [
           BoxShadow(
             color: AppTheme.border,
-            offset: Offset(0, 7),
+            offset: Offset(0, 8),
             blurRadius: 0,
           ),
         ],
@@ -557,7 +605,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         children: [
           // Top row (favicon and domain)
           Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.fromLTRB(18.0, 16.0, 18.0, 12.0),
             child: Row(
               children: [
                 Container(
@@ -593,7 +641,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           // Large image area
           Expanded(
             child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0),
+              margin: const EdgeInsets.symmetric(horizontal: 14.0),
               decoration: BoxDecoration(
                 color: const Color(0xFF111111),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
@@ -608,8 +656,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                         ? Image.network(
                             UrlHelper.resolveImageUrl(b.imageUrl, b.url) ??
                                 (b.imageUrl!.startsWith('//')
-                                    ? 'https:${b.imageUrl!}'
-                                    : b.imageUrl!),
+                                     ? 'https:${b.imageUrl!}'
+                                     : b.imageUrl!),
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Center(
                               child: Icon(
@@ -635,8 +683,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   ),
                   // Pill at bottom left
                   Positioned(
-                    bottom: 16,
-                    left: 16,
+                    bottom: 14,
+                    left: 14,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 8),
@@ -690,7 +738,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
           // Title and description
           Padding(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.fromLTRB(20.0, 14.0, 20.0, 18.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -698,17 +746,17 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 Text(
                   b.title ?? b.url,
                   style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 22,
                       fontWeight: FontWeight.w900,
                       height: 1.2,
                       color: Colors.black),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Text(
                   b.description ?? b.url,
-                  style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  style: const TextStyle(fontSize: 15, color: Colors.black54),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
