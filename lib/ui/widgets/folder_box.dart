@@ -20,6 +20,7 @@ class FolderBox extends StatelessWidget {
   final VoidCallback? onLongPressCancel;
   final double shadowOffset;
   final bool isInteractive;
+  final bool enableFeedback;
 
   const FolderBox({
     super.key,
@@ -38,6 +39,7 @@ class FolderBox extends StatelessWidget {
     this.onLongPressCancel,
     this.shadowOffset = 2.0,
     this.isInteractive = true,
+    this.enableFeedback = false,
   });
 
   @override
@@ -50,6 +52,7 @@ class FolderBox extends StatelessWidget {
       onLongPressCancel: isInteractive ? onLongPressCancel : null,
       shadowOffset: shadowOffset,
       scaleSquash: 0.025,
+      enableFeedback: enableFeedback,
       builder: (context, t, currentShadow) {
         final body = Container(
           key: bodyKey,

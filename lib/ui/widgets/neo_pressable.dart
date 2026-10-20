@@ -10,6 +10,7 @@ class NeoPressable extends StatefulWidget {
   final double shadowOffset;
   final double scaleSquash;
   final HitTestBehavior behavior;
+  final bool enableFeedback;
   final Widget Function(BuildContext context, double t, double currentShadowOffset) builder;
 
   const NeoPressable({
@@ -22,6 +23,7 @@ class NeoPressable extends StatefulWidget {
     this.shadowOffset = 2.0,
     this.scaleSquash = 0.025,
     this.behavior = HitTestBehavior.opaque,
+    this.enableFeedback = true,
     required this.builder,
   });
 
@@ -57,13 +59,17 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
 
   void _handleTapDown(TapDownDetails details) {
     if (widget.onTap == null) return;
-    HapticFeedback.lightImpact();
+    if (widget.enableFeedback) {
+      HapticFeedback.lightImpact();
+    }
     _controller.forward();
   }
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.onTap == null) return;
-    HapticFeedback.selectionClick();
+    if (widget.enableFeedback) {
+      HapticFeedback.selectionClick();
+    }
     _controller.forward().whenComplete(() {
       if (!mounted) return;
       _controller.reverse().whenComplete(() {

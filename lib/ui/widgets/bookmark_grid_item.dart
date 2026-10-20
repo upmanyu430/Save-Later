@@ -85,6 +85,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   @override
   Widget build(BuildContext context) {
     return NeoPressable(
+      enableFeedback: false,
       onTap: () {
         if (widget.isSelectMode) {
           if (widget.onSelectTapped != null) widget.onSelectTapped!();
