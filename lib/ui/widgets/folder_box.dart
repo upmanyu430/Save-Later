@@ -93,42 +93,49 @@ class FolderBox extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              itemCountText,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: AppTheme.border,
-                              ),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            itemCountText,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.border,
                             ),
                           ),
                         ),
                         if (hasNewItems) ...[
-                          const SizedBox(width: 6),
+                          const SizedBox(height: 3),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFFD166),
                               borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: AppTheme.border,
+                                width: 1.2,
+                              ),
                             ),
                             child: Text(
                               AppLocalizations.of(context)!.newBadge,
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 9,
                                 fontWeight: forceBold ? FontWeight.bold : FontWeight.w900,
+                                color: AppTheme.border,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
                         ],
                       ],
                     ),
-                  )
+                  ),
                 ],
               ),
               const Spacer(),
