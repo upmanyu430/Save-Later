@@ -266,7 +266,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     padding: EdgeInsets.zero,
                     shadowOffset: 0,
                     onPressed: () {
-                      HapticFeedback.lightImpact();
                       // currentIndex points at the trailing page while the
                       // caught-up view is shown. Use it as the source of truth
                       // instead of completedCount, which can lag behind when
@@ -319,7 +318,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     padding: EdgeInsets.zero,
                     shadowOffset: 0,
                     onPressed: () {
-                      HapticFeedback.lightImpact();
                       // Review is pushed from the current folder. Pop back to
                       // that folder instead of replacing the route with home.
                       context.pop();

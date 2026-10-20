@@ -360,12 +360,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   builder: (context) {
                     final isNameEmpty = _nameController.text.trim().isEmpty;
                     return NeoButton(
-                      onPressed: !isNameEmpty
-                          ? () {
-                              HapticFeedback.lightImpact();
-                              _save();
-                            }
-                          : () {},
+                      onPressed: !isNameEmpty ? _save : () {},
                       color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
                       padding: const EdgeInsets.symmetric(vertical: 18),
                       child: Center(

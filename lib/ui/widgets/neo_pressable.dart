@@ -67,9 +67,6 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
 
   void _handleTapUp(TapUpDetails details) {
     if (widget.onTap == null) return;
-    if (widget.enableFeedback) {
-      HapticFeedback.selectionClick();
-    }
     _controller.forward().whenComplete(() {
       if (!mounted) return;
       _controller.reverse().whenComplete(() {

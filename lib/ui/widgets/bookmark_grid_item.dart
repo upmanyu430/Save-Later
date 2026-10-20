@@ -88,7 +88,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     final isSaving = ref.watch(savingBookmarkIdsProvider).contains(widget.bookmark.id);
 
     return NeoPressable(
-      enableFeedback: false,
+      enableFeedback: true,
       onTap: () {
         if (isSaving) return;
         if (widget.isSelectMode) {

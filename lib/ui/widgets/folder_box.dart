@@ -41,7 +41,7 @@ class FolderBox extends StatelessWidget {
     this.onLongPressCancel,
     this.shadowOffset = 2.0,
     this.isInteractive = true,
-    this.enableFeedback = false,
+    this.enableFeedback = true,
   });
 
   @override

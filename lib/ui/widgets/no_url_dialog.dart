@@ -55,7 +55,7 @@ void showNoUrlDialog(BuildContext context) {
                         color: AppTheme.accent,
                         borderWidth: AppDimensions.borderWidthMd,
                         padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
-                        onPressed: () { HapticFeedback.lightImpact(); Navigator.of(context).pop(); },
+                        onPressed: () => Navigator.of(context).pop(),
                         child: Text(
                           l10n.ok,
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.border),

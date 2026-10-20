@@ -107,6 +107,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _addTag(String tag) async {
+    HapticFeedback.lightImpact();
     final cleanTag = tag.trim();
     if (cleanTag.isEmpty) return;
 
@@ -120,7 +121,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _confirmRemoveTag(String tag) {
-    HapticFeedback.selectionClick();
+    HapticFeedback.lightImpact();
     showGeneralDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -1219,7 +1220,6 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
   }
 
   void _handleTapUp(TapUpDetails details) {
-    HapticFeedback.selectionClick();
     _controller.forward().whenComplete(() {
       if (!mounted) return;
       _controller.reverse().whenComplete(() {

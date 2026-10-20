@@ -330,6 +330,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                         ? IconButton(
                             icon: const Icon(Icons.clear, size: 18),
                             onPressed: () {
+                              HapticFeedback.lightImpact();
                               _searchController.clear();
                               setState(() {
                                 _searchQuery = '';

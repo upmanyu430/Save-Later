@@ -66,7 +66,6 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isEnabled) return;
-    HapticFeedback.selectionClick();
     _controller.forward().whenComplete(() {
       if (!mounted) return;
       _controller.reverse().whenComplete(() {

@@ -61,12 +61,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _openUrl(String url) async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
+    if (_hapticFeedback) HapticFeedback.lightImpact();
     await openUrl(url, context: context);
   }
 
   Future<void> _sendFeedback() async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
+    if (_hapticFeedback) HapticFeedback.lightImpact();
     final Uri emailLaunchUri = Uri(
       scheme: 'mailto',
       path: AppConfig.supportEmail,
@@ -84,7 +84,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _deleteData(BuildContext ctx, WidgetRef ref) async {
-    if (_hapticFeedback) HapticFeedback.selectionClick();
+    if (_hapticFeedback) HapticFeedback.lightImpact();
     final l10n = AppLocalizations.of(ctx)!;
     final confirm = await DeleteConfirmationDialog.show(
       context: ctx,
@@ -226,7 +226,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 44,
                       child: NeoButton(
                         onPressed: () {
-                          if (_hapticFeedback) HapticFeedback.selectionClick();
+                          if (_hapticFeedback) HapticFeedback.lightImpact();
                           context.pop();
                         },
                         padding: EdgeInsets.zero,

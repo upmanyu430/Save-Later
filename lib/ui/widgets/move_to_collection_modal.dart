@@ -234,7 +234,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           key: ValueKey('collection_${col.id}'),
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                            HapticFeedback.selectionClick();
+                            HapticFeedback.lightImpact();
                             setState(() {
                               _selectedCollection = col;
                             });

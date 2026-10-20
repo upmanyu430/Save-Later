@@ -264,7 +264,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       borderRadius: AppDimensions.radiusMd,
                       color: AppTheme.accent, // Yellow button
                       onPressed: () {
-                        HapticFeedback.lightImpact();
                         _quickSave();
                       },
                       child: isSaving
