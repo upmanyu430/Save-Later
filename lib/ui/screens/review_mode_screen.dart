@@ -541,7 +541,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               const SizedBox(width: AppDimensions.paddingMd),
               Expanded(
                 child: SizedBox(
-                  height: 64,
+                  height: 57.6,
                   child: NeoButton(
                     color: const Color(0xFFFFD166),
                     borderRadius: AppDimensions.radiusXl,
@@ -771,8 +771,8 @@ class _ReviewIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 60,
-      height: 60,
+      width: 54,
+      height: 54,
       child: NeoButton(
         onPressed: onPressed,
         padding: EdgeInsets.zero,
