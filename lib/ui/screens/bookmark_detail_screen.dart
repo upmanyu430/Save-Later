@@ -671,7 +671,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   _buildActionItem(
                                     Icons.refresh,
                                     l10n.refresh,
-                                    _showRefreshDialog,
+                                    () async {
+                                      final confirmed = await _showRefreshDialog();
+                                      if (confirmed != true) return;
+
+                                      ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+                                      if (context.mounted) {
+                                        Navigator.of(context).pop();
+                                      }
+                                    },
                                     color: const Color(0xFFD3F4E4),
                                   ),
                                   _buildSegmentDivider(),
@@ -943,32 +951,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   );
 }
 
-  void _performRefresh() {
-    // Show loading overlay
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: 'RefreshOverlay',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
-      transitionBuilder: (context, animation, secondaryAnimation, child) {
-        return ScaleTransition(
-          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      pageBuilder: (ctx, animation, secondaryAnimation) => _RefreshOverlay(
-        onRefresh: () async {
-          await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
-          _titleController.text = bookmark.title ?? bookmark.url;
-          setState(() {});
-        },
-      ),
-    );
-  }
-
-  void _showRefreshDialog() {
-    showGeneralDialog(
+  Future<bool?> _showRefreshDialog() {
+    return showGeneralDialog<bool>(
       context: context,
       barrierDismissible: true,
       barrierLabel: 'RefreshDialog',
@@ -982,7 +966,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       },
       pageBuilder: (ctx, animation, secondaryAnimation) => GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.pop(ctx),
+        onTap: () => Navigator.pop(ctx, false),
         child: Center(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
@@ -1034,7 +1018,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   children: [
                     Expanded(
                       child: NeoButton(
-                        onPressed: () => Navigator.pop(ctx),
+                        onPressed: () => Navigator.pop(ctx, false),
                         color: AppTheme.background,
                         borderRadius: AppDimensions.radiusLg,
                         borderWidth: AppDimensions.borderWidthMd,
@@ -1052,10 +1036,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     const SizedBox(width: AppDimensions.paddingMd),
                     Expanded(
                       child: NeoButton(
-                        onPressed: () {
-                          Navigator.pop(ctx);
-                          _performRefresh();
-                        },
+                        onPressed: () => Navigator.pop(ctx, true),
                         color: const Color(0xFFD3F4E4),
                         borderRadius: AppDimensions.radiusLg,
                         borderWidth: AppDimensions.borderWidthMd,
@@ -1655,164 +1636,4 @@ class _TagAddButton extends StatelessWidget {
       },
     );
   }
-}
-
-
-class _RefreshOverlay extends StatefulWidget {
-  final Future<void> Function() onRefresh;
-
-  const _RefreshOverlay({required this.onRefresh});
-
-  @override
-  State<_RefreshOverlay> createState() => _RefreshOverlayState();
-}
-
-class _RefreshOverlayState extends State<_RefreshOverlay>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _spinController;
-  bool _done = false;
-  bool _error = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _spinController = AnimationController(
-      vsync: this,
-      duration: AppDurations.animationSlow,
-    )..repeat();
-    _doRefresh();
-  }
-
-  Future<void> _doRefresh() async {
-    try {
-      await widget.onRefresh();
-      if (!mounted) return;
-      setState(() => _done = true);
-      _spinController.stop();
-      await Future.delayed(AppDurations.delayLong);
-      if (mounted) Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _error = true;
-        _done = true;
-      });
-      _spinController.stop();
-      await Future.delayed(AppDurations.messageDuration);
-      if (mounted) Navigator.pop(context);
-    }
-  }
-
-  @override
-  void dispose() {
-    _spinController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
-        child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 48),
-        padding: EdgeInsets.symmetric(horizontal: 32, vertical: 36),
-        decoration: BoxDecoration(
-          color: AppTheme.background,
-          borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
-          border: Border.all(color: AppTheme.border, width: 3),
-          boxShadow: const [
-            BoxShadow(
-              color: AppTheme.border,
-              offset: Offset(2.8, 2.8),
-              blurRadius: 0,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedSwitcher(
-                duration: AppDurations.animationNormal,
-                child: _done
-                    ? Container(
-                        key: const ValueKey('done'),
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: _error
-                              ? const Color(0xFFFF3366)
-                              : const Color(0xFF2ECC71),
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.border,
-                              offset: Offset(AppDimensions.shadowOffsetSm, AppDimensions.shadowOffsetSm),
-                              blurRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          _error ? Icons.close : Icons.check,
-                          color: Colors.white,
-                          size: AppDimensions.iconSizeXl,
-                        ),
-                      )
-                    : RotationTransition(
-                        key: const ValueKey('loading'),
-                        turns: _spinController,
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFD166),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: AppTheme.border, width: AppDimensions.borderWidthMd),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppTheme.border,
-                                offset: Offset(AppDimensions.shadowOffsetSm, AppDimensions.shadowOffsetSm),
-                                blurRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(Icons.refresh, size: AppDimensions.iconSizeXl, color: AppTheme.border),
-                        ),
-                      ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                _done
-                    ? (_error ? AppLocalizations.of(context)!.somethingWentWrong : AppLocalizations.of(context)!.allDone)
-                    : AppLocalizations.of(context)!.refreshing,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: AppDimensions.paddingSm),
-              Text(
-                _done
-                    ? (_error
-                        ? AppLocalizations.of(context)!.couldNotFetchMetadata
-                        : AppLocalizations.of(context)!.metadataUpdatedSuccessfully)
-                    : AppLocalizations.of(context)!.fetchingLatestMetadata,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF666666),
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
-}
 }

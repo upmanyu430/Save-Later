@@ -62,6 +62,7 @@ final allTagsProvider = FutureProvider<List<String>>((ref) async {
 });
 
 final savingBookmarkIdsProvider = StateProvider<Set<int>>((ref) => {});
+final refreshingBookmarkIdsProvider = StateProvider<Set<int>>((ref) => {});
 
 // A notifier to handle adding a bookmark and fetching metadata
 class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
@@ -205,43 +206,55 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> refreshMetadata(Bookmark bookmark) async {
-      try {
-        String url = UrlHelper.extractUrl(bookmark.url) ?? bookmark.url.trim();
-        if (!url.startsWith('http://') && !url.startsWith('https://')) { url = 'https://$url'; }
-        final resolvedUrl = await UrlHelper.resolveFinalUrl(url);
-        final originalUri = Uri.tryParse(url);
-        final resolvedUri = Uri.tryParse(resolvedUrl);
+    ref.read(refreshingBookmarkIdsProvider.notifier).update((set) => {...set, bookmark.id});
+    try {
+      if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+        try {
+          await bookmark.collection.load();
+        } catch (_) {}
+      }
+      String url = UrlHelper.extractUrl(bookmark.url) ?? bookmark.url.trim();
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://$url';
+      }
+      final resolvedUrl = await UrlHelper.resolveFinalUrl(url);
+      final originalUri = Uri.tryParse(url);
+      final resolvedUri = Uri.tryParse(resolvedUrl);
 
-        final isWrapperOrCrossHost = (originalUri != null &&
-            resolvedUri != null &&
-            (originalUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
-                UrlHelper.isRedirectWrapper(url)));
+      final isWrapperOrCrossHost = (originalUri != null &&
+          resolvedUri != null &&
+          (originalUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
+              UrlHelper.isRedirectWrapper(url)));
 
-        if (isWrapperOrCrossHost) {
-          bookmark.url = resolvedUrl;
-          bookmark.sourceDomain = resolvedUri.host;
-        } else {
-          bookmark.sourceDomain = (resolvedUri ?? originalUri)?.host ?? bookmark.sourceDomain;
-        }
+      if (isWrapperOrCrossHost) {
+        bookmark.url = resolvedUrl;
+        bookmark.sourceDomain = resolvedUri.host;
+      } else {
+        bookmark.sourceDomain = (resolvedUri ?? originalUri)?.host ?? bookmark.sourceDomain;
+      }
 
-        var data = await MetadataFetch.extract(resolvedUrl);
-        if (data != null) {
-          bookmark.title = data.title ?? bookmark.title;
-          bookmark.description = data.description ?? bookmark.description;
-          final resolvedImg = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
-          bookmark.imageUrl = resolvedImg ?? bookmark.imageUrl;
-        }
-        await ref.read(repositoryProvider).updateBookmark(bookmark);
-        ref.invalidate(bookmarksProvider);
+      var data = await MetadataFetch.extract(resolvedUrl);
+      if (data != null) {
+        bookmark.title = data.title ?? bookmark.title;
+        bookmark.description = data.description ?? bookmark.description;
+        final resolvedImg = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
+        bookmark.imageUrl = resolvedImg ?? bookmark.imageUrl;
+      }
+      await ref.read(repositoryProvider).updateBookmark(bookmark);
+    } catch (e) {
+      debugPrint('Error refreshing metadata: $e');
+    } finally {
+      ref.read(refreshingBookmarkIdsProvider.notifier).update(
+            (set) => set.where((id) => id != bookmark.id).toSet(),
+          );
+      ref.invalidate(bookmarksProvider);
       ref.invalidate(unsortedBookmarksProvider);
-        if (bookmark.collection.value != null) {
-          ref.invalidate(collectionBookmarksProvider(bookmark.collection.value!.id));
-        }
-      } catch (e) {
-        debugPrint('Error refreshing metadata: $e');
-        rethrow;
+      final colId = bookmark.collection.value?.id;
+      if (colId != null) {
+        ref.invalidate(collectionBookmarksProvider(colId));
       }
     }
+  }
 
     Future<void> removeTag(Bookmark bookmark, String tag) async {
     final repo = ref.read(repositoryProvider);

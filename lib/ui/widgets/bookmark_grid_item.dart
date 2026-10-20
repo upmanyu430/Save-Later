@@ -86,11 +86,13 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   @override
   Widget build(BuildContext context) {
     final isSaving = ref.watch(savingBookmarkIdsProvider).contains(widget.bookmark.id);
+    final isRefreshing = ref.watch(refreshingBookmarkIdsProvider).contains(widget.bookmark.id);
+    final isBusy = isSaving || isRefreshing;
 
     return NeoPressable(
       enableFeedback: true,
       onTap: () {
-        if (isSaving) return;
+        if (isBusy) return;
         if (widget.isSelectMode) {
           if (widget.onSelectTapped != null) widget.onSelectTapped!();
         } else {
@@ -98,17 +100,21 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
         }
       },
-      onLongPressStart: isSaving ? null : _handleLongPressStart,
-      onLongPressMoveUpdate: isSaving ? null : _handleLongPressMoveUpdate,
-      onLongPressEnd: isSaving ? null : _handleLongPressEnd,
-      onLongPressCancel: isSaving ? null : _handleLongPressCancel,
-      scaleSquash: isSaving ? 0.0 : 0.025,
+      onLongPressStart: isBusy ? null : _handleLongPressStart,
+      onLongPressMoveUpdate: isBusy ? null : _handleLongPressMoveUpdate,
+      onLongPressEnd: isBusy ? null : _handleLongPressEnd,
+      onLongPressCancel: isBusy ? null : _handleLongPressCancel,
+      scaleSquash: isBusy ? 0.0 : 0.025,
       builder: (context, t, shadowOffset) {
         return Opacity(
           opacity: _isMenuOpen ? 0.0 : 1.0,
           child: Container(
             key: _cardKey,
-            child: _buildCard(shadowOffset: shadowOffset, isSaving: isSaving),
+            child: _buildCard(
+              shadowOffset: shadowOffset,
+              isSaving: isSaving,
+              isRefreshing: isRefreshing,
+            ),
           ),
         );
       },
@@ -139,7 +145,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     return '?';
   }
 
-  Widget _buildCard({double shadowOffset = 2.0, bool isSaving = false}) {
+  Widget _buildCard({
+    double shadowOffset = 2.0,
+    bool isSaving = false,
+    bool isRefreshing = false,
+  }) {
+    final isBusy = isSaving || isRefreshing;
     final b = widget.bookmark;
     return Stack(
       clipBehavior: Clip.none,
@@ -186,7 +197,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           ),
                   ),
                   // Overlay Unsorted/Collection pill
-                  if (widget.showCollectionPill && !isSaving)
+                  if (widget.showCollectionPill && !isBusy)
                     Positioned(
                       bottom: 6,
                       left: 6,
@@ -207,7 +218,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         ),
                       ),
                     ),
-                  if (!b.isRead && !isSaving)
+                  if (!b.isRead && !isBusy)
                     Positioned(
                       top: 6,
                       left: 6,
@@ -323,13 +334,13 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
         ],
       ),
-                if (isSaving)
+                if (isBusy)
                   Positioned.fill(
                     child: Container(
                       color: Colors.black.withOpacity(0.5),
                       alignment: Alignment.center,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        padding: EdgeInsets.symmetric(horizontal: isRefreshing ? 12 : 14, vertical: 7),
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFD166),
                           borderRadius: BorderRadius.circular(10),
@@ -356,7 +367,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              'SAVING...',
+                              isRefreshing ? 'REFRESHING...' : 'SAVING...',
                               style: TextStyle(
                                 color: AppTheme.border,
                                 fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900,
