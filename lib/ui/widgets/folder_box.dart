@@ -98,20 +98,7 @@ class FolderBox extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            itemCountText,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.border,
-                            ),
-                          ),
-                        ),
                         if (hasNewItems) ...[
-                          const SizedBox(height: 3),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
@@ -132,7 +119,20 @@ class FolderBox extends StatelessWidget {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 3),
                         ],
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            itemCountText,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.border,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
