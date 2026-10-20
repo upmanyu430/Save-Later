@@ -112,14 +112,16 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
                       color: widget.borderColor ?? AppTheme.border,
                       width: widget.borderWidth,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: widget.shadowColor ?? AppTheme.border,
-                        offset: Offset(shadowOffset, shadowOffset),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                      ),
-                    ],
+                    boxShadow: widget.shadowOffset > 0
+                        ? [
+                            BoxShadow(
+                              color: widget.shadowColor ?? AppTheme.border,
+                              offset: Offset(shadowOffset, shadowOffset),
+                              blurRadius: 0,
+                              spreadRadius: 0,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     widthFactor: 1.0,

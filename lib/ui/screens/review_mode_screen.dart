@@ -459,7 +459,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                             : _pageController.initialPage.toDouble();
                         final difference = index - page;
 
-                        // iPhone App Switcher stacked deck effect
+                        // Stacked deck effect
                         final double scale;
                         final double dx;
                         final double opacity;
@@ -546,6 +546,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     color: const Color(0xFFFFD166),
                     borderRadius: AppDimensions.radiusXl,
                     padding: EdgeInsets.zero,
+                    shadowOffset: 0,
                     onPressed: () async {
                       await openUrl(unreadBookmarks[currentIndex].url, context: context);
                     },
@@ -777,11 +778,10 @@ class _ReviewIconButton extends StatelessWidget {
         onPressed: onPressed,
         padding: EdgeInsets.zero,
         color: const Color(0xFF222222),
-        borderColor: Colors.white12,
-        shadowColor: Colors.black,
+        borderColor: Colors.white24,
         borderWidth: 2,
         borderRadius: AppDimensions.radiusXl,
-        shadowOffset: 2.8,
+        shadowOffset: 0,
         child: Icon(icon, color: Colors.white, size: 30),
       ),
     );
