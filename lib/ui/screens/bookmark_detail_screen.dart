@@ -957,11 +957,18 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       barrierDismissible: true,
       barrierLabel: 'RefreshDialog',
       barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 240),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return ScaleTransition(
-          scale: animation.drive(Tween<double>(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
-          child: FadeTransition(opacity: animation, child: child),
+          scale: animation.drive(
+            Tween<double>(begin: 0.85, end: 1.0).chain(
+              CurveTween(curve: Curves.easeOutBack),
+            ),
+          ),
+          child: FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
         );
       },
       pageBuilder: (ctx, animation, secondaryAnimation) => GestureDetector(
@@ -974,96 +981,103 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
               child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 32),
-          padding: EdgeInsets.all(28),
-          decoration: BoxDecoration(
-            color: AppTheme.background,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
-            border: Border.all(color: AppTheme.border, width: 3),
-            boxShadow: const [
-              BoxShadow(
-                color: AppTheme.border,
-                offset: Offset(2.8, 2.8),
-                blurRadius: 0,
-                spreadRadius: 0,
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  AppLocalizations.of(context)!.refreshLinkMetadata,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w900,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: AppDimensions.paddingLg),
-                Text(
-                  AppLocalizations.of(context)!.refreshMetadataDescription,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF555555),
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    Expanded(
-                      child: NeoButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        color: AppTheme.background,
-                        borderRadius: AppDimensions.radiusLg,
-                        borderWidth: AppDimensions.borderWidthMd,
-                        shadowOffset: 2.8,
-                        padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
-                        child: Text(
-                          AppLocalizations.of(context)!.cancel,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: AppDimensions.paddingMd),
-                    Expanded(
-                      child: NeoButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        color: const Color(0xFFD3F4E4),
-                        borderRadius: AppDimensions.radiusLg,
-                        borderWidth: AppDimensions.borderWidthMd,
-                        shadowOffset: 2.8,
-                        padding: EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),
-                        child: Text(
-                          AppLocalizations.of(context)!.refresh,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.border,
-                          ),
-                        ),
-                      ),
+                margin: const EdgeInsets.symmetric(horizontal: 28),
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.0),
+                  border: Border.all(color: AppTheme.border, width: 2.5),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: AppTheme.border,
+                      offset: Offset(2.8, 2.8),
+                      blurRadius: 0,
+                      spreadRadius: 0,
                     ),
                   ],
                 ),
-              ],
+                child: Material(
+                  color: Colors.transparent,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        AppLocalizations.of(context)!.refreshLinkMetadata,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.border,
+                          letterSpacing: -0.3,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        AppLocalizations.of(context)!.refreshMetadataDescription,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF555555),
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: NeoButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              color: Colors.white,
+                              borderRadius: 12.0,
+                              borderWidth: 2.5,
+                              shadowOffset: 3.0,
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              child: Text(
+                                AppLocalizations.of(context)!.cancel,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.border,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: NeoButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              color: const Color(0xFFD3F4E4),
+                              borderRadius: 12.0,
+                              borderWidth: 2.5,
+                              shadowOffset: 3.0,
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              child: Text(
+                                AppLocalizations.of(context)!.refresh,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.border,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
       ),
-    ),
-  ),
-),
-);
-}
+    );
+  }
 
   Widget _buildDescription(AppLocalizations l10n) {
     final description = bookmark.description?.trim();
