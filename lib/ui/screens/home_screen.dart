@@ -331,7 +331,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     ref.watch(unsortedBookmarksProvider);
                                 final bookmarks = countAsync.valueOrNull ?? [];
                                 final count = bookmarks.length;
-                                final hasNew = bookmarks.any((b) => !b.isRead);
+                                final newCount = bookmarks.where((b) => !b.isRead).length;
+                                final hasNew = newCount > 0;
                                 return FolderBox(
                                   forceBold: true,
                                   title: l10n.unsorted,
@@ -341,6 +342,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     _pushRoute('/unsorted');
                                   },
                                   hasNewItems: hasNew,
+                                  newCount: newCount,
                                 );
                               });
                             }
@@ -351,11 +353,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   .watch(collectionBookmarksProvider(col.id));
                               final bookmarks = countAsync.valueOrNull ?? [];
                               final count = bookmarks.length;
-                              final hasNew = bookmarks.any((b) => !b.isRead);
+                              final newCount = bookmarks.where((b) => !b.isRead).length;
+                              final hasNew = newCount > 0;
                               return CollectionGridItem(
                                 collection: col,
                                 itemCount: count,
                                 hasNewItems: hasNew,
+                                newCount: newCount,
                                 onTap: () => _pushRoute('/collection/${col.id}',
                                     extra: col),
                               );

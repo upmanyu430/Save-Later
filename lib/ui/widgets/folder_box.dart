@@ -10,6 +10,7 @@ class FolderBox extends StatelessWidget {
   final Color folderColor;
   final VoidCallback onTap;
   final bool hasNewItems;
+  final int newCount;
   final IconData icon;
   final bool forceBold;
   final bool showTab;
@@ -29,6 +30,7 @@ class FolderBox extends StatelessWidget {
     required this.folderColor,
     required this.onTap,
     this.hasNewItems = false,
+    this.newCount = 0,
     this.icon = Icons.folder_outlined,
     this.forceBold = false,
     this.showTab = true,
@@ -54,6 +56,11 @@ class FolderBox extends StatelessWidget {
       scaleSquash: 0.025,
       enableFeedback: enableFeedback,
       builder: (context, t, currentShadow) {
+        final showBadge = hasNewItems || newCount > 0;
+        final badgeText = newCount > 0
+            ? '$newCount ${AppLocalizations.of(context)!.newBadge}'
+            : AppLocalizations.of(context)!.newBadge;
+
         final body = Container(
           key: bodyKey,
           padding: const EdgeInsets.all(AppDimensions.paddingLg),
@@ -101,24 +108,27 @@ class FolderBox extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (hasNewItems) ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFD166),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                color: AppTheme.border,
-                                width: 1.2,
+                        if (showBadge) ...[
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFD166),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: AppTheme.border,
+                                  width: 1.2,
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              AppLocalizations.of(context)!.newBadge,
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: forceBold ? FontWeight.bold : FontWeight.w900,
-                                color: AppTheme.border,
-                                letterSpacing: 0.5,
+                              child: Text(
+                                badgeText,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: forceBold ? FontWeight.bold : FontWeight.w900,
+                                  color: AppTheme.border,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
                           ),

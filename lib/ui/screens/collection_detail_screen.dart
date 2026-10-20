@@ -535,13 +535,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                                   collectionBookmarksProvider(subCol.id));
                                               final count =
                                                   countAsync.valueOrNull?.length ?? 0;
-                                              final hasNew = countAsync.valueOrNull
-                                                      ?.any((b) => !b.isRead) ??
-                                                  false;
+                                              final newCount = countAsync.valueOrNull?.where((b) => !b.isRead).length ?? 0;
+                                              final hasNew = newCount > 0;
                                               return CollectionGridItem(
                                                 collection: subCol,
                                                 itemCount: count,
                                                 hasNewItems: hasNew,
+                                                newCount: newCount,
                                                 onTap: () => context.push(
                                                     '/collection/${subCol.id}',
                                                     extra: subCol),

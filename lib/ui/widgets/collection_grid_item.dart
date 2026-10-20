@@ -11,6 +11,7 @@ class CollectionGridItem extends ConsumerStatefulWidget {
   final BookmarkCollection collection;
   final int itemCount;
   final bool hasNewItems;
+  final int newCount;
   final VoidCallback onTap;
 
   const CollectionGridItem({
@@ -18,6 +19,7 @@ class CollectionGridItem extends ConsumerStatefulWidget {
     required this.collection,
     required this.itemCount,
     required this.hasNewItems,
+    this.newCount = 0,
     required this.onTap,
   });
 
@@ -43,6 +45,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
       ),
       onTap: widget.onTap,
       hasNewItems: widget.hasNewItems,
+      newCount: widget.newCount,
       showTab: showTab,
       isInteractive: isInteractive,
     );
@@ -118,6 +121,7 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
           ),
           onTap: widget.onTap,
           hasNewItems: widget.hasNewItems,
+          newCount: widget.newCount,
           onLongPressStart: _handleLongPressStart,
           onLongPressMoveUpdate: _handleLongPressMoveUpdate,
           onLongPressEnd: _handleLongPressEnd,
