@@ -85,7 +85,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       final isWrapperOrCrossHost = (cleanUri != null &&
           resolvedUri != null &&
           (cleanUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
-              UrlHelper.isRedirectWrapper(cleanUri.host)));
+              UrlHelper.isRedirectWrapper(cleanUrl)));
 
       final finalUrl = isWrapperOrCrossHost ? resolvedUrl : cleanUrl;
       final targetUri = resolvedUri ?? cleanUri ?? Uri.parse(finalUrl);
@@ -169,7 +169,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         final isWrapperOrCrossHost = (originalUri != null &&
             resolvedUri != null &&
             (originalUri.host.toLowerCase() != resolvedUri.host.toLowerCase() ||
-                UrlHelper.isRedirectWrapper(originalUri.host)));
+                UrlHelper.isRedirectWrapper(url)));
 
         if (isWrapperOrCrossHost) {
           bookmark.url = resolvedUrl;

@@ -75,11 +75,18 @@ class UrlHelper {
     final trimmed = urlOrHost.trim().toLowerCase();
     if (trimmed.isEmpty) return false;
 
-    String host = trimmed;
-    if (host.startsWith('https://')) host = host.substring(8);
-    if (host.startsWith('http://')) host = host.substring(7);
-    if (host.contains('/')) host = host.split('/')[0];
-    if (host.contains(':')) host = host.split(':')[0];
+    final uri = Uri.tryParse(trimmed.startsWith(RegExp(r'https?:\/\/', caseSensitive: false))
+        ? trimmed
+        : 'https://$trimmed');
+
+    final host = uri?.host.toLowerCase() ?? trimmed;
+    final path = uri?.path.toLowerCase() ?? '';
+
+    if (host == 'share.google' ||
+        path.contains('share.google') ||
+        (host.endsWith('google.com') && (path.startsWith('/url') || path.startsWith('/share')))) {
+      return true;
+    }
 
     const wrappers = {
       'share.google',
@@ -140,6 +147,8 @@ class UrlHelper {
   }
 
   /// Resolves HTTP redirect chains (e.g. share.google, bit.ly, t.co) to find the canonical URL.
+  /// Uses GET with automatic redirect following so services that only redirect on GET (like Google share links)
+  /// are properly resolved.
   /// Falls back to the original [url] if network fails or resolution times out.
   static Future<String> resolveFinalUrl(
     String url, {
@@ -157,62 +166,18 @@ class UrlHelper {
       client.connectionTimeout = timeout;
       client.badCertificateCallback = (cert, host, port) => true;
 
-      Uri currentUri = Uri.parse(normalized);
-      const maxHops = 5;
+      final uri = Uri.parse(normalized);
+      final request = await client.getUrl(uri).timeout(timeout);
+      request.followRedirects = true;
+      request.maxRedirects = 5;
+      request.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
 
-      for (int i = 0; i < maxHops; i++) {
-        HttpClientRequest request;
-        try {
-          request = await client.openUrl('HEAD', currentUri).timeout(timeout);
-          request.followRedirects = false;
-          request.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
-        } catch (_) {
-          break;
-        }
-
-        HttpClientResponse response;
-        try {
-          response = await request.close().timeout(timeout);
-        } catch (_) {
-          break;
-        }
-
-        final statusCode = response.statusCode;
-        if (statusCode >= 300 && statusCode < 400) {
-          final location = response.headers.value(HttpHeaders.locationHeader);
-          await response.drain().catchError((_) {});
-          if (location != null && location.trim().isNotEmpty) {
-            currentUri = currentUri.resolve(location.trim());
-            continue;
-          }
-        }
-
-        // If HEAD was rejected (e.g. 405 Method Not Allowed or 403), try GET without following body
-        if (statusCode == HttpStatus.methodNotAllowed || statusCode == HttpStatus.forbidden || statusCode == HttpStatus.badRequest) {
-          await response.drain().catchError((_) {});
-          try {
-            final getReq = await client.openUrl('GET', currentUri).timeout(timeout);
-            getReq.followRedirects = false;
-            getReq.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
-            final getRes = await getReq.close().timeout(timeout);
-            final getStatus = getRes.statusCode;
-            if (getStatus >= 300 && getStatus < 400) {
-              final location = getRes.headers.value(HttpHeaders.locationHeader);
-              await getRes.drain().catchError((_) {});
-              if (location != null && location.trim().isNotEmpty) {
-                currentUri = currentUri.resolve(location.trim());
-                continue;
-              }
-            }
-            await getRes.drain().catchError((_) {});
-          } catch (_) {}
-        } else {
-          await response.drain().catchError((_) {});
-        }
-
-        break;
+      final response = await request.close().timeout(timeout);
+      Uri currentUri = uri;
+      for (final redirect in response.redirects) {
+        currentUri = currentUri.resolveUri(redirect.location);
       }
-
+      await response.drain().catchError((_) {});
       client.close();
       return currentUri.toString();
     } catch (_) {
