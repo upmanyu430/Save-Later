@@ -259,6 +259,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   const SizedBox(height: 6),
                   GridView.builder(
                     shrinkWrap: true,
+                    clipBehavior: Clip.none,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 8,
@@ -280,7 +281,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                           decoration: BoxDecoration(
                             color: color,
                             borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                            border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
+                            border: Border.all(color: AppTheme.border, width: 2),
+                            boxShadow: isSelected
+                                ? const [
+                                    BoxShadow(
+                                      color: AppTheme.border,
+                                      offset: Offset(2, 2),
+                                      blurRadius: 0,
+                                      spreadRadius: 0,
+                                    ),
+                                  ]
+                                : null,
                           ),
                           child: isSelected
                               ? Icon(
@@ -306,6 +317,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
 
                       return GridView.builder(
                         shrinkWrap: true,
+                        clipBehavior: Clip.none,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 8,
@@ -344,7 +356,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               decoration: BoxDecoration(
                                 color: isSelected ? currentColor : Colors.transparent,
                                 borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                                border: Border.all(color: AppTheme.border, width: isSelected ? 3 : 2),
+                                border: Border.all(color: AppTheme.border, width: 2),
+                                boxShadow: isSelected
+                                    ? const [
+                                        BoxShadow(
+                                          color: AppTheme.border,
+                                          offset: Offset(2, 2),
+                                          blurRadius: 0,
+                                          spreadRadius: 0,
+                                        ),
+                                      ]
+                                    : null,
                               ),
                               child: Icon(icon, size: 20),
                             ),
