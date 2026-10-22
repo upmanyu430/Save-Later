@@ -9,7 +9,7 @@ class BookmarkCollection {
 
   late String name;
   
-  // Hex color string, e.g., 'FFAABB'
+  // Hex color string, e.g., 'FFAABB' or 'FFFFD166'
   late String colorHex;
   
   // CodePoint for the icon
@@ -25,8 +25,25 @@ class BookmarkCollection {
   int? parentId;
 
   @ignore
-  Color get color {
-    final hex = colorHex.replaceFirst('#', '');
-    return Color(int.parse(hex.length == 6 ? '0xFF$hex' : hex));
+  Color get color => parseColor(colorHex);
+
+  static Color parseColor(String? hexString, [Color fallback = const Color(0xFFFFD166)]) {
+    if (hexString == null) return fallback;
+    try {
+      String hex = hexString
+          .replaceFirst('#', '')
+          .replaceFirst(RegExp(r'^0x', caseSensitive: false), '')
+          .trim();
+      if (hex.length == 3) {
+        hex = hex.split('').map((c) => '$c$c').join();
+      }
+      if (hex.length == 6) {
+        hex = 'FF$hex';
+      }
+      if (hex.length == 8) {
+        return Color(int.parse(hex, radix: 16));
+      }
+    } catch (_) {}
+    return fallback;
   }
 }

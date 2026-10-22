@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../config/app_constants.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_button.dart';
+import '../../models/collection.dart';
 
 class IconItem {
   final IconData icon;
@@ -224,14 +225,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     }).toList();
   }
 
-  Color get _themeColor {
-    try {
-      final hex = widget.selectedColorHex.replaceFirst('#', '');
-      return Color(int.parse(hex.length == 6 ? '0xFF$hex' : hex));
-    } catch (_) {
-      return const Color(0xFFFFD166);
-    }
-  }
+  Color get _themeColor => BookmarkCollection.parseColor(widget.selectedColorHex);
 
   void _selectAndReturn(int iconCodePoint) {
     HapticFeedback.lightImpact();

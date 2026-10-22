@@ -269,7 +269,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     itemCount: _colors.length,
                     itemBuilder: (context, index) {
                       final colorHex = _colors[index];
-                      final color = Color(int.parse('0xFF$colorHex'));
+                      final color = BookmarkCollection.parseColor(colorHex);
                       final isSelected = _selectedColorHex == colorHex;
                       
                       return GestureDetector(
@@ -312,7 +312,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   Builder(
                     builder: (context) {
                       final icons = _displayIcons;
-                      final currentColor = Color(int.parse('0xFF$_selectedColorHex'));
+                      final currentColor = BookmarkCollection.parseColor(_selectedColorHex);
                       final count = _isExpanded ? icons.length : 24;
 
                       return GridView.builder(
