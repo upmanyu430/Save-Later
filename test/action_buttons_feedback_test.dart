@@ -181,4 +181,82 @@ void main() {
     expect(getContainerColor(), equals(Colors.white));
     expect(tapped, isTrue);
   });
+testWidgets('ActionStripButton exhibits mechanical depression with top/left recess shadows on press', (WidgetTester tester) async {
+    var tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: [
+              ActionStripButton(
+                icon: Icons.folder_outlined,
+                label: 'Move',
+                color: const Color(0xFFFDD164),
+                onTap: () => tapped = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Resting state: no Positioned recess shadows in Stack
+    expect(find.byType(Positioned), findsNothing);
+
+    // Press down
+    final gesture = await tester.startGesture(tester.getCenter(find.text('Move')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 70));
+
+    // Pressed state: top and left recess shadows exist
+    expect(find.byType(Positioned), findsNWidgets(2));
+
+    // Release
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // After release: recess shadows disappear and callback invoked
+    expect(find.byType(Positioned), findsNothing);
+    expect(tapped, isTrue);
+  });
+
+  testWidgets('ActionStripButton cancels press when dragged away beyond threshold', (WidgetTester tester) async {
+    var tapped = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: [
+              ActionStripButton(
+                icon: Icons.folder_outlined,
+                label: 'Move',
+                color: const Color(0xFFFDD164),
+                onTap: () => tapped = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final center = tester.getCenter(find.text('Move'));
+    final gesture = await tester.startGesture(center);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 70));
+    expect(find.byType(Positioned), findsNWidgets(2));
+
+    // Drag away (e.g. scrolling)
+    await gesture.moveBy(const Offset(0, 30));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 150));
+
+    // Depressed state canceled
+    expect(find.byType(Positioned), findsNothing);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Tap callback should not be invoked on drag cancel
+    expect(tapped, isFalse);
+  });
 }

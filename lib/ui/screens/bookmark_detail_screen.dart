@@ -1274,18 +1274,22 @@ class ActionStripButton extends StatefulWidget {
 class _ActionStripButtonState extends State<ActionStripButton> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
+  Offset? _pointerDownPosition;
+  DateTime? _pointerDownTime;
+  bool _isPointerPressed = false;
+  bool _handledByPointer = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 70),
-      reverseDuration: const Duration(milliseconds: 140),
+      duration: const Duration(milliseconds: 60),
+      reverseDuration: const Duration(milliseconds: 110),
     );
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeIn,
+      curve: Curves.easeOut,
       reverseCurve: Curves.easeOutBack,
     );
   }
@@ -1296,23 +1300,56 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _onPointerDown(PointerDownEvent event) {
+    _isPointerPressed = true;
+    _handledByPointer = true;
+    _pointerDownPosition = event.position;
+    _pointerDownTime = DateTime.now();
     HapticFeedback.lightImpact();
     _controller.forward();
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    _controller.forward().whenComplete(() {
-      if (!mounted) return;
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_isPointerPressed) return;
+    if (_pointerDownPosition != null) {
+      final delta = (event.position - _pointerDownPosition!).distance;
+      if (delta > 14.0) {
+        _isPointerPressed = false;
+        _controller.reverse();
+      }
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    if (!_isPointerPressed) return;
+    _isPointerPressed = false;
+
+    final elapsed = DateTime.now().difference(_pointerDownTime ?? DateTime.now());
+    final remainingHold = const Duration(milliseconds: 70) - elapsed;
+
+    if (remainingHold > Duration.zero) {
+      Future.delayed(remainingHold, () {
+        if (!mounted) return;
+        _controller.reverse().whenComplete(() {
+          if (mounted) {
+            _handledByPointer = false;
+            widget.onTap();
+          }
+        });
+      });
+    } else {
       _controller.reverse().whenComplete(() {
         if (mounted) {
+          _handledByPointer = false;
           widget.onTap();
         }
       });
-    });
+    }
   }
 
-  void _handleTapCancel() {
+  void _onPointerCancel(PointerCancelEvent event) {
+    _isPointerPressed = false;
+    _handledByPointer = false;
     _controller.reverse();
   }
 
@@ -1321,48 +1358,100 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
     final fgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
 
     return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: _handleTapDown,
-        onTapUp: _handleTapUp,
-        onTapCancel: _handleTapCancel,
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            final t = _animation.value;
-            final backgroundColor = Color.lerp(Colors.white, widget.color, t)!;
-            final scale = 1.0 - (t * 0.08);
-            final offsetY = t * 2.0;
+      child: Semantics(
+        button: true,
+        enabled: true,
+        label: widget.label,
+        child: Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: _onPointerDown,
+          onPointerMove: _onPointerMove,
+          onPointerUp: _onPointerUp,
+          onPointerCancel: _onPointerCancel,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              if (!_handledByPointer) {
+                _controller.forward().whenComplete(() {
+                  if (!mounted) return;
+                  _controller.reverse().whenComplete(() {
+                    if (mounted) {
+                      widget.onTap();
+                    }
+                  });
+                });
+              }
+            },
+            child: AnimatedBuilder(
+              animation: _animation,
+              builder: (context, child) {
+                final t = _animation.value;
+                final backgroundColor = Color.lerp(Colors.white, widget.color, t)!;
+                final scale = 1.0 - (t * 0.04);
+                final offsetX = t * 1.5;
+                final offsetY = t * 3.0;
+                final topRecess = t * 3.0;
+                final leftRecess = t * 2.0;
 
-            return Container(
-              color: backgroundColor,
-              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
-              child: Transform.translate(
-                offset: Offset(0, offsetY),
-                child: Transform.scale(
-                  scale: scale,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                return Container(
+                  color: backgroundColor,
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      Icon(widget.icon, color: fgColor, size: 22),
-                      const SizedBox(height: 5),
-                      Text(
-                        widget.label,
-                        style: TextStyle(
-                          color: fgColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 11.5,
+                      // Top recess shadow simulating mechanical button depression
+                      if (topRecess > 0)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: topRecess,
+                          child: const ColoredBox(color: AppTheme.border),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      // Left recess shadow simulating mechanical button depression
+                      if (leftRecess > 0)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          width: leftRecess,
+                          child: const ColoredBox(color: AppTheme.border),
+                        ),
+                      // Button contents (Icon and Label)
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 2),
+                          child: Transform.translate(
+                            offset: Offset(offsetX, offsetY),
+                            child: Transform.scale(
+                              scale: scale,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(widget.icon, color: fgColor, size: 22),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    widget.label,
+                                    style: TextStyle(
+                                      color: fgColor,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 11.5,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ),
-            );
-          },
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
