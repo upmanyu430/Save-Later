@@ -85,6 +85,15 @@ class IsarRepository {
   }
 
   // --- Bookmark Methods ---
+  Future<Bookmark?> getBookmark(Id id) async {
+    final isar = await db;
+    final bookmark = await isar.bookmarks.get(id);
+    if (bookmark != null && bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+      await bookmark.collection.load();
+    }
+    return bookmark;
+  }
+
   Future<List<Bookmark>> getBookmarks() async {
     final isar = await db;
     final list = await isar.bookmarks.where().sortByCreatedAtDesc().findAll();

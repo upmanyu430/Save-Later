@@ -24,36 +24,84 @@ import 'dart:async';
 
 
 class BookmarkDetailScreen extends ConsumerStatefulWidget {
-  final Bookmark bookmark;
+  final Bookmark? bookmark;
+  final int? bookmarkId;
 
-  const BookmarkDetailScreen({super.key, required this.bookmark});
+  const BookmarkDetailScreen({
+    super.key,
+    this.bookmark,
+    this.bookmarkId,
+  });
 
   @override
   ConsumerState<BookmarkDetailScreen> createState() => _BookmarkDetailScreenState();
 }
 
 class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
-  late Bookmark bookmark;
+  Bookmark? _loadedBookmark;
+  Bookmark get bookmark => _loadedBookmark!;
   late TextEditingController _notesController;
   late TextEditingController _titleController;
   bool _isEditingTitle = false;
   bool _isEditingNotes = false;
   bool _notesEdited = false;
-  late String _lastSavedNotes;
+  String _lastSavedNotes = '';
   bool _isTopBarVisible = true;
   bool _isDescriptionExpanded = false;
+  bool _isLoading = false;
+  bool _notFound = false;
 
   @override
   void initState() {
     super.initState();
-    bookmark = widget.bookmark;
-    _notesController = TextEditingController(text: bookmark.notes);
-    _lastSavedNotes = bookmark.notes;
-    _titleController = TextEditingController(text: bookmark.title ?? bookmark.url);
-    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
-      bookmark.collection.load().then((_) {
+    _notesController = TextEditingController();
+    _titleController = TextEditingController();
+
+    if (widget.bookmark != null) {
+      _initBookmark(widget.bookmark!);
+    } else if (widget.bookmarkId != null && widget.bookmarkId! > 0) {
+      _isLoading = true;
+      Future.microtask(() => _fetchBookmark(widget.bookmarkId!));
+    } else {
+      _notFound = true;
+    }
+  }
+
+  void _initBookmark(Bookmark b) {
+    _loadedBookmark = b;
+    _notesController.text = b.notes;
+    _lastSavedNotes = b.notes;
+    _titleController.text = b.title ?? b.url;
+    if (b.collection.isAttached && !b.collection.isLoaded) {
+      b.collection.load().then((_) {
         if (mounted) setState(() {});
       });
+    }
+  }
+
+  Future<void> _fetchBookmark(int id) async {
+    try {
+      final repo = ref.read(repositoryProvider);
+      final b = await repo.getBookmark(id);
+      if (!mounted) return;
+      if (b != null) {
+        setState(() {
+          _initBookmark(b);
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _notFound = true;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _notFound = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -75,7 +123,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   // Ensure any pending changes are saved when the screen is disposed
   @override
   void dispose() {
-    if (_notesEdited && _notesController.text != _lastSavedNotes) {
+    if (_loadedBookmark != null && _notesEdited && _notesController.text != _lastSavedNotes) {
       unawaited(_saveNotes(_notesController.text));
     } else {
       _saveTimer?.cancel();
@@ -243,6 +291,45 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppTheme.background,
+        body: Center(
+          child: CircularProgressIndicator(color: AppTheme.primary),
+        ),
+      );
+    }
+
+    if (_notFound || _loadedBookmark == null) {
+      return Scaffold(
+        backgroundColor: AppTheme.background,
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppDimensions.paddingXl),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.bookmark_border, size: 64, color: Colors.black26),
+                  const SizedBox(height: AppDimensions.paddingMd),
+                  const Text(
+                    'Bookmark not found',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingLg),
+                  NeoButton(
+                    onPressed: () => context.pop(),
+                    color: Colors.white,
+                    child: const Text('Go back', style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     final l10n = AppLocalizations.of(context)!;
     final placeholderIconSize =
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
@@ -656,7 +743,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     Icons.share_outlined,
                                     l10n.share,
                                     () {
-                                      Share.share(widget.bookmark.url);
+                                      Share.share(bookmark.url);
                                     },
                                     color: const Color(0xFFE8E0FF),
                                   ),

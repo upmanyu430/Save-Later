@@ -107,11 +107,15 @@ final _router = GoRouter(
     GoRoute(
       path: '/bookmark/:id',
       pageBuilder: (context, state) {
-        final bookmark = state.extra as Bookmark;
+        final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
+        final bookmark = state.extra as Bookmark?;
         return _buildPageWithTransition(
           context: context,
           state: state,
-          child: BookmarkDetailScreen(bookmark: bookmark),
+          child: BookmarkDetailScreen(
+            bookmark: bookmark,
+            bookmarkId: id,
+          ),
         );
       },
     ),

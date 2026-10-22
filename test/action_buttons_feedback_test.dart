@@ -34,6 +34,9 @@ class FakeIsarRepository implements IsarRepository {
   Future<void> deleteCollection(Id collectionId) async {}
 
   @override
+  Future<Bookmark?> getBookmark(Id id) async => null;
+
+  @override
   Future<List<Bookmark>> getBookmarks() async => [];
 
   @override
