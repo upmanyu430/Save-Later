@@ -199,7 +199,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final collectionsAsync = ref.watch(collectionsProvider);
+    final collectionsAsync = ref.watch(allCollectionsProvider);
     final bookmarksAsync = ref.watch(bookmarksProvider);
 
     final collectionsCount = collectionsAsync.valueOrNull?.length ?? 0;
