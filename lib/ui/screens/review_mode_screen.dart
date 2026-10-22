@@ -397,8 +397,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 ],
               ),
               SizedBox(
-                width: 50,
-                height: 50,
+                width: 45,
+                height: 45,
                 child: NeoButton(
                   onPressed: () => context.pop(),
                   padding: EdgeInsets.zero,
