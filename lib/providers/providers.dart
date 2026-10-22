@@ -23,6 +23,12 @@ final allCollectionsProvider =
   return repo.getAllCollections();
 });
 
+final singleCollectionProvider =
+    FutureProvider.family<BookmarkCollection?, int>((ref, id) async {
+  final repo = ref.watch(repositoryProvider);
+  return repo.getCollection(id);
+});
+
 final subCollectionsProvider =
     FutureProvider.family<List<BookmarkCollection>, int>((ref, parentId) async {
   final repo = ref.watch(repositoryProvider);
@@ -420,6 +426,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       await repo.addCollection(collection);
       ref.invalidate(collectionsProvider);
       ref.invalidate(allCollectionsProvider);
+      ref.invalidate(singleCollectionProvider(collection.id));
       if (parentId != null) {
         ref.invalidate(subCollectionsProvider(parentId));
       }
@@ -439,6 +446,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       await repo.addCollection(collection); 
       ref.invalidate(collectionsProvider);
       ref.invalidate(allCollectionsProvider);
+      ref.invalidate(singleCollectionProvider(collection.id));
       if (collection.parentId != null) {
         ref.invalidate(subCollectionsProvider(collection.parentId!));
       }
@@ -456,6 +464,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
       await repo.deleteCollection(collection.id);
       ref.invalidate(collectionsProvider);
       ref.invalidate(allCollectionsProvider);
+      ref.invalidate(singleCollectionProvider(collection.id));
       ref.invalidate(unsortedBookmarksProvider);
       ref.invalidate(collectionBookmarksProvider(collection.id));
       ref.invalidate(bookmarksProvider);

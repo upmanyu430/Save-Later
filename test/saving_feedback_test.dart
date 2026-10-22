@@ -21,6 +21,9 @@ class _FakeSavingRepo implements IsarRepository {
   @override
   Future<List<BookmarkCollection>> getSubCollections(Id parentId) async => [];
   @override
+  Future<BookmarkCollection?> getCollection(Id id) async => null;
+
+  @override
   Future<List<BookmarkCollection>> getAllCollections() async => [];
   @override
   Future<void> addCollection(BookmarkCollection collection) async {}

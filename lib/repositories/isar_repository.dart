@@ -49,6 +49,11 @@ class IsarRepository {
         .findAll();
   }
 
+  Future<BookmarkCollection?> getCollection(Id id) async {
+    final isar = await db;
+    return await isar.bookmarkCollections.get(id);
+  }
+
   Future<List<BookmarkCollection>> getAllCollections() async {
     final isar = await db;
     return await isar.bookmarkCollections.where().findAll();

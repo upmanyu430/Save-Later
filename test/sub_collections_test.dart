@@ -36,6 +36,9 @@ class SubCollectionTestRepo implements IsarRepository {
   }
 
   @override
+  Future<BookmarkCollection?> getCollection(Id id) async => null;
+
+  @override
   Future<List<BookmarkCollection>> getAllCollections() async {
     return List.from(collections);
   }

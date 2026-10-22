@@ -35,6 +35,9 @@ class MockEmptyCollectionRepo implements IsarRepository {
   }
 
   @override
+  Future<BookmarkCollection?> getCollection(Id id) async => null;
+
+  @override
   Future<List<BookmarkCollection>> getAllCollections() async => List.from(collections);
 
   @override

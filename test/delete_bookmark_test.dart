@@ -23,6 +23,9 @@ class MockIsarRepo implements IsarRepository {
   Future<List<BookmarkCollection>> getSubCollections(Id parentId) async => [];
 
   @override
+  Future<BookmarkCollection?> getCollection(Id id) async => null;
+
+  @override
   Future<List<BookmarkCollection>> getAllCollections() async => [];
 
   @override

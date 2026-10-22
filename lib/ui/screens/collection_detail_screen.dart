@@ -37,7 +37,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   bool _isSelectMode = false;
   final Set<int> _selectedIds = {};
 
-  void _showAddLinkModal(BuildContext context) {
+  void _showAddLinkModal(BuildContext context, [BookmarkCollection? currentCollection]) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -92,7 +92,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           ),
                           onSubmitted: (val) {
                             if (val.trim().isNotEmpty) {
-                              ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: widget.collection);
+                              ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: currentCollection ?? widget.collection);
                               Navigator.pop(modalCtx);
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savingLink)));
                             }
@@ -122,7 +122,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     );
   }
 
-  void _showMenuModal(BuildContext context) {
+  void _showMenuModal(BuildContext context, [BookmarkCollection? currentCollection]) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -176,7 +176,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           title: AppLocalizations.of(context)!.addLink,
                           onTap: () {
                             Navigator.pop(ctx);
-                            _showAddLinkModal(context);
+                            _showAddLinkModal(context, currentCollection);
                           },
                         ),
                         _buildDivider(),
@@ -339,6 +339,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     final subCollectionsAsync = widget.collectionId != null
         ? ref.watch(subCollectionsProvider(widget.collectionId!))
         : const AsyncValue.data(<BookmarkCollection>[]);
+    final effectiveCollection = widget.collection ??
+        (widget.collectionId != null
+            ? ref.watch(singleCollectionProvider(widget.collectionId!)).valueOrNull
+            : null);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -404,7 +408,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             Column(
                               children: [
                                 Text(
-                                  (widget.collection?.name ?? l10n.unsorted),
+                                  widget.collectionId != null
+                                      ? (effectiveCollection?.name ?? '...')
+                                      : l10n.unsorted,
                                   style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                                 ),
                                 Text(
@@ -421,7 +427,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   width: 44,
                                   height: 44,
                                   child: NeoButton(
-                                    onPressed: () => context.push('/review', extra: widget.collection),
+                                    onPressed: () => context.push('/review', extra: effectiveCollection),
                                     color: const Color(0xFFFFD166), // Yellow
                                     padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusSm,
@@ -434,7 +440,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   width: 44,
                                   height: 44,
                                   child: NeoButton(
-                                    onPressed: () => _showMenuModal(context),
+                                    onPressed: () => _showMenuModal(context, effectiveCollection),
                                     padding: EdgeInsets.zero,
                                     color: AppTheme.cardColor,
                                     borderRadius: AppDimensions.radiusSm,
