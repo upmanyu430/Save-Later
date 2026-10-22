@@ -780,8 +780,8 @@ class _ReviewIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 52,
-      height: 52,
+      width: 51,
+      height: 51,
       child: NeoButton(
         onPressed: onPressed,
         padding: EdgeInsets.zero,
