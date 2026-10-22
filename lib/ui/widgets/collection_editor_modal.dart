@@ -163,9 +163,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       18.0,
-                      14.0,
+                      12.0,
                       18.0,
-                      20.0 + MediaQuery.paddingOf(context).bottom,
+                      14.0 + MediaQuery.paddingOf(context).bottom,
                     ),
                     child: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
@@ -187,7 +187,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.paddingXl),
+                  const SizedBox(height: 12),
                   
                   // Header
                   Row(
@@ -223,7 +223,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppDimensions.paddingXxl),
+                  const SizedBox(height: 14),
                   
                   // Name Field
                   Row(
@@ -246,17 +246,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       decoration: const InputDecoration(
                         hintText: 'e.g. Travel, Design Inspiration...',
                         hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: InputBorder.none,
                         counterText: '',
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppDimensions.paddingXl),
+                  const SizedBox(height: 12),
                   
                   // Color Picker
                   Text(AppLocalizations.of(context)!.colorUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   GridView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -293,11 +293,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       );
                     },
                   ),
-                  const SizedBox(height: AppDimensions.paddingXl),
+                  const SizedBox(height: 12),
                   
                   // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
                   Text(AppLocalizations.of(context)!.iconUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
                   Builder(
                     builder: (context) {
                       final icons = _displayIcons;
@@ -353,7 +353,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       );
                     },
                   ),
-                  const SizedBox(height: AppDimensions.paddingXxl),
+                  const SizedBox(height: 16),
                 
                 // Save Button
                 Builder(
@@ -362,7 +362,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     return NeoButton(
                       onPressed: !isNameEmpty ? _save : () {},
                       color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       child: Center(
                         child: Text(
                           isEditing
