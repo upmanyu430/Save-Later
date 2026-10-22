@@ -27,8 +27,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   int currentIndex = 0;
   List<Bookmark> unreadBookmarks = [];
   bool loaded = false;
-  int completedCount = 0;
-  bool _pendingPreviousNavigation = false;
+  final Set<int> _reviewedBookmarkIds = {};
+  int get completedCount => _reviewedBookmarkIds.length;
 
   @override
   void initState() {
@@ -62,6 +62,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   }
 
   void _applyAction(Bookmark bookmark) {
+    _reviewedBookmarkIds.add(bookmark.id);
     final notifier = ref.read(bookmarkNotifierProvider.notifier);
     // Reviewing a card must never delete the saved bookmark. Both swipe
     // directions complete the review by marking it as read; deletion remains
@@ -77,16 +78,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
     HapticFeedback.lightImpact();
 
-    // The bottom-left arrow is navigation, not a swipe action. Do not mark
-    // or delete the current bookmark when it returns to the previous card.
-    if (_pendingPreviousNavigation && nextIndex < previousIndex) {
-      _pendingPreviousNavigation = false;
+    // Backward navigation (swipe or button) to an earlier card is purely navigation;
+    // do not mark as read or increment counts when looking back at a card.
+    if (nextIndex < previousIndex) {
       setState(() {
         currentIndex = nextIndex;
       });
       return;
     }
-    _pendingPreviousNavigation = false;
 
     // PageView has one trailing page so the final bookmark can be swiped
     // away naturally. Reaching that page completes the last bookmark and
@@ -103,13 +102,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       }
       setState(() {
         currentIndex = unreadBookmarks.length;
-        completedCount += unreadBookmarks.length - previousIndex;
       });
       return;
     }
 
-    // A swipe completes the current card. The bookmark is retained and marked
-    // as read regardless of swipe direction.
+    // A forward swipe completes the cards passed.
     if (nextIndex > previousIndex) {
       final lastUnreviewedIndex =
           nextIndex.clamp(0, unreadBookmarks.length).toInt();
@@ -119,13 +116,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
       setState(() {
         currentIndex = nextIndex;
-        completedCount += lastUnreviewedIndex - previousIndex;
-      });
-    } else {
-      _applyAction(unreadBookmarks[previousIndex]);
-      setState(() {
-        currentIndex = nextIndex;
-        completedCount++;
       });
     }
   }
@@ -136,7 +126,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       _applyAction(unreadBookmarks[currentIndex]);
       setState(() {
         currentIndex = unreadBookmarks.length;
-        completedCount++;
       });
       return;
     }
@@ -148,7 +137,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _goToPrevious() {
     if (currentIndex <= 0 || !_pageController.hasClients) return;
-    _pendingPreviousNavigation = true;
     _pageController.previousPage(
       duration: const Duration(milliseconds: 360),
       curve: Curves.easeOutCubic,
@@ -275,11 +263,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                             .clamp(0, unreadBookmarks.length - 1)
                             .toInt();
                         setState(() {
-                          _pendingPreviousNavigation = false;
-                          currentIndex = previousIndex;
-                          completedCount = completedCount > 0
-                              ? completedCount - 1
-                              : 0;
+                                                  currentIndex = previousIndex;
                         });
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted && _pageController.hasClients) {
