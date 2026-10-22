@@ -161,8 +161,9 @@ class UrlHelper {
         ? trimmed
         : 'https://$trimmed';
 
+    HttpClient? client;
     try {
-      final client = HttpClient();
+      client = HttpClient();
       client.connectionTimeout = timeout;
       client.badCertificateCallback = (cert, host, port) => true;
 
@@ -178,10 +179,11 @@ class UrlHelper {
         currentUri = currentUri.resolveUri(redirect.location);
       }
       await response.drain().catchError((_) {});
-      client.close();
       return currentUri.toString();
     } catch (_) {
       return normalized;
+    } finally {
+      client?.close(force: true);
     }
   }
 }

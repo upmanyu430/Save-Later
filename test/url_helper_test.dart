@@ -188,6 +188,13 @@ Hope you like it!
             ..statusCode = HttpStatus.ok
             ..write('Hello')
             ..close();
+        } else if (request.uri.path == '/hang') {
+          // Keep request open to trigger client timeout
+          Future.delayed(const Duration(milliseconds: 300), () {
+            try {
+              request.response.close();
+            } catch (_) {}
+          });
         } else {
           request.response
             ..statusCode = HttpStatus.notFound
@@ -208,6 +215,21 @@ Hope you like it!
     test('returns direct URL when no redirects occur', () async {
       final resolved = await UrlHelper.resolveFinalUrl('$serverUrl/final');
       expect(resolved, '$serverUrl/final');
+    });
+    test('returns normalized URL on timeout and safely closes client', () async {
+      final resolved = await UrlHelper.resolveFinalUrl(
+        '$serverUrl/hang',
+        timeout: const Duration(milliseconds: 60),
+      );
+      expect(resolved, '$serverUrl/hang');
+    });
+
+    test('returns normalized URL on socket error and safely closes client', () async {
+      final resolved = await UrlHelper.resolveFinalUrl(
+        'http://127.0.0.1:1/unreachable',
+        timeout: const Duration(milliseconds: 60),
+      );
+      expect(resolved, 'http://127.0.0.1:1/unreachable');
     });
   });
 }
