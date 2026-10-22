@@ -212,9 +212,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                           title: AppLocalizations.of(context)!.shareCollection,
                           onTap: () {
                             Navigator.pop(ctx);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(AppLocalizations.of(context)!.sharingCollection)),
-                            );
+                            _shareCollection(currentCollection);
                           },
                         ),
                       ],
@@ -278,6 +276,28 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
         child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
       ),
     );
+  }
+
+  Future<void> _shareCollection(BookmarkCollection? currentCollection) async {
+    final repo = ref.read(repositoryProvider);
+    final List<Bookmark> bookmarks;
+    final String collectionName;
+    if (widget.collectionId != null) {
+      collectionName = currentCollection?.name ?? 'Collection';
+      bookmarks = await repo.getBookmarksByCollection(widget.collectionId!);
+    } else {
+      collectionName = AppLocalizations.of(context)!.unsorted;
+      bookmarks = await repo.getUnsortedBookmarks();
+    }
+
+    if (!mounted) return;
+
+    if (bookmarks.isEmpty) {
+      await Share.share('Collection: $collectionName');
+    } else {
+      final urls = bookmarks.map((b) => b.url).join('\n');
+      await Share.share('$collectionName:\n$urls');
+    }
   }
 
   void _shareSelected(List<Bookmark> allBookmarks) {
