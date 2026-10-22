@@ -95,15 +95,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (confirm == true) {
-      // Clear data logic
       final repo = ref.read(repositoryProvider);
       final isar = await repo.db;
       await isar.writeTxn(() async {
         await isar.clear();
       });
+
       ref.invalidate(collectionsProvider);
+      ref.invalidate(allCollectionsProvider);
+      ref.invalidate(singleCollectionProvider);
+      ref.invalidate(subCollectionsProvider);
       ref.invalidate(bookmarksProvider);
       ref.invalidate(unsortedBookmarksProvider);
+      ref.invalidate(collectionBookmarksProvider);
+      ref.invalidate(allTagsProvider);
+      ref.invalidate(savingBookmarkIdsProvider);
+      ref.invalidate(refreshingBookmarkIdsProvider);
 
       if (ctx.mounted) {
         ScaffoldMessenger.of(ctx).showSnackBar(
