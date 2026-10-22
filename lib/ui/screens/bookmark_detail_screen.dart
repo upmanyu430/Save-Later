@@ -752,7 +752,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     Icons.folder_outlined,
                                     l10n.move,
                                     _showMoveModal,
-                                    color: const Color(0xFFFFF2C2),
+                                    color: const Color(0xFFFDD164),
                                   ),
                                   _buildSegmentDivider(),
                                   _buildActionItem(
@@ -1263,7 +1263,7 @@ class ActionStripButton extends StatefulWidget {
     required this.icon,
     required this.label,
     required this.onTap,
-    this.color = Colors.white,
+    this.color = const Color(0xFFFDD164),
     this.isDestructive = false,
   });
 
@@ -1330,7 +1330,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
           animation: _animation,
           builder: (context, child) {
             final t = _animation.value;
-            final backgroundColor = Color.lerp(widget.color, Colors.black, t * 0.14)!;
+            final backgroundColor = Color.lerp(Colors.white, widget.color, t)!;
             final scale = 1.0 - (t * 0.08);
             final offsetY = t * 2.0;
 
