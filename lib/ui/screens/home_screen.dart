@@ -37,8 +37,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _intentDataStreamSubscription = ReceiveSharingIntent.instance
         .getMediaStream()
         .listen((List<SharedMediaFile> value) {
-      if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-        _handleIncomingSharedText(value.first.path);
+      if (value.isNotEmpty) {
+        if (value.first.type == SharedMediaType.text) {
+          _handleIncomingSharedText(value.first.path);
+        }
+        ReceiveSharingIntent.instance.reset();
       }
     }, onError: (err) {
       debugPrint("getIntentDataStream error: $err");
@@ -48,8 +51,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ReceiveSharingIntent.instance
         .getInitialMedia()
         .then((List<SharedMediaFile> value) {
-      if (value.isNotEmpty && value.first.type == SharedMediaType.text) {
-        _handleIncomingSharedText(value.first.path);
+      if (value.isNotEmpty) {
+        if (value.first.type == SharedMediaType.text) {
+          _handleIncomingSharedText(value.first.path);
+        }
+        ReceiveSharingIntent.instance.reset();
       }
     });
   }
