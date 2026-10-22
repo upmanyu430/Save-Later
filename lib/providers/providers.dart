@@ -271,18 +271,32 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
   Future<void> markAsUnread(Bookmark bookmark) async {
     final repo = ref.read(repositoryProvider);
+    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+      try {
+        await bookmark.collection.load();
+      } catch (_) {}
+    }
     bookmark.isRead = false;
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
-    
+    ref.invalidate(unsortedBookmarksProvider);
+    if (bookmark.collection.value != null) {
+      ref.invalidate(
+          collectionBookmarksProvider(bookmark.collection.value!.id));
+    }
   }
 
   Future<void> markAsRead(Bookmark bookmark) async {
     final repo = ref.read(repositoryProvider);
+    if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
+      try {
+        await bookmark.collection.load();
+      } catch (_) {}
+    }
     bookmark.isRead = true;
     await repo.updateBookmark(bookmark);
     ref.invalidate(bookmarksProvider);
-      ref.invalidate(unsortedBookmarksProvider);
+    ref.invalidate(unsortedBookmarksProvider);
     if (bookmark.collection.value != null) {
       ref.invalidate(
           collectionBookmarksProvider(bookmark.collection.value!.id));
