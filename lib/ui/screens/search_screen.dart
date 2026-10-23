@@ -293,22 +293,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
         const SizedBox(height: 18),
-        Wrap(
-          spacing: 12.0,
-          runSpacing: 16.0,
-          children: List.generate(displayedTags.length, (index) {
-            final entry = displayedTags[index];
-            final tilt = NeoTagBadge.getTilt(index);
-            return NeoTagBadge(
-              name: entry.key,
-              count: entry.value,
-              color: NeoTagBadge.getColor(entry.key, index),
-              tilt: tilt,
-              onTap: () {
-                _searchController.text = entry.key;
-              },
-            );
-          }),
+        SizedBox(
+          width: double.infinity,
+          child: Wrap(
+            alignment: WrapAlignment.center,
+            runAlignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 12.0,
+            runSpacing: 16.0,
+            children: List.generate(displayedTags.length, (index) {
+              final entry = displayedTags[index];
+              final tilt = NeoTagBadge.getTilt(index);
+              return NeoTagBadge(
+                name: entry.key,
+                count: entry.value,
+                color: NeoTagBadge.getColor(entry.key, index),
+                tilt: tilt,
+                onTap: () {
+                  _searchController.text = entry.key;
+                },
+              );
+            }),
+          ),
         ),
       ],
     );
