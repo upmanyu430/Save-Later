@@ -291,20 +291,24 @@ void main() {
       matching: find.byType(Container),
     );
 
-    // Verify the decoration has the 2.5 offset drop shadow
+    // Verify the decoration has the 2.0 offset drop shadow and matches button padding
     bool hasMatchingShadow = false;
+    bool hasMatchingPadding = false;
     for (final element in containerFinder.evaluate()) {
       final widget = element.widget as Container;
+      if (widget.padding == const EdgeInsets.symmetric(horizontal: 20, vertical: 6)) {
+        hasMatchingPadding = true;
+      }
       if (widget.decoration is BoxDecoration) {
         final boxDec = widget.decoration as BoxDecoration;
         if (boxDec.boxShadow != null &&
-            boxDec.boxShadow!.any((s) => s.offset == const Offset(2.5, 2.5))) {
+            boxDec.boxShadow!.any((s) => s.offset == const Offset(2.0, 2.0))) {
           hasMatchingShadow = true;
-          break;
         }
       }
     }
 
     expect(hasMatchingShadow, isTrue);
+    expect(hasMatchingPadding, isTrue);
   });
 }
