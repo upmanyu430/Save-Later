@@ -9,6 +9,7 @@ import '../widgets/neo_button.dart';
 import '../widgets/neo_tag_badge.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_grid_item.dart';
+import '../widgets/pin_icon.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
 import '../../models/collection.dart';
@@ -58,7 +59,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildStatTab({
-    required IconData icon,
+    IconData? icon,
+    Widget? iconWidget,
     required String count,
     required String label,
     required bool isSelected,
@@ -67,7 +69,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: AppDimensions.iconSizeMd, color: AppTheme.border),
+        iconWidget ??
+            Icon(icon!, size: AppDimensions.iconSizeMd, color: AppTheme.border),
         const SizedBox(height: 6),
         Text(
           count,
@@ -208,7 +211,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         : LibraryTab.saves),
               ),
               _buildStatTab(
-                icon: Icons.push_pin_outlined,
+                iconWidget: const PinIcon(
+                  size: AppDimensions.iconSizeMd,
+                  isPinned: true,
+                  color: AppTheme.border,
+                ),
                 count: '$pinnedCount',
                 label: l10n.pinned,
                 isSelected: _selectedTab == LibraryTab.pinned,
@@ -419,8 +426,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       children: [
         Row(
           children: [
-            const Icon(Icons.push_pin_outlined,
-                size: 18, color: AppTheme.border),
+            const PinIcon(
+              size: 18,
+              isPinned: true,
+              color: AppTheme.border,
+            ),
             const SizedBox(width: 8),
             Text(
               l10n.pinned.toUpperCase(),
@@ -440,8 +450,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               padding: EdgeInsets.symmetric(vertical: 36, horizontal: 16),
               child: Column(
                 children: [
-                  Icon(Icons.push_pin_outlined,
-                      size: 48, color: Colors.black26),
+                  PinIcon(
+                    size: 48,
+                    isPinned: true,
+                    color: Colors.black26,
+                  ),
                   SizedBox(height: 12),
                   Text(
                     'No pinned saves',

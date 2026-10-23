@@ -10,6 +10,7 @@ import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/screens/search_screen.dart';
 import 'package:save_later/ui/widgets/neo_tag_badge.dart';
+import 'package:save_later/ui/widgets/pin_icon.dart';
 
 class FakeIsarRepository implements IsarRepository {
   final List<BookmarkCollection> collections = [];
@@ -315,6 +316,10 @@ void main() {
       // Pinned header and bookmark should be visible
       expect(find.text('PINNED'), findsOneWidget);
       expect(find.text('Pinned Bookmark'), findsOneWidget);
+
+      // Verify custom PinIcon is used, not Flutter default Icons.push_pin_outlined
+      expect(find.byType(PinIcon), findsWidgets);
+      expect(find.byIcon(Icons.push_pin_outlined), findsNothing);
     });
 
     testWidgets('When library has no tags, sample tags from design mockup are displayed', (tester) async {
