@@ -12,6 +12,7 @@ class NeoTagBadge extends StatefulWidget {
   final double height;
   final double shadowOffset;
   final double borderWidth;
+  final bool isSelected;
 
   const NeoTagBadge({
     super.key,
@@ -24,6 +25,7 @@ class NeoTagBadge extends StatefulWidget {
     this.height = 44.0,
     this.shadowOffset = 3.0,
     this.borderWidth = 2.5,
+    this.isSelected = false,
   });
 
   /// Map of canonical tag names from the design mockup to their exact colors.
@@ -202,8 +204,10 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
           animation: _animation,
           builder: (context, child) {
             final t = _animation.value;
-            final currentShadowOffset = (1.0 - t).clamp(0.0, 1.0) * widget.shadowOffset;
-            final pressTranslate = t * widget.shadowOffset;
+            final baseBorderWidth = widget.isSelected ? 3.5 : widget.borderWidth;
+            final baseShadow = widget.isSelected ? 4.5 : widget.shadowOffset;
+            final currentShadowOffset = (1.0 - t).clamp(0.0, 1.0) * baseShadow;
+            final pressTranslate = t * baseShadow;
 
             return Transform.translate(
               offset: Offset(pressTranslate, pressTranslate),
@@ -212,7 +216,7 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
                   color: bgColor,
                   borderColor: AppTheme.border,
                   shadowColor: AppTheme.border,
-                  borderWidth: widget.borderWidth,
+                  borderWidth: baseBorderWidth,
                   shadowOffset: currentShadowOffset,
                   noseWidth: noseWidth,
                   cornerRadius: 11.0,
@@ -230,6 +234,14 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      if (widget.isSelected) ...[
+                        Icon(
+                          Icons.check,
+                          size: 16,
+                          color: fgColor,
+                        ),
+                        const SizedBox(width: 4.0),
+                      ],
                       Text(
                         '#${widget.name}',
                         style: TextStyle(

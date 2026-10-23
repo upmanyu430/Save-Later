@@ -162,7 +162,7 @@ void main() {
       expect(find.text('TAGS'), findsNothing);
     });
 
-    testWidgets('Tapping a tag badge populates search field and filters bookmarks', (tester) async {
+    testWidgets('Tapping a tag badge filters to only bookmarks with that exact tag', (tester) async {
       final fakeRepo = FakeIsarRepository();
 
       final bookmark1 = Bookmark()
@@ -177,7 +177,14 @@ void main() {
         ..url = 'https://travel.com/tokyo'
         ..tags = ['travel'];
 
-      fakeRepo.bookmarks.addAll([bookmark1, bookmark2]);
+      // Bookmark with word 'recipes' in title, but tagged 'baking' (not 'recipes')
+      final bookmark3 = Bookmark()
+        ..id = 3
+        ..title = 'Old Family Recipes'
+        ..url = 'https://baking.com'
+        ..tags = ['baking'];
+
+      fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
 
       await tester.pumpWidget(
         ProviderScope(
@@ -200,11 +207,21 @@ void main() {
       await tester.tap(find.text('#recipes'));
       await tester.pumpAndSettle();
 
-      // Search bar should now contain 'recipes'
-      expect(find.text('recipes'), findsWidgets);
-      // Results should show Pasta Carbonara, but not Tokyo Trip Guide
+      // Active tag section header is displayed
+      expect(find.text('TAGGED #RECIPES'), findsOneWidget);
+      // Results should show Pasta Carbonara (tagged recipes)
       expect(find.text('Pasta Carbonara'), findsOneWidget);
+      // Tokyo Trip Guide (tagged travel) should not show
       expect(find.text('Tokyo Trip Guide'), findsNothing);
+      // Bookmark with word 'recipes' in title but tagged 'baking' must NOT appear
+      expect(find.text('Old Family Recipes'), findsNothing);
+
+      // Tapping Clear clears the tag filter
+      await tester.tap(find.text('Clear'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('TAGGED #RECIPES'), findsNothing);
+      expect(find.text('Tap any tag above to view its bookmarks'), findsOneWidget);
     });
 
     testWidgets('Tapping Collections stat switches to Collections view', (tester) async {

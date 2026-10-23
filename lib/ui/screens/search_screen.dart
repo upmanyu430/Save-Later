@@ -38,6 +38,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   late LibraryTab _selectedTab;
   String _searchQuery = '';
+  String? _selectedTagFilter;
 
   @override
   void initState() {
@@ -509,6 +510,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final displayedTags =
         userTags.isNotEmpty ? userTags : NeoTagBadge.sampleTags;
 
+    // Filter bookmarks for currently selected tag
+    final matchingBookmarks = _selectedTagFilter == null
+        ? <Bookmark>[]
+        : allBookmarks.where((b) {
+            final target = _selectedTagFilter!.startsWith('#')
+                ? _selectedTagFilter!.substring(1).trim().toLowerCase()
+                : _selectedTagFilter!.trim().toLowerCase();
+            return b.tags.any((t) {
+              final clean = t.startsWith('#')
+                  ? t.substring(1).trim().toLowerCase()
+                  : t.trim().toLowerCase();
+              return clean == target;
+            });
+          }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -529,6 +545,23 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 letterSpacing: 0.5,
               ),
             ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.border, width: 1.5),
+              ),
+              child: Text(
+                '${displayedTags.length}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.border,
+                ),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 18),
@@ -543,18 +576,175 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: List.generate(displayedTags.length, (index) {
               final entry = displayedTags[index];
               final tilt = NeoTagBadge.getTilt(index);
+              final isTagSelected = _selectedTagFilter != null &&
+                  (_selectedTagFilter!.toLowerCase().trim() ==
+                      entry.key.toLowerCase().trim());
+
               return NeoTagBadge(
                 name: entry.key,
                 count: entry.value,
                 color: NeoTagBadge.getColor(entry.key, index),
                 tilt: tilt,
+                isSelected: isTagSelected,
                 onTap: () {
-                  _searchController.text = entry.key;
+                  HapticFeedback.lightImpact();
+                  setState(() {
+                    if (isTagSelected) {
+                      _selectedTagFilter = null;
+                    } else {
+                      _selectedTagFilter = entry.key;
+                    }
+                  });
                 },
               );
             }),
           ),
         ),
+        if (_selectedTagFilter != null) ...[
+          const SizedBox(height: 28),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(
+                    Icons.bookmark_outline,
+                    size: 18,
+                    color: AppTheme.border,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'TAGGED #${_selectedTagFilter!.toUpperCase()}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.border,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: AppTheme.border, width: 1.5),
+                    ),
+                    child: Text(
+                      '${matchingBookmarks.length}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w900,
+                        color: AppTheme.border,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  setState(() => _selectedTagFilter = null);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.border, width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(1.5, 1.5),
+                      ),
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.close, size: 14, color: AppTheme.border),
+                      SizedBox(width: 4),
+                      Text(
+                        'Clear',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.border,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (matchingBookmarks.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  children: [
+                    const Icon(Icons.bookmark_border,
+                        size: 40, color: Colors.black26),
+                    const SizedBox(height: 8),
+                    Text(
+                      'No bookmarks found with tag #${_selectedTagFilter}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Colors.black45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: AppDimensions.gridSpacingMd,
+                mainAxisSpacing: AppDimensions.gridSpacingMd,
+                mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
+              ),
+              itemCount: matchingBookmarks.length,
+              itemBuilder: (context, index) {
+                final b = matchingBookmarks[index];
+                return BookmarkGridItem(
+                  bookmark: b,
+                  showCollectionPill: true,
+                );
+              },
+            ),
+        ] else ...[
+          const SizedBox(height: 24),
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.touch_app_outlined,
+                      size: 16, color: Colors.black38),
+                  SizedBox(width: 6),
+                  Text(
+                    'Tap any tag above to view its bookmarks',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black45,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -625,11 +815,30 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSearchResults(List<Bookmark> allBookmarks, double bottomInset) {
+    final isTagSearch = _searchQuery.startsWith('#');
+    final tagQuery = isTagSearch
+        ? _searchQuery.substring(1).trim().toLowerCase()
+        : '';
+
     final results = allBookmarks.where((b) {
+      if (isTagSearch) {
+        if (tagQuery.isEmpty) return b.tags.isNotEmpty;
+        return b.tags.any((t) {
+          final clean = t.startsWith('#')
+              ? t.substring(1).trim().toLowerCase()
+              : t.trim().toLowerCase();
+          return clean == tagQuery;
+        });
+      }
+
       final titleMatch = (b.title ?? '').toLowerCase().contains(_searchQuery);
       final urlMatch = b.url.toLowerCase().contains(_searchQuery);
-      final tagMatch =
-          b.tags.any((t) => t.toLowerCase().contains(_searchQuery));
+      final tagMatch = b.tags.any((t) {
+        final clean = t.startsWith('#')
+            ? t.substring(1).trim().toLowerCase()
+            : t.trim().toLowerCase();
+        return clean.contains(_searchQuery);
+      });
       return titleMatch || urlMatch || tagMatch;
     }).toList();
 
@@ -745,6 +954,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 color: AppTheme.border,
                                 size: AppDimensions.iconSizeLg,
                               ),
+                              suffixIcon: _searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.close,
+                                          color: AppTheme.border, size: 20),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        setState(() {
+                                          _searchQuery = '';
+                                        });
+                                      },
+                                    )
+                                  : null,
                             ),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
