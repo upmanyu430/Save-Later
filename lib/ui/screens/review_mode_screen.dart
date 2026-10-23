@@ -700,7 +700,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                         fontFamily: collection.iconFontFamily,
                                       ),
                                       size: 10,
-                                      color: AppTheme.border,
+                                      color: ThemeData.estimateBrightnessForColor(collectionColor) == Brightness.dark
+                                          ? Colors.white
+                                          : AppTheme.border,
                                     ),
                                   )
                                 : null,

@@ -98,7 +98,13 @@ class FolderBox extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Icon(icon, color: AppTheme.border, size: AppDimensions.iconSizeLg),
+                      child: Icon(
+                        icon,
+                        color: ThemeData.estimateBrightnessForColor(folderColor) == Brightness.dark
+                            ? Colors.white
+                            : AppTheme.border,
+                        size: AppDimensions.iconSizeLg,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 8),

@@ -454,7 +454,11 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                                   child: Icon(
                                     item.icon,
                                     size: 24,
-                                    color: AppTheme.border,
+                                    color: isSelected &&
+                                            ThemeData.estimateBrightnessForColor(selectedColor) ==
+                                                Brightness.dark
+                                        ? Colors.white
+                                        : AppTheme.border,
                                   ),
                                 ),
                               ),
@@ -471,31 +475,40 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                 horizontal: AppDimensions.paddingXl,
                 vertical: AppDimensions.paddingMd,
               ),
-              child: NeoButton(
-                onPressed: () => _selectAndReturn(_selectedIconCode),
-                color: selectedColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        IconData(_selectedIconCode, fontFamily: 'MaterialIcons'),
-                        size: 20,
-                        color: AppTheme.border,
+              child: Builder(
+                builder: (context) {
+                  final isDarkBtn =
+                      ThemeData.estimateBrightnessForColor(selectedColor) ==
+                          Brightness.dark;
+                  final btnTextColor = isDarkBtn ? Colors.white : AppTheme.border;
+
+                  return NeoButton(
+                    onPressed: () => _selectAndReturn(_selectedIconCode),
+                    color: selectedColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            IconData(_selectedIconCode, fontFamily: 'MaterialIcons'),
+                            size: 20,
+                            color: btnTextColor,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Select Icon',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: btnTextColor,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
-                      const Text(
-                        'Select Icon',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.border,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ],

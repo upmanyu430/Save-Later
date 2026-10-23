@@ -368,7 +368,15 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                       ]
                                     : null,
                               ),
-                              child: Icon(icon, size: 20),
+                              child: Icon(
+                                icon,
+                                size: 20,
+                                color: isSelected &&
+                                        ThemeData.estimateBrightnessForColor(currentColor) ==
+                                            Brightness.dark
+                                    ? Colors.white
+                                    : AppTheme.border,
+                              ),
                             ),
                           );
                         },
