@@ -8,8 +8,10 @@ import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_tag_badge.dart';
 import '../widgets/bookmark_grid_item.dart';
+import '../widgets/collection_grid_item.dart';
 import '../../providers/providers.dart';
 import '../../models/bookmark.dart';
+import '../../models/collection.dart';
 import 'package:save_later/config/app_constants.dart';
 
 enum LibraryTab {
@@ -157,13 +159,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       color: AppTheme.border,
                       width: 2.0,
                     ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(1.5, 1.5),
-                        blurRadius: 0,
-                      ),
-                    ],
+                    boxShadow: _selectedTab == LibraryTab.overview
+                        ? const [
+                            BoxShadow(
+                              color: AppTheme.border,
+                              offset: Offset(2.0, 2.0),
+                              blurRadius: 0,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Text(
                     l10n.overview,
@@ -187,28 +191,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 count: '$collectionsCount',
                 label: l10n.collections,
                 isSelected: _selectedTab == LibraryTab.collections,
-                onTap: () => setState(() => _selectedTab = LibraryTab.collections),
+                onTap: () => setState(() => _selectedTab =
+                    _selectedTab == LibraryTab.collections
+                        ? LibraryTab.overview
+                        : LibraryTab.collections),
               ),
               _buildStatTab(
                 icon: Icons.link,
                 count: '$bookmarksCount',
                 label: l10n.saves,
                 isSelected: _selectedTab == LibraryTab.saves,
-                onTap: () => setState(() => _selectedTab = LibraryTab.saves),
+                onTap: () => setState(() => _selectedTab =
+                    _selectedTab == LibraryTab.saves
+                        ? LibraryTab.overview
+                        : LibraryTab.saves),
               ),
               _buildStatTab(
                 icon: Icons.push_pin_outlined,
                 count: '$pinnedCount',
                 label: l10n.pinned,
                 isSelected: _selectedTab == LibraryTab.pinned,
-                onTap: () => setState(() => _selectedTab = LibraryTab.pinned),
+                onTap: () => setState(() => _selectedTab =
+                    _selectedTab == LibraryTab.pinned
+                        ? LibraryTab.overview
+                        : LibraryTab.pinned),
               ),
               _buildStatTab(
                 icon: Icons.local_offer_outlined,
                 count: '$tagsCount',
                 label: l10n.tags,
                 isSelected: _selectedTab == LibraryTab.tags,
-                onTap: () => setState(() => _selectedTab = LibraryTab.tags),
+                onTap: () => setState(() => _selectedTab =
+                    _selectedTab == LibraryTab.tags
+                        ? LibraryTab.overview
+                        : LibraryTab.tags),
               ),
             ],
           ),
@@ -242,6 +258,229 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return (availableWidth -
             (columnCount - 1) * AppDimensions.gridSpacingMd) /
         columnCount;
+  }
+
+  Widget _buildCollectionsView(
+    List<BookmarkCollection> collections,
+    List<Bookmark> allBookmarks,
+    AppLocalizations l10n,
+  ) {
+    if (collections.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40),
+          child: Column(
+            children: [
+              const Icon(Icons.folder_open_outlined,
+                  size: 48, color: Colors.black26),
+              const SizedBox(height: 12),
+              Text(
+                l10n.myCollections,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: Colors.black45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.folder_outlined,
+                size: 18, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.collections.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppDimensions.gridSpacingMd,
+            mainAxisSpacing: AppDimensions.gridSpacingLg,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: collections.length,
+          itemBuilder: (context, index) {
+            final col = collections[index];
+            final colBookmarks = allBookmarks.where((b) {
+              return b.collection.value?.id == col.id;
+            }).toList();
+            final hasNew = colBookmarks.any((b) => !b.isRead);
+            final newCount = colBookmarks.where((b) => !b.isRead).length;
+
+            return CollectionGridItem(
+              collection: col,
+              itemCount: colBookmarks.length,
+              hasNewItems: hasNew,
+              newCount: newCount,
+              onTap: () =>
+                  context.push('/collection/${col.id}', extra: col),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSavesView(
+    List<Bookmark> allBookmarks,
+    AppLocalizations l10n,
+  ) {
+    if (allBookmarks.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 40),
+          child: Column(
+            children: [
+              Icon(Icons.bookmark_border, size: 48, color: Colors.black26),
+              SizedBox(height: 12),
+              Text(
+                'No saves yet',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: Colors.black45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.link, size: 18, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.saves.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppDimensions.gridSpacingMd,
+            mainAxisSpacing: AppDimensions.gridSpacingMd,
+            mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
+          ),
+          itemCount: allBookmarks.length,
+          itemBuilder: (context, index) {
+            final b = allBookmarks[index];
+            return BookmarkGridItem(
+              bookmark: b,
+              showCollectionPill: true,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPinnedView(
+    List<Bookmark> allBookmarks,
+    AppLocalizations l10n,
+  ) {
+    final pinned = allBookmarks.where((b) => b.isPinned).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.push_pin_outlined,
+                size: 18, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.pinned.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        if (pinned.isEmpty)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+              child: Column(
+                children: [
+                  Icon(Icons.push_pin_outlined,
+                      size: 48, color: Colors.black26),
+                  SizedBox(height: 12),
+                  Text(
+                    'No pinned saves',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      color: Colors.black45,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Pin your favorite saves to quickly find them here',
+                    style: TextStyle(fontSize: 13, color: Colors.black38),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: AppDimensions.gridSpacingMd,
+              mainAxisSpacing: AppDimensions.gridSpacingMd,
+              mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
+            ),
+            itemCount: pinned.length,
+            itemBuilder: (context, index) {
+              final b = pinned[index];
+              return BookmarkGridItem(
+                bookmark: b,
+                showCollectionPill: true,
+              );
+            },
+          ),
+      ],
+    );
   }
 
   Widget _buildTagsView(List<Bookmark> allBookmarks) {
@@ -450,7 +689,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final collectionsAsync = ref.watch(allCollectionsProvider);
     final bookmarksAsync = ref.watch(bookmarksProvider);
 
-    final collectionsCount = collectionsAsync.valueOrNull?.length ?? 0;
+    final collections = collectionsAsync.valueOrNull ?? [];
+    final collectionsCount = collections.length;
     final allBookmarks = bookmarksAsync.valueOrNull ?? [];
     final bookmarksCount = allBookmarks.length;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
@@ -558,6 +798,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             const SizedBox(height: AppDimensions.paddingXxl),
                             if (_selectedTab == LibraryTab.tags)
                               _buildTagsView(allBookmarks)
+                            else if (_selectedTab == LibraryTab.collections)
+                              _buildCollectionsView(
+                                collections,
+                                allBookmarks,
+                                l10n,
+                              )
+                            else if (_selectedTab == LibraryTab.saves)
+                              _buildSavesView(allBookmarks, l10n)
+                            else if (_selectedTab == LibraryTab.pinned)
+                              _buildPinnedView(allBookmarks, l10n)
                             else
                               _buildOverviewView(allBookmarks, l10n),
                           ],

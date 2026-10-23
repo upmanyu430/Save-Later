@@ -207,6 +207,99 @@ void main() {
       expect(find.text('Tokyo Trip Guide'), findsNothing);
     });
 
+    testWidgets('Tapping Collections stat switches to Collections view', (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final col1 = BookmarkCollection()
+        ..id = 1
+        ..name = 'Design Resources'
+        ..colorHex = 'FF5733'
+        ..iconCodePoint = Icons.folder_outlined.codePoint
+        ..iconFontFamily = 'MaterialIcons';
+      fakeRepo.collections.add(col1);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: buildTestApp(
+            home: const SearchScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Tap on Collections stat tab
+      await tester.tap(find.text('Collections'));
+      await tester.pumpAndSettle();
+
+      // Collections header and item should be visible
+      expect(find.text('COLLECTIONS'), findsOneWidget);
+      expect(find.text('Design Resources'), findsOneWidget);
+    });
+
+    testWidgets('Tapping Saves stat switches to Saves view with all saves', (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final b1 = Bookmark()
+        ..id = 1
+        ..title = 'Unique Save Title'
+        ..url = 'https://example.com/save';
+      fakeRepo.bookmarks.add(b1);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: buildTestApp(
+            home: const SearchScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Tap on Saves stat tab
+      await tester.tap(find.text('Saves'));
+      await tester.pumpAndSettle();
+
+      // Saves header and bookmark should be visible
+      expect(find.text('SAVES'), findsOneWidget);
+      expect(find.text('Unique Save Title'), findsOneWidget);
+    });
+
+    testWidgets('Tapping Pinned stat switches to Pinned view or empty state', (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final b1 = Bookmark()
+        ..id = 1
+        ..title = 'Pinned Bookmark'
+        ..url = 'https://example.com/pinned'
+        ..isPinned = true;
+      fakeRepo.bookmarks.add(b1);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: buildTestApp(
+            home: const SearchScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Tap on Pinned stat tab
+      await tester.tap(find.text('Pinned'));
+      await tester.pumpAndSettle();
+
+      // Pinned header and bookmark should be visible
+      expect(find.text('PINNED'), findsOneWidget);
+      expect(find.text('Pinned Bookmark'), findsOneWidget);
+    });
+
     testWidgets('When library has no tags, sample tags from design mockup are displayed', (tester) async {
       final fakeRepo = FakeIsarRepository();
 
