@@ -679,6 +679,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusSm),
                         border: Border.all(color: AppTheme.border, width: 2),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppTheme.border,
+                            offset: Offset(2.5, 2.5),
+                            blurRadius: 0,
+                            spreadRadius: 0,
+                          ),
+                        ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

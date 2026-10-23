@@ -257,4 +257,54 @@ void main() {
     expect(find.text('Viewed 2'), findsOneWidget);
     expect(bookmark2.isRead, isTrue);
   });
+
+  testWidgets('ReviewModeScreen collection badge has neo-brutalist shadow', (tester) async {
+    final fakeRepo = FakeIsarRepository();
+    final bookmark1 = Bookmark()
+      ..id = 1
+      ..url = 'https://example.com/1'
+      ..title = 'Bookmark 1'
+      ..isRead = false;
+
+    fakeRepo.bookmarks.add(bookmark1);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+          unsortedBookmarksProvider.overrideWith((ref) => Future.value([bookmark1])),
+        ],
+        child: buildTestApp(
+          home: const ReviewModeScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Find the collection badge container (contains "Unsorted")
+    final badgeTextFinder = find.text('Unsorted');
+    expect(badgeTextFinder, findsOneWidget);
+
+    final containerFinder = find.ancestor(
+      of: badgeTextFinder,
+      matching: find.byType(Container),
+    );
+
+    // Verify the decoration has the 2.5 offset drop shadow
+    bool hasMatchingShadow = false;
+    for (final element in containerFinder.evaluate()) {
+      final widget = element.widget as Container;
+      if (widget.decoration is BoxDecoration) {
+        final boxDec = widget.decoration as BoxDecoration;
+        if (boxDec.boxShadow != null &&
+            boxDec.boxShadow!.any((s) => s.offset == const Offset(2.5, 2.5))) {
+          hasMatchingShadow = true;
+          break;
+        }
+      }
+    }
+
+    expect(hasMatchingShadow, isTrue);
+  });
 }
