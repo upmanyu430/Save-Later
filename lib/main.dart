@@ -98,11 +98,18 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/search',
-      pageBuilder: (context, state) => _buildPageWithTransition(
-        context: context,
-        state: state,
-        child: const SearchScreen(),
-      ),
+      pageBuilder: (context, state) {
+        final tabStr = state.uri.queryParameters['tab'] ??
+            (state.extra is Map ? (state.extra as Map)['tab'] as String? : null);
+        final initialTab = tabStr == 'tags'
+            ? LibraryTab.tags
+            : LibraryTab.overview;
+        return _buildPageWithTransition(
+          context: context,
+          state: state,
+          child: SearchScreen(initialTab: initialTab),
+        );
+      },
     ),
     GoRoute(
       path: '/bookmark/:id',

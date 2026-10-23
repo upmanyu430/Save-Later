@@ -291,6 +291,10 @@
     "description": "Fallback text when source is unknown"
   },
   "yourLibrary": "YOUR LIBRARY",
+  "overview": "Overview",
+  "@overview": {
+    "description": "Button to switch back to library overview"
+  },
   "@yourLibrary": {
     "description": "Header for library stats"
   },
