@@ -420,9 +420,7 @@ class _CollectionRadialMenuOverlayWidgetState
                       _origin.dy + (pos.dy - _origin.dy) * _anim.value;
 
                   final buttonColor = isSelected ? action.color : Colors.white;
-                  final iconColor = buttonColor.computeLuminance() < 0.5
-                      ? Colors.white
-                      : Colors.black;
+                  final iconColor = isSelected ? Colors.white : Colors.black;
 
                   return Positioned(
                     left: currentDx - buttonRadius,
