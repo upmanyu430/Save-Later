@@ -18,8 +18,12 @@ class MockSharePlatform extends Fake
   String? sharedText;
 
   @override
-  Future<ShareResult> share(ShareParams params) async {
-    sharedText = params.text;
+  Future<ShareResult> share(
+    String text, {
+    String? subject,
+    Rect? sharePositionOrigin,
+  }) async {
+    sharedText = text;
     return const ShareResult('success', ShareResultStatus.success);
   }
 }
@@ -102,14 +106,11 @@ Widget buildTestApp({required Widget home}) {
 }
 
 void main() {
-  final mockShare = MockSharePlatform();
-
-  setUpAll(() {
-    SharePlatform.instance = mockShare;
-  });
+  late MockSharePlatform mockShare;
 
   setUp(() {
-    mockShare.sharedText = null;
+    mockShare = MockSharePlatform();
+    SharePlatform.instance = mockShare;
   });
 
   testWidgets('Tapping Share Collection in menu modal shares all bookmarks in the collection', (tester) async {

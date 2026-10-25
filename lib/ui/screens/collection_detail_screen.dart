@@ -293,10 +293,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     if (!mounted) return;
 
     if (bookmarks.isEmpty) {
-      await SharePlus.instance.share(ShareParams(text: 'Collection: $collectionName'));
+      await Share.share('Collection: $collectionName');
     } else {
       final urls = bookmarks.map((b) => b.url).join('\n');
-      await SharePlus.instance.share(ShareParams(text: '$collectionName:\n$urls'));
+      await Share.share('$collectionName:\n$urls');
     }
   }
 
@@ -304,7 +304,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     if (_selectedIds.isEmpty) return;
     final selectedBookmarks = allBookmarks.where((b) => _selectedIds.contains(b.id)).toList();
     final urls = selectedBookmarks.map((b) => b.url).join('\n');
-    SharePlus.instance.share(ShareParams(text: urls));
+    Share.share(urls);
   }
   
   void _deleteSelected(List<Bookmark> allBookmarks) async {

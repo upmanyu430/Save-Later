@@ -743,7 +743,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     Icons.share_outlined,
                                     l10n.share,
                                     () {
-                                      SharePlus.instance.share(ShareParams(text: bookmark.url));
+                                      Share.share(bookmark.url);
                                     },
                                     color: const Color(0xFF7B61FF),
                                   ),

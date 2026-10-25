@@ -82,10 +82,10 @@ class CollectionRadialMenu {
               .read(repositoryProvider)
               .getBookmarksByCollection(collection.id);
           if (bookmarks.isEmpty) {
-            SharePlus.instance.share(ShareParams(text: 'Collection: ${collection.name}'));
+            Share.share('Collection: ${collection.name}');
           } else {
             final urls = bookmarks.map((b) => b.url).join('\n');
-            SharePlus.instance.share(ShareParams(text: '${collection.name}:\n$urls'));
+            Share.share('${collection.name}:\n$urls');
           }
         },
       ),
