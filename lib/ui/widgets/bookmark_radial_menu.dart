@@ -91,7 +91,7 @@ class BookmarkRadialMenu {
         color: const Color(0xFF7B61FF),
         labelColor: const Color(0xFF7B61FF),
         onTap: () {
-          Share.share(bookmark.url);
+          SharePlus.instance.share(ShareParams(text: bookmark.url));
         },
       ),
       BookmarkRadialMenuAction(
