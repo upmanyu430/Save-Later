@@ -382,7 +382,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               children: [
                 // Top Custom App Bar
                 Padding(
-                  padding: const EdgeInsets.all(AppDimensions.paddingLg),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppDimensions.paddingXl,
+                    AppDimensions.paddingLg,
+                    AppDimensions.paddingXl,
+                    AppDimensions.paddingSm,
+                  ),
                   child: _isSelectMode
                       ? SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
@@ -543,7 +548,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                       AppDimensions.paddingXl,
                                       AppDimensions.paddingSm,
                                       AppDimensions.paddingXl,
-                                      AppDimensions.paddingMd,
+                                      0,
                                     ),
                                     sliver: SliverGrid(
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -583,9 +588,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                 if (pinnedBookmarks.isNotEmpty) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: AppDimensions.paddingXl,
-                                        vertical: AppDimensions.paddingSm,
+                                      padding: EdgeInsets.fromLTRB(
+                                        AppDimensions.paddingXl,
+                                        subCollections.isNotEmpty
+                                            ? AppDimensions.paddingMd
+                                            : AppDimensions.paddingSm,
+                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingSm,
                                       ),
                                       child: Text(
                                         'PINNED (${pinnedBookmarks.length})',
@@ -602,7 +611,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                       AppDimensions.paddingXl,
                                       AppDimensions.paddingSm,
                                       AppDimensions.paddingXl,
-                                      AppDimensions.paddingMd,
+                                      0,
                                     ),
                                     sliver: SliverGrid(
                                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -624,7 +633,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                       padding: EdgeInsets.fromLTRB(
                                         AppDimensions.paddingXl,
                                         (pinnedBookmarks.isNotEmpty || subCollections.isNotEmpty)
-                                            ? AppDimensions.paddingLg
+                                            ? AppDimensions.paddingMd
                                             : AppDimensions.paddingSm,
                                         AppDimensions.paddingXl,
                                         AppDimensions.paddingSm,
@@ -655,7 +664,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                       padding: EdgeInsets.fromLTRB(
                                         AppDimensions.paddingXl,
                                         (pinnedBookmarks.isNotEmpty || subCollections.isNotEmpty)
-                                            ? AppDimensions.paddingLg
+                                            ? AppDimensions.paddingMd
                                             : AppDimensions.paddingSm,
                                         AppDimensions.paddingXl,
                                         AppDimensions.paddingSm,
