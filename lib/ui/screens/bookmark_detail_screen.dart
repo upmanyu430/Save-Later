@@ -1356,7 +1356,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
   @override
   Widget build(BuildContext context) {
     final idleFgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
-    final activeFgColor = widget.color.computeLuminance() < 0.35 ? Colors.white : AppTheme.border;
+    const activeFgColor = Colors.white;
 
     return Expanded(
       child: Semantics(

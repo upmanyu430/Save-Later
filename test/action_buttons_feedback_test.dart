@@ -302,13 +302,13 @@ testWidgets('ActionStripButton transitions foreground to high-contrast white whe
     await deleteGesture.up();
     await tester.pumpAndSettle();
 
-    // Tap down on Refresh (luminance >= 0.35)
+    // Tap down on Refresh
     final refreshGesture = await tester.startGesture(tester.getCenter(find.text('Refresh')));
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 70));
 
-    // Should keep AppTheme.border for high contrast on light background
-    expect(getLabelText('Refresh').style?.color, equals(AppTheme.border));
+    // All buttons transition icon and label to white on tap
+    expect(getLabelText('Refresh').style?.color, equals(Colors.white));
     await refreshGesture.up();
     await tester.pumpAndSettle();
   });
