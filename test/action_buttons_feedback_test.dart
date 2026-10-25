@@ -9,6 +9,7 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/screens/bookmark_detail_screen.dart';
+import 'package:save_later/theme/app_theme.dart';
 
 class FakeIsarRepository implements IsarRepository {
   @override
@@ -104,12 +105,12 @@ void main() {
     );
     expect(actionButtons, findsAtLeastNWidgets(4));
 
-    // Verify assigned highlight feedback colors
+    // Verify assigned highlight feedback colors (bold vibrant action palette)
     final btnWidgets = tester.widgetList<ActionStripButton>(actionButtons).toList();
-    expect(btnWidgets[0].color, equals(const Color(0xFFE8E0FF)));
+    expect(btnWidgets[0].color, equals(const Color(0xFF7B61FF)));
     expect(btnWidgets[1].color, equals(const Color(0xFFFDD164)));
-    expect(btnWidgets[2].color, equals(const Color(0xFFD3F4E4)));
-    expect(btnWidgets[3].color, equals(const Color(0xFFFFD8DE)));
+    expect(btnWidgets[2].color, equals(const Color(0xFF26D5A8)));
+    expect(btnWidgets[3].color, equals(const Color(0xFFEF476F)));
 
     // Verify resting background is white for all buttons
     Color getButtonBgColor(String text) {
@@ -258,5 +259,57 @@ testWidgets('ActionStripButton exhibits mechanical depression with top/left rece
 
     // Tap callback should not be invoked on drag cancel
     expect(tapped, isFalse);
+  });
+
+
+testWidgets('ActionStripButton transitions foreground to high-contrast white when background is dark/vibrant', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Row(
+            children: [
+              ActionStripButton(
+                icon: Icons.delete_outline,
+                label: 'Delete',
+                color: const Color(0xFFEF476F),
+                isDestructive: true,
+                onTap: () {},
+              ),
+              ActionStripButton(
+                icon: Icons.refresh,
+                label: 'Refresh',
+                color: const Color(0xFF26D5A8),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Initial state: Delete has red text/icon, Refresh has black (AppTheme.border)
+    Text getLabelText(String label) => tester.widget<Text>(find.text(label));
+    expect(getLabelText('Delete').style?.color, equals(const Color(0xFFC0392B)));
+    expect(getLabelText('Refresh').style?.color, equals(AppTheme.border));
+
+    // Tap down on Delete (luminance < 0.35)
+    final deleteGesture = await tester.startGesture(tester.getCenter(find.text('Delete')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 70));
+
+    // Should transition to white for high contrast
+    expect(getLabelText('Delete').style?.color, equals(Colors.white));
+    await deleteGesture.up();
+    await tester.pumpAndSettle();
+
+    // Tap down on Refresh (luminance >= 0.35)
+    final refreshGesture = await tester.startGesture(tester.getCenter(find.text('Refresh')));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 70));
+
+    // Should keep AppTheme.border for high contrast on light background
+    expect(getLabelText('Refresh').style?.color, equals(AppTheme.border));
+    await refreshGesture.up();
+    await tester.pumpAndSettle();
   });
 }

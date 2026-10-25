@@ -745,7 +745,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     () {
                                       Share.share(bookmark.url);
                                     },
-                                    color: const Color(0xFFE8E0FF),
+                                    color: const Color(0xFF7B61FF),
                                   ),
                                   _buildSegmentDivider(),
                                   _buildActionItem(
@@ -767,7 +767,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         Navigator.of(context).pop();
                                       }
                                     },
-                                    color: const Color(0xFFD3F4E4),
+                                    color: const Color(0xFF26D5A8),
                                   ),
                                   _buildSegmentDivider(),
                                   _buildActionItem(
@@ -782,7 +782,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         context.pop();
                                       }
                                     },
-                                    color: const Color(0xFFFFD8DE),
+                                    color: const Color(0xFFEF476F),
                                     isDestructive: true,
                                   ),
                                 ],
@@ -1355,7 +1355,8 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final fgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    final idleFgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    final activeFgColor = widget.color.computeLuminance() < 0.35 ? Colors.white : AppTheme.border;
 
     return Expanded(
       child: Semantics(
@@ -1387,6 +1388,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
               builder: (context, child) {
                 final t = _animation.value;
                 final backgroundColor = Color.lerp(Colors.white, widget.color, t)!;
+                final fgColor = Color.lerp(idleFgColor, activeFgColor, t)!;
                 final scale = 1.0 - (t * 0.04);
                 final offsetX = t * 1.5;
                 final offsetY = t * 3.0;
