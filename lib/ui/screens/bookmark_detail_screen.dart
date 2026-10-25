@@ -1137,7 +1137,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           Expanded(
                             child: NeoButton(
                               onPressed: () => Navigator.pop(ctx, true),
-                              color: const Color(0xFFD3F4E4),
+                              color: const Color(0xFF26D5A8),
                               borderRadius: 12.0,
                               borderWidth: 2.5,
                               shadowOffset: 3.0,
