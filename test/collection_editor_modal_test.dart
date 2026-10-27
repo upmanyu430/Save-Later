@@ -11,6 +11,7 @@ import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/ui/screens/icon_picker_screen.dart';
 import 'package:save_later/ui/widgets/collection_editor_modal.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
+import 'package:save_later/theme/app_theme.dart';
 
 class MockModalRepository implements IsarRepository {
   final List<BookmarkCollection> collections = [];
@@ -235,6 +236,38 @@ void main() {
       find.ancestor(of: buttonFinder, matching: find.byType(SizedBox)).first,
     );
     expect(sizedBox.height, 50.4);
+  });
+
+  testWidgets('Unselected colors and icons have light borders, selected have dark borders', (tester) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        child: const Scaffold(
+          body: CollectionEditorModal(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final containers = tester.widgetList<Container>(find.byType(Container)).where((c) {
+      if (c.decoration is BoxDecoration) {
+        final box = c.decoration as BoxDecoration;
+        return box.border != null;
+      }
+      return false;
+    }).toList();
+
+    final lightBorderBoxes = containers.where((c) {
+      final border = (c.decoration as BoxDecoration).border as Border?;
+      return border?.top.color == Colors.black.withValues(alpha: 0.15);
+    }).toList();
+
+    final darkBorderBoxes = containers.where((c) {
+      final border = (c.decoration as BoxDecoration).border as Border?;
+      return border?.top.color == AppTheme.border;
+    }).toList();
+
+    expect(lightBorderBoxes.isNotEmpty, isTrue);
+    expect(darkBorderBoxes.isNotEmpty, isTrue);
   });
 }
 

@@ -281,7 +281,12 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                           decoration: BoxDecoration(
                             color: color,
                             borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                            border: Border.all(color: AppTheme.border, width: 2),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppTheme.border
+                                  : Colors.black.withValues(alpha: 0.15),
+                              width: isSelected ? 2 : 1.5,
+                            ),
                             boxShadow: isSelected
                                 ? const [
                                     BoxShadow(
@@ -339,7 +344,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                                  border: Border.all(color: AppTheme.border, width: 2),
+                                  border: Border.all(
+                                    color: Colors.black.withValues(alpha: 0.15),
+                                    width: 1.5,
+                                  ),
                                 ),
                                 child: const Icon(Icons.more_horiz, size: 20),
                               ),
@@ -358,7 +366,12 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               decoration: BoxDecoration(
                                 color: isSelected ? currentColor : Colors.transparent,
                                 borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                                border: Border.all(color: AppTheme.border, width: 2),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppTheme.border
+                                      : Colors.black.withValues(alpha: 0.15),
+                                  width: isSelected ? 2 : 1.5,
+                                ),
                                 boxShadow: isSelected
                                     ? const [
                                         BoxShadow(

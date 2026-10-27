@@ -447,8 +447,10 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                                     color: isSelected ? selectedColor : Colors.white,
                                     borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                                     border: Border.all(
-                                      color: AppTheme.border,
-                                      width: isSelected ? 3 : 2,
+                                      color: isSelected
+                                          ? AppTheme.border
+                                          : Colors.black.withValues(alpha: 0.15),
+                                      width: isSelected ? 2 : 1.5,
                                     ),
                                   ),
                                   child: Icon(
