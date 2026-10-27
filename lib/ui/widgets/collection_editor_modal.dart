@@ -390,21 +390,26 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 Builder(
                   builder: (context) {
                     final isNameEmpty = _nameController.text.trim().isEmpty;
-                    return NeoButton(
-                      onPressed: !isNameEmpty ? _save : () {},
-                      color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Center(
-                        child: Text(
-                          isEditing
-                              ? AppLocalizations.of(context)!.updateCollection
-                              : (widget.parentId != null
-                                  ? AppLocalizations.of(context)!.createSubCollectionButton
-                                  : AppLocalizations.of(context)!.createCollection),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: !isNameEmpty ? AppTheme.border : Colors.black38,
+                    return SizedBox(
+                      height: 50.4,
+                      width: double.infinity,
+                      child: NeoButton(
+                        onPressed: !isNameEmpty ? _save : () {},
+                        color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
+                        padding: EdgeInsets.zero,
+                        borderRadius: AppDimensions.radiusMd,
+                        child: Center(
+                          child: Text(
+                            isEditing
+                                ? AppLocalizations.of(context)!.updateCollection
+                                : (widget.parentId != null
+                                    ? AppLocalizations.of(context)!.createSubCollectionButton
+                                    : AppLocalizations.of(context)!.createCollection),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: !isNameEmpty ? AppTheme.border : Colors.black38,
+                            ),
                           ),
                         ),
                       ),

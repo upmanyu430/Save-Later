@@ -10,6 +10,7 @@ import 'package:save_later/providers/providers.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/ui/screens/icon_picker_screen.dart';
 import 'package:save_later/ui/widgets/collection_editor_modal.dart';
+import 'package:save_later/ui/widgets/neo_button.dart';
 
 class MockModalRepository implements IsarRepository {
   final List<BookmarkCollection> collections = [];
@@ -215,6 +216,25 @@ void main() {
     expect(find.byIcon(Icons.sports_esports_outlined), findsOneWidget);
     // Since custom icon is selected, more_horiz is replaced by the custom icon
     expect(find.byIcon(Icons.more_horiz), findsNothing);
+  });
+
+  testWidgets('CollectionEditorModal save button has height 50.4 matching URL bar', (tester) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        child: const Scaffold(
+          body: CollectionEditorModal(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final buttonFinder = find.widgetWithText(NeoButton, 'Create collection');
+    expect(buttonFinder, findsOneWidget);
+
+    final sizedBox = tester.widget<SizedBox>(
+      find.ancestor(of: buttonFinder, matching: find.byType(SizedBox)).first,
+    );
+    expect(sizedBox.height, 50.4);
   });
 }
 
