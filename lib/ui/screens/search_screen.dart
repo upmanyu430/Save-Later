@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
@@ -947,9 +948,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         child: SizedBox(
                           height: 50.4,
                           child: NeoBox(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 0,
+                            padding: const EdgeInsets.only(
+                              left: 6,
+                              right: 8,
                             ),
                             color: Colors.white,
                             borderRadius: 14.0,
@@ -960,23 +961,29 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 isDense: true,
-                                hintText: l10n.findCollectionsOrSavesHint,
-                                hintStyle: const TextStyle(
-                                  color: Colors.black38,
-                                  fontWeight: FontWeight.w600,
-                                ),
                                 border: InputBorder.none,
-                                icon: const Icon(
+                                contentPadding: EdgeInsets.zero,
+                                prefixIcon: const Icon(
                                   Icons.search,
                                   color: AppTheme.border,
-                                  size: AppDimensions.iconSizeLg,
+                                  size: 20,
+                                ),
+                                prefixIconConstraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                                hintText: l10n.findCollectionsOrSavesHint,
+                                hintStyle: GoogleFonts.bricolageGrotesque(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black38,
                                 ),
                                 suffixIcon: _searchController.text.isNotEmpty
                                     ? IconButton(
                                         padding: EdgeInsets.zero,
                                         constraints: const BoxConstraints(
-                                          minWidth: 40,
-                                          minHeight: 40,
+                                          minWidth: 32,
+                                          minHeight: 32,
                                         ),
                                         icon: const Icon(Icons.close,
                                             color: AppTheme.border, size: 20),
@@ -988,8 +995,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                         },
                                       )
                                     : null,
+                                suffixIconConstraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
                               ),
-                              style: const TextStyle(
+                              style: GoogleFonts.bricolageGrotesque(
+                                fontSize: 13.5,
                                 fontWeight: FontWeight.w600,
                                 color: AppTheme.border,
                               ),
@@ -1003,7 +1015,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         child: NeoButton(
                           onPressed: () => context.pop(),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
+                            horizontal: 14,
                             vertical: 0,
                           ),
                           color: Colors.white,
@@ -1012,8 +1024,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           shadowOffset: 2.0,
                           child: Text(
                             l10n.cancel,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: GoogleFonts.bricolageGrotesque(
+                              fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: AppTheme.border,
                             ),
