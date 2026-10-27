@@ -944,66 +944,79 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: NeoBox(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 0,
-                          ),
-                          color: Colors.white,
-                          borderRadius: 14.0,
-                          borderWidth: 2.5,
-                          shadowOffset: 2.0,
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              hintText: l10n.findCollectionsOrSavesHint,
-                              hintStyle: const TextStyle(
-                                color: Colors.black38,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              border: InputBorder.none,
-                              icon: const Icon(
-                                Icons.search,
-                                color: AppTheme.border,
-                                size: AppDimensions.iconSizeLg,
-                              ),
-                              suffixIcon: _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.close,
-                                          color: AppTheme.border, size: 20),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        setState(() {
-                                          _searchQuery = '';
-                                        });
-                                      },
-                                    )
-                                  : null,
+                        child: SizedBox(
+                          height: 50.4,
+                          child: NeoBox(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 0,
                             ),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.border,
+                            color: Colors.white,
+                            borderRadius: 14.0,
+                            borderWidth: 2.5,
+                            shadowOffset: 2.0,
+                            child: TextField(
+                              controller: _searchController,
+                              textAlignVertical: TextAlignVertical.center,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                hintText: l10n.findCollectionsOrSavesHint,
+                                hintStyle: const TextStyle(
+                                  color: Colors.black38,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                border: InputBorder.none,
+                                icon: const Icon(
+                                  Icons.search,
+                                  color: AppTheme.border,
+                                  size: AppDimensions.iconSizeLg,
+                                ),
+                                suffixIcon: _searchController.text.isNotEmpty
+                                    ? IconButton(
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 40,
+                                          minHeight: 40,
+                                        ),
+                                        icon: const Icon(Icons.close,
+                                            color: AppTheme.border, size: 20),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() {
+                                            _searchQuery = '';
+                                          });
+                                        },
+                                      )
+                                    : null,
+                              ),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.border,
+                              ),
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingMd),
-                      NeoButton(
-                        onPressed: () => context.pop(),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        color: Colors.white,
-                        borderWidth: 2.5,
-                        borderRadius: 14.0,
-                        shadowOffset: 2.0,
-                        child: Text(
-                          l10n.cancel,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.border,
+                      SizedBox(
+                        height: 50.4,
+                        child: NeoButton(
+                          onPressed: () => context.pop(),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 0,
+                          ),
+                          color: Colors.white,
+                          borderWidth: 2.5,
+                          borderRadius: 14.0,
+                          shadowOffset: 2.0,
+                          child: Text(
+                            l10n.cancel,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.border,
+                            ),
                           ),
                         ),
                       ),
