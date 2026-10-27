@@ -226,7 +226,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                         final isSelected = selected?.id == col.id;
 
                         final iconColor =
-                            ThemeData.estimateBrightnessForColor(col.color) == Brightness.dark
+                            BookmarkCollection.isWhiteIconColor(col.color)
                                 ? Colors.white
                                 : AppTheme.border;
 

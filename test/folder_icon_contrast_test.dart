@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/widgets/folder_box.dart';
+import 'package:save_later/models/collection.dart';
 
 Widget createTestApp(Widget child) {
   return MaterialApp(
@@ -25,13 +26,14 @@ Widget createTestApp(Widget child) {
 }
 
 void main() {
-  testWidgets('FolderBox uses white icon for dark/black folderColor', (tester) async {
+  testWidgets('FolderBox uses white icon only for Black (#1C1C1C) and Slate Blue/Purple (#6A5ACD)', (tester) async {
+    // 1. Black (0xFF1C1C1C) -> White icon
     await tester.pumpWidget(
       createTestApp(
         FolderBox(
           title: 'Tech',
           itemCountText: '7 items',
-          folderColor: const Color(0xFF1C1C1C), // Pitch-black tech folder
+          folderColor: const Color(0xFF1C1C1C),
           icon: Icons.code,
           onTap: () {},
         ),
@@ -39,21 +41,37 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final iconFinder = find.byIcon(Icons.code);
-    expect(iconFinder, findsOneWidget);
+    final techIcon = tester.widget<Icon>(find.byIcon(Icons.code));
+    expect(techIcon.color, Colors.white,
+        reason: '#1C1C1C must render white icon');
 
-    final Icon iconWidget = tester.widget(iconFinder);
-    expect(iconWidget.color, Colors.white,
-        reason: 'Dark folder colors must render white icons for clear contrast');
+    // 2. Slate Blue / Purple (0xFF6A5ACD) -> White icon
+    await tester.pumpWidget(
+      createTestApp(
+        FolderBox(
+          title: 'Purple',
+          itemCountText: '3 items',
+          folderColor: const Color(0xFF6A5ACD),
+          icon: Icons.star_outline,
+          onTap: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final purpleIcon = tester.widget<Icon>(find.byIcon(Icons.star_outline));
+    expect(purpleIcon.color, Colors.white,
+        reason: '#6A5ACD must render white icon');
   });
 
-  testWidgets('FolderBox uses border color (black) icon for light folderColor', (tester) async {
+  testWidgets('FolderBox uses border color (black) icon for all other colors', (tester) async {
+    // 1. Lime green (0xFFA2D149) -> Black/border icon
     await tester.pumpWidget(
       createTestApp(
         FolderBox(
           title: 'Sample',
           itemCountText: '0 items',
-          folderColor: const Color(0xFFA2D149), // Lime green
+          folderColor: const Color(0xFFA2D149),
           icon: Icons.palette,
           onTap: () {},
         ),
@@ -61,11 +79,35 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final iconFinder = find.byIcon(Icons.palette);
-    expect(iconFinder, findsOneWidget);
+    final limeIcon = tester.widget<Icon>(find.byIcon(Icons.palette));
+    expect(limeIcon.color, AppTheme.border,
+        reason: 'Lime folder color must render black border-color icons');
 
-    final Icon iconWidget = tester.widget(iconFinder);
-    expect(iconWidget.color, AppTheme.border,
-        reason: 'Light folder colors must render black border-color icons');
+    // 2. Blue (0xFF4A90E2) -> Black/border icon (not white, only 1C1C1C and 6A5ACD are white)
+    await tester.pumpWidget(
+      createTestApp(
+        FolderBox(
+          title: 'Blue',
+          itemCountText: '5 items',
+          folderColor: const Color(0xFF4A90E2),
+          icon: Icons.favorite_outline,
+          onTap: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final blueIcon = tester.widget<Icon>(find.byIcon(Icons.favorite_outline));
+    expect(blueIcon.color, AppTheme.border,
+        reason: 'Blue folder color must render black border-color icon');
+  });
+
+  test('BookmarkCollection.isWhiteIconColor helper works accurately', () {
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF1C1C1C)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF6A5ACD)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF4A90E2)), isFalse);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFA0522D)), isFalse);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFE74C3C)), isFalse);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFFFD166)), isFalse);
   });
 }

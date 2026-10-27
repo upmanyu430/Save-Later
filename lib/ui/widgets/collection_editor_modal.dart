@@ -297,7 +297,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               ? Icon(
                                   Icons.check,
                                   size: 16,
-                                  color: color.computeLuminance() < 0.4 ? Colors.white : Colors.black,
+                                  color: BookmarkCollection.isWhiteIconColor(color)
+                                      ? Colors.white
+                                      : Colors.black,
                                 )
                               : null,
                         ),
@@ -372,8 +374,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                 icon,
                                 size: 20,
                                 color: isSelected &&
-                                        ThemeData.estimateBrightnessForColor(currentColor) ==
-                                            Brightness.dark
+                                        BookmarkCollection.isWhiteIconColor(currentColor)
                                     ? Colors.white
                                     : AppTheme.border,
                               ),

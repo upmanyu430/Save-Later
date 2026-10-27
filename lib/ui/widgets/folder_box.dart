@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../models/collection.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'neo_pressable.dart';
@@ -100,7 +101,7 @@ class FolderBox extends StatelessWidget {
                     child: Center(
                       child: Icon(
                         icon,
-                        color: ThemeData.estimateBrightnessForColor(folderColor) == Brightness.dark
+                        color: BookmarkCollection.isWhiteIconColor(folderColor)
                             ? Colors.white
                             : AppTheme.border,
                         size: AppDimensions.iconSizeLg,

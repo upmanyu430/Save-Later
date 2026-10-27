@@ -455,8 +455,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                                     item.icon,
                                     size: 24,
                                     color: isSelected &&
-                                            ThemeData.estimateBrightnessForColor(selectedColor) ==
-                                                Brightness.dark
+                                            BookmarkCollection.isWhiteIconColor(selectedColor)
                                         ? Colors.white
                                         : AppTheme.border,
                                   ),
@@ -478,8 +477,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
               child: Builder(
                 builder: (context) {
                   final isDarkBtn =
-                      ThemeData.estimateBrightnessForColor(selectedColor) ==
-                          Brightness.dark;
+                      BookmarkCollection.isWhiteIconColor(selectedColor);
                   final btnTextColor = isDarkBtn ? Colors.white : AppTheme.border;
 
                   return NeoButton(

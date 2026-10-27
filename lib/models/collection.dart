@@ -27,6 +27,27 @@ class BookmarkCollection {
   @ignore
   Color get color => parseColor(colorHex);
 
+  @ignore
+  bool get hasWhiteIcon => isWhiteIconColor(color);
+
+  /// Only Black (#1C1C1C) and Slate Blue/Purple (#6A5ACD) use white icons.
+  /// All other colors use dark border-color (black) icons.
+  static bool isWhiteIconColor(Color color) {
+    final v = color.value & 0x00FFFFFF;
+    return v == 0x1C1C1C || v == 0x6A5ACD;
+  }
+
+  static bool isWhiteIconColorHex(String? hexString) {
+    if (hexString == null) return false;
+    final hex = hexString
+        .replaceFirst('#', '')
+        .replaceFirst(RegExp(r'^0x', caseSensitive: false), '')
+        .trim()
+        .toUpperCase();
+    final hex6 = hex.length >= 6 ? hex.substring(hex.length - 6) : hex;
+    return hex6 == '1C1C1C' || hex6 == '6A5ACD';
+  }
+
   static Color parseColor(String? hexString, [Color fallback = const Color(0xFFFFD166)]) {
     if (hexString == null) return fallback;
     try {

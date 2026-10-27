@@ -708,7 +708,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                         fontFamily: collection.iconFontFamily,
                                       ),
                                       size: 10,
-                                      color: ThemeData.estimateBrightnessForColor(collectionColor) == Brightness.dark
+                                      color: BookmarkCollection.isWhiteIconColor(collectionColor)
                                           ? Colors.white
                                           : AppTheme.border,
                                     ),
