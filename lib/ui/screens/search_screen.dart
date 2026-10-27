@@ -38,6 +38,7 @@ class SearchScreen extends ConsumerStatefulWidget {
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   late LibraryTab _selectedTab;
   String _searchQuery = '';
   String? _selectedTagFilter;
@@ -56,6 +57,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -947,63 +949,66 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       Expanded(
                         child: SizedBox(
                           height: 50.4,
-                          child: NeoBox(
-                            padding: const EdgeInsets.only(
-                              left: 6,
-                              right: 8,
-                            ),
-                            color: Colors.white,
-                            borderRadius: 14.0,
-                            borderWidth: 2.5,
-                            shadowOffset: 2.0,
-                            child: TextField(
-                              controller: _searchController,
-                              textAlignVertical: TextAlignVertical.center,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.zero,
-                                prefixIcon: const Icon(
-                                  Icons.search,
-                                  color: AppTheme.border,
-                                  size: 20,
-                                ),
-                                prefixIconConstraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                                hintText: l10n.findCollectionsOrSavesHint,
-                                hintStyle: GoogleFonts.bricolageGrotesque(
-                                  fontSize: 12.0,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black38,
-                                ),
-                                suffixIcon: _searchController.text.isNotEmpty
-                                    ? IconButton(
-                                        padding: EdgeInsets.zero,
-                                        constraints: const BoxConstraints(
-                                          minWidth: 32,
-                                          minHeight: 32,
-                                        ),
-                                        icon: const Icon(Icons.close,
-                                            color: AppTheme.border, size: 20),
-                                        onPressed: () {
-                                          _searchController.clear();
-                                          setState(() {
-                                            _searchQuery = '';
-                                          });
-                                        },
-                                      )
-                                    : null,
-                                suffixIconConstraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => _searchFocusNode.requestFocus(),
+                            child: NeoBox(
+                              padding: const EdgeInsets.only(
+                                left: 10,
+                                right: 8,
                               ),
-                              style: GoogleFonts.bricolageGrotesque(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.border,
+                              color: Colors.white,
+                              borderRadius: 14.0,
+                              borderWidth: 2.5,
+                              shadowOffset: 2.0,
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.search,
+                                    color: AppTheme.border,
+                                    size: 21,
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: _searchController,
+                                      focusNode: _searchFocusNode,
+                                      textAlignVertical: TextAlignVertical.center,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        border: InputBorder.none,
+                                        contentPadding: EdgeInsets.zero,
+                                        hintText: l10n.findCollectionsOrSavesHint,
+                                        hintStyle: GoogleFonts.bricolageGrotesque(
+                                          fontSize: 13.5,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.black38,
+                                        ),
+                                      ),
+                                      style: GoogleFonts.bricolageGrotesque(
+                                        fontSize: 14.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppTheme.border,
+                                      ),
+                                    ),
+                                  ),
+                                  if (_searchController.text.isNotEmpty)
+                                    GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        _searchController.clear();
+                                        setState(() {
+                                          _searchQuery = '';
+                                        });
+                                      },
+                                      child: const Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 4.0),
+                                        child: Icon(Icons.close,
+                                            color: AppTheme.border, size: 20),
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                           ),
