@@ -453,7 +453,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        padding: EdgeInsets.fromLTRB(32, 32, 32, 24),
+                        padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -472,7 +472,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppDimensions.paddingLg),
+                        const SizedBox(height: AppDimensions.paddingSm),
 
                         // Title & Edit Button
                         if (_isEditingTitle)
@@ -595,7 +595,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               ),
                             ],
                           ),
-                        const SizedBox(height: AppDimensions.paddingLg),
+                        const SizedBox(height: AppDimensions.paddingMd),
 
                         // Collection & Date
                         Wrap(
@@ -658,7 +658,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppDimensions.paddingXl),
+                        const SizedBox(height: AppDimensions.paddingMd),
 
                         // Open Link Button
                         NeoPressable(
@@ -711,7 +711,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             );
                           },
                         ),
-                        const SizedBox(height: AppDimensions.paddingXl),
+                        const SizedBox(height: AppDimensions.paddingMd),
 
                         // Actions Strip
                         Container(
@@ -791,17 +791,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: AppDimensions.paddingXxl),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Description
                         Text(l10n.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppDimensions.paddingSm),
                         _buildDescription(l10n),
-                        const SizedBox(height: AppDimensions.paddingXxl),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Tags
                         Text(l10n.tagsLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppDimensions.paddingSm),
                         Wrap(
                           spacing: 8.0,
                           runSpacing: 8.0,
@@ -826,7 +826,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: AppDimensions.paddingXxl),
+                        const SizedBox(height: AppDimensions.paddingLg),
 
                         // Notes
                         ConstrainedBox(
@@ -890,7 +890,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppDimensions.paddingSm),
                         SizedBox(
                           height: 160,
                           child: GestureDetector(
