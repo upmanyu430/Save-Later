@@ -239,7 +239,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                        border: Border.all(color: AppTheme.border, width: 1.5),
+                        border: Border.all(color: AppTheme.border, width: 1.0),
                       ),
                       child: Center(
                         child: TextField(
@@ -417,7 +417,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         onPressed: !isNameEmpty ? _save : () {},
                         color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
                         padding: EdgeInsets.zero,
-                        borderWidth: 1.5,
+                        borderWidth: 1.0,
                         borderRadius: AppDimensions.radiusMd,
                         child: Center(
                           child: Text(

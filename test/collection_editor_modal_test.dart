@@ -244,7 +244,7 @@ void main() {
       find.ancestor(of: textFieldFinder, matching: find.byType(Container)).first,
     );
     final border = (nameContainer.decoration as BoxDecoration).border as Border;
-    expect(border.top.width, 1.5);
+    expect(border.top.width, 1.0);
   });
 
   testWidgets('Unselected colors and icons have light borders, selected have dark borders', (tester) async {
