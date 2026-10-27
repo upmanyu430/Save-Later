@@ -247,7 +247,7 @@ void main() {
     expect(border.top.width, 1.0);
   });
 
-  testWidgets('Unselected colors and icons have light borders, selected have dark borders', (tester) async {
+  testWidgets('Unselected colors and icons have thin 1.0 border matching name field, selected have 2.0 border', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         child: const Scaffold(
@@ -265,18 +265,18 @@ void main() {
       return false;
     }).toList();
 
-    final lightBorderBoxes = containers.where((c) {
+    final thinBorderBoxes = containers.where((c) {
       final border = (c.decoration as BoxDecoration).border as Border?;
-      return border?.top.color == Colors.black.withValues(alpha: 0.15);
+      return border?.top.color == AppTheme.border && border?.top.width == 1.0;
     }).toList();
 
-    final darkBorderBoxes = containers.where((c) {
+    final thickBorderBoxes = containers.where((c) {
       final border = (c.decoration as BoxDecoration).border as Border?;
-      return border?.top.color == AppTheme.border;
+      return border?.top.color == AppTheme.border && border?.top.width == 2.0;
     }).toList();
 
-    expect(lightBorderBoxes.isNotEmpty, isTrue);
-    expect(darkBorderBoxes.isNotEmpty, isTrue);
+    expect(thinBorderBoxes.isNotEmpty, isTrue);
+    expect(thickBorderBoxes.isNotEmpty, isTrue);
   });
 }
 
