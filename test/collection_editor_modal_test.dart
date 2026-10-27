@@ -219,7 +219,7 @@ void main() {
     expect(find.byIcon(Icons.more_horiz), findsNothing);
   });
 
-  testWidgets('CollectionEditorModal save button has height 50.4 matching URL bar', (tester) async {
+  testWidgets('CollectionEditorModal save button and name field have height 48.0 and thin border', (tester) async {
     await tester.pumpWidget(
       buildTestWidget(
         child: const Scaffold(
@@ -235,7 +235,16 @@ void main() {
     final sizedBox = tester.widget<SizedBox>(
       find.ancestor(of: buttonFinder, matching: find.byType(SizedBox)).first,
     );
-    expect(sizedBox.height, 50.4);
+    expect(sizedBox.height, 48.0);
+
+    // Verify name field container has thin border (1.5) and height 48
+    final textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+    final nameContainer = tester.widget<Container>(
+      find.ancestor(of: textFieldFinder, matching: find.byType(Container)).first,
+    );
+    final border = (nameContainer.decoration as BoxDecoration).border as Border;
+    expect(border.top.width, 1.5);
   });
 
   testWidgets('Unselected colors and icons have light borders, selected have dark borders', (tester) async {

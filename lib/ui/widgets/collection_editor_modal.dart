@@ -234,21 +234,28 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     ],
                   ),
                   const SizedBox(height: AppDimensions.paddingSm),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                      border: Border.all(color: AppTheme.border, width: 2),
-                    ),
-                    child: TextField(
-                      controller: _nameController,
-                      maxLength: 40,
-                      onChanged: (val) => setState(() {}),
-                      decoration: const InputDecoration(
-                        hintText: 'e.g. Travel, Design Inspiration...',
-                        hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        border: InputBorder.none,
-                        counterText: '',
+                  SizedBox(
+                    height: 48.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+                        border: Border.all(color: AppTheme.border, width: 1.5),
+                      ),
+                      child: Center(
+                        child: TextField(
+                          controller: _nameController,
+                          maxLength: 40,
+                          textAlignVertical: TextAlignVertical.center,
+                          onChanged: (val) => setState(() {}),
+                          decoration: const InputDecoration(
+                            hintText: 'e.g. Travel, Design Inspiration...',
+                            hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                            border: InputBorder.none,
+                            isDense: true,
+                            counterText: '',
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -404,12 +411,13 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   builder: (context) {
                     final isNameEmpty = _nameController.text.trim().isEmpty;
                     return SizedBox(
-                      height: 50.4,
+                      height: 48.0,
                       width: double.infinity,
                       child: NeoButton(
                         onPressed: !isNameEmpty ? _save : () {},
                         color: !isNameEmpty ? const Color(0xFFFFD166) : AppTheme.cardColor,
                         padding: EdgeInsets.zero,
+                        borderWidth: 1.5,
                         borderRadius: AppDimensions.radiusMd,
                         child: Center(
                           child: Text(
