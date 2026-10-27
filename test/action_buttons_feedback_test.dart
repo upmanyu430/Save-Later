@@ -127,6 +127,12 @@ void main() {
     expect(getButtonBgColor('Refresh'), equals(Colors.white));
     expect(getButtonBgColor('Delete'), equals(Colors.white));
 
+    // Verify all 4 action button labels are bold
+    for (final label in ['Share', 'Move', 'Refresh', 'Delete']) {
+      final textWidget = tester.widget<Text>(find.text(label));
+      expect(textWidget.style?.fontWeight, equals(FontWeight.bold));
+    }
+
     // Test pressing down on the Refresh button
     final refreshFinder = find.text('Refresh');
     final gesture = await tester.startGesture(tester.getCenter(refreshFinder));

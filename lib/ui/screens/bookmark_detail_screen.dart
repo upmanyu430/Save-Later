@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
@@ -1434,9 +1435,9 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
                                   const SizedBox(height: 5),
                                   Text(
                                     widget.label,
-                                    style: TextStyle(
+                                    style: GoogleFonts.bricolageGrotesque(
                                       color: fgColor,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.bold,
                                       fontSize: 11.5,
                                     ),
                                     maxLines: 1,
