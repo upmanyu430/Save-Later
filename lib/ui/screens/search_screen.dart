@@ -73,22 +73,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         iconWidget ??
-            Icon(icon!, size: AppDimensions.iconSizeMd, color: AppTheme.border),
-        const SizedBox(height: 6),
+            Icon(icon!, size: 20, color: AppTheme.border),
+        const SizedBox(height: 2),
         Text(
           count,
-          style: const TextStyle(
-            fontSize: 26,
+          style: GoogleFonts.bricolageGrotesque(
+            fontSize: 20,
             fontWeight: FontWeight.w900,
             color: AppTheme.border,
             height: 1.0,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
+          style: GoogleFonts.bricolageGrotesque(
+            fontSize: 10.5,
             fontWeight: FontWeight.w700,
             color: AppTheme.border,
           ),
@@ -104,10 +104,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? AppTheme.border : Colors.transparent,
             width: 2.0,
@@ -127,10 +127,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final l10n = AppLocalizations.of(context)!;
     return NeoBox(
       color: const Color(0xFFFFD166), // Yellow
-      borderRadius: 18.0,
+      borderRadius: 16.0,
       borderWidth: 2.5,
       shadowOffset: 3.0,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -140,8 +140,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Text(
                 l10n.yourLibrary,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: GoogleFonts.bricolageGrotesque(
+                  fontSize: 13,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.border,
                   letterSpacing: 0.5,
@@ -156,12 +156,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 5,
+                    horizontal: 10,
+                    vertical: 3.5,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: AppTheme.border,
                       width: 2.0,
@@ -170,7 +170,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         ? const [
                             BoxShadow(
                               color: AppTheme.border,
-                              offset: Offset(2.0, 2.0),
+                              offset: Offset(1.5, 1.5),
                               blurRadius: 0,
                             ),
                           ]
@@ -178,8 +178,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                   child: Text(
                     l10n.overview,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: GoogleFonts.bricolageGrotesque(
+                      fontSize: 11,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.border,
                     ),
@@ -188,7 +188,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -215,7 +215,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               _buildStatTab(
                 iconWidget: const PinIcon(
-                  size: AppDimensions.iconSizeMd,
+                  size: 20,
                   isPinned: true,
                   color: AppTheme.border,
                 ),
