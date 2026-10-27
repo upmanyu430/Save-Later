@@ -219,7 +219,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   Expanded(
                     child: SizedBox(
-                      height: 56.0,
+                      height: 50.4,
                       child: NeoBox(
                         padding: const EdgeInsets.symmetric(
                             horizontal: AppDimensions.paddingMd, vertical: 0.0),
@@ -263,8 +263,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(width: AppDimensions.paddingMd),
                   SizedBox(
-                    height: 56.0,
-                    width: 56.0,
+                    height: 50.4,
+                    width: 50.4,
                     child: NeoButton(
                       padding: EdgeInsets.zero,
                       borderRadius: AppDimensions.radiusMd,
