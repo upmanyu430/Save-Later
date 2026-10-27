@@ -20,7 +20,7 @@
   "@saveNowFindAnytime": {
     "description": "Header title on home screen"
   },
-  "pasteLinkHint": "#   Paste link to quick save",
+  "pasteLinkHint": "# Paste link to quick save",
   "@pasteLinkHint": {
     "description": "Hint text for quick save text field"
   },
