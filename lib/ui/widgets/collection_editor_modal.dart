@@ -135,38 +135,50 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
+    final viewInsets = MediaQuery.of(context).viewInsets;
+    final view = View.of(context);
+    final windowPadding = MediaQueryData.fromView(view).padding;
+    final statusBarHeight = windowPadding.top > 0
+        ? windowPadding.top
+        : MediaQuery.paddingOf(context).top;
+    final topClearance = statusBarHeight + 16.0;
+    final bottomInset = viewInsets.bottom;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxCardHeight = screenHeight - bottomInset - topClearance;
     
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.of(context).pop(),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 5.0,
-            right: 5.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardColor,
-                    borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 5.0,
+          right: 5.0,
+          top: topClearance,
+          bottom: bottomInset,
+        ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 420,
+              maxHeight: maxCardHeight,
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppTheme.cardColor,
+                  borderRadius: BorderRadius.circular(55),
+                  border: Border.all(color: AppTheme.border, width: 2.5),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    18.0,
+                    12.0,
+                    18.0,
+                    bottomInset > 0 ? 14.0 : (14.0 + MediaQuery.paddingOf(context).bottom),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      18.0,
-                      12.0,
-                      18.0,
-                      14.0 + MediaQuery.paddingOf(context).bottom,
-                    ),
                     child: AnimatedSize(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOutCubic,
