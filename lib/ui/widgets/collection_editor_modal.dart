@@ -163,7 +163,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       18.0,
-                      12.0,
+                      10.0,
                       18.0,
                       14.0 + MediaQuery.paddingOf(context).bottom,
                     ),
@@ -179,7 +179,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   // Drag handle
                   Center(
                     child: Container(
-                      width: 48,
+                      width: 44,
                       height: 4,
                       decoration: BoxDecoration(
                         color: AppTheme.border,
@@ -187,7 +187,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   
                   // Header
                   Row(
@@ -223,7 +223,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 10),
                   
                   // Name Field
                   Row(
@@ -233,7 +233,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       Text('${_nameController.text.length}/40', style: const TextStyle(color: Colors.grey, fontSize: 12)),
                     ],
                   ),
-                  const SizedBox(height: AppDimensions.paddingSm),
+                  const SizedBox(height: 5),
                   SizedBox(
                     height: 48.0,
                     child: Container(
@@ -259,19 +259,19 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   
                   // Color Picker
                   Text(AppLocalizations.of(context)!.colorUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   GridView.builder(
                     shrinkWrap: true,
                     clipBehavior: Clip.none,
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 8,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 7,
+                      mainAxisSpacing: 7,
                     ),
                     itemCount: _colors.length,
                     itemBuilder: (context, index) {
@@ -316,11 +316,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       );
                     },
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                   
                   // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
                   Text(AppLocalizations.of(context)!.iconUpper, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 5),
                   Builder(
                     builder: (context) {
                       final icons = _displayIcons;
@@ -333,8 +333,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 8,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 7,
+                          mainAxisSpacing: 7,
                         ),
                         itemCount: count,
                         itemBuilder: (context, index) {
@@ -400,7 +400,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       );
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                 
                 // Save Button
                 Builder(
