@@ -506,7 +506,6 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                       ? const Color(0xFFFFD166)
                                       : AppTheme.cardColor,
                                   padding: EdgeInsets.zero,
-                                  borderWidth: 1.0,
                                   borderRadius: AppDimensions.radiusMd,
                                   shadowOffset: 2.0,
                                   child: Center(
