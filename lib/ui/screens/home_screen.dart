@@ -230,10 +230,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           controller: _urlController,
                           focusNode: _urlFocusNode,
                           textAlignVertical: TextAlignVertical.center,
+                          style: GoogleFonts.bricolageGrotesque(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.border,
+                          ),
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
                             hintStyle: GoogleFonts.bricolageGrotesque(
-                              fontSize: 12.0,
+                              fontSize: 14.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black38,
                             ),
