@@ -163,7 +163,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(
                       18.0,
-                      10.0,
+                      12.0,
                       18.0,
                       14.0 + MediaQuery.paddingOf(context).bottom,
                     ),
@@ -187,7 +187,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 14),
                   
                   // Header
                   Row(
