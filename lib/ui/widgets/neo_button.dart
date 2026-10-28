@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
-
 class NeoButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
@@ -13,6 +12,7 @@ class NeoButton extends StatefulWidget {
   final double borderWidth;
   final double borderRadius;
   final double shadowOffset;
+  final Offset? customShadowOffset;
   final EdgeInsetsGeometry padding;
 
   const NeoButton({
@@ -25,14 +25,17 @@ class NeoButton extends StatefulWidget {
     this.borderWidth = 3.0,
     this.borderRadius = 12.0,
     this.shadowOffset = 2.0,
-    this.padding = const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: 14),
+    this.customShadowOffset,
+    this.padding = const EdgeInsets.symmetric(
+        horizontal: AppDimensions.paddingXl, vertical: 14),
   });
 
   @override
   State<NeoButton> createState() => _NeoButtonState();
 }
 
-class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMixin {
+class _NeoButtonState extends State<NeoButton>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
   bool get _isEnabled => widget.onPressed != null;
@@ -94,12 +97,15 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
           animation: _animation,
           builder: (context, child) {
             final t = _animation.value;
-            final offset = t * widget.shadowOffset;
-            final shadowOffset = (1.0 - t).clamp(0.0, 1.0) * widget.shadowOffset;
+            final baseOffset = widget.customShadowOffset ??
+                Offset(widget.shadowOffset, widget.shadowOffset);
+            final hasShadow = baseOffset.dx != 0 || baseOffset.dy != 0;
+            final pressOffset = baseOffset * t;
+            final currentShadow = baseOffset * (1.0 - t).clamp(0.0, 1.0);
             final scale = 1.0 - (t * 0.04);
 
             return Transform.translate(
-              offset: Offset(offset, offset),
+              offset: pressOffset,
               child: Transform.scale(
                 scale: scale,
                 child: Container(
@@ -111,11 +117,11 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
                       color: widget.borderColor ?? AppTheme.border,
                       width: widget.borderWidth,
                     ),
-                    boxShadow: widget.shadowOffset > 0
+                    boxShadow: hasShadow
                         ? [
                             BoxShadow(
                               color: widget.shadowColor ?? AppTheme.border,
-                              offset: Offset(shadowOffset, shadowOffset),
+                              offset: currentShadow,
                               blurRadius: 0,
                               spreadRadius: 0,
                             ),
@@ -136,4 +142,3 @@ class _NeoButtonState extends State<NeoButton> with SingleTickerProviderStateMix
     );
   }
 }
-

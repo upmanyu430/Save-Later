@@ -208,6 +208,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     curve: Curves.easeInOutCubic,
                     alignment: Alignment.topCenter,
                     child: SingleChildScrollView(
+                      clipBehavior: Clip.none,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -492,7 +493,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   padding: EdgeInsets.zero,
                                   borderWidth: 1.0,
                                   borderRadius: AppDimensions.radiusMd,
-                                  shadowOffset: 0,
+                                  customShadowOffset: const Offset(-2.0, 2.0),
                                   child: Center(
                                     child: Text(
                                       isEditing
