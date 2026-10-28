@@ -493,7 +493,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   padding: EdgeInsets.zero,
                                   borderWidth: 1.0,
                                   borderRadius: AppDimensions.radiusMd,
-                                  customShadowOffset: const Offset(-2.0, 2.0),
+                                  shadowOffset: 2.0,
                                   child: Center(
                                     child: Text(
                                       isEditing
