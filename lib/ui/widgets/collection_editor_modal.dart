@@ -455,7 +455,6 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
 ),
 ),
 ),
-),
 );
   }
 }
