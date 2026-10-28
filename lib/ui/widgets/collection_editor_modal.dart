@@ -189,26 +189,19 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
               behavior: HitTestBehavior.opaque,
               onTap: () {},
               child: Container(
+                clipBehavior: Clip.antiAlias,
                 decoration: BoxDecoration(
                   color: AppTheme.cardColor,
                   borderRadius: BorderRadius.circular(55),
                   border: Border.all(color: AppTheme.border, width: 2.5),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    18.0,
-                    12.0,
-                    18.0,
-                    bottomInset > 0
-                        ? (14.0 + bottomInset)
-                        : (14.0 + MediaQuery.paddingOf(context).bottom),
-                  ),
-                  child: AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: SingleChildScrollView(
-                      clipBehavior: Clip.none,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Pinned Header Section
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(18.0, 12.0, 18.0, 0),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -266,7 +259,29 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
+                        ],
+                      ),
+                    ),
+                    Flexible(
+                      child: AnimatedSize(
+                        duration: bottomInset > 0
+                            ? Duration.zero
+                            : const Duration(milliseconds: 300),
+                        curve: Curves.easeInOutCubic,
+                        alignment: Alignment.topCenter,
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(
+                            18.0,
+                            10.0,
+                            18.0,
+                            bottomInset > 0
+                                ? (14.0 + bottomInset)
+                                : (14.0 + MediaQuery.paddingOf(context).bottom),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
 
                           // Name Field
                           Row(
@@ -522,11 +537,13 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
