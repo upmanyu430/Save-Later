@@ -166,7 +166,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     final topClearance = statusBarHeight + 16.0;
     final bottomInset = viewInsets.bottom;
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final maxCardHeight = screenHeight - bottomInset - topClearance;
+    final maxCardHeight = screenHeight - topClearance;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -176,7 +176,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
           left: 5.0,
           right: 5.0,
           top: topClearance,
-          bottom: bottomInset,
+          bottom: 0,
         ),
         child: Align(
           alignment: Alignment.bottomCenter,
@@ -200,7 +200,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     12.0,
                     18.0,
                     bottomInset > 0
-                        ? 14.0
+                        ? (14.0 + bottomInset)
                         : (14.0 + MediaQuery.paddingOf(context).bottom),
                   ),
                   child: AnimatedSize(
@@ -492,6 +492,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   padding: EdgeInsets.zero,
                                   borderWidth: 1.0,
                                   borderRadius: AppDimensions.radiusMd,
+                                  shadowOffset: 0,
                                   child: Center(
                                     child: Text(
                                       isEditing
