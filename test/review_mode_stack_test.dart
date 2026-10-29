@@ -1,0 +1,443 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:isar/isar.dart';
+import 'package:save_later/models/bookmark.dart';
+import 'package:save_later/models/collection.dart';
+import 'package:save_later/repositories/isar_repository.dart';
+import 'package:save_later/providers/providers.dart';
+import 'package:save_later/ui/screens/review_mode_screen.dart';
+import 'package:save_later/theme/app_theme.dart';
+
+class FakeIsarRepository implements IsarRepository {
+  final List<Bookmark> bookmarks = [];
+
+  @override
+  late Future<Isar> db = Future.error('No DB in test');
+
+  @override
+  Future<Isar> openDB() async => Future.error('No DB in test');
+
+  @override
+  Future<List<BookmarkCollection>> getCollections({int? parentId}) async => [];
+
+  @override
+  Future<List<BookmarkCollection>> getSubCollections(Id parentId) async => [];
+
+  @override
+  Future<BookmarkCollection?> getCollection(Id id) async => null;
+
+  @override
+  Future<List<BookmarkCollection>> getAllCollections() async => [];
+
+  @override
+  Future<void> addCollection(BookmarkCollection collection) async {}
+
+  @override
+  Future<void> deleteCollection(Id collectionId) async {}
+
+  @override
+  Future<Bookmark?> getBookmark(Id id) async {
+    try {
+      return bookmarks.firstWhere((b) => b.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Bookmark>> getBookmarks() async => bookmarks;
+
+  @override
+  Future<List<Bookmark>> getBookmarksByCollection(Id collectionId) async => [];
+
+  @override
+  Future<List<Bookmark>> getUnsortedBookmarks() async =>
+      bookmarks.where((b) => !b.isRead).toList();
+
+  @override
+  Future<void> addBookmark(Bookmark bookmark) async {
+    bookmarks.add(bookmark);
+  }
+
+  @override
+  Future<void> updateBookmark(Bookmark bookmark) async {
+    final idx = bookmarks.indexWhere((b) => b.id == bookmark.id);
+    if (idx != -1) {
+      bookmarks[idx] = bookmark;
+    }
+  }
+
+  @override
+  Future<void> updateBookmarks(List<Bookmark> updated) async {
+    for (final b in updated) {
+      await updateBookmark(b);
+    }
+  }
+
+  @override
+  Future<void> deleteBookmark(Id id) async {
+    bookmarks.removeWhere((b) => b.id == id);
+  }
+
+  @override
+  Future<void> deleteBookmarks(List<Id> ids) async {
+    bookmarks.removeWhere((b) => ids.contains(b.id));
+  }
+}
+
+Widget buildTestApp({required Widget home}) {
+  return MaterialApp(
+    localizationsDelegates: const [
+      AppLocalizations.delegate,
+      GlobalMaterialLocalizations.delegate,
+      GlobalWidgetsLocalizations.delegate,
+      GlobalCupertinoLocalizations.delegate,
+    ],
+    supportedLocales: const [Locale('en', '')],
+    home: home,
+  );
+}
+
+void main() {
+  group('Review Mode Stack Deck & Gestures', () {
+    testWidgets(
+        'Test 1: Stack Layout & Card Styling at Index 0 (white bg, radius 26, no outer border, 2px hero border, 2px badge shadow)',
+        (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final bookmark1 = Bookmark()
+        ..id = 1
+        ..url = 'https://example.com/1'
+        ..title = 'Bookmark 1'
+        ..isRead = false;
+      final bookmark2 = Bookmark()
+        ..id = 2
+        ..url = 'https://example.com/2'
+        ..title = 'Bookmark 2'
+        ..isRead = false;
+      final bookmark3 = Bookmark()
+        ..id = 3
+        ..url = 'https://example.com/3'
+        ..title = 'Bookmark 3'
+        ..isRead = false;
+
+      fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+            unsortedBookmarksProvider.overrideWith(
+                (ref) => Future.value([bookmark1, bookmark2, bookmark3])),
+          ],
+          child: buildTestApp(
+            home: const ReviewModeScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify Card 1 title is visible
+      expect(find.text('Bookmark 1'), findsOneWidget);
+      // Verify Card 2 is also built in the stack behind Card 1
+      expect(find.text('Bookmark 2'), findsOneWidget);
+
+      // Inspect main card container: white background, radius 26, NO outer border
+      final mainCardFinder = find.ancestor(
+        of: find.text('Bookmark 1'),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).borderRadius ==
+                  BorderRadius.circular(26),
+        ),
+      );
+      expect(mainCardFinder, findsOneWidget);
+
+      final mainCardContainer =
+          tester.widget<Container>(mainCardFinder.first);
+      final cardDecoration = mainCardContainer.decoration as BoxDecoration;
+      expect(cardDecoration.color, equals(Colors.white));
+      expect(cardDecoration.borderRadius, equals(BorderRadius.circular(26)));
+      expect(cardDecoration.border, isNull);
+
+      // Inspect hero image container: 2px inner image border
+      final heroContainerFinder = find.descendant(
+        of: mainCardFinder,
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).border ==
+                  Border.all(color: AppTheme.border, width: 2.0) &&
+              (w.decoration as BoxDecoration).color == const Color(0xFF111111),
+        ),
+      );
+      expect(heroContainerFinder, findsOneWidget);
+      final heroContainer =
+          tester.widget<Container>(heroContainerFinder.first);
+      final heroDecoration = heroContainer.decoration as BoxDecoration;
+      expect(heroDecoration.border,
+          equals(Border.all(color: AppTheme.border, width: 2.0)));
+
+      // Inspect collection badge: 2.0px drop shadow and 2.0px border
+      final badgeContainerFinder = find.descendant(
+        of: mainCardFinder,
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w is Container &&
+              w.decoration is BoxDecoration &&
+              (w.decoration as BoxDecoration).boxShadow != null &&
+              (w.decoration as BoxDecoration)
+                  .boxShadow!
+                  .any((s) => s.offset == const Offset(2.0, 2.0)),
+        ),
+      );
+      expect(badgeContainerFinder, findsOneWidget);
+      final badgeContainer =
+          tester.widget<Container>(badgeContainerFinder.first);
+      final badgeDecoration = badgeContainer.decoration as BoxDecoration;
+      expect(badgeDecoration.border,
+          equals(Border.all(color: AppTheme.border, width: 2.0)));
+      expect(
+          badgeDecoration.boxShadow!
+              .any((s) => s.offset == const Offset(2.0, 2.0)),
+          isTrue);
+    });
+
+    testWidgets(
+        'Test 2: Stack Drag & Tilt Transform Verification (drag gesture, read tracking integrity)',
+        (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final bookmark1 = Bookmark()
+        ..id = 1
+        ..url = 'https://example.com/1'
+        ..title = 'Bookmark 1'
+        ..isRead = false;
+      final bookmark2 = Bookmark()
+        ..id = 2
+        ..url = 'https://example.com/2'
+        ..title = 'Bookmark 2'
+        ..isRead = false;
+      final bookmark3 = Bookmark()
+        ..id = 3
+        ..url = 'https://example.com/3'
+        ..title = 'Bookmark 3'
+        ..isRead = false;
+
+      fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+            unsortedBookmarksProvider.overrideWith(
+                (ref) => Future.value([bookmark1, bookmark2, bookmark3])),
+          ],
+          child: buildTestApp(
+            home: const ReviewModeScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bookmark 1'), findsOneWidget);
+      expect(find.text('01'), findsOneWidget);
+
+      // Verify dragging PageView initiates card movement and changes page index
+      // Start drag forward (drag left)
+      final gesture =
+          await tester.startGesture(tester.getCenter(find.byType(PageView)));
+      await gesture.moveBy(const Offset(-150, 0));
+      await tester.pump();
+
+      // Complete drag forward to smoothly advance from Bookmark 1 to Bookmark 2
+      await gesture.moveBy(const Offset(-350, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bookmark 2'), findsOneWidget);
+      expect(find.text('02'), findsOneWidget);
+      // Bookmark 1 is marked as read, Bookmark 2 remains unread
+      expect(bookmark1.isRead, isTrue);
+      expect(bookmark2.isRead, isFalse);
+
+      // Drag backward (drag right) to return to Bookmark 1
+      await tester.drag(find.byType(PageView), const Offset(500, 0));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bookmark 1'), findsOneWidget);
+      expect(find.text('01'), findsOneWidget);
+      // Bookmark 2 still remains unread after backward navigation
+      expect(bookmark2.isRead, isFalse);
+    });
+
+    testWidgets(
+        'Test 3: Multi-card Stack Layers at Middle Index (both left and right stacks present)',
+        (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final bookmarks = List.generate(
+        5,
+        (i) => Bookmark()
+          ..id = i + 1
+          ..url = 'https://example.com/${i + 1}'
+          ..title = 'Bookmark ${i + 1}'
+          ..isRead = false,
+      );
+
+      fakeRepo.bookmarks.addAll(bookmarks);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+            unsortedBookmarksProvider
+                .overrideWith((ref) => Future.value(bookmarks)),
+          ],
+          child: buildTestApp(
+            home: const ReviewModeScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final nextButtonFinder =
+          find.widgetWithIcon(GestureDetector, Icons.arrow_forward);
+
+      // Advance to bookmark 3 (index 2)
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Verify top counter shows 03 / 05
+      expect(find.text('03'), findsOneWidget);
+      expect(find.text(' / 05'), findsOneWidget);
+
+      // Verify progress bar shows 3 active yellow segments out of 5 total segments
+      final progressBars = tester
+          .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
+          .where((w) {
+        final dec = w.decoration as BoxDecoration?;
+        return dec?.borderRadius == BorderRadius.circular(999);
+      }).toList();
+      expect(progressBars.length, equals(5));
+
+      final activeSegments = progressBars.where((w) {
+        final dec = w.decoration as BoxDecoration?;
+        return dec?.color == const Color(0xFFFFD166);
+      }).toList();
+      expect(activeSegments.length, equals(3));
+
+      // Verify all cards are built in the stacked deck:
+      // Left stack (previous cards Bookmark 1 and 2), center (Bookmark 3), right stack (Bookmark 4 and 5)
+      expect(find.text('Bookmark 1'), findsOneWidget);
+      expect(find.text('Bookmark 2'), findsOneWidget);
+      expect(find.text('Bookmark 3'), findsOneWidget);
+      expect(find.text('Bookmark 4'), findsOneWidget);
+      expect(find.text('Bookmark 5'), findsOneWidget);
+
+      // Verify transform offsets: both negative dx (left stack) and positive dx (right stack) exist
+      final transforms = tester.widgetList<Transform>(find.byType(Transform));
+      final dxTranslations = transforms
+          .map((t) => t.transform.getTranslation().x)
+          .where((dx) => dx != 0.0)
+          .toList();
+
+      final hasLeftStack = dxTranslations.any((dx) => dx < 0.0);
+      final hasRightStack = dxTranslations.any((dx) => dx > 0.0);
+      expect(hasLeftStack, isTrue);
+      expect(hasRightStack, isTrue);
+    });
+
+    testWidgets(
+        'Test 4: Button Navigation & Caught-up Flow (advance, return, and complete)',
+        (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final bookmark1 = Bookmark()
+        ..id = 1
+        ..url = 'https://example.com/1'
+        ..title = 'Bookmark 1'
+        ..isRead = false;
+      final bookmark2 = Bookmark()
+        ..id = 2
+        ..url = 'https://example.com/2'
+        ..title = 'Bookmark 2'
+        ..isRead = false;
+      final bookmark3 = Bookmark()
+        ..id = 3
+        ..url = 'https://example.com/3'
+        ..title = 'Bookmark 3'
+        ..isRead = false;
+
+      fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+            unsortedBookmarksProvider.overrideWith(
+                (ref) => Future.value([bookmark1, bookmark2, bookmark3])),
+          ],
+          child: buildTestApp(
+            home: const ReviewModeScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final nextButtonFinder =
+          find.widgetWithIcon(GestureDetector, Icons.arrow_forward);
+      final previousButtonFinder =
+          find.widgetWithIcon(GestureDetector, Icons.arrow_back);
+
+      // Verify initial state
+      expect(find.text('01'), findsOneWidget);
+
+      // Tapping next button advances through cards
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('02'), findsOneWidget);
+      expect(find.text('Bookmark 2'), findsOneWidget);
+      expect(bookmark1.isRead, isTrue);
+      expect(bookmark2.isRead, isFalse);
+
+      // Tapping previous button returns to prior card
+      await tester.tap(previousButtonFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text('01'), findsOneWidget);
+      expect(find.text('Bookmark 1'), findsOneWidget);
+      expect(bookmark2.isRead, isFalse);
+
+      // Advance again to Card 2
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('02'), findsOneWidget);
+
+      // Advance to Card 3
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+      expect(find.text('03'), findsOneWidget);
+      expect(find.text('Bookmark 3'), findsOneWidget);
+      expect(bookmark2.isRead, isTrue);
+      expect(bookmark3.isRead, isFalse);
+
+      // Advancing past final card presents caught-up screen with correct completion count
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.text("You're all caught up!"), findsOneWidget);
+      expect(find.text('Viewed 3'), findsOneWidget);
+      expect(bookmark3.isRead, isTrue);
+    });
+  });
+}
