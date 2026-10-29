@@ -26,7 +26,7 @@ class _CardTransformData {
   final int index;
   final double dx;
   final double scale;
-  final double opacity;
+  final double dim;
   final double angle;
   final int zIndex;
 
@@ -34,7 +34,7 @@ class _CardTransformData {
     required this.index,
     required this.dx,
     required this.scale,
-    required this.opacity,
+    required this.dim,
     required this.angle,
     required this.zIndex,
   });
@@ -197,59 +197,54 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
     final List<_CardTransformData> list = [];
 
-    void addCard(int idx, double dx, double scale, double opacity, double angle, int zIndex) {
+    void addCard(int idx, double dx, double scale, double dim, double angle, int zIndex) {
       if (idx < 0 || idx >= totalCards) return;
-      if (opacity <= 0.0) return;
       list.add(_CardTransformData(
         index: idx,
         dx: dx,
         scale: scale,
-        opacity: opacity.clamp(0.0, 1.0),
+        dim: dim.clamp(0.0, 1.0),
         angle: angle,
         zIndex: zIndex,
       ));
     }
 
     if (isAtRest) {
-      // Resting on card k
-      addCard(k, 0.0, 1.0, 1.0, 0.0, 4);
-      addCard(k + 1, 44.0, 0.94, 0.60, 0.0, 2);
-      addCard(k + 2, 80.0, 0.88, 0.35, 0.0, 1);
-      addCard(k - 1, -44.0, 0.94, 0.60, 0.0, 2);
-      addCard(k - 2, -80.0, 0.88, 0.35, 0.0, 1);
+      // Resting on card k:
+      // Active card k is fully white, scaled 1.0, centered.
+      // Next card k+1 and previous card k-1 peek out by 28dp, scaled 0.94, with a 38% dim overlay.
+      // All cards are 100% opaque (NO see-through transparency).
+      // Cards k+2 and k-2 sit directly behind k+1 and k-1 so they don't peek out or bleed through.
+      addCard(k, 0.0, 1.0, 0.0, 0.0, 5);
+      addCard(k + 1, 28.0, 0.94, 0.38, 0.0, 3);
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 1);
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 4);
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
     } else if (!isBackward) {
       // Forward swipe: moving from k towards k + 1
       // Card k is being swiped off to the left with counter-clockwise tilt
       final diffK = k - page; // in [-1.0, 0.0]
       final dxK = diffK * (cardWidth * 1.05);
       final angleK = diffK * 0.08;
-      final opacityK = 1.0 - ((-diffK) * 0.40);
-      addCard(k, dxK, 1.0, opacityK, angleK, 4);
+      addCard(k, dxK, 1.0, 0.0, angleK, 5);
 
-      // Card k + 1 is moving from right stack (+44) into center (0)
+      // Card k + 1 is moving from right stack (+28) into center (0)
       final diffNext = (k + 1) - page; // in [0.0, 1.0]
-      final dxNext = diffNext * 44.0;
+      final dxNext = diffNext * 28.0;
       final scaleNext = 1.0 - (diffNext * 0.06);
-      final opacityNext = 1.0 - (diffNext * 0.40);
+      final dimNext = diffNext * 0.38;
       // Entering card tilts clockwise (positive angle) proportional to remaining distance
       final angleNext = diffNext * 0.05;
-      addCard(k + 1, dxNext, scaleNext, opacityNext, angleNext, 3);
+      addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, 4);
 
-      // Card k + 2 is moving from +80 to +44
-      final diffNext2 = (k + 2) - page; // in [1.0, 2.0]
-      final pNext2 = diffNext2 - 1.0;
-      final dxNext2 = 44.0 + (pNext2 * 36.0);
-      final scaleNext2 = 0.94 - (pNext2 * 0.06);
-      final opacityNext2 = 0.60 - (pNext2 * 0.25);
-      addCard(k + 2, dxNext2, scaleNext2, opacityNext2, 0.0, 1);
+      // Card k + 2 is waiting in the right stack at +28
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 1);
 
-      // Card k - 1 is moving from -44 to -80
-      final diffPrev = (k - 1) - page; // in [-2.0, -1.0]
+      // Card k - 1 moves further left into previous stack
+      final diffPrev = (k - 1) - page;
       final pPrev = -diffPrev - 1.0;
-      final dxPrev = -44.0 - (pPrev * 36.0);
-      final scalePrev = 0.94 - (pPrev * 0.06);
-      final opacityPrev = 0.60 - (pPrev * 0.25);
-      addCard(k - 1, dxPrev, scalePrev, opacityPrev, 0.0, 2);
+      final dxPrev = -28.0 - (pPrev * 10.0);
+      addCard(k - 1, dxPrev, 0.94, 0.38, 0.0, 2);
     } else {
       // Backward swipe: moving from k + 1 towards k
       final progress = (k + 1) - page; // in [0.0, 1.0] as page goes from k+1 to k
@@ -257,28 +252,21 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       // Card k + 1 is the active card sliding right with clockwise tilt
       final dxActive = progress * (cardWidth * 1.05);
       final angleActive = progress * 0.08;
-      final opacityActive = 1.0 - (progress * 0.40);
-      addCard(k + 1, dxActive, 1.0, opacityActive, angleActive, 4);
+      addCard(k + 1, dxActive, 1.0, 0.0, angleActive, 5);
 
-      // Card k is the previous card expanding from -44 into center 0
-      final dxPrev = -44.0 * (1.0 - progress);
+      // Card k is the previous card expanding from -28 into center 0
+      final dxPrev = -28.0 * (1.0 - progress);
       final scalePrev = 0.94 + (progress * 0.06);
-      final opacityPrev = 0.60 + (progress * 0.40);
+      final dimPrev = (1.0 - progress) * 0.38;
       // Entering card tilts counter-clockwise (negative angle) proportional to remaining distance
       final anglePrev = -(1.0 - progress) * 0.05;
-      addCard(k, dxPrev, scalePrev, opacityPrev, anglePrev, 3);
+      addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, 4);
 
-      // Card k - 1 moves from -80 to -44
-      final dxPrev2 = -80.0 + (progress * 36.0);
-      final scalePrev2 = 0.88 + (progress * 0.06);
-      final opacityPrev2 = 0.35 + (progress * 0.25);
-      addCard(k - 1, dxPrev2, scalePrev2, opacityPrev2, 0.0, 1);
+      // Card k - 1 is waiting in the left stack at -28
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 1);
 
-      // Card k + 2 moves from +44 to +80
-      final dxNext2 = 44.0 + (progress * 36.0);
-      final scaleNext2 = 0.94 - (progress * 0.06);
-      final opacityNext2 = 0.60 - (progress * 0.25);
-      addCard(k + 2, dxNext2, scaleNext2, opacityNext2, 0.0, 2);
+      // Card k + 2 is waiting in the right stack at +28
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 2);
     }
 
     // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
@@ -610,13 +598,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                           angle: data.angle,
                                           child: Transform.scale(
                                             scale: data.scale,
-                                            child: Opacity(
-                                              opacity: data.opacity,
-                                              child: _buildCard(
-                                                unreadBookmarks[data.index],
-                                                cardWidth,
-                                                cardHeight,
-                                              ),
+                                            child: _buildCard(
+                                              unreadBookmarks[data.index],
+                                              cardWidth,
+                                              cardHeight,
+                                              dim: data.dim,
                                             ),
                                           ),
                                         ),
@@ -707,7 +693,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 
-  Widget _buildCard(Bookmark b, double cardWidth, double cardHeight) {
+  Widget _buildCard(
+    Bookmark b,
+    double cardWidth,
+    double cardHeight, {
+    double dim = 0.0,
+  }) {
     final collection = b.collection.value ?? widget.collection;
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
@@ -725,8 +716,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         borderRadius: BorderRadius.circular(26),
         border: null,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Top row (favicon and domain)
           Padding(
@@ -900,7 +894,15 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           ),
         ],
       ),
-    );
+      if (dim > 0.001)
+        Positioned.fill(
+          child: Container(
+            color: Colors.black.withValues(alpha: dim),
+          ),
+        ),
+    ],
+  ),
+);
   }
 }
 
