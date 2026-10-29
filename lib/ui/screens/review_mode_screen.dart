@@ -49,6 +49,23 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   int get completedCount => _reviewedBookmarkIds.length;
   int? _dragStartPage;
 
+  final Map<int, Widget> _cachedCards = {};
+  double? _cachedCardWidth;
+  double? _cachedCardHeight;
+
+  Widget _getCardWidget(Bookmark b, double cardWidth, double cardHeight) {
+    if (_cachedCardWidth != cardWidth || _cachedCardHeight != cardHeight) {
+      _cachedCards.clear();
+      _cachedCardWidth = cardWidth;
+      _cachedCardHeight = cardHeight;
+    }
+    return _cachedCards.putIfAbsent(b.id, () {
+      return RepaintBoundary(
+        child: _buildCard(b, cardWidth, cardHeight),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -150,7 +167,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       return;
     }
     _pageController.nextPage(
-      duration: const Duration(milliseconds: 360),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
     );
   }
@@ -159,7 +176,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     if (currentIndex <= 0 || !_pageController.hasClients) return;
     _dragStartPage = currentIndex;
     _pageController.previousPage(
-      duration: const Duration(milliseconds: 360),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeOutCubic,
     );
   }
@@ -573,44 +590,61 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       children: [
                         // Stacked deck visual rendering in proper Z-order
                         Positioned.fill(
-                          child: RepaintBoundary(
-                            child: IgnorePointer(
-                              child: AnimatedBuilder(
-                                animation: _pageController,
-                                builder: (context, _) {
-                                  final page = _pageController.hasClients &&
-                                          _pageController.page != null
-                                      ? _pageController.page!
-                                      : currentIndex.toDouble();
-                                  final transforms = _calculateCardTransforms(
-                                    page,
-                                    cardWidth,
-                                    unreadBookmarks.length,
-                                  );
+                          child: IgnorePointer(
+                            child: AnimatedBuilder(
+                              animation: _pageController,
+                              builder: (context, _) {
+                                final page = _pageController.hasClients &&
+                                        _pageController.page != null
+                                    ? _pageController.page!
+                                    : currentIndex.toDouble();
+                                final transforms = _calculateCardTransforms(
+                                  page,
+                                  cardWidth,
+                                  unreadBookmarks.length,
+                                );
 
-                                  return Stack(
-                                    alignment: Alignment.center,
-                                    clipBehavior: Clip.none,
-                                    children: transforms.map((data) {
-                                      return Transform.translate(
-                                        offset: Offset(data.dx, 0),
-                                        child: Transform.rotate(
-                                          angle: data.angle,
-                                          child: Transform.scale(
-                                            scale: data.scale,
-                                            child: _buildCard(
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  clipBehavior: Clip.none,
+                                  children: transforms.map((data) {
+                                    final matrix = Matrix4.identity()
+                                      ..translate(data.dx, 0.0)
+                                      ..rotateZ(data.angle)
+                                      ..scale(data.scale, data.scale);
+
+                                    return Transform(
+                                      transform: matrix,
+                                      alignment: Alignment.center,
+                                      child: SizedBox(
+                                        width: cardWidth,
+                                        height: cardHeight,
+                                        child: Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            _getCardWidget(
                                               unreadBookmarks[data.index],
                                               cardWidth,
                                               cardHeight,
-                                              dim: data.dim,
                                             ),
-                                          ),
+                                            if (data.dim > 0.001)
+                                              Positioned.fill(
+                                                child: IgnorePointer(
+                                                  child: DecoratedBox(
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black.withValues(alpha: data.dim),
+                                                      borderRadius: BorderRadius.circular(26),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
                                         ),
-                                      );
-                                    }).toList(),
-                                  );
-                                },
-                              ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -624,12 +658,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               clipBehavior: Clip.none,
                               itemCount: unreadBookmarks.length + 1,
                               onPageChanged: _onPageChanged,
-                              allowImplicitScrolling: true,
-                              physics: const PageScrollPhysics(),
+                              physics: const BouncingScrollPhysics(parent: PageScrollPhysics()),
                               itemBuilder: (context, index) {
-                                return Container(
-                                  color: Colors.transparent,
-                                );
+                                return const SizedBox.expand();
                               },
                             ),
                           ),
@@ -696,9 +727,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   Widget _buildCard(
     Bookmark b,
     double cardWidth,
-    double cardHeight, {
-    double dim = 0.0,
-  }) {
+    double cardHeight,
+  ) {
     final collection = b.collection.value ?? widget.collection;
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
@@ -716,11 +746,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         borderRadius: BorderRadius.circular(26),
         border: null,
       ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Top row (favicon and domain)
           Padding(
@@ -894,15 +921,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           ),
         ],
       ),
-      if (dim > 0.001)
-        Positioned.fill(
-          child: Container(
-            color: Colors.black.withValues(alpha: dim),
-          ),
-        ),
-    ],
-  ),
-);
+    );
   }
 }
 
