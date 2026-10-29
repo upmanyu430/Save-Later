@@ -18,11 +18,112 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
   final BookmarkCollection? collection;
   const ReviewModeScreen({super.key, this.collection});
 
+  @visibleForTesting
+  static List<CardTransformData> calculateCardTransforms({
+    required double page,
+    required double cardWidth,
+    required int totalCards,
+    int? dragStartPage,
+    int currentIndex = 0,
+  }) {
+    if (totalCards == 0) return const [];
+
+    final k = page.floor();
+    final frac = page - k;
+    final isAtRest = frac.abs() < 0.0001;
+
+    final isBackward = !isAtRest &&
+        ((dragStartPage != null && dragStartPage == k + 1) ||
+            (dragStartPage == null && currentIndex == k + 1));
+
+    final List<CardTransformData> list = [];
+
+    void addCard(int idx, double dx, double scale, double dim, double angle, int zIndex) {
+      if (idx < 0 || idx >= totalCards) return;
+      list.add(CardTransformData(
+        index: idx,
+        dx: dx,
+        scale: scale,
+        dim: dim.clamp(0.0, 1.0),
+        angle: angle,
+        zIndex: zIndex,
+      ));
+    }
+
+    if (isAtRest) {
+      // Resting on card k:
+      // Active card k is fully white, scaled 1.0, centered.
+      // Next card k+1 and previous card k-1 peek out by 28dp, scaled 0.94, with a 38% dim overlay.
+      // All cards are 100% opaque (NO see-through transparency).
+      // Cards k+2 and k-2 sit directly behind k+1 and k-1 so they don't peek out or bleed through.
+      addCard(k, 0.0, 1.0, 0.0, 0.0, 10);
+      addCard(k + 1, 28.0, 0.94, 0.38, 0.0, 8);
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 7);
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
+    } else if (!isBackward) {
+      // Forward swipe: moving from k towards k + 1
+      // Card k is being swiped off to the left with counter-clockwise tilt
+      final diffK = k - page; // in [-1.0, 0.0]
+      final dxK = diffK * (cardWidth * 1.05);
+      final angleK = diffK * 0.08;
+      addCard(k, dxK, 1.0, 0.0, angleK, 10);
+
+      // Card k + 1 is moving from right stack (+28) into center (0)
+      final diffNext = (k + 1) - page; // in [0.0, 1.0]
+      final dxNext = diffNext * 28.0;
+      final scaleNext = 1.0 - (diffNext * 0.06);
+      final dimNext = diffNext * 0.38;
+      // Entering card tilts clockwise (positive angle) proportional to remaining distance
+      final angleNext = diffNext * 0.05;
+      addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, 8);
+
+      // Card k + 2 is waiting in the right stack at +28
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+
+      // Card k - 1 stays smoothly in the left stack at -28
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 7);
+
+      // Card k - 2 is waiting in the left stack at -28
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
+    } else {
+      // Backward swipe: moving from k + 1 towards k
+      final progress = (k + 1) - page; // in [0.0, 1.0] as page goes from k+1 to k
+
+      // Card k + 1 is the active card sliding right with clockwise tilt
+      final dxActive = progress * (cardWidth * 1.05);
+      final angleActive = progress * 0.08;
+      addCard(k + 1, dxActive, 1.0, 0.0, angleActive, 10);
+
+      // Card k is the previous card expanding from -28 into center 0
+      final dxPrev = -28.0 * (1.0 - progress);
+      final scalePrev = 0.94 + (progress * 0.06);
+      final dimPrev = (1.0 - progress) * 0.38;
+      // Entering card tilts counter-clockwise (negative angle) proportional to remaining distance
+      final anglePrev = -(1.0 - progress) * 0.05;
+      addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, 8);
+
+      // Card k - 1 is waiting in the left stack at -28
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 7);
+
+      // Card k + 2 is waiting in the right stack at +28
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+
+      // Card k - 2 is waiting in the left stack at -28
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
+    }
+
+    // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
+    list.sort((a, b) => a.zIndex.compareTo(b.zIndex));
+    return list;
+  }
+
   @override
   ConsumerState<ReviewModeScreen> createState() => _ReviewModeScreenState();
 }
 
-class _CardTransformData {
+@visibleForTesting
+class CardTransformData {
   final int index;
   final double dx;
   final double scale;
@@ -30,7 +131,7 @@ class _CardTransformData {
   final double angle;
   final int zIndex;
 
-  const _CardTransformData({
+  const CardTransformData({
     required this.index,
     required this.dx,
     required this.scale,
@@ -120,8 +221,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         .toList();
 
     Future.microtask(() async {
-      for (final bookmark in bookmarksToMark) {
-        await notifier.markAsRead(bookmark);
+      try {
+        for (final bookmark in bookmarksToMark) {
+          await notifier.markAsRead(bookmark);
+        }
+      } catch (e, st) {
+        debugPrint('Error flushing pending read actions: $e\n$st');
       }
     });
   }
@@ -220,98 +325,18 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     return false;
   }
 
-  List<_CardTransformData> _calculateCardTransforms(
+  List<CardTransformData> _calculateCardTransforms(
     double page,
     double cardWidth,
     int totalCards,
   ) {
-    if (totalCards == 0) return const [];
-
-    final k = page.floor();
-    final frac = page - k;
-    final isAtRest = frac.abs() < 0.0001;
-
-    final isBackward = !isAtRest &&
-        ((_dragStartPage != null && _dragStartPage == k + 1) ||
-            (_dragStartPage == null && currentIndex == k + 1));
-
-    final List<_CardTransformData> list = [];
-
-    void addCard(int idx, double dx, double scale, double dim, double angle, int zIndex) {
-      if (idx < 0 || idx >= totalCards) return;
-      list.add(_CardTransformData(
-        index: idx,
-        dx: dx,
-        scale: scale,
-        dim: dim.clamp(0.0, 1.0),
-        angle: angle,
-        zIndex: zIndex,
-      ));
-    }
-
-    if (isAtRest) {
-      // Resting on card k:
-      // Active card k is fully white, scaled 1.0, centered.
-      // Next card k+1 and previous card k-1 peek out by 28dp, scaled 0.94, with a 38% dim overlay.
-      // All cards are 100% opaque (NO see-through transparency).
-      // Cards k+2 and k-2 sit directly behind k+1 and k-1 so they don't peek out or bleed through.
-      addCard(k, 0.0, 1.0, 0.0, 0.0, 5);
-      addCard(k + 1, 28.0, 0.94, 0.38, 0.0, 3);
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 1);
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 4);
-      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
-    } else if (!isBackward) {
-      // Forward swipe: moving from k towards k + 1
-      // Card k is being swiped off to the left with counter-clockwise tilt
-      final diffK = k - page; // in [-1.0, 0.0]
-      final dxK = diffK * (cardWidth * 1.05);
-      final angleK = diffK * 0.08;
-      addCard(k, dxK, 1.0, 0.0, angleK, 5);
-
-      // Card k + 1 is moving from right stack (+28) into center (0)
-      final diffNext = (k + 1) - page; // in [0.0, 1.0]
-      final dxNext = diffNext * 28.0;
-      final scaleNext = 1.0 - (diffNext * 0.06);
-      final dimNext = diffNext * 0.38;
-      // Entering card tilts clockwise (positive angle) proportional to remaining distance
-      final angleNext = diffNext * 0.05;
-      addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, 4);
-
-      // Card k + 2 is waiting in the right stack at +28
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 1);
-
-      // Card k - 1 moves further left into previous stack
-      final diffPrev = (k - 1) - page;
-      final pPrev = -diffPrev - 1.0;
-      final dxPrev = -28.0 - (pPrev * 10.0);
-      addCard(k - 1, dxPrev, 0.94, 0.38, 0.0, 2);
-    } else {
-      // Backward swipe: moving from k + 1 towards k
-      final progress = (k + 1) - page; // in [0.0, 1.0] as page goes from k+1 to k
-
-      // Card k + 1 is the active card sliding right with clockwise tilt
-      final dxActive = progress * (cardWidth * 1.05);
-      final angleActive = progress * 0.08;
-      addCard(k + 1, dxActive, 1.0, 0.0, angleActive, 5);
-
-      // Card k is the previous card expanding from -28 into center 0
-      final dxPrev = -28.0 * (1.0 - progress);
-      final scalePrev = 0.94 + (progress * 0.06);
-      final dimPrev = (1.0 - progress) * 0.38;
-      // Entering card tilts counter-clockwise (negative angle) proportional to remaining distance
-      final anglePrev = -(1.0 - progress) * 0.05;
-      addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, 4);
-
-      // Card k - 1 is waiting in the left stack at -28
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 1);
-
-      // Card k + 2 is waiting in the right stack at +28
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 2);
-    }
-
-    // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
-    list.sort((a, b) => a.zIndex.compareTo(b.zIndex));
-    return list;
+    return ReviewModeScreen.calculateCardTransforms(
+      page: page,
+      cardWidth: cardWidth,
+      totalCards: totalCards,
+      dragStartPage: _dragStartPage,
+      currentIndex: currentIndex,
+    );
   }
 
   @override
@@ -652,6 +677,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                       ..scale(data.scale, data.scale);
 
                                     return Transform(
+                                      key: ValueKey<int>(data.index),
                                       transform: matrix,
                                       alignment: Alignment.center,
                                       child: SizedBox(

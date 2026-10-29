@@ -439,5 +439,168 @@ void main() {
       expect(find.text('Viewed 3'), findsOneWidget);
       expect(bookmark3.isRead, isTrue);
     });
+
+    testWidgets(
+        'Test 5: Stable ValueKeys on Stack Deck Transform Elements',
+        (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      final bookmarks = List.generate(
+        4,
+        (i) => Bookmark()
+          ..id = i + 1
+          ..url = 'https://example.com/${i + 1}'
+          ..title = 'Bookmark ${i + 1}'
+          ..isRead = false,
+      );
+      fakeRepo.bookmarks.addAll(bookmarks);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+            unsortedBookmarksProvider.overrideWith((ref) => Future.value(bookmarks)),
+          ],
+          child: buildTestApp(
+            home: const ReviewModeScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify that each card transform has a stable ValueKey<int> corresponding to its bookmark index
+      expect(find.byKey(const ValueKey<int>(0)), findsOneWidget);
+      expect(find.byKey(const ValueKey<int>(1)), findsOneWidget);
+      expect(find.byKey(const ValueKey<int>(2)), findsOneWidget);
+
+      // Verify widget type of each key is Transform
+      final transform0 = tester.widget<Transform>(find.byKey(const ValueKey<int>(0)));
+      final transform1 = tester.widget<Transform>(find.byKey(const ValueKey<int>(1)));
+      expect(transform0, isNotNull);
+      expect(transform1, isNotNull);
+
+      // Advance to next card
+      final nextButtonFinder =
+          find.widgetWithIcon(GestureDetector, Icons.arrow_forward);
+      await tester.tap(nextButtonFinder);
+      await tester.pumpAndSettle();
+
+      // Keys remain stable and now include previous card (0), active card (1), and next cards (2, 3)
+      expect(find.byKey(const ValueKey<int>(0)), findsOneWidget);
+      expect(find.byKey(const ValueKey<int>(1)), findsOneWidget);
+      expect(find.byKey(const ValueKey<int>(2)), findsOneWidget);
+      expect(find.byKey(const ValueKey<int>(3)), findsOneWidget);
+    });
+
+    test(
+        'Test 6: Continuous Z-Indices & Stable Card Transforms Across Page Boundaries',
+        () {
+      // 1. At Rest (page = 0.0)
+      final atRest0 = ReviewModeScreen.calculateCardTransforms(
+        page: 0.0,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      // Expected: Card 2 (zIndex 4), Card 1 (zIndex 8), Card 0 (zIndex 10)
+      expect(atRest0.length, equals(3));
+      expect(atRest0.map((c) => c.zIndex).toList(), equals([4, 8, 10]));
+      final card0Rest = atRest0.firstWhere((c) => c.index == 0);
+      final card1Rest = atRest0.firstWhere((c) => c.index == 1);
+      final card2Rest = atRest0.firstWhere((c) => c.index == 2);
+      expect(card0Rest.dx, equals(0.0));
+      expect(card0Rest.scale, equals(1.0));
+      expect(card0Rest.dim, equals(0.0));
+      expect(card0Rest.zIndex, equals(10));
+      expect(card1Rest.dx, equals(28.0));
+      expect(card1Rest.scale, equals(0.94));
+      expect(card1Rest.dim, equals(0.38));
+      expect(card1Rest.zIndex, equals(8));
+      expect(card2Rest.dx, equals(28.0));
+      expect(card2Rest.zIndex, equals(4));
+
+      // 2. Forward Swipe midpoint (page = 0.5)
+      final swipeMid = ReviewModeScreen.calculateCardTransforms(
+        page: 0.5,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      expect(swipeMid.map((c) => c.zIndex).toList(), equals([4, 8, 10]));
+      final card0Mid = swipeMid.firstWhere((c) => c.index == 0);
+      final card1Mid = swipeMid.firstWhere((c) => c.index == 1);
+      expect(card0Mid.dx, lessThan(0.0));
+      expect(card0Mid.zIndex, equals(10));
+      expect(card1Mid.dx, closeTo(14.0, 0.01));
+      expect(card1Mid.scale, closeTo(0.97, 0.01));
+      expect(card1Mid.zIndex, equals(8));
+
+      // 3. Right before boundary (page = 0.999)
+      final swipeEnd = ReviewModeScreen.calculateCardTransforms(
+        page: 0.999,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card0End = swipeEnd.firstWhere((c) => c.index == 0);
+      final card1End = swipeEnd.firstWhere((c) => c.index == 1);
+      final card2End = swipeEnd.firstWhere((c) => c.index == 2);
+      expect(card0End.dx, closeTo(-0.999 * 300.0 * 1.05, 0.1));
+      expect(card0End.zIndex, equals(10));
+      expect(card1End.dx, closeTo(0.028, 0.01));
+      expect(card1End.scale, closeTo(0.99994, 0.001));
+      expect(card1End.zIndex, equals(8));
+      expect(card2End.dx, equals(28.0));
+      expect(card2End.zIndex, equals(4));
+
+      // 4. Crossing boundary to page = 1.000 (At rest at index 1)
+      final atRest1 = ReviewModeScreen.calculateCardTransforms(
+        page: 1.0,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      // Cards present: Card 3 (zIndex 4), Card 0 (zIndex 7), Card 2 (zIndex 8), Card 1 (zIndex 10)
+      expect(atRest1.map((c) => c.zIndex).toList(), equals([4, 7, 8, 10]));
+      final card1AtRest = atRest1.firstWhere((c) => c.index == 1);
+      final card2AtRest = atRest1.firstWhere((c) => c.index == 2);
+      final card0AtRest = atRest1.firstWhere((c) => c.index == 0);
+      expect(card1AtRest.dx, equals(0.0));
+      expect(card1AtRest.scale, equals(1.0));
+      expect(card1AtRest.zIndex, equals(10));
+      expect(card2AtRest.dx, equals(28.0));
+      expect(card2AtRest.zIndex, equals(8));
+      expect(card0AtRest.dx, equals(-28.0));
+      expect(card0AtRest.zIndex, equals(7));
+
+      // 5. Middle Index Forward Swipe (k = 2, page = 2.5) -> verify Card k-1 rests smoothly at -28.0
+      final middleSwipe = ReviewModeScreen.calculateCardTransforms(
+        page: 2.5,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      // Card 0 (k-2, zIndex 3), Card 4 (k+2, zIndex 4), Card 1 (k-1, zIndex 7), Card 3 (k+1, zIndex 8), Card 2 (k, zIndex 10)
+      expect(middleSwipe.map((c) => c.zIndex).toList(), equals([3, 4, 7, 8, 10]));
+      final card1InLeftStack = middleSwipe.firstWhere((c) => c.index == 1);
+      final card0InLeftStack = middleSwipe.firstWhere((c) => c.index == 0);
+      expect(card1InLeftStack.dx, equals(-28.0)); // Smoothly resting at -28.0, NO teleporting
+      expect(card1InLeftStack.zIndex, equals(7));
+      expect(card0InLeftStack.dx, equals(-28.0));
+      expect(card0InLeftStack.zIndex, equals(3));
+
+      // 6. Backward Swipe (page = 1.5, dragging back towards 1)
+      final backSwipe = ReviewModeScreen.calculateCardTransforms(
+        page: 1.5,
+        cardWidth: 300.0,
+        totalCards: 5,
+        dragStartPage: 2,
+        currentIndex: 2,
+      );
+      // Backward: Card 2 is sliding right (zIndex 10), Card 1 is entering from left (zIndex 8),
+      // Card 3 is right stack (zIndex 4), Card 0 is left stack (zIndex 7)
+      expect(backSwipe.map((c) => c.zIndex).toList(), equals([4, 7, 8, 10]));
+      final card2Back = backSwipe.firstWhere((c) => c.index == 2);
+      final card1Back = backSwipe.firstWhere((c) => c.index == 1);
+      expect(card2Back.dx, greaterThan(0.0));
+      expect(card2Back.zIndex, equals(10));
+      expect(card1Back.dx, closeTo(-14.0, 0.01));
+      expect(card1Back.zIndex, equals(8));
+    });
   });
 }
