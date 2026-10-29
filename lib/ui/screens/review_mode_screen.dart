@@ -22,6 +22,24 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
   ConsumerState<ReviewModeScreen> createState() => _ReviewModeScreenState();
 }
 
+class _CardTransformData {
+  final int index;
+  final double dx;
+  final double scale;
+  final double opacity;
+  final double angle;
+  final int zIndex;
+
+  const _CardTransformData({
+    required this.index,
+    required this.dx,
+    required this.scale,
+    required this.opacity,
+    required this.angle,
+    required this.zIndex,
+  });
+}
+
 class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   late final PageController _pageController;
   int currentIndex = 0;
@@ -29,11 +47,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   bool loaded = false;
   final Set<int> _reviewedBookmarkIds = {};
   int get completedCount => _reviewedBookmarkIds.length;
+  int? _dragStartPage;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.84);
+    _pageController = PageController(viewportFraction: 1.0);
     Future.microtask(() async {
       List<Bookmark> list;
       if (widget.collection == null) {
@@ -122,6 +141,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _goToNext() {
     if (currentIndex >= unreadBookmarks.length) return;
+    _dragStartPage = currentIndex;
     if (currentIndex == unreadBookmarks.length - 1) {
       _applyAction(unreadBookmarks[currentIndex]);
       setState(() {
@@ -137,10 +157,129 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _goToPrevious() {
     if (currentIndex <= 0 || !_pageController.hasClients) return;
+    _dragStartPage = currentIndex;
     _pageController.previousPage(
       duration: const Duration(milliseconds: 360),
       curve: Curves.easeOutCubic,
     );
+  }
+
+  bool _onScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollStartNotification) {
+      final start = _pageController.hasClients && _pageController.page != null
+          ? _pageController.page!.round()
+          : currentIndex;
+      if (_dragStartPage != start) {
+        _dragStartPage = start;
+      }
+    } else if (notification is ScrollEndNotification) {
+      if (_dragStartPage != null) {
+        _dragStartPage = null;
+      }
+    }
+    return false;
+  }
+
+  List<_CardTransformData> _calculateCardTransforms(
+    double page,
+    double cardWidth,
+    int totalCards,
+  ) {
+    if (totalCards == 0) return const [];
+
+    final k = page.floor();
+    final frac = page - k;
+    final isAtRest = frac.abs() < 0.0001;
+
+    final isBackward = !isAtRest &&
+        ((_dragStartPage != null && _dragStartPage == k + 1) ||
+            (_dragStartPage == null && currentIndex == k + 1));
+
+    final List<_CardTransformData> list = [];
+
+    void addCard(int idx, double dx, double scale, double opacity, double angle, int zIndex) {
+      if (idx < 0 || idx >= totalCards) return;
+      if (opacity <= 0.0) return;
+      list.add(_CardTransformData(
+        index: idx,
+        dx: dx,
+        scale: scale,
+        opacity: opacity.clamp(0.0, 1.0),
+        angle: angle,
+        zIndex: zIndex,
+      ));
+    }
+
+    if (isAtRest) {
+      // Resting on card k
+      addCard(k, 0.0, 1.0, 1.0, 0.0, 4);
+      addCard(k + 1, 44.0, 0.94, 0.60, 0.0, 2);
+      addCard(k + 2, 80.0, 0.88, 0.35, 0.0, 1);
+      addCard(k - 1, -44.0, 0.94, 0.60, 0.0, 2);
+      addCard(k - 2, -80.0, 0.88, 0.35, 0.0, 1);
+    } else if (!isBackward) {
+      // Forward swipe: moving from k towards k + 1
+      // Card k is being swiped off to the left with counter-clockwise tilt
+      final diffK = k - page; // in [-1.0, 0.0]
+      final dxK = diffK * (cardWidth * 1.05);
+      final angleK = diffK * 0.08;
+      final opacityK = 1.0 - ((-diffK) * 0.40);
+      addCard(k, dxK, 1.0, opacityK, angleK, 4);
+
+      // Card k + 1 is moving from right stack (+44) into center (0)
+      final diffNext = (k + 1) - page; // in [0.0, 1.0]
+      final dxNext = diffNext * 44.0;
+      final scaleNext = 1.0 - (diffNext * 0.06);
+      final opacityNext = 1.0 - (diffNext * 0.40);
+      addCard(k + 1, dxNext, scaleNext, opacityNext, 0.0, 3);
+
+      // Card k + 2 is moving from +80 to +44
+      final diffNext2 = (k + 2) - page; // in [1.0, 2.0]
+      final pNext2 = diffNext2 - 1.0;
+      final dxNext2 = 44.0 + (pNext2 * 36.0);
+      final scaleNext2 = 0.94 - (pNext2 * 0.06);
+      final opacityNext2 = 0.60 - (pNext2 * 0.25);
+      addCard(k + 2, dxNext2, scaleNext2, opacityNext2, 0.0, 1);
+
+      // Card k - 1 is moving from -44 to -80
+      final diffPrev = (k - 1) - page; // in [-2.0, -1.0]
+      final pPrev = -diffPrev - 1.0;
+      final dxPrev = -44.0 - (pPrev * 36.0);
+      final scalePrev = 0.94 - (pPrev * 0.06);
+      final opacityPrev = 0.60 - (pPrev * 0.25);
+      addCard(k - 1, dxPrev, scalePrev, opacityPrev, 0.0, 2);
+    } else {
+      // Backward swipe: moving from k + 1 towards k
+      final progress = (k + 1) - page; // in [0.0, 1.0] as page goes from k+1 to k
+
+      // Card k + 1 is the active card sliding right with clockwise tilt
+      final dxActive = progress * (cardWidth * 1.05);
+      final angleActive = progress * 0.08;
+      final opacityActive = 1.0 - (progress * 0.40);
+      addCard(k + 1, dxActive, 1.0, opacityActive, angleActive, 4);
+
+      // Card k is the previous card expanding from -44 into center 0
+      final dxPrev = -44.0 * (1.0 - progress);
+      final scalePrev = 0.94 + (progress * 0.06);
+      final opacityPrev = 0.60 + (progress * 0.40);
+      addCard(k, dxPrev, scalePrev, opacityPrev, 0.0, 3);
+
+      // Card k - 1 moves from -80 to -44
+      final dxPrev2 = -80.0 + (progress * 36.0);
+      final scalePrev2 = 0.88 + (progress * 0.06);
+      final opacityPrev2 = 0.35 + (progress * 0.25);
+      addCard(k - 1, dxPrev2, scalePrev2, opacityPrev2, 0.0, 1);
+
+      // Card k + 2 moves from +44 to +80
+      final dxNext2 = 44.0 + (progress * 36.0);
+      final scaleNext2 = 0.94 - (progress * 0.06);
+      final opacityNext2 = 0.60 - (progress * 0.25);
+      addCard(k + 2, dxNext2, scaleNext2, opacityNext2, 0.0, 2);
+    }
+
+    // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
+    list.sort((a, b) => a.zIndex.compareTo(b.zIndex));
+    return list;
   }
 
   @override
@@ -263,7 +402,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                             .clamp(0, unreadBookmarks.length - 1)
                             .toInt();
                         setState(() {
-                                                  currentIndex = previousIndex;
+                          currentIndex = previousIndex;
                         });
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted && _pageController.hasClients) {
@@ -425,93 +564,87 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         Expanded(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 600),
+              constraints: const BoxConstraints(
+                maxWidth: AppDimensions.maxContentWidth,
+              ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: PageView.builder(
-                  controller: _pageController,
-                  clipBehavior: Clip.none,
-                  // The extra trailing page makes the last left swipe
-                  // produce an onPageChanged event instead of stopping on
-                  // the final card.
-                  itemCount: unreadBookmarks.length + 1,
-                  onPageChanged: _onPageChanged,
-                  allowImplicitScrolling: true,
-                  physics: const ClampingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    if (index == unreadBookmarks.length) {
-                      return const SizedBox.shrink();
-                    }
-                    return AnimatedBuilder(
-                      animation: _pageController,
-                      builder: (context, child) {
-                        final page = _pageController.hasClients &&
-                                _pageController.page != null
-                            ? _pageController.page!
-                            : _pageController.initialPage.toDouble();
-                        final difference = index - page;
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = MediaQuery.sizeOf(context).width;
+                    final cardWidth = (screenWidth * 0.736).clamp(280.0, 420.0);
+                    final cardHeight = (cardWidth * 1.70).clamp(0.0, constraints.maxHeight * 0.88);
 
-                        // Stacked deck effect
-                        final double scale;
-                        final double dx;
-                        final double opacity;
+                    return Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        // Stacked deck visual rendering in proper Z-order
+                        Positioned.fill(
+                          child: RepaintBoundary(
+                            child: IgnorePointer(
+                              child: AnimatedBuilder(
+                                animation: _pageController,
+                                builder: (context, _) {
+                                  final page = _pageController.hasClients &&
+                                          _pageController.page != null
+                                      ? _pageController.page!
+                                      : currentIndex.toDouble();
+                                  final transforms = _calculateCardTransforms(
+                                    page,
+                                    cardWidth,
+                                    unreadBookmarks.length,
+                                  );
 
-                        if (difference <= 0) {
-                          // Cards to the left: scale down and slide right to tuck under active card
-                          final progress = (-difference).clamp(0.0, 3.0);
-                          scale = (1.0 - (progress.clamp(0.0, 1.0) * 0.08))
-                              .clamp(0.84, 1.0);
-                          // Tucks underneath the card to the right
-                          final baseShift = progress.clamp(0.0, 1.0) * 36.0;
-                          final extraShift =
-                              progress > 1.0 ? (progress - 1.0) * 14.0 : 0.0;
-                          dx = baseShift + extraShift;
-                          opacity = (1.0 - (progress * 0.12)).clamp(0.65, 1.0);
-                        } else {
-                          // Cards to the right: peek in from the edge
-                          final progress = difference.clamp(0.0, 2.0);
-                          scale = (1.0 - (progress.clamp(0.0, 1.0) * 0.08))
-                              .clamp(0.84, 1.0);
-                          // Slight shift left to show more of upcoming card
-                          dx = -progress.clamp(0.0, 1.0) * 12.0;
-                          opacity = (1.0 - (progress.clamp(0.0, 1.0) * 0.12))
-                              .clamp(0.70, 1.0);
-                        }
-
-                        return Center(
-                          child: Transform.translate(
-                            offset: Offset(dx, 0),
-                            child: Transform.scale(
-                              scale: scale,
-                              child: Opacity(
-                                opacity: opacity,
-                                child: child,
+                                  return Stack(
+                                    alignment: Alignment.center,
+                                    clipBehavior: Clip.none,
+                                    children: transforms.map((data) {
+                                      return Transform.translate(
+                                        offset: Offset(data.dx, 0),
+                                        child: Transform.rotate(
+                                          angle: data.angle,
+                                          child: Transform.scale(
+                                            scale: data.scale,
+                                            child: Opacity(
+                                              opacity: data.opacity,
+                                              child: _buildCard(
+                                                unreadBookmarks[data.index],
+                                                cardWidth,
+                                                cardHeight,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
                               ),
                             ),
                           ),
-                        );
-                      },
-                      child: GestureDetector(
-                        onTap: () {
-                          final page = _pageController.hasClients &&
-                                  _pageController.page != null
-                              ? _pageController.page!
-                              : _pageController.initialPage.toDouble();
-                          if ((index - page).abs() > 0.3) {
-                            _pageController.animateToPage(
-                              index,
-                              duration: const Duration(milliseconds: 320),
-                              curve: Curves.easeOutCubic,
-                            );
-                          }
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 6.0),
-                          child: RepaintBoundary(
-                            child: _buildCard(unreadBookmarks[index]),
+                        ),
+
+                        // Gesture driver PageView
+                        Positioned.fill(
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: _onScrollNotification,
+                            child: PageView.builder(
+                              controller: _pageController,
+                              clipBehavior: Clip.none,
+                              itemCount: unreadBookmarks.length + 1,
+                              onPageChanged: _onPageChanged,
+                              allowImplicitScrolling: true,
+                              physics: const ClampingScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  color: Colors.transparent,
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     );
                   },
                 ),
@@ -570,21 +703,23 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     );
   }
 
-  Widget _buildCard(Bookmark b) {
+  Widget _buildCard(Bookmark b, double cardWidth, double cardHeight) {
     final collection = b.collection.value ?? widget.collection;
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
     final collectionColor = collection?.color ?? Colors.grey.shade400;
-    final placeholderSize =
-        (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
+    final placeholderSize = (cardWidth * 0.16).clamp(48.0, 80.0);
     final placeholderFontSize =
         MediaQuery.textScalerOf(context).scale(placeholderSize);
 
     return Container(
+      width: cardWidth,
+      height: cardHeight,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: AppTheme.border, width: 4.0),
+        border: null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -631,7 +766,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF111111),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                border: Border.all(color: AppTheme.border, width: 2),
+                border: Border.all(color: AppTheme.border, width: 2.0),
               ),
               child: Stack(
                 fit: StackFit.expand,
