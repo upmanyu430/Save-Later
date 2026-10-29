@@ -388,4 +388,65 @@ void main() {
     expect(controller.hasClients, isTrue);
     expect(controller.page, 1.0);
   });
+
+  testWidgets('ReviewModeScreen defers marking bookmark as read until scroll ends', (tester) async {
+    final fakeRepo = FakeIsarRepository();
+    final bookmark1 = Bookmark()
+      ..id = 1
+      ..url = 'https://example.com/1'
+      ..title = 'Bookmark 1'
+      ..isRead = false;
+    final bookmark2 = Bookmark()
+      ..id = 2
+      ..url = 'https://example.com/2'
+      ..title = 'Bookmark 2'
+      ..isRead = false;
+    final bookmark3 = Bookmark()
+      ..id = 3
+      ..url = 'https://example.com/3'
+      ..title = 'Bookmark 3'
+      ..isRead = false;
+
+    fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+          unsortedBookmarksProvider.overrideWith((ref) => Future.value([bookmark1, bookmark2, bookmark3])),
+        ],
+        child: buildTestApp(
+          home: const ReviewModeScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Start drag to move to bookmark 2
+    final gesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    // Move enough to cross page threshold (onPageChanged fires)
+    await gesture.moveBy(const Offset(-600, 0));
+    await tester.pump();
+
+    // bookmark1 has NOT been marked as read in DB yet because scroll is not idle
+    expect(bookmark1.isRead, isFalse);
+
+    // End drag and let scroll settle
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // After scroll settles (ScrollEndNotification), pending actions flush
+    expect(bookmark1.isRead, isTrue);
+    expect(bookmark2.isRead, isFalse);
+
+    // Backward drag to bookmark 1 does not mark bookmark 2 as read
+    final backGesture = await tester.startGesture(tester.getCenter(find.byType(PageView)));
+    await backGesture.moveBy(const Offset(600, 0));
+    await tester.pump();
+    await backGesture.up();
+    await tester.pumpAndSettle();
+
+    expect(bookmark2.isRead, isFalse);
+  });
 }

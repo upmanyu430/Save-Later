@@ -47,8 +47,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   List<Bookmark> unreadBookmarks = [];
   bool loaded = false;
   final Set<int> _reviewedBookmarkIds = {};
+  final Set<int> _pendingReadBookmarkIds = {};
   int get completedCount => _reviewedBookmarkIds.length;
   int? _dragStartPage;
+  late final BookmarkNotifier _bookmarkNotifier;
 
   final Map<int, Widget> _cachedCards = {};
   double? _cachedCardWidth;
@@ -72,6 +74,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     super.initState();
     _pageController = PageController(viewportFraction: 1.0);
     _currentIndexNotifier = ValueNotifier<int>(0);
+    _bookmarkNotifier = ref.read(bookmarkNotifierProvider.notifier);
     Future.microtask(() async {
       List<Bookmark> list;
       if (widget.collection == null) {
@@ -95,6 +98,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   @override
   void dispose() {
+    _flushPendingReadActions();
     _currentIndexNotifier.dispose();
     _pageController.dispose();
     super.dispose();
@@ -102,11 +106,24 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   void _applyAction(Bookmark bookmark) {
     _reviewedBookmarkIds.add(bookmark.id);
-    final notifier = ref.read(bookmarkNotifierProvider.notifier);
-    // Reviewing a card must never delete the saved bookmark. Both swipe
-    // directions complete the review by marking it as read; deletion remains
-    // available from the bookmark's own actions.
-    notifier.markAsRead(bookmark);
+    _pendingReadBookmarkIds.add(bookmark.id);
+  }
+
+  void _flushPendingReadActions() {
+    if (_pendingReadBookmarkIds.isEmpty) return;
+    final idsToFlush = _pendingReadBookmarkIds.toSet();
+    _pendingReadBookmarkIds.clear();
+
+    final notifier = _bookmarkNotifier;
+    final bookmarksToMark = unreadBookmarks
+        .where((b) => idsToFlush.contains(b.id))
+        .toList();
+
+    Future.microtask(() async {
+      for (final bookmark in bookmarksToMark) {
+        await notifier.markAsRead(bookmark);
+      }
+    });
   }
 
   void _onPageChanged(int nextIndex) {
@@ -138,6 +155,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
           index++) {
         _applyAction(unreadBookmarks[index]);
       }
+      _flushPendingReadActions();
       setState(() {
         currentIndex = unreadBookmarks.length;
         _currentIndexNotifier.value = unreadBookmarks.length;
@@ -163,6 +181,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     _dragStartPage = currentIndex;
     if (currentIndex == unreadBookmarks.length - 1) {
       _applyAction(unreadBookmarks[currentIndex]);
+      _flushPendingReadActions();
       setState(() {
         currentIndex = unreadBookmarks.length;
         _currentIndexNotifier.value = unreadBookmarks.length;
@@ -196,6 +215,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       if (_dragStartPage != null) {
         _dragStartPage = null;
       }
+      _flushPendingReadActions();
     }
     return false;
   }
@@ -454,6 +474,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     padding: EdgeInsets.zero,
                     shadowOffset: 0,
                     onPressed: () {
+                      _flushPendingReadActions();
                       // Review is pushed from the current folder. Pop back to
                       // that folder instead of replacing the route with home.
                       context.pop();
@@ -541,7 +562,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 width: 45,
                 height: 45,
                 child: NeoButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () {
+                    _flushPendingReadActions();
+                    context.pop();
+                  },
                   padding: EdgeInsets.zero,
                   color: const Color(0xFF222222),
                   borderColor: Colors.white24,
