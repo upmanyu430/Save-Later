@@ -231,7 +231,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       final dxNext = diffNext * 44.0;
       final scaleNext = 1.0 - (diffNext * 0.06);
       final opacityNext = 1.0 - (diffNext * 0.40);
-      addCard(k + 1, dxNext, scaleNext, opacityNext, 0.0, 3);
+      // Entering card tilts clockwise (positive angle) proportional to remaining distance
+      final angleNext = diffNext * 0.05;
+      addCard(k + 1, dxNext, scaleNext, opacityNext, angleNext, 3);
 
       // Card k + 2 is moving from +80 to +44
       final diffNext2 = (k + 2) - page; // in [1.0, 2.0]
@@ -262,7 +264,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       final dxPrev = -44.0 * (1.0 - progress);
       final scalePrev = 0.94 + (progress * 0.06);
       final opacityPrev = 0.60 + (progress * 0.40);
-      addCard(k, dxPrev, scalePrev, opacityPrev, 0.0, 3);
+      // Entering card tilts counter-clockwise (negative angle) proportional to remaining distance
+      final anglePrev = -(1.0 - progress) * 0.05;
+      addCard(k, dxPrev, scalePrev, opacityPrev, anglePrev, 3);
 
       // Card k - 1 moves from -80 to -44
       final dxPrev2 = -80.0 + (progress * 36.0);
@@ -635,7 +639,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               itemCount: unreadBookmarks.length + 1,
                               onPageChanged: _onPageChanged,
                               allowImplicitScrolling: true,
-                              physics: const ClampingScrollPhysics(),
+                              physics: const PageScrollPhysics(),
                               itemBuilder: (context, index) {
                                 return Container(
                                   color: Colors.transparent,
