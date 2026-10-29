@@ -42,6 +42,7 @@ class _CardTransformData {
 
 class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   late final PageController _pageController;
+  late final ValueNotifier<int> _currentIndexNotifier;
   int currentIndex = 0;
   List<Bookmark> unreadBookmarks = [];
   bool loaded = false;
@@ -70,6 +71,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(viewportFraction: 1.0);
+    _currentIndexNotifier = ValueNotifier<int>(0);
     Future.microtask(() async {
       List<Bookmark> list;
       if (widget.collection == null) {
@@ -93,6 +95,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
   @override
   void dispose() {
+    _currentIndexNotifier.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -117,9 +120,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     // Backward navigation (swipe or button) to an earlier card is purely navigation;
     // do not mark as read or increment counts when looking back at a card.
     if (nextIndex < previousIndex) {
-      setState(() {
-        currentIndex = nextIndex;
-      });
+      currentIndex = nextIndex;
+      _currentIndexNotifier.value = nextIndex;
       return;
     }
 
@@ -138,6 +140,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       }
       setState(() {
         currentIndex = unreadBookmarks.length;
+        _currentIndexNotifier.value = unreadBookmarks.length;
       });
       return;
     }
@@ -150,9 +153,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         _applyAction(unreadBookmarks[index]);
       }
 
-      setState(() {
-        currentIndex = nextIndex;
-      });
+      currentIndex = nextIndex;
+      _currentIndexNotifier.value = nextIndex;
     }
   }
 
@@ -163,6 +165,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       _applyAction(unreadBookmarks[currentIndex]);
       setState(() {
         currentIndex = unreadBookmarks.length;
+        _currentIndexNotifier.value = unreadBookmarks.length;
       });
       return;
     }
@@ -412,6 +415,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                             .toInt();
                         setState(() {
                           currentIndex = previousIndex;
+                          _currentIndexNotifier.value = previousIndex;
                         });
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           if (mounted && _pageController.hasClients) {
@@ -506,25 +510,30 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.5),
                   ),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        (currentIndex + 1).toString().padLeft(2, '0'),
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        ' / ${unreadBookmarks.length.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ],
+                  ValueListenableBuilder<int>(
+                    valueListenable: _currentIndexNotifier,
+                    builder: (context, current, _) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            (current + 1).toString().padLeft(2, '0'),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            ' / ${unreadBookmarks.length.toString().padLeft(2, '0')}',
+                            style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -548,24 +557,29 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         // Progress Bars
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Row(
-            children: List.generate(unreadBookmarks.length, (index) {
-              return Expanded(
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 260),
-                  curve: Curves.easeOutCubic,
-                  height: 8,
-                  margin: EdgeInsets.only(
-                      right: index == unreadBookmarks.length - 1 ? 0 : 6),
-                  decoration: BoxDecoration(
-                    color: index <= currentIndex
-                        ? const Color(0xFFFFD166)
-                        : const Color(0xFF333333),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
+          child: ValueListenableBuilder<int>(
+            valueListenable: _currentIndexNotifier,
+            builder: (context, current, _) {
+              return Row(
+                children: List.generate(unreadBookmarks.length, (index) {
+                  return Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 260),
+                      curve: Curves.easeOutCubic,
+                      height: 8,
+                      margin: EdgeInsets.only(
+                          right: index == unreadBookmarks.length - 1 ? 0 : 6),
+                      decoration: BoxDecoration(
+                        color: index <= current
+                            ? const Color(0xFFFFD166)
+                            : const Color(0xFF333333),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  );
+                }),
               );
-            }),
+            },
           ),
         ),
 
@@ -688,27 +702,35 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               Expanded(
                 child: SizedBox(
                   height: 56,
-                  child: NeoButton(
-                    color: const Color(0xFFFFD166),
-                    borderRadius: AppDimensions.radiusXl,
-                    padding: EdgeInsets.zero,
-                    shadowOffset: 0,
-                    onPressed: () async {
-                      await openUrl(unreadBookmarks[currentIndex].url, context: context);
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: _currentIndexNotifier,
+                    builder: (context, current, _) {
+                      return NeoButton(
+                        color: const Color(0xFFFFD166),
+                        borderRadius: AppDimensions.radiusXl,
+                        padding: EdgeInsets.zero,
+                        shadowOffset: 0,
+                        onPressed: () async {
+                          if (current < unreadBookmarks.length) {
+                            await openUrl(unreadBookmarks[current].url,
+                                context: context);
+                          }
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(AppLocalizations.of(context)!.openLink,
+                                style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900)),
+                            const SizedBox(width: AppDimensions.paddingSm),
+                            const Icon(Icons.arrow_outward,
+                                color: Colors.black, size: 24),
+                          ],
+                        ),
+                      );
                     },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(AppLocalizations.of(context)!.openLink,
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900)),
-                        const SizedBox(width: AppDimensions.paddingSm),
-                        const Icon(Icons.arrow_outward,
-                            color: Colors.black, size: 24),
-                      ],
-                    ),
                   ),
                 ),
               ),

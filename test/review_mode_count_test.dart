@@ -311,4 +311,81 @@ void main() {
     expect(hasMatchingShadow, isTrue);
     expect(hasMatchingPadding, isTrue);
   });
+
+  testWidgets('ReviewModeScreen updates top bar counter and progress bar on page transition without rebuilding swiper', (tester) async {
+    final fakeRepo = FakeIsarRepository();
+    final bookmark1 = Bookmark()
+      ..id = 1
+      ..url = 'https://example.com/1'
+      ..title = 'Bookmark 1'
+      ..isRead = false;
+    final bookmark2 = Bookmark()
+      ..id = 2
+      ..url = 'https://example.com/2'
+      ..title = 'Bookmark 2'
+      ..isRead = false;
+    final bookmark3 = Bookmark()
+      ..id = 3
+      ..url = 'https://example.com/3'
+      ..title = 'Bookmark 3'
+      ..isRead = false;
+
+    fakeRepo.bookmarks.addAll([bookmark1, bookmark2, bookmark3]);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+          unsortedBookmarksProvider.overrideWith((ref) => Future.value([bookmark1, bookmark2, bookmark3])),
+        ],
+        child: buildTestApp(
+          home: const ReviewModeScreen(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify initial counter: "01" and " / 03"
+    expect(find.text('01'), findsOneWidget);
+    expect(find.text(' / 03'), findsOneWidget);
+
+    // Initial progress bar state: index 0 is yellow (0xFFFFD166), 1 and 2 are grey (0xFF333333)
+    var progressBars = tester.widgetList<AnimatedContainer>(find.byType(AnimatedContainer)).toList();
+    expect(progressBars.length, 3);
+    expect((progressBars[0].decoration as BoxDecoration).color, const Color(0xFFFFD166));
+    expect((progressBars[1].decoration as BoxDecoration).color, const Color(0xFF333333));
+    expect((progressBars[2].decoration as BoxDecoration).color, const Color(0xFF333333));
+
+    // Capture initial PageView and its PageController
+    final pageView = tester.widget<PageView>(find.byType(PageView));
+    final controller = pageView.controller;
+    expect(controller, isNotNull);
+    expect(controller!.hasClients, isTrue);
+    expect(controller.page, 0.0);
+
+    // Find next arrow button
+    final nextButtonFinder = find.widgetWithIcon(GestureDetector, Icons.arrow_forward);
+
+    // Tap next to transition to card 2 (index 1)
+    await tester.tap(nextButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Verify counter updated to "02 / 03"
+    expect(find.text('02'), findsOneWidget);
+    expect(find.text(' / 03'), findsOneWidget);
+
+    // Verify progress bars updated: index 0 and 1 are yellow, index 2 is grey
+    progressBars = tester.widgetList<AnimatedContainer>(find.byType(AnimatedContainer)).toList();
+    expect(progressBars.length, 3);
+    expect((progressBars[0].decoration as BoxDecoration).color, const Color(0xFFFFD166));
+    expect((progressBars[1].decoration as BoxDecoration).color, const Color(0xFFFFD166));
+    expect((progressBars[2].decoration as BoxDecoration).color, const Color(0xFF333333));
+
+    // Verify controller remains attached and stable on the same instance
+    final updatedPageView = tester.widget<PageView>(find.byType(PageView));
+    expect(updatedPageView.controller, same(controller));
+    expect(controller.hasClients, isTrue);
+    expect(controller.page, 1.0);
+  });
 }
