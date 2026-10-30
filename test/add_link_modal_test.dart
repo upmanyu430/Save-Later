@@ -277,8 +277,8 @@ void main() {
     // Modal should be dismissed
     expect(find.text('Add Link to Collection'), findsNothing);
 
-    // SnackBar should be displayed
-    expect(find.text('Saving link...'), findsOneWidget);
+    // No intrusive SnackBar is displayed
+    expect(find.text('Saving link...'), findsNothing);
   });
 
   testWidgets('Valid URL saves successfully via keyboard onSubmitted', (tester) async {
@@ -317,8 +317,8 @@ void main() {
     // Modal should be dismissed
     expect(find.text('Add Link to Collection'), findsNothing);
 
-    // SnackBar should be displayed
-    expect(find.text('Saving link...'), findsOneWidget);
+    // No intrusive SnackBar is displayed
+    expect(find.text('Saving link...'), findsNothing);
   });
 
   testWidgets('Tapping Add Link from CollectionDetailScreen menu opens AddLinkModal', (tester) async {

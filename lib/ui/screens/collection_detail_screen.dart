@@ -810,18 +810,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
       collection: widget.collection,
     );
 
-    final targetContext = widget.parentContext ?? context;
-    final messenger = ScaffoldMessenger.maybeOf(targetContext) ??
-        ScaffoldMessenger.of(context);
-    final l10n = AppLocalizations.of(targetContext) ??
-        AppLocalizations.of(context);
-    final msg = l10n?.savingLink ?? 'Saving link...';
-
     Navigator.pop(context);
-
-    messenger.showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
   }
 
   @override
