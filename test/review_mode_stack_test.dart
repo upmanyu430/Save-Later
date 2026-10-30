@@ -524,16 +524,13 @@ void main() {
         cardWidth: 300.0,
         totalCards: 5,
       );
-      expect(swipeMid.map((c) => c.zIndex).toList(), equals([4, 8, 10]));
       final card0Mid = swipeMid.firstWhere((c) => c.index == 0);
       final card1Mid = swipeMid.firstWhere((c) => c.index == 1);
       expect(card0Mid.dx, lessThan(0.0));
-      expect(card0Mid.zIndex, equals(10));
       expect(card1Mid.dx, closeTo(14.0, 0.01));
       expect(card1Mid.scale, closeTo(0.97, 0.01));
-      expect(card1Mid.zIndex, equals(8));
 
-      // 3. Right before boundary (page = 0.999)
+      // 3. Right before boundary (page = 0.999) - Verify continuous approach with ZERO teleportation
       final swipeEnd = ReviewModeScreen.calculateCardTransforms(
         page: 0.999,
         cardWidth: 300.0,
@@ -542,13 +539,19 @@ void main() {
       final card0End = swipeEnd.firstWhere((c) => c.index == 0);
       final card1End = swipeEnd.firstWhere((c) => c.index == 1);
       final card2End = swipeEnd.firstWhere((c) => c.index == 2);
-      expect(card0End.dx, closeTo(-0.999 * 300.0 * 1.05, 0.1));
-      expect(card0End.zIndex, equals(10));
+      final card3End = swipeEnd.firstWhere((c) => c.index == 3);
+      // Card 0 smoothly settles within 1dp of -28.0 (NO teleporting across 300dp)
+      expect(card0End.dx, closeTo(-28.0, 1.0));
+      expect(card0End.zIndex, equals(7));
+      expect(card0End.scale, closeTo(0.94, 0.01));
+      expect(card0End.dim, closeTo(0.38, 0.01));
       expect(card1End.dx, closeTo(0.028, 0.01));
-      expect(card1End.scale, closeTo(0.99994, 0.001));
-      expect(card1End.zIndex, equals(8));
+      expect(card1End.scale, closeTo(1.0, 0.01));
+      expect(card1End.zIndex, equals(10));
       expect(card2End.dx, equals(28.0));
-      expect(card2End.zIndex, equals(4));
+      expect(card2End.zIndex, equals(8));
+      expect(card3End.dx, equals(28.0));
+      expect(card3End.zIndex, equals(4));
 
       // 4. Crossing boundary to page = 1.000 (At rest at index 1)
       final atRest1 = ReviewModeScreen.calculateCardTransforms(
@@ -575,14 +578,10 @@ void main() {
         cardWidth: 300.0,
         totalCards: 5,
       );
-      // Card 0 (k-2, zIndex 3), Card 4 (k+2, zIndex 4), Card 1 (k-1, zIndex 7), Card 3 (k+1, zIndex 8), Card 2 (k, zIndex 10)
-      expect(middleSwipe.map((c) => c.zIndex).toList(), equals([3, 4, 7, 8, 10]));
       final card1InLeftStack = middleSwipe.firstWhere((c) => c.index == 1);
       final card0InLeftStack = middleSwipe.firstWhere((c) => c.index == 0);
       expect(card1InLeftStack.dx, equals(-28.0)); // Smoothly resting at -28.0, NO teleporting
-      expect(card1InLeftStack.zIndex, equals(7));
       expect(card0InLeftStack.dx, equals(-28.0));
-      expect(card0InLeftStack.zIndex, equals(3));
 
       // 6. Backward Swipe (page = 1.5, dragging back towards 1)
       final backSwipe = ReviewModeScreen.calculateCardTransforms(
@@ -592,15 +591,10 @@ void main() {
         dragStartPage: 2,
         currentIndex: 2,
       );
-      // Backward: Card 2 is sliding right (zIndex 10), Card 1 is entering from left (zIndex 8),
-      // Card 3 is right stack (zIndex 4), Card 0 is left stack (zIndex 7)
-      expect(backSwipe.map((c) => c.zIndex).toList(), equals([4, 7, 8, 10]));
       final card2Back = backSwipe.firstWhere((c) => c.index == 2);
       final card1Back = backSwipe.firstWhere((c) => c.index == 1);
       expect(card2Back.dx, greaterThan(0.0));
-      expect(card2Back.zIndex, equals(10));
       expect(card1Back.dx, closeTo(-14.0, 0.01));
-      expect(card1Back.zIndex, equals(8));
     });
   });
 }

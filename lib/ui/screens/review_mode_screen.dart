@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -50,6 +51,9 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       ));
     }
 
+    final t = frac;
+    final arc = cardWidth * 0.55;
+
     if (isAtRest) {
       // Resting on card k:
       // Active card k is fully white, scaled 1.0, centered.
@@ -63,54 +67,70 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
     } else if (!isBackward) {
       // Forward swipe: moving from k towards k + 1
-      // Card k is being swiped off to the left with counter-clockwise tilt
-      final diffK = k - page; // in [-1.0, 0.0]
-      final dxK = diffK * (cardWidth * 1.05);
-      final angleK = diffK * 0.08;
-      addCard(k, dxK, 1.0, 0.0, angleK, 10);
+      // Card k is swiped outward with parting arc and tilts counter-clockwise,
+      // continuously settling into left stack at -28.0 with scale 0.94, dim 0.38, zIndex 7.
+      final dxK = -28.0 * t - arc * math.sin(math.pi * t);
+      final scaleK = 1.0 - (t * 0.06);
+      final dimK = t * 0.38;
+      final angleK = -math.sin(math.pi * t) * 0.07;
+      final zK = t < 0.5 ? 10 : 7;
+      addCard(k, dxK, scaleK, dimK, angleK, zK);
 
       // Card k + 1 is moving from right stack (+28) into center (0)
-      final diffNext = (k + 1) - page; // in [0.0, 1.0]
-      final dxNext = diffNext * 28.0;
-      final scaleNext = 1.0 - (diffNext * 0.06);
-      final dimNext = diffNext * 0.38;
-      // Entering card tilts clockwise (positive angle) proportional to remaining distance
-      final angleNext = diffNext * 0.05;
-      addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, 8);
+      final dxNext = (1.0 - t) * 28.0;
+      final scaleNext = 0.94 + (t * 0.06);
+      final dimNext = (1.0 - t) * 0.38;
+      final angleNext = (1.0 - t) * 0.05;
+      final zNext = t < 0.5 ? 8 : 10;
+      addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, zNext);
 
-      // Card k + 2 is waiting in the right stack at +28
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+      // Card k + 2 moves up in stack hierarchy from background (4) to peek (8)
+      final zNext2 = t >= 0.5 ? 8 : 4;
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, zNext2);
+
+      // Card k + 3 pre-mounted in right stack background so it doesn't hitch on arrival
+      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 4);
 
       // Card k - 1 stays smoothly in the left stack at -28
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 7);
+      final zPrev = t >= 0.5 ? 3 : 7;
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, zPrev);
 
       // Card k - 2 is waiting in the left stack at -28
-      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
     } else {
       // Backward swipe: moving from k + 1 towards k
       final progress = (k + 1) - page; // in [0.0, 1.0] as page goes from k+1 to k
 
-      // Card k + 1 is the active card sliding right with clockwise tilt
-      final dxActive = progress * (cardWidth * 1.05);
-      final angleActive = progress * 0.08;
-      addCard(k + 1, dxActive, 1.0, 0.0, angleActive, 10);
+      // Card k + 1 is the active card sliding outward to the right with parting arc and clockwise tilt,
+      // continuously settling into right stack at +28.0 with scale 0.94, dim 0.38, zIndex 8.
+      final dxActive = 28.0 * progress + arc * math.sin(math.pi * progress);
+      final scaleActive = 1.0 - (progress * 0.06);
+      final dimActive = progress * 0.38;
+      final angleActive = math.sin(math.pi * progress) * 0.07;
+      final zActive = progress < 0.5 ? 10 : 8;
+      addCard(k + 1, dxActive, scaleActive, dimActive, angleActive, zActive);
 
       // Card k is the previous card expanding from -28 into center 0
       final dxPrev = -28.0 * (1.0 - progress);
       final scalePrev = 0.94 + (progress * 0.06);
       final dimPrev = (1.0 - progress) * 0.38;
-      // Entering card tilts counter-clockwise (negative angle) proportional to remaining distance
       final anglePrev = -(1.0 - progress) * 0.05;
-      addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, 8);
+      final zPrev = progress < 0.5 ? 7 : 10;
+      addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, zPrev);
 
       // Card k - 1 is waiting in the left stack at -28
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 7);
-
-      // Card k + 2 is waiting in the right stack at +28
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+      final zPrev1 = progress >= 0.5 ? 7 : 3;
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, zPrev1);
 
       // Card k - 2 is waiting in the left stack at -28
-      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 3);
+      addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
+
+      // Card k + 2 is waiting in the right stack at +28
+      final zNext2 = progress >= 0.5 ? 4 : 8;
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, zNext2);
+
+      // Card k + 3 pre-mounted in right stack background
+      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 4);
     }
 
     // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
@@ -220,14 +240,16 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         .where((b) => idsToFlush.contains(b.id))
         .toList();
 
-    Future.microtask(() async {
-      try {
-        for (final bookmark in bookmarksToMark) {
-          await notifier.markAsRead(bookmark);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.microtask(() async {
+        try {
+          for (final bookmark in bookmarksToMark) {
+            await notifier.markAsRead(bookmark);
+          }
+        } catch (e, st) {
+          debugPrint('Error flushing pending read actions: $e\n$st');
         }
-      } catch (e, st) {
-        debugPrint('Error flushing pending read actions: $e\n$st');
-      }
+      });
     });
   }
 
@@ -237,7 +259,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       return;
     }
 
-    HapticFeedback.lightImpact();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      HapticFeedback.lightImpact();
+    });
 
     // Backward navigation (swipe or button) to an earlier card is purely navigation;
     // do not mark as read or increment counts when looking back at a card.
