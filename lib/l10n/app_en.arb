@@ -452,7 +452,7 @@
   "@editUpper": {
     "description": "Radial menu action label to edit collection"
   },
-  "deleteCollection": "Delete collection",
+  "deleteCollection": "Delete Collection",
   "@deleteCollection": {
     "description": "Title for delete collection dialog"
   },
@@ -465,7 +465,7 @@
       }
     }
   },
-  "editCollection": "Edit collection",
+  "editCollection": "Edit Collection",
   "@editCollection": {
     "description": "Modal title for editing an existing collection"
   },

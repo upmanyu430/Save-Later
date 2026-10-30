@@ -122,9 +122,59 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     );
   }
 
+  void _showEditCollectionModal([BookmarkCollection? currentCollection]) async {
+    if (widget.collectionId == null) return;
+    var target = currentCollection ??
+        widget.collection ??
+        ref.read(singleCollectionProvider(widget.collectionId!)).valueOrNull;
+    target ??= await ref.read(repositoryProvider).getCollection(widget.collectionId!);
+    if (target == null || !mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => CollectionEditorModal(
+        existingCollection: target,
+      ),
+    );
+  }
+
+  void _showDeleteCollectionDialog([BookmarkCollection? currentCollection]) async {
+    if (widget.collectionId == null) return;
+    var target = currentCollection ??
+        widget.collection ??
+        ref.read(singleCollectionProvider(widget.collectionId!)).valueOrNull;
+    target ??= await ref.read(repositoryProvider).getCollection(widget.collectionId!);
+    if (target == null || !mounted) return;
+
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await DeleteConfirmationDialog.show(
+      context: context,
+      title: l10n.deleteCollection,
+      message: l10n.deleteCollectionMessage(target.name),
+    );
+    if (!confirmed || !mounted) return;
+
+    await ref
+        .read(collectionNotifierProvider.notifier)
+        .deleteCollection(target);
+
+    if (mounted) {
+      try {
+        context.pop();
+      } catch (_) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      }
+    }
+  }
+
   void _showMenuModal(BuildContext context, [BookmarkCollection? currentCollection]) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -215,6 +265,30 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             _shareCollection(currentCollection);
                           },
                         ),
+                        if (widget.collectionId != null) ...[
+                          _buildDivider(),
+
+                          // Edit Collection
+                          _buildMenuItem(
+                            icon: Icons.edit_outlined,
+                            title: AppLocalizations.of(context)!.editCollection,
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              _showEditCollectionModal(currentCollection);
+                            },
+                          ),
+                          _buildDivider(),
+
+                          // Delete Collection
+                          _buildMenuItem(
+                            icon: Icons.delete_outline,
+                            title: AppLocalizations.of(context)!.deleteCollection,
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              _showDeleteCollectionDialog(currentCollection);
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -359,10 +433,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     final subCollectionsAsync = widget.collectionId != null
         ? ref.watch(subCollectionsProvider(widget.collectionId!))
         : const AsyncValue.data(<BookmarkCollection>[]);
-    final effectiveCollection = widget.collection ??
-        (widget.collectionId != null
-            ? ref.watch(singleCollectionProvider(widget.collectionId!)).valueOrNull
-            : null);
+    final singleColAsync = widget.collectionId != null
+        ? ref.watch(singleCollectionProvider(widget.collectionId!))
+        : null;
+    final effectiveCollection = singleColAsync?.valueOrNull ?? widget.collection;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
