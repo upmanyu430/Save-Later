@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
-import '../screens/icon_picker_screen.dart';
 import 'neo_button.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -25,27 +24,28 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   late TextEditingController _nameController;
   late String _selectedColorHex;
   late int _selectedIconCode;
+  bool _isExpanded = false;
 
   final List<String> _colors = [
     'FFD166',
     'FF9EAA',
     'B19CD9',
-    '4A90E2',
+    'A0C4FF',
     '1ABC9C',
-    '2ECC71',
+    'A8D8B9',
     'A2D149',
-    'F39C12',
+    'FFCC99',
     'F5DEB3',
     'BDC3C7',
     '7F8C8D',
-    '9B59B6',
-    'A0522D',
+    'D8B4E2',
+    'D7B999',
     '1C1C1C',
-    'E74C3C',
+    'F38181',
     '6A5ACD',
   ];
 
-  static final List<IconData> _quickIcons = [
+  static final List<IconData> _allIcons = [
     // Row 1
     Icons.folder_outlined,
     Icons.star_outline,
@@ -72,7 +72,40 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     Icons.movie_outlined,
     Icons.headphones_outlined,
     Icons.palette_outlined,
+    Icons.sports_esports_outlined,
+    // Row 4
+    Icons.fitness_center,
+    Icons.attach_money,
+    Icons.phone_outlined,
+    Icons.desktop_windows_outlined,
+    Icons.access_time,
+    Icons.lightbulb_outline,
+    Icons.school_outlined,
+    Icons.shield_outlined,
+    // Row 5
+    Icons.restaurant_outlined,
+    Icons.tv,
+    Icons.notifications_none,
+    Icons.vpn_key_outlined,
+    Icons.inventory_2_outlined,
+    Icons.layers_outlined,
+    Icons.code,
+    Icons.bolt,
+    // Row 6
+    Icons.bookmark_border,
+    Icons.local_offer_outlined,
+    Icons.home_outlined,
   ];
+
+  List<IconData> get _displayIcons {
+    if (!_allIcons.any((icon) => icon.codePoint == _selectedIconCode)) {
+      return [
+        ..._allIcons,
+        IconData(_selectedIconCode, fontFamily: 'MaterialIcons')
+      ];
+    }
+    return _allIcons;
+  }
 
   @override
   void initState() {
@@ -81,24 +114,13 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         TextEditingController(text: widget.existingCollection?.name ?? '');
     _selectedColorHex = widget.existingCollection?.colorHex ?? _colors[0];
     _selectedIconCode =
-        widget.existingCollection?.iconCodePoint ?? _quickIcons[0].codePoint;
-  }
+        widget.existingCollection?.iconCodePoint ?? _allIcons[0].codePoint;
 
-  Future<void> _openFullIconPicker() async {
-    HapticFeedback.lightImpact();
-    final picked = await Navigator.push<int>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => IconPickerScreen(
-          selectedColorHex: _selectedColorHex,
-          currentIconCode: _selectedIconCode,
-        ),
-      ),
-    );
-    if (picked != null && mounted) {
-      setState(() {
-        _selectedIconCode = picked;
-      });
+    final existingIconIndex =
+        _allIcons.indexWhere((icon) => icon.codePoint == _selectedIconCode);
+    if (existingIconIndex >= 23 ||
+        (existingIconIndex == -1 && widget.existingCollection != null)) {
+      _isExpanded = true;
     }
   }
 
@@ -357,16 +379,18 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                           ),
                           const SizedBox(height: 10),
 
-                          // Icon Picker (3 rows of 8 = 24 items, with 24th item as 3-dots more button)
+                          // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
                           Text(AppLocalizations.of(context)!.iconUpper,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 12)),
                           const SizedBox(height: 5),
                           Builder(
                             builder: (context) {
+                              final icons = _displayIcons;
                               final currentColor =
                                   BookmarkCollection.parseColor(
                                       _selectedColorHex);
+                              final count = _isExpanded ? icons.length : 24;
 
                               return GridView.builder(
                                 shrinkWrap: true,
@@ -379,55 +403,32 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   crossAxisSpacing: 7,
                                   mainAxisSpacing: 7,
                                 ),
-                                itemCount: 24,
+                                itemCount: count,
                                 itemBuilder: (context, index) {
-                                  // 24th item is the 3-dots / full page icon picker button
-                                  if (index == 23) {
-                                    final isQuickIconSelected = _quickIcons.any(
-                                        (icon) =>
-                                            icon.codePoint ==
-                                            _selectedIconCode);
-                                    final isSelected = !isQuickIconSelected;
-
+                                  // In collapsed state, slot 24 (index 23) is the 3-dots expand button
+                                  if (!_isExpanded && index == 23) {
                                     return GestureDetector(
-                                      onTap: _openFullIconPicker,
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        setState(() => _isExpanded = true);
+                                      },
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: isSelected
-                                              ? currentColor
-                                              : Colors.transparent,
+                                          color: Colors.transparent,
                                           borderRadius: BorderRadius.circular(
                                               AppDimensions.radiusSm),
                                           border: Border.all(
                                             color: AppTheme.border,
-                                            width: isSelected ? 2.0 : 1.0,
+                                            width: 1.0,
                                           ),
-                                          boxShadow: isSelected
-                                              ? const [
-                                                  BoxShadow(
-                                                    color: AppTheme.border,
-                                                    offset: Offset(2, 2),
-                                                    blurRadius: 0,
-                                                    spreadRadius: 0,
-                                                  ),
-                                                ]
-                                              : null,
                                         ),
-                                        child: Icon(
-                                          Icons.more_horiz,
-                                          size: 20,
-                                          color: isSelected &&
-                                                  BookmarkCollection
-                                                      .isWhiteIconColor(
-                                                          currentColor)
-                                              ? Colors.white
-                                              : AppTheme.border,
-                                        ),
+                                        child: const Icon(Icons.more_horiz,
+                                            size: 20),
                                       ),
                                     );
                                   }
 
-                                  final icon = _quickIcons[index];
+                                  final icon = icons[index];
                                   final isSelected =
                                       _selectedIconCode == icon.codePoint;
 
