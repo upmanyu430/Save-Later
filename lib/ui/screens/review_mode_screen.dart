@@ -850,21 +850,11 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
             padding: const EdgeInsets.fromLTRB(18.0, 16.0, 18.0, 12.0),
             child: Row(
               children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                    border: Border.all(color: AppTheme.border, width: 2),
-                  ),
-                  child: Center(
-                    child: FaviconImage(
-                      domain: b.sourceDomain,
-                      url: b.url,
-                      size: 20,
-                    ),
-                  ),
+                FaviconImage(
+                  domain: b.sourceDomain,
+                  url: b.url,
+                  size: 26,
+                  borderRadius: 6,
                 ),
                 const SizedBox(width: AppDimensions.paddingMd),
                 Expanded(
