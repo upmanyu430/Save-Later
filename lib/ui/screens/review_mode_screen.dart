@@ -84,18 +84,10 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       final zNext = t < 0.5 ? 8 : 10;
       addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, zNext);
 
-      // Card k + 2 moves up in stack hierarchy from background (4) to peek (8)
-      final zNext2 = t >= 0.5 ? 8 : 4;
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, zNext2);
-
-      // Card k + 3 pre-mounted in right stack background so it doesn't hitch on arrival
-      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 4);
-
-      // Card k - 1 stays smoothly in the left stack at -28
-      final zPrev = t >= 0.5 ? 3 : 7;
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, zPrev);
-
-      // Card k - 2 is waiting in the left stack at -28
+      // Background cards: keep constant z-index so they never pop in front or flicker on slow reverse
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 2);
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 3);
       addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
     } else {
       // Backward swipe: moving from k + 1 towards k
@@ -118,19 +110,11 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       final zPrev = progress < 0.5 ? 7 : 10;
       addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, zPrev);
 
-      // Card k - 1 is waiting in the left stack at -28
-      final zPrev1 = progress >= 0.5 ? 7 : 3;
-      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, zPrev1);
-
-      // Card k - 2 is waiting in the left stack at -28
+      // Background cards: keep constant z-index so they never pop in front or flicker on slow reverse
+      addCard(k - 1, -28.0, 0.94, 0.38, 0.0, 3);
       addCard(k - 2, -28.0, 0.94, 0.38, 0.0, 2);
-
-      // Card k + 2 is waiting in the right stack at +28
-      final zNext2 = progress >= 0.5 ? 4 : 8;
-      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, zNext2);
-
-      // Card k + 3 pre-mounted in right stack background
-      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 4);
+      addCard(k + 2, 28.0, 0.94, 0.38, 0.0, 4);
+      addCard(k + 3, 28.0, 0.94, 0.38, 0.0, 2);
     }
 
     // Sort by zIndex ascending (lowest zIndex painted first, highest painted on top)
@@ -341,9 +325,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         _dragStartPage = start;
       }
     } else if (notification is ScrollEndNotification) {
-      if (_dragStartPage != null) {
-        _dragStartPage = null;
-      }
+      _dragStartPage = _pageController.hasClients && _pageController.page != null
+          ? _pageController.page!.round()
+          : currentIndex;
       _flushPendingReadActions();
     }
     return false;

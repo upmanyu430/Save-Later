@@ -549,9 +549,9 @@ void main() {
       expect(card1End.scale, closeTo(1.0, 0.01));
       expect(card1End.zIndex, equals(10));
       expect(card2End.dx, equals(28.0));
-      expect(card2End.zIndex, equals(8));
+      expect(card2End.zIndex, equals(4)); // Card 2 stays safely at background zIndex 4 without popping in front
       expect(card3End.dx, equals(28.0));
-      expect(card3End.zIndex, equals(4));
+      expect(card3End.zIndex, equals(2));
 
       // 4. Crossing boundary to page = 1.000 (At rest at index 1)
       final atRest1 = ReviewModeScreen.calculateCardTransforms(
