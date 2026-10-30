@@ -387,11 +387,6 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                         (icon) =>
                                             icon.codePoint ==
                                             _selectedIconCode);
-                                    final IconData displayIcon =
-                                        isQuickIconSelected
-                                            ? Icons.more_horiz
-                                            : IconData(_selectedIconCode,
-                                                fontFamily: 'MaterialIcons');
                                     final isSelected = !isQuickIconSelected;
 
                                     return GestureDetector(
@@ -419,7 +414,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                               : null,
                                         ),
                                         child: Icon(
-                                          displayIcon,
+                                          Icons.more_horiz,
                                           size: 20,
                                           color: isSelected &&
                                                   BookmarkCollection

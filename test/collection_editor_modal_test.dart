@@ -139,8 +139,8 @@ void main() {
     expect(find.byType(IconPickerScreen), findsNothing);
     expect(find.byType(CollectionEditorModal), findsOneWidget);
 
-    // Verify the code icon is now visible in CollectionEditorModal in the 24th slot
-    expect(find.byIcon(Icons.code), findsOneWidget);
+    // Verify the 3-dots icon is always preserved in CollectionEditorModal in the 24th slot
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
 
     // Fill in name and create collection
     await tester.enterText(find.byType(TextField).first, 'Coding Resources');
@@ -218,10 +218,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Verify the custom icon is displayed in the modal
-    expect(find.byIcon(Icons.sports_esports_outlined), findsOneWidget);
-    // Since custom icon is selected, more_horiz is replaced by the custom icon
-    expect(find.byIcon(Icons.more_horiz), findsNothing);
+    // Verify 3-dots icon is always preserved in slot 24 even with custom icon
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 
   testWidgets('CollectionEditorModal save button and name field have height 48.0 and thin border', (tester) async {
