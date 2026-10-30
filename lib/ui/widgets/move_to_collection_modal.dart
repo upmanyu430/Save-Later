@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/bookmark.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
@@ -14,13 +15,15 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
   final Bookmark? bookmark;
   final List<Bookmark>? bookmarks;
   final BookmarkCollection? initialCollection;
-  final Future<void> Function(BookmarkCollection collection)? onMove;
+  final bool initialUnsorted;
+  final Future<void> Function(BookmarkCollection? collection)? onMove;
 
   const MoveToCollectionModal({
     super.key,
     this.bookmark,
     this.bookmarks,
     this.initialCollection,
+    this.initialUnsorted = false,
     this.onMove,
   });
 
@@ -29,7 +32,8 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     Bookmark? bookmark,
     List<Bookmark>? bookmarks,
     BookmarkCollection? initialCollection,
-    Future<void> Function(BookmarkCollection collection)? onMove,
+    bool initialUnsorted = false,
+    Future<void> Function(BookmarkCollection? collection)? onMove,
   }) async {
     final moved = await showModalBottomSheet<bool>(
       context: context,
@@ -39,6 +43,7 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
         bookmark: bookmark,
         bookmarks: bookmarks,
         initialCollection: initialCollection,
+        initialUnsorted: initialUnsorted,
         onMove: onMove,
       ),
     );
@@ -56,14 +61,16 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
 
 class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   BookmarkCollection? _selectedCollection;
+  bool _isUnsortedSelected = false;
 
   @override
   void initState() {
     super.initState();
     _selectedCollection = widget.initialCollection;
+    _isUnsortedSelected = widget.initialUnsorted && widget.initialCollection == null;
   }
 
-  Future<void> _handleMove(BookmarkCollection collection) async {
+  Future<void> _handleMove(BookmarkCollection? collection) async {
     HapticFeedback.mediumImpact();
 
     if (widget.onMove != null) {
@@ -85,6 +92,79 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const CollectionEditorModal(),
+    );
+  }
+
+  Widget _buildUnsortedTile(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final isSelected = _isUnsortedSelected;
+
+    return GestureDetector(
+      key: const ValueKey('collection_unsorted'),
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.lightImpact();
+        setState(() {
+          _isUnsortedSelected = true;
+          _selectedCollection = null;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFFFF4D0)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? AppTheme.border
+                : Colors.black.withValues(alpha: 0.08),
+            width: 2.0,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Unsorted Icon Box
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE5E5E5),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppTheme.border,
+                  width: 2.0,
+                ),
+              ),
+              child: const Icon(
+                Icons.folder_off_outlined,
+                color: AppTheme.border,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                l10n?.unsorted ?? 'Unsorted',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.border,
+                ),
+              ),
+            ),
+            if (isSelected)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppTheme.border,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -180,32 +260,45 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
               collectionsAsync.when(
                 data: (collections) {
                   if (collections.isEmpty) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24.0),
-                      child: Column(
-                        children: [
-                          const Text(
-                            'No collections yet',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black54,
+                    return ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.40,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildUnsortedTile(context),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24.0),
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    'No collections yet',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  NeoButton(
+                                    onPressed: _openCreateCollection,
+                                    color: AppTheme.accent,
+                                    borderWidth: 2,
+                                    borderRadius: 12,
+                                    shadowOffset: 2,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                    child: const Text(
+                                      'Create New Collection',
+                                      style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.border),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          NeoButton(
-                            onPressed: _openCreateCollection,
-                            color: AppTheme.accent,
-                            borderWidth: 2,
-                            borderRadius: 12,
-                            shadowOffset: 2,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                            child: const Text(
-                              'Create New Collection',
-                              style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.border),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }
@@ -219,11 +312,15 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
-                      itemCount: collections.length,
+                      itemCount: collections.length + 1,
                       separatorBuilder: (_, __) => const SizedBox(height: 8),
                       itemBuilder: (ctx, index) {
-                        final col = collections[index];
-                        final isSelected = selected?.id == col.id;
+                        if (index == 0) {
+                          return _buildUnsortedTile(context);
+                        }
+
+                        final col = collections[index - 1];
+                        final isSelected = !_isUnsortedSelected && selected?.id == col.id;
 
                         final iconColor =
                             BookmarkCollection.isWhiteIconColor(col.color)
@@ -237,6 +334,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                             HapticFeedback.lightImpact();
                             setState(() {
                               _selectedCollection = col;
+                              _isUnsortedSelected = false;
                             });
                           },
                           child: Container(
@@ -347,27 +445,40 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
               ),
 
               // Bottom Move Action Button
-              NeoButton(
-                onPressed: _selectedCollection != null
-                    ? () => _handleMove(_selectedCollection!)
-                    : null,
-                color: const Color(0xFFFFD166),
-                borderWidth: 2.5,
-                borderRadius: 12.0,
-                shadowOffset: 2.5,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Text(
-                  _selectedCollection != null
-                      ? 'Move to "${_selectedCollection!.name}"'
-                      : 'Move to Collection',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.border,
-                  ),
-                ),
+              Builder(
+                builder: (context) {
+                  final l10n = AppLocalizations.of(context);
+                  final isEnabled = _isUnsortedSelected || _selectedCollection != null;
+                  final String buttonLabel;
+                  if (_isUnsortedSelected) {
+                    buttonLabel = 'Move to "${l10n?.unsorted ?? 'Unsorted'}"';
+                  } else if (_selectedCollection != null) {
+                    buttonLabel = 'Move to "${_selectedCollection!.name}"';
+                  } else {
+                    buttonLabel = 'Move to Collection';
+                  }
+
+                  return NeoButton(
+                    onPressed: isEnabled
+                        ? () => _handleMove(_isUnsortedSelected ? null : _selectedCollection)
+                        : null,
+                    color: const Color(0xFFFFD166),
+                    borderWidth: 2.5,
+                    borderRadius: 12.0,
+                    shadowOffset: 2.5,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      buttonLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.border,
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

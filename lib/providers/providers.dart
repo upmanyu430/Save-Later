@@ -326,11 +326,11 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     }
   }
 
-  Future<void> moveToCollection(Bookmark bookmark, BookmarkCollection collection) async {
+  Future<void> moveToCollection(Bookmark bookmark, BookmarkCollection? collection) async {
     await moveBookmarksToCollection([bookmark], collection);
   }
 
-  Future<void> moveBookmarksToCollection(List<Bookmark> bookmarks, BookmarkCollection collection) async {
+  Future<void> moveBookmarksToCollection(List<Bookmark> bookmarks, BookmarkCollection? collection) async {
     if (bookmarks.isEmpty) return;
     final repo = ref.read(repositoryProvider);
     final oldCollectionIds = <int>{};
@@ -341,7 +341,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         } catch (_) {}
       }
       final oldId = bookmark.collection.value?.id;
-      if (oldId != null && oldId != collection.id) {
+      if (oldId != null && (collection == null || oldId != collection.id)) {
         oldCollectionIds.add(oldId);
       }
       bookmark.collection.value = collection;
@@ -349,10 +349,20 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     await repo.updateBookmarks(bookmarks);
     ref.invalidate(bookmarksProvider);
     ref.invalidate(unsortedBookmarksProvider);
-    ref.invalidate(collectionBookmarksProvider(collection.id));
+    if (collection != null) {
+      ref.invalidate(collectionBookmarksProvider(collection.id));
+    }
     for (final oldId in oldCollectionIds) {
       ref.invalidate(collectionBookmarksProvider(oldId));
     }
+  }
+
+  Future<void> removeFromCollection(Bookmark bookmark) async {
+    await moveToCollection(bookmark, null);
+  }
+
+  Future<void> removeBookmarksFromCollection(List<Bookmark> bookmarks) async {
+    await moveBookmarksToCollection(bookmarks, null);
   }
 
   Future<void> updateNotes(Bookmark bookmark, String notes) async {
