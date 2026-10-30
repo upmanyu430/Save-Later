@@ -104,7 +104,7 @@ Widget buildTestApp({required Widget home}) {
 void main() {
   group('Review Mode Stack Deck & Gestures', () {
     testWidgets(
-        'Test 1: Stack Layout & Card Styling at Index 0 (white bg, radius 26, no outer border, 2px hero border, 2px badge shadow)',
+        'Test 1: Stack Layout & Card Styling at Index 0 (white bg, radius 26, 1.5px dark outer border, 2px hero border, 2px badge shadow)',
         (tester) async {
       final fakeRepo = FakeIsarRepository();
       final bookmark1 = Bookmark()
@@ -163,7 +163,7 @@ void main() {
       final cardDecoration = mainCardContainer.decoration as BoxDecoration;
       expect(cardDecoration.color, equals(Colors.white));
       expect(cardDecoration.borderRadius, equals(BorderRadius.circular(26)));
-      expect(cardDecoration.border, isNull);
+      expect(cardDecoration.border, equals(Border.all(color: Colors.black, width: 1.5)));
 
       // Inspect hero image container: 2px inner image border
       final heroContainerFinder = find.descendant(
