@@ -7,7 +7,11 @@ import 'package:share_plus/share_plus.dart';
 import '../../models/collection.dart';
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../utils/url_helper.dart';
+import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/no_url_dialog.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
@@ -42,70 +46,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (modalCtx) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.pop(modalCtx),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 16.0,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {},
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: AppTheme.background,
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: AppTheme.border, width: 2.5),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: AppTheme.border,
-                          offset: Offset(2.8, 2.8),
-                          blurRadius: 0,
-                          spreadRadius: 0,
-                        ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          AppLocalizations.of(context)!.addLinkToCollection,
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingLg),
-                        TextField(
-                          autofocus: true,
-                          decoration: InputDecoration(
-                            hintText: AppLocalizations.of(context)!.linkUrlHint,
-                            border: const OutlineInputBorder(),
-                          ),
-                          onSubmitted: (val) {
-                            if (val.trim().isNotEmpty) {
-                              ref.read(bookmarkNotifierProvider.notifier).quickSave(val.trim(), collection: currentCollection ?? widget.collection);
-                              Navigator.pop(modalCtx);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.savingLink)));
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+      builder: (modalCtx) => AddLinkModal(
+        collection: currentCollection ?? widget.collection,
+        parentContext: context,
       ),
     );
   }
@@ -801,4 +744,249 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   ),
 );
 }
+}
+
+
+class AddLinkModal extends ConsumerStatefulWidget {
+  final BookmarkCollection? collection;
+  final BuildContext? parentContext;
+
+  const AddLinkModal({
+    super.key,
+    this.collection,
+    this.parentContext,
+  });
+
+  @override
+  ConsumerState<AddLinkModal> createState() => _AddLinkModalState();
+}
+
+class _AddLinkModalState extends ConsumerState<AddLinkModal> {
+  late final TextEditingController _urlController;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _urlController = TextEditingController();
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _urlController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pasteFromClipboard() async {
+    HapticFeedback.lightImpact();
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!mounted) return;
+    if (data != null && data.text != null && data.text!.isNotEmpty) {
+      setState(() {
+        _urlController.text = data.text!;
+        _urlController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _urlController.text.length),
+        );
+      });
+    }
+  }
+
+  void _handleSave() {
+    final rawText = _urlController.text.trim();
+    if (rawText.isEmpty) {
+      showNoUrlDialog(context);
+      return;
+    }
+    final url = UrlHelper.extractUrl(rawText) ?? rawText;
+    if (!UrlHelper.isValidUrl(url)) {
+      showNoUrlDialog(context);
+      return;
+    }
+
+    ref.read(bookmarkNotifierProvider.notifier).quickSave(
+      url,
+      collection: widget.collection,
+    );
+
+    final targetContext = widget.parentContext ?? context;
+    final messenger = ScaffoldMessenger.maybeOf(targetContext) ??
+        ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(targetContext) ??
+        AppLocalizations.of(context);
+    final msg = l10n?.savingLink ?? 'Saving link...';
+
+    Navigator.pop(context);
+
+    messenger.showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.pop(context),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: AppTheme.background,
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(color: AppTheme.border, width: 2.5),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(2.8, 2.8),
+                        blurRadius: 0,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context)!.addLinkToCollection,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.border,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: NeoButton(
+                              onPressed: () {
+                                if (Navigator.canPop(context)) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              color: Colors.white,
+                              borderWidth: 2,
+                              borderRadius: AppDimensions.radiusSm,
+                              shadowOffset: 0,
+                              child: const Icon(Icons.close, size: 18),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppDimensions.paddingLg),
+                      SizedBox(
+                        height: 52.0,
+                        child: NeoBox(
+                          color: AppTheme.cardColor,
+                          borderRadius: AppDimensions.radiusMd,
+                          borderWidth: AppDimensions.borderWidthMd,
+                          shadowOffset: 2.0,
+                          padding: const EdgeInsets.only(
+                            left: AppDimensions.paddingMd,
+                            right: AppDimensions.paddingXs,
+                          ),
+                          child: TextField(
+                            controller: _urlController,
+                            focusNode: _focusNode,
+                            autofocus: true,
+                            textAlignVertical: TextAlignVertical.center,
+                            style: GoogleFonts.bricolageGrotesque(
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.border,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: AppLocalizations.of(context)!.linkUrlHint,
+                              hintStyle: GoogleFonts.bricolageGrotesque(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black38,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                              suffixIcon: IconButton(
+                                tooltip: 'Paste',
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                constraints: const BoxConstraints(
+                                  minWidth: 40,
+                                  minHeight: 40,
+                                ),
+                                icon: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.paste_outlined,
+                                        size: 18, color: AppTheme.border),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Paste',
+                                      style: GoogleFonts.bricolageGrotesque(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppTheme.border,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                onPressed: _pasteFromClipboard,
+                              ),
+                            ),
+                            onSubmitted: (_) => _handleSave(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.paddingLg),
+                      SizedBox(
+                        height: 48.0,
+                        width: double.infinity,
+                        child: NeoButton(
+                          onPressed: _handleSave,
+                          color: AppTheme.accent,
+                          padding: EdgeInsets.zero,
+                          borderRadius: AppDimensions.radiusMd,
+                          borderWidth: AppDimensions.borderWidthMd,
+                          shadowOffset: 2.0,
+                          child: Center(
+                            child: Text(
+                              AppLocalizations.of(context)!.save,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppTheme.border,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
