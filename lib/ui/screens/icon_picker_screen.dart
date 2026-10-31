@@ -271,7 +271,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                   Expanded(
                     child: Text(
                       'Choose Icon',
-                      style: GoogleFonts.bricolageGrotesque(
+                      style: GoogleFonts.gabarito(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: AppTheme.border,
@@ -401,7 +401,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                           const SizedBox(height: 12),
                           Text(
                             'No icons found',
-                            style: GoogleFonts.bricolageGrotesque(
+                            style: GoogleFonts.gabarito(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),

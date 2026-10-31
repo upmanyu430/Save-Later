@@ -901,14 +901,14 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
                             focusNode: _focusNode,
                             autofocus: true,
                             textAlignVertical: TextAlignVertical.center,
-                            style: GoogleFonts.bricolageGrotesque(
+                            style: GoogleFonts.gabarito(
                               fontSize: 14.0,
                               fontWeight: FontWeight.w500,
                               color: AppTheme.border,
                             ),
                             decoration: InputDecoration(
                               hintText: AppLocalizations.of(context)!.linkUrlHint,
-                              hintStyle: GoogleFonts.bricolageGrotesque(
+                              hintStyle: GoogleFonts.gabarito(
                                 fontSize: 14.0,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.black38,
@@ -930,7 +930,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
                                     const SizedBox(width: 4),
                                     Text(
                                       'Paste',
-                                      style: GoogleFonts.bricolageGrotesque(
+                                      style: GoogleFonts.gabarito(
                                         fontSize: 13,
                                         fontWeight: FontWeight.bold,
                                         color: AppTheme.border,

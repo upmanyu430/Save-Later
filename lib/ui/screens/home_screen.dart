@@ -205,7 +205,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Text(
                 l10n.saveNowFindAnytime,
                 textScaler: TextScaler.noScaling,
-                style: GoogleFonts.bricolageGrotesque(
+                style: GoogleFonts.gabarito(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
@@ -230,14 +230,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           controller: _urlController,
                           focusNode: _urlFocusNode,
                           textAlignVertical: TextAlignVertical.center,
-                          style: GoogleFonts.bricolageGrotesque(
+                          style: GoogleFonts.gabarito(
                             fontSize: 14.0,
                             fontWeight: FontWeight.w500,
                             color: AppTheme.border,
                           ),
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
-                            hintStyle: GoogleFonts.bricolageGrotesque(
+                            hintStyle: GoogleFonts.gabarito(
                               fontSize: 14.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black38,
@@ -298,7 +298,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               // Collections Header
               Text(
                 l10n.myCollections,
-                style: GoogleFonts.bricolageGrotesque(
+                style: GoogleFonts.gabarito(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),

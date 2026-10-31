@@ -1435,7 +1435,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
                                   const SizedBox(height: 5),
                                   Text(
                                     widget.label,
-                                    style: GoogleFonts.bricolageGrotesque(
+                                    style: GoogleFonts.gabarito(
                                       color: fgColor,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 11.5,

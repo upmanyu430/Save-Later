@@ -52,7 +52,7 @@ Save Later rejects transparent glassmorphism and blurs in favor of a bold, physi
   * Pastel Green (Secondary): `#FF3AC19F`
   * Pastel Yellow (Accent): `#FFFFD166`
   * Deep Charcoal / Outlines: `#FF1C1C1C`
-* **Typography:** Heavyweight modern sans-serifs (Bricolage Grotesque) with bold headings (`FontWeight.w900`) and tight tracking.
+* **Typography:** Heavyweight modern sans-serifs (Gabarito) with bold headings (`FontWeight.w900`) and tight tracking.
 * **Tactile Components (`NeoBox` & `NeoButton`):** Custom containers featuring 2.5px–3.0px solid borders, hard non-blurred drop shadows (`Offset(2.8, 2.8)`), and spring-loaded physics (`Curves.elasticOut` / `Curves.easeOutBack`).
 
 ---

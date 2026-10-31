@@ -111,13 +111,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-  fonts:
-    - family: Quilon
-      fonts:
-        - asset: assets/fonts/Quilon-Regular.ttf
-        - asset: assets/fonts/Quilon-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Quilon-Semibold.ttf
-          weight: 600
-        - asset: assets/fonts/Quilon-Bold.ttf
-          weight: 700

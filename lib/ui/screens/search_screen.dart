@@ -77,7 +77,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: 2),
         Text(
           count,
-          style: GoogleFonts.bricolageGrotesque(
+          style: GoogleFonts.gabarito(
             fontSize: 20,
             fontWeight: FontWeight.w900,
             color: AppTheme.border,
@@ -87,7 +87,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: 2),
         Text(
           label,
-          style: GoogleFonts.bricolageGrotesque(
+          style: GoogleFonts.gabarito(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
             color: AppTheme.border,
@@ -140,7 +140,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Text(
                 l10n.yourLibrary,
-                style: GoogleFonts.bricolageGrotesque(
+                style: GoogleFonts.gabarito(
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
                   color: AppTheme.border,
@@ -178,7 +178,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                   child: Text(
                     l10n.overview,
-                    style: GoogleFonts.bricolageGrotesque(
+                    style: GoogleFonts.gabarito(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       color: AppTheme.border,
@@ -980,13 +980,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                         border: InputBorder.none,
                                         contentPadding: EdgeInsets.zero,
                                         hintText: l10n.findCollectionsOrSavesHint,
-                                        hintStyle: GoogleFonts.bricolageGrotesque(
+                                        hintStyle: GoogleFonts.gabarito(
                                           fontSize: 13.5,
                                           fontWeight: FontWeight.w400,
                                           color: Colors.black38,
                                         ),
                                       ),
-                                      style: GoogleFonts.bricolageGrotesque(
+                                      style: GoogleFonts.gabarito(
                                         fontSize: 14.5,
                                         fontWeight: FontWeight.w600,
                                         color: AppTheme.border,
@@ -1029,7 +1029,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           shadowOffset: 2.0,
                           child: Text(
                             l10n.cancel,
-                            style: GoogleFonts.bricolageGrotesque(
+                            style: GoogleFonts.gabarito(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
                               color: AppTheme.border,

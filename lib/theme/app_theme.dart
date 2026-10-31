@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:save_later/config/app_constants.dart';
 
-
 class AppTheme {
   // Pastel color palette
   static const Color background = Color(0xFFF4F0EB);
@@ -25,7 +24,7 @@ class AppTheme {
         onSecondary: border,
         onSurface: border,
       ),
-      textTheme: GoogleFonts.bricolageGrotesqueTextTheme().apply(
+      textTheme: GoogleFonts.gabaritoTextTheme().apply(
         bodyColor: border,
         displayColor: border,
       ),
@@ -33,7 +32,7 @@ class AppTheme {
         backgroundColor: background,
         elevation: 0,
         iconTheme: const IconThemeData(color: border, size: AppDimensions.iconSizeLg),
-        titleTextStyle: GoogleFonts.bricolageGrotesque(
+        titleTextStyle: GoogleFonts.gabarito(
           color: border,
           fontSize: 24,
           fontWeight: FontWeight.bold,
@@ -42,5 +41,3 @@ class AppTheme {
     );
   }
 }
-
-
