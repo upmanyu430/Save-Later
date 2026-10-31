@@ -96,7 +96,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         if (widget.isSelectMode) {
           if (widget.onSelectTapped != null) widget.onSelectTapped!();
         } else {
-          ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+          // Defer markAsRead so it does not trigger Riverpod provider invalidation during the animation
+          Future.delayed(const Duration(milliseconds: 400), () {
+            if (mounted) {
+              ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+            }
+          });
           context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
         }
       },
