@@ -903,7 +903,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                     left: 14,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 6),
+                          horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius:
@@ -931,12 +931,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                                   Border.all(color: AppTheme.border, width: 2),
                             ),
                           ),
-                          const SizedBox(width: AppDimensions.paddingSm),
+                          const SizedBox(width: 6),
                           Text(
                             collectionName,
                             style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
                                 color: Colors.black),
                           ),
                         ],

@@ -165,6 +165,13 @@ void main() {
       matching: find.byType(Icon),
     );
     expect(iconInsideSwatch, findsNothing);
+
+    // Verify badge container padding has horizontal 10 (no excessive left gap)
+    final badgeContainerFinder = find.ancestor(
+      of: swatchFinder,
+      matching: find.byWidgetPredicate((w) => w is Container && w.padding == const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
+    );
+    expect(badgeContainerFinder, findsOneWidget);
   });
 
   testWidgets('ReviewModeScreen displays solid color swatch #E5E5E5 without icon for Unsorted', (tester) async {
@@ -212,5 +219,12 @@ void main() {
       matching: find.byType(Icon),
     );
     expect(iconInsideSwatch, findsNothing);
+
+    // Verify badge container padding has horizontal 10 (no excessive left gap)
+    final badgeContainerFinder = find.ancestor(
+      of: swatchFinder,
+      matching: find.byWidgetPredicate((w) => w is Container && w.padding == const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
+    );
+    expect(badgeContainerFinder, findsOneWidget);
   });
 }

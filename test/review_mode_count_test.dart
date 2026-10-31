@@ -296,7 +296,7 @@ void main() {
     bool hasMatchingPadding = false;
     for (final element in containerFinder.evaluate()) {
       final widget = element.widget as Container;
-      if (widget.padding == const EdgeInsets.symmetric(horizontal: 20, vertical: 6)) {
+      if (widget.padding == const EdgeInsets.symmetric(horizontal: 10, vertical: 6)) {
         hasMatchingPadding = true;
       }
       if (widget.decoration is BoxDecoration) {
