@@ -197,6 +197,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
+    // Verify "UNSORTED" top bar header text and no "NEW SAVES"
+    expect(find.text('UNSORTED'), findsOneWidget);
+    expect(find.text('NEW SAVES'), findsNothing);
+
     // Verify "Unsorted" badge text
     expect(find.text('Unsorted'), findsOneWidget);
 
@@ -250,6 +254,10 @@ void main() {
     );
 
     await tester.pumpAndSettle();
+
+    // Verify "UNSORTED" top bar header text and no "NEW SAVES"
+    expect(find.text('UNSORTED'), findsOneWidget);
+    expect(find.text('NEW SAVES'), findsNothing);
 
     // Verify the card is visible with its title, rather than caught up screen
     expect(find.text('Already Read Unsorted Bookmark'), findsOneWidget);

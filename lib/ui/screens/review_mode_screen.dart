@@ -537,9 +537,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
   }
 
   Widget _buildReviewUI(double bottomInset) {
-    final reviewTitle = widget.collection == null
-        ? 'NEW SAVES'
-        : widget.collection!.name.toUpperCase();
+    final l10n = AppLocalizations.of(context);
+    final reviewTitle =
+        (widget.collection?.name ?? l10n?.unsorted ?? 'Unsorted').toUpperCase();
 
     return Column(
       children: [
