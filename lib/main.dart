@@ -49,6 +49,41 @@ CustomTransitionPage<T> _buildPageWithTransition<T>({
   );
 }
 
+CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
+  required BuildContext context,
+  required GoRouterState state,
+  required Widget child,
+}) {
+  return CustomTransitionPage<T>(
+    key: state.pageKey,
+    opaque: false,
+    barrierColor: Colors.transparent,
+    transitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 250),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curvedScale = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutBack,
+        reverseCurve: Curves.easeInCubic,
+      );
+      final curvedFade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+        reverseCurve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      );
+      return ScaleTransition(
+        scale: curvedScale,
+        alignment: Alignment.center,
+        child: FadeTransition(
+          opacity: curvedFade,
+          child: child,
+        ),
+      );
+    },
+    child: child,
+  );
+}
+
 final _router = GoRouter(
   initialLocation: '/',
   routes: [
@@ -116,7 +151,7 @@ final _router = GoRouter(
       pageBuilder: (context, state) {
         final id = int.tryParse(state.pathParameters['id'] ?? '') ?? 0;
         final bookmark = state.extra as Bookmark?;
-        return _buildPageWithTransition(
+        return _buildBookmarkTransitionPage(
           context: context,
           state: state,
           child: BookmarkDetailScreen(
