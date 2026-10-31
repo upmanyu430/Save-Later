@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   test('Gabarito is available in google_fonts', () {
     final style = GoogleFonts.gabarito();

@@ -354,7 +354,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.background,
         body: Stack(
           children: [
             // 1. Background Image Box
@@ -386,12 +386,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     )
                   else
                     Container(
-                      color: Colors.grey.shade900,
+                      color: const Color(0xFFEFECE6),
                       child: Center(
                         child: Icon(
                           Icons.link,
                           size: placeholderIconSize,
-                          color: Colors.grey,
+                          color: AppTheme.border.withValues(alpha: 0.35),
                         ),
                       ),
                     ),
@@ -775,9 +775,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       final confirmed = await _showRefreshDialog();
                                       if (confirmed != true) return;
 
-                                      ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
-                                      if (context.mounted) {
-                                        Navigator.of(context).pop();
+                                      await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+                                      if (!mounted) return;
+                                      final refreshed = await ref.read(repositoryProvider).getBookmark(bookmark.id);
+                                      if (refreshed != null && mounted) {
+                                        setState(() {
+                                          _initBookmark(refreshed);
+                                        });
                                       }
                                     },
                                     color: const Color(0xFF26D5A8),

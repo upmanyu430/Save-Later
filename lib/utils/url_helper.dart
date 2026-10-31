@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:html/parser.dart' as parser;
+import 'package:http/http.dart' as http;
+import 'package:metadata_fetch/metadata_fetch.dart';
 
 class UrlHelper {
   // Regex matching http/https URLs or www. domains in text
@@ -184,6 +188,79 @@ class UrlHelper {
       return normalized;
     } finally {
       client?.close(force: true);
+    }
+  }
+
+  /// Fetches webpage metadata (title, description, image) using realistic browser headers
+  /// to avoid 403 Forbidden responses from protected websites (e.g., Microsoft Store, Cloudflare, etc.).
+  static Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    final cleanUrl = extractUrl(url) ?? url.trim();
+    if (!isValidUrl(cleanUrl)) return null;
+
+    final targetUri = Uri.tryParse(cleanUrl.startsWith(RegExp(r'https?:\/\/', caseSensitive: false))
+        ? cleanUrl
+        : 'https://$cleanUrl');
+    if (targetUri == null) return null;
+
+    const headers = {
+      'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      'Accept':
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+    };
+
+    try {
+      final response = await http.get(targetUri, headers: headers).timeout(timeout);
+      if (response.statusCode == 200) {
+        final document = parser.parse(utf8.decode(response.bodyBytes, allowMalformed: true));
+        final data = MetadataParser.parse(document, url: targetUri.toString());
+
+        // Check additional meta tags for image if OpenGraph / TwitterCard missed it:
+        if (data.image == null || data.image!.trim().isEmpty) {
+          final ogSecure = document.querySelector('meta[property="og:image:secure_url"]')?.attributes['content'];
+          final twitterSrc = document.querySelector('meta[name="twitter:image:src"]')?.attributes['content'];
+          final linkImg = document.querySelector('link[rel="image_src"]')?.attributes['href'];
+          final linkIcon = document.querySelector('link[rel="apple-touch-icon"]')?.attributes['href'] ??
+              document.querySelector('link[rel="icon"]')?.attributes['href'];
+          final fallbackImg = ogSecure ?? twitterSrc ?? linkImg ?? linkIcon;
+          if (fallbackImg != null && fallbackImg.trim().isNotEmpty) {
+            data.image = resolveImageUrl(fallbackImg, targetUri.toString());
+          }
+        }
+
+        // Check title fallback if empty or just domain
+        if (data.title == null || data.title!.trim().isEmpty) {
+          final ogTitle = document.querySelector('meta[property="og:title"]')?.attributes['content'];
+          final twitterTitle = document.querySelector('meta[name="twitter:title"]')?.attributes['content'];
+          data.title = ogTitle ?? twitterTitle ?? document.querySelector('title')?.text.trim();
+        }
+
+        // Check description fallback
+        if (data.description == null || data.description!.trim().isEmpty) {
+          final ogDesc = document.querySelector('meta[property="og:description"]')?.attributes['content'];
+          final twitterDesc = document.querySelector('meta[name="twitter:description"]')?.attributes['content'];
+          final metaDesc = document.querySelector('meta[name="description"]')?.attributes['content'];
+          data.description = ogDesc ?? twitterDesc ?? metaDesc;
+        }
+
+        if (data.image != null) {
+          data.image = resolveImageUrl(data.image, targetUri.toString());
+        }
+
+        return data;
+      }
+    } catch (_) {
+      // Fall through to MetadataFetch.extract
+    }
+
+    try {
+      return await MetadataFetch.extract(targetUri.toString()).timeout(timeout);
+    } catch (_) {
+      return null;
     }
   }
 }

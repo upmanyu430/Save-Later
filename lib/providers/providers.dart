@@ -150,10 +150,14 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       String? sourceDomain = targetUri.host;
 
       try {
-        var data = await MetadataFetch.extract(resolvedUrl);
+        var data = await UrlHelper.fetchMetadata(resolvedUrl);
         if (data != null) {
-          title = data.title;
-          description = data.description;
+          if (data.title != null && data.title!.isNotEmpty) {
+            title = data.title;
+          }
+          if (data.description != null && data.description!.isNotEmpty) {
+            description = data.description;
+          }
           imageUrl = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
         }
       } catch (e) {
@@ -239,12 +243,18 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         bookmark.sourceDomain = (resolvedUri ?? originalUri)?.host ?? bookmark.sourceDomain;
       }
 
-      var data = await MetadataFetch.extract(resolvedUrl);
+      var data = await UrlHelper.fetchMetadata(resolvedUrl);
       if (data != null) {
-        bookmark.title = data.title ?? bookmark.title;
-        bookmark.description = data.description ?? bookmark.description;
+        if (data.title != null && data.title!.isNotEmpty) {
+          bookmark.title = data.title!;
+        }
+        if (data.description != null && data.description!.isNotEmpty) {
+          bookmark.description = data.description!;
+        }
         final resolvedImg = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
-        bookmark.imageUrl = resolvedImg ?? bookmark.imageUrl;
+        if (resolvedImg != null && resolvedImg.isNotEmpty) {
+          bookmark.imageUrl = resolvedImg;
+        }
       }
       await ref.read(repositoryProvider).updateBookmark(bookmark);
     } catch (e) {
