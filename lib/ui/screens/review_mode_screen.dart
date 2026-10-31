@@ -190,11 +190,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       }
       if (mounted) {
         setState(() {
-          // Collections are repeatable review folders: show every bookmark
-          // each time. Unsorted remains the inbox and only shows unread saves.
-          unreadBookmarks = widget.collection == null
-              ? list.where((b) => !b.isRead).toList()
-              : list;
+          // Collections and Unsorted are repeatable review folders: show all bookmarks.
+          unreadBookmarks = list;
           loaded = true;
         });
       }

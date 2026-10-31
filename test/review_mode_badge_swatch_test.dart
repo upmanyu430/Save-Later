@@ -54,8 +54,7 @@ class FakeIsarRepository implements IsarRepository {
   Future<List<Bookmark>> getBookmarksByCollection(Id collectionId) async => [];
 
   @override
-  Future<List<Bookmark>> getUnsortedBookmarks() async =>
-      bookmarks.where((b) => !b.isRead).toList();
+  Future<List<Bookmark>> getUnsortedBookmarks() async => bookmarks.toList();
 
   @override
   Future<List<Bookmark>> getUnreadBookmarks() async =>
@@ -226,5 +225,35 @@ void main() {
       matching: find.byWidgetPredicate((w) => w is Container && w.padding == const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
     );
     expect(badgeContainerFinder, findsOneWidget);
+  });
+
+  testWidgets('ReviewModeScreen displays bookmarks in Unsorted even when they are marked as read', (tester) async {
+    final fakeRepo = FakeIsarRepository();
+    final readBookmark = Bookmark()
+      ..id = 1
+      ..url = 'https://example.com/read'
+      ..title = 'Already Read Unsorted Bookmark'
+      ..isRead = true;
+
+    fakeRepo.bookmarks.add(readBookmark);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+          unsortedBookmarksProvider.overrideWith((ref) => Future.value([readBookmark])),
+        ],
+        child: buildTestApp(
+          home: const ReviewModeScreen(collection: null),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify the card is visible with its title, rather than caught up screen
+    expect(find.text('Already Read Unsorted Bookmark'), findsOneWidget);
+    expect(find.text('Unsorted'), findsOneWidget);
+    expect(find.text("You're all caught up!"), findsNothing);
   });
 }
