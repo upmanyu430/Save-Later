@@ -56,49 +56,20 @@ CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
   return CustomTransitionPage<T>(
     key: state.pageKey,
     opaque: false,
-    barrierColor: Colors.black26,
+    barrierColor: Colors.black38,
+    barrierDismissible: true,
     transitionDuration: const Duration(milliseconds: 380),
-    reverseTransitionDuration: const Duration(milliseconds: 300),
+    reverseTransitionDuration: const Duration(milliseconds: 320),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curvedScale = CurvedAnimation(
+      final curvedAnimation = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeOutCubic,
-        reverseCurve: Curves.easeInCubic,
+        curve: Curves.easeInOutCubic,
+        reverseCurve: Curves.easeInOutCubic,
       );
-      final curvedFade = CurvedAnimation(
-        parent: animation,
-        curve: const Interval(0.0, 0.12, curve: Curves.easeOut),
-        reverseCurve: const Interval(0.88, 1.0, curve: Curves.easeIn),
-      );
-      return FadeTransition(
-        opacity: curvedFade,
-        child: ScaleTransition(
-          scale: curvedScale,
-          alignment: Alignment.center,
-          child: AnimatedBuilder(
-            animation: curvedScale,
-            builder: (context, child) {
-              final t = curvedScale.value.clamp(0.0, 1.0);
-              final radius = t >= 0.98 ? 0.0 : (24.0 * (1.0 - t));
-              final borderWidth = t >= 0.98 ? 0.0 : (2.5 * (1.0 - t));
-              if (radius <= 0.5) return child!;
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(radius),
-                child: Container(
-                  foregroundDecoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(radius),
-                    border: Border.all(
-                      color: AppTheme.border,
-                      width: borderWidth,
-                    ),
-                  ),
-                  child: child,
-                ),
-              );
-            },
-            child: child,
-          ),
-        ),
+      return ScaleTransition(
+        scale: curvedAnimation,
+        alignment: Alignment.center,
+        child: child,
       );
     },
     child: child,

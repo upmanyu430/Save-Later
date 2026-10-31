@@ -75,7 +75,19 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
     _titleController.text = b.title ?? b.url;
     if (b.collection.isAttached && !b.collection.isLoaded) {
       b.collection.load().then((_) {
-        if (mounted) setState(() {});
+        if (!mounted) return;
+        final route = ModalRoute.of(context);
+        if (route?.animation != null && route!.animation!.isAnimating) {
+          void listener(AnimationStatus status) {
+            if (status == AnimationStatus.completed) {
+              route.animation!.removeStatusListener(listener);
+              if (mounted) setState(() {});
+            }
+          }
+          route.animation!.addStatusListener(listener);
+        } else {
+          setState(() {});
+        }
       });
     }
   }
