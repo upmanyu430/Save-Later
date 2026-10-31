@@ -140,13 +140,13 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
 
-    // Verify common items are present
+    // Verify items present in Unsorted
     expect(find.text('Add Link'), findsOneWidget);
     expect(find.text('Select Links'), findsOneWidget);
-    expect(find.text('Create Sub-collection'), findsOneWidget);
     expect(find.text('Share Collection'), findsOneWidget);
 
-    // Verify Edit Collection and Delete Collection are NOT present
+    // Verify Create Sub-collection, Edit Collection, and Delete Collection are NOT present in Unsorted
+    expect(find.text('Create Sub-collection'), findsNothing);
     expect(find.text('Edit Collection'), findsNothing);
     expect(find.text('Delete Collection'), findsNothing);
   });
@@ -169,7 +169,8 @@ void main() {
     await tester.tap(find.byIcon(Icons.more_vert));
     await tester.pumpAndSettle();
 
-    // Verify Edit Collection and Delete Collection are present
+    // Verify Create Sub-collection, Edit Collection and Delete Collection are present
+    expect(find.text('Create Sub-collection'), findsOneWidget);
     expect(find.text('Edit Collection'), findsOneWidget);
     expect(find.text('Delete Collection'), findsOneWidget);
     expect(find.byIcon(Icons.edit_outlined), findsOneWidget);

@@ -189,15 +189,17 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                         _buildDivider(),
 
                         // Create Sub-collection
-                        _buildMenuItem(
-                          icon: Icons.create_new_folder_outlined,
-                          title: AppLocalizations.of(context)!.createSubCollection,
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            _showCreateSubCollectionModal(context);
-                          },
-                        ),
-                        _buildDivider(),
+                        if (widget.collectionId != null) ...[
+                          _buildMenuItem(
+                            icon: Icons.create_new_folder_outlined,
+                            title: AppLocalizations.of(context)!.createSubCollection,
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              _showCreateSubCollectionModal(context);
+                            },
+                          ),
+                          _buildDivider(),
+                        ],
 
                         // Share Collection
                         _buildMenuItem(
