@@ -812,7 +812,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     final collection = b.collection.value ?? widget.collection;
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
-    final collectionColor = collection?.color ?? Colors.grey.shade400;
+    final collectionColor = collection?.color ?? const Color(0xFFE5E5E5);
     final placeholderSize = (cardWidth * 0.16).clamp(48.0, 80.0);
     final placeholderFontSize =
         MediaQuery.textScalerOf(context).scale(placeholderSize);
@@ -930,20 +930,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               border:
                                   Border.all(color: AppTheme.border, width: 2),
                             ),
-                            child: collection != null
-                                ? Center(
-                                    child: Icon(
-                                      IconData(
-                                        collection.iconCodePoint,
-                                        fontFamily: collection.iconFontFamily,
-                                      ),
-                                      size: 10,
-                                      color: BookmarkCollection.isWhiteIconColor(collectionColor)
-                                          ? Colors.white
-                                          : AppTheme.border,
-                                    ),
-                                  )
-                                : null,
                           ),
                           const SizedBox(width: AppDimensions.paddingSm),
                           Text(

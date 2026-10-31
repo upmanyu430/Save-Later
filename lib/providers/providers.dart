@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:metadata_fetch/metadata_fetch.dart';
 import '../models/bookmark.dart';
 import '../models/collection.dart';
 import '../repositories/isar_repository.dart';
