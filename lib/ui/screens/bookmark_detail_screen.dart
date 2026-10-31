@@ -615,55 +615,32 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           spacing: 12.0,
                           runSpacing: 8.0,
                           children: [
-                            if (bookmark.collection.value != null)
-                              NeoBox(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                borderRadius: AppDimensions.radiusSm,
-                                borderWidth: 2,
-                                shadowOffset: 0,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      IconData(bookmark.collection.value!.iconCodePoint, fontFamily: bookmark.collection.value!.iconFontFamily),
-                                      size: 16,
-                                      color: bookmark.collection.value!.color,
+                            NeoBox(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              borderRadius: AppDimensions.radiusSm,
+                              borderWidth: 2,
+                              shadowOffset: 0,
+                              color: Colors.white,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    width: 16,
+                                    height: 16,
+                                    decoration: BoxDecoration(
+                                      color: bookmark.collection.value?.color ?? const Color(0xFFE5E5E5),
+                                      border: Border.all(color: AppTheme.border, width: 2),
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      bookmark.collection.value!.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else
-                              NeoBox(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                borderRadius: AppDimensions.radiusSm,
-                                borderWidth: 2,
-                                shadowOffset: 0,
-                                color: Colors.white,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 16,
-                                      height: 16,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFE5E5E5),
-                                        border: Border.all(color: AppTheme.border, width: 2),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      l10n.unsorted,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    bookmark.collection.value?.name ?? l10n.unsorted,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                  ),
+                                ],
                               ),
+                            ),
                             Text(
                               DateFormat('dd MMM yyyy, h:mm a').format(bookmark.createdAt),
                               style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 13),
