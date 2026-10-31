@@ -75,8 +75,8 @@ CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
     opaque: false,
     barrierColor: Colors.black38,
     barrierDismissible: true,
-    transitionDuration: const Duration(milliseconds: 342),
-    reverseTransitionDuration: const Duration(milliseconds: 288),
+    transitionDuration: const Duration(milliseconds: 308),
+    reverseTransitionDuration: const Duration(milliseconds: 260),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,
@@ -175,8 +175,8 @@ void main() {
     expect(initialScale.alignment, Alignment.center);
     expect(initialScale.scale.value, equals(0.0));
 
-    // Pump halfway (171ms) - scale expands smoothly around 0.5 with easeInOutCubic
-    await tester.pump(const Duration(milliseconds: 171));
+    // Pump halfway (154ms) - scale expands smoothly around 0.5 with easeInOutCubic
+    await tester.pump(const Duration(milliseconds: 154));
     final midScale = tester.widget<ScaleTransition>(detailScaleFinder);
     expect(midScale.scale.value, inInclusiveRange(0.4, 0.6));
 
@@ -189,7 +189,7 @@ void main() {
     await tester.pump(); // Pop starts
 
     // In reverse transition, it scales back down smoothly without disappearing
-    await tester.pump(const Duration(milliseconds: 144));
+    await tester.pump(const Duration(milliseconds: 130));
     final reverseScale = tester.widget<ScaleTransition>(detailScaleFinder);
     expect(reverseScale.scale.value, inInclusiveRange(0.4, 0.6));
 

@@ -58,8 +58,8 @@ CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
     opaque: false,
     barrierColor: Colors.black38,
     barrierDismissible: true,
-    transitionDuration: const Duration(milliseconds: 342),
-    reverseTransitionDuration: const Duration(milliseconds: 288),
+    transitionDuration: const Duration(milliseconds: 308),
+    reverseTransitionDuration: const Duration(milliseconds: 260),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,
