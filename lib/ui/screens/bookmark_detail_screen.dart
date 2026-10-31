@@ -752,13 +752,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       final confirmed = await _showRefreshDialog();
                                       if (confirmed != true) return;
 
-                                      await ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
-                                      if (!mounted) return;
-                                      final refreshed = await ref.read(repositoryProvider).getBookmark(bookmark.id);
-                                      if (refreshed != null && mounted) {
-                                        setState(() {
-                                          _initBookmark(refreshed);
-                                        });
+                                      ref.read(bookmarkNotifierProvider.notifier).refreshMetadata(bookmark);
+                                      if (context.mounted) {
+                                        Navigator.of(context).pop();
                                       }
                                     },
                                     color: const Color(0xFF26D5A8),
