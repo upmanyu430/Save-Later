@@ -80,7 +80,7 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       final dxNext = (1.0 - t) * 28.0;
       final scaleNext = 0.94 + (t * 0.06);
       final dimNext = (1.0 - t) * 0.38;
-      final angleNext = (1.0 - t) * 0.05;
+      final angleNext = math.sin(math.pi * t) * 0.05;
       final zNext = t < 0.5 ? 8 : 10;
       addCard(k + 1, dxNext, scaleNext, dimNext, angleNext, zNext);
 
@@ -106,7 +106,7 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
       final dxPrev = -28.0 * (1.0 - progress);
       final scalePrev = 0.94 + (progress * 0.06);
       final dimPrev = (1.0 - progress) * 0.38;
-      final anglePrev = -(1.0 - progress) * 0.05;
+      final anglePrev = -math.sin(math.pi * progress) * 0.05;
       final zPrev = progress < 0.5 ? 7 : 10;
       addCard(k, dxPrev, scalePrev, dimPrev, anglePrev, zPrev);
 
@@ -727,7 +727,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               clipBehavior: Clip.none,
                               itemCount: unreadBookmarks.length + 1,
                               onPageChanged: _onPageChanged,
-                              physics: const BouncingScrollPhysics(parent: PageScrollPhysics()),
+                              physics: const PageScrollPhysics(),
                               itemBuilder: (context, index) {
                                 return const SizedBox.expand();
                               },

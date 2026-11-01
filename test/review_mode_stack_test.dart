@@ -595,6 +595,39 @@ void main() {
       final card1Back = backSwipe.firstWhere((c) => c.index == 1);
       expect(card2Back.dx, greaterThan(0.0));
       expect(card1Back.dx, closeTo(-14.0, 0.01));
+      expect(card1Back.angle, lessThan(0.0));
+
+      // 7. Backward Drag Boundaries - Continuous tilt with zero angle pop at rest
+      // Just beginning backward drag from card 2 (page = 1.999)
+      final backDragStart = ReviewModeScreen.calculateCardTransforms(
+        page: 1.999,
+        cardWidth: 300.0,
+        totalCards: 5,
+        dragStartPage: 2,
+        currentIndex: 2,
+      );
+      final card1AtBackDragStart = backDragStart.firstWhere((c) => c.index == 1);
+      expect(card1AtBackDragStart.angle, closeTo(0.0, 0.001));
+
+      // Right before landing on card 1 (page = 1.001)
+      final backDragEnd = ReviewModeScreen.calculateCardTransforms(
+        page: 1.001,
+        cardWidth: 300.0,
+        totalCards: 5,
+        dragStartPage: 2,
+        currentIndex: 2,
+      );
+      final card1AtBackDragEnd = backDragEnd.firstWhere((c) => c.index == 1);
+      expect(card1AtBackDragEnd.angle, closeTo(0.0, 0.001));
+
+      // Forward drag start from card 0 (page = 0.001)
+      final forwardDragStart = ReviewModeScreen.calculateCardTransforms(
+        page: 0.001,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card1AtForwardStart = forwardDragStart.firstWhere((c) => c.index == 1);
+      expect(card1AtForwardStart.angle, closeTo(0.0, 0.001));
     });
   });
 }
