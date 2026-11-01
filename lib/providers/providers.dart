@@ -166,7 +166,11 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       bookmark.url = finalUrl;
       bookmark.title = title ?? cleanUrl;
       bookmark.description = description;
-      bookmark.imageUrl = imageUrl;
+      // Pages behind bot challenges (AWS WAF, Cloudflare...) send 202/403 and
+      // cannot be scraped by any HTTP client, so no og:image exists. Keep a
+      // usable preview alive with an automatic page screenshot instead of
+      // leaving the background image permanently empty.
+      bookmark.imageUrl = imageUrl ?? UrlHelper.fallbackPreviewUrl(finalUrl);
       bookmark.sourceDomain = sourceDomain;
 
       await repo.updateBookmark(bookmark);
@@ -253,7 +257,16 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         final resolvedImg = UrlHelper.resolveImageUrl(data.image, resolvedUrl);
         if (resolvedImg != null && resolvedImg.isNotEmpty) {
           bookmark.imageUrl = resolvedImg;
+        } else if (bookmark.imageUrl == null || bookmark.imageUrl!.trim().isEmpty) {
+          // Page has no og:image and nothing stored — keep a preview alive
+          // with an automatic page screenshot instead of leaving it empty.
+          bookmark.imageUrl = UrlHelper.fallbackPreviewUrl(resolvedUrl);
         }
+      } else if (bookmark.imageUrl == null || bookmark.imageUrl!.trim().isEmpty) {
+        // Fetch itself failed (bot challenge / network) and nothing is stored
+        // yet — fall back to an automatic page screenshot. A previously
+        // stored URL is kept as-is: the failure is probably transient.
+        bookmark.imageUrl = UrlHelper.fallbackPreviewUrl(resolvedUrl);
       }
       await ref.read(repositoryProvider).updateBookmark(bookmark);
     } catch (e) {

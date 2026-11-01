@@ -17,9 +17,9 @@ import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/pin_icon.dart';
 import '../widgets/favicon_image.dart';
+import '../widgets/bookmark_image.dart';
 import '../../utils/url_launcher.dart';
 import '../../utils/tag_helper.dart';
-import '../../utils/url_helper.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'dart:async';
 
@@ -366,26 +366,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (bookmark.imageUrl != null)
-                    Image.network(
-                      UrlHelper.resolveImageUrl(bookmark.imageUrl, bookmark.url) ??
-                          (bookmark.imageUrl!.startsWith('//')
-                              ? 'https:${bookmark.imageUrl!}'
-                              : bookmark.imageUrl!),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: Colors.grey.shade900,
-                        child: Center(
-                          child: Icon(
-                            Icons.image_not_supported,
-                            size: placeholderIconSize,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
+                  BookmarkImage(
+                    imageUrl: bookmark.imageUrl,
+                    url: bookmark.url,
+                    fallback: Container(
                       color: const Color(0xFFEFECE6),
                       child: Center(
                         child: Icon(
@@ -395,6 +379,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         ),
                       ),
                     ),
+                  ),
 
                   // Lower Black Line on the bookmark background image
                   Positioned(

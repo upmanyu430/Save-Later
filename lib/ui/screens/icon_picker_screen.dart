@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../config/app_constants.dart';
 import '../../theme/app_theme.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/stored_icon.dart';
 import '../../models/collection.dart';
 
 class IconItem {
@@ -29,6 +30,12 @@ class IconPickerScreen extends StatefulWidget {
     required this.selectedColorHex,
     required this.currentIconCode,
   });
+
+  /// Every icon the picker can store, keyed as `Icons.*` const references so
+  /// the release-build icon tree-shaker preserves their glyphs. Stored
+  /// `iconCodePoint` values are materialized at runtime through [storedIcon]
+  /// (see ui/widgets/stored_icon.dart).
+  static List<IconItem> get offeredIcons => _IconPickerScreenState._allIcons;
 
   @override
   State<IconPickerScreen> createState() => _IconPickerScreenState();
@@ -288,7 +295,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                       border: Border.all(color: AppTheme.border, width: 2.5),
                     ),
                     child: Icon(
-                      IconData(_selectedIconCode, fontFamily: 'MaterialIcons'),
+                      storedIcon(_selectedIconCode, kStoredIconFontFamily),
                       size: 22,
                       color: AppTheme.border,
                     ),
@@ -489,7 +496,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            IconData(_selectedIconCode, fontFamily: 'MaterialIcons'),
+                            storedIcon(_selectedIconCode, kStoredIconFontFamily),
                             size: 20,
                             color: btnTextColor,
                           ),

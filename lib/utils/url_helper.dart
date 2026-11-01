@@ -150,6 +150,16 @@ class UrlHelper {
     }
   }
 
+  /// thum.io live page-screenshot endpoint, used as an automatic preview
+  /// fallback for pages whose OpenGraph image cannot be scraped (AWS WAF /
+  /// Cloudflare bot challenges respond 202/403 to any client) or whose stored
+  /// CDN link has expired (e.g. Instagram signed URLs).
+  static String fallbackPreviewUrl(String url, {int width = 1200}) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return trimmed;
+    return 'https://image.thum.io/get/width/$width/crop/900/$trimmed';
+  }
+
   /// Resolves HTTP redirect chains (e.g. share.google, bit.ly, t.co) to find the canonical URL.
   /// Uses GET with automatic redirect following so services that only redirect on GET (like Google share links)
   /// are properly resolved.

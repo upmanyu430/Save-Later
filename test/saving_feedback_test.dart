@@ -87,6 +87,11 @@ void main() {
     // Let entrance animations settle
     await tester.pump(const Duration(milliseconds: 500));
 
+    // BookmarkImage advances through its fallback stages (test HTTP requests
+    // fail instantly), so the letter placeholder appears after one more frame.
+    await tester.pump();
+    await tester.pump();
+
     // Verify SAVING... badge is displayed
     expect(find.text('SAVING...'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

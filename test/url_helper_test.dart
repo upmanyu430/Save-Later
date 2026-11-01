@@ -116,6 +116,27 @@ Hope you like it!
     });
   });
 
+  group('UrlHelper.fallbackPreviewUrl', () {
+    test('wraps the page url into the thum.io screenshot endpoint', () {
+      expect(
+        UrlHelper.fallbackPreviewUrl('https://www.imdb.com/title/tt0111161/'),
+        'https://image.thum.io/get/width/1200/crop/900/https://www.imdb.com/title/tt0111161/',
+      );
+    });
+
+    test('supports a custom width', () {
+      expect(
+        UrlHelper.fallbackPreviewUrl('https://example.com/page?id=1', width: 800),
+        'https://image.thum.io/get/width/800/crop/900/https://example.com/page?id=1',
+      );
+    });
+
+    test('returns empty string for empty input', () {
+      expect(UrlHelper.fallbackPreviewUrl(''), '');
+      expect(UrlHelper.fallbackPreviewUrl('   '), '');
+    });
+  });
+
   group('UrlHelper.resolveImageUrl', () {
     test('returns null for null or empty imageUrl', () {
       expect(UrlHelper.resolveImageUrl(null, 'https://example.com'), isNull);

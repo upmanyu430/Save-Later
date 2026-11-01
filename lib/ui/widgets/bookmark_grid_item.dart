@@ -9,10 +9,10 @@ import '../../theme/app_theme.dart';
 import 'neo_box.dart';
 import 'neo_pressable.dart';
 import 'bookmark_radial_menu.dart';
+import 'bookmark_image.dart';
 import 'pin_icon.dart';
 import 'favicon_image.dart';
 import '../../providers/providers.dart';
-import '../../utils/url_helper.dart';
 import 'package:save_later/config/app_constants.dart';
 
 
@@ -184,22 +184,19 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(_innerRadius)),
-                    child: b.imageUrl != null
-                        ? Image.network(
-                            UrlHelper.resolveImageUrl(b.imageUrl, b.url) ??
-                                (b.imageUrl!.startsWith('//') ? 'https:${b.imageUrl!}' : b.imageUrl!), 
-                            fit: BoxFit.cover, 
-                            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: Colors.grey)
-                          )
-                        : Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                _getInitialLetter(b),
-                                style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
-                              ),
-                            ),
+                    child: BookmarkImage(
+                      imageUrl: b.imageUrl,
+                      url: b.url,
+                      fallback: Center(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            _getInitialLetter(b),
+                            style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
                           ),
+                        ),
+                      ),
+                    ),
                   ),
                   // Overlay Unsorted/Collection pill
                   if (widget.showCollectionPill && !isBusy)

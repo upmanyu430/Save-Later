@@ -87,6 +87,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 500));
 
+    // BookmarkImage advances through its fallback stages (test HTTP requests
+    // fail instantly), so the letter placeholder appears after one more frame.
+    await tester.pump();
+    await tester.pump();
+
     // Verify REFRESHING... badge is displayed
     expect(find.text('REFRESHING...'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);

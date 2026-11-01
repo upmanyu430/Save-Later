@@ -3,6 +3,9 @@ import 'package:isar/isar.dart';
 
 part 'collection.g.dart';
 
+/// Font family that icons persisted in the database are stored under.
+const String kStoredIconFontFamily = 'MaterialIcons';
+
 @collection
 class BookmarkCollection {
   Id id = Isar.autoIncrement;

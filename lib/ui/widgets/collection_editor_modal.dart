@@ -6,11 +6,17 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'neo_button.dart';
+import 'stored_icon.dart';
 import 'package:save_later/config/app_constants.dart';
 
 class CollectionEditorModal extends ConsumerStatefulWidget {
   final BookmarkCollection? existingCollection;
   final int? parentId;
+
+  /// Quick icons offered directly inside the editor (subset view). Public so
+  /// [storedIcons] can materialize their code points at runtime while keeping
+  /// the `Icons.*` references const (icon tree-shaking in release builds).
+  static List<IconData> get quickIcons => _CollectionEditorModalState._allIcons;
 
   const CollectionEditorModal(
       {super.key, this.existingCollection, this.parentId});
@@ -101,7 +107,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     if (!_allIcons.any((icon) => icon.codePoint == _selectedIconCode)) {
       return [
         ..._allIcons,
-        IconData(_selectedIconCode, fontFamily: 'MaterialIcons')
+        storedIcon(_selectedIconCode, kStoredIconFontFamily)
       ];
     }
     return _allIcons;

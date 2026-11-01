@@ -12,7 +12,7 @@ import '../widgets/neo_box.dart';
 import '../widgets/favicon_image.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
-import '../../utils/url_helper.dart';
+import '../widgets/bookmark_image.dart';
 import 'package:save_later/config/app_constants.dart';
 
 class ReviewModeScreen extends ConsumerStatefulWidget {
@@ -810,9 +810,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
     final collectionColor = collection?.color ?? const Color(0xFFE5E5E5);
-    final placeholderSize = (cardWidth * 0.16).clamp(48.0, 80.0);
     final placeholderFontSize =
-        MediaQuery.textScalerOf(context).scale(placeholderSize);
+        MediaQuery.textScalerOf(context)
+            .scale((cardWidth * 0.16).clamp(48.0, 80.0));
 
     return Container(
       width: cardWidth,
@@ -865,34 +865,23 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                    child: b.imageUrl != null
-                        ? Image.network(
-                            UrlHelper.resolveImageUrl(b.imageUrl, b.url) ??
-                                (b.imageUrl!.startsWith('//')
-                                     ? 'https:${b.imageUrl!}'
-                                     : b.imageUrl!),
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Center(
-                              child: Icon(
-                                Icons.image_not_supported,
-                                color: Colors.grey,
-                                size: placeholderSize,
-                              ),
-                            ),
-                          )
-                        : Center(
-                            child: Text(
-                              b.title != null && b.title!.isNotEmpty
-                                  ? b.title![0].toUpperCase()
-                                  : '?',
-                              textScaler: TextScaler.noScaling,
-                              style: TextStyle(
-                                fontSize: placeholderFontSize,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white24,
-                              ),
-                            ),
+                    child: BookmarkImage(
+                      imageUrl: b.imageUrl,
+                      url: b.url,
+                      fallback: Center(
+                        child: Text(
+                          b.title != null && b.title!.isNotEmpty
+                              ? b.title![0].toUpperCase()
+                              : '?',
+                          textScaler: TextScaler.noScaling,
+                          style: TextStyle(
+                            fontSize: placeholderFontSize,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white24,
                           ),
+                        ),
+                      ),
+                    ),
                   ),
                   // Pill at bottom left
                   Positioned(

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/collection.dart';
 import 'collection_radial_menu.dart';
 import 'folder_box.dart';
+import 'stored_icon.dart';
 
 class CollectionGridItem extends ConsumerStatefulWidget {
   final BookmarkCollection collection;
@@ -39,9 +40,9 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
       title: widget.collection.name,
       itemCountText: l10n.itemsCount(widget.itemCount),
       folderColor: widget.collection.color,
-      icon: IconData(
+      icon: storedIcon(
         widget.collection.iconCodePoint,
-        fontFamily: widget.collection.iconFontFamily,
+        widget.collection.iconFontFamily,
       ),
       onTap: widget.onTap,
       hasNewItems: widget.hasNewItems,
@@ -115,9 +116,9 @@ class _CollectionGridItemState extends ConsumerState<CollectionGridItem> {
           title: widget.collection.name,
           itemCountText: l10n.itemsCount(widget.itemCount),
           folderColor: widget.collection.color,
-          icon: IconData(
+          icon: storedIcon(
             widget.collection.iconCodePoint,
-            fontFamily: widget.collection.iconFontFamily,
+            widget.collection.iconFontFamily,
           ),
           onTap: widget.onTap,
           hasNewItems: widget.hasNewItems,

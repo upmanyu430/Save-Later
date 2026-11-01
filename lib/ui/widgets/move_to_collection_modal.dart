@@ -10,6 +10,7 @@ import 'package:save_later/config/app_constants.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
 import 'neo_button.dart';
+import 'stored_icon.dart';
 
 class MoveToCollectionModal extends ConsumerStatefulWidget {
   final Bookmark? bookmark;
@@ -366,7 +367,10 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     ),
                                   ),
                                   child: Icon(
-                                    IconData(col.iconCodePoint, fontFamily: col.iconFontFamily),
+                                    storedIcon(
+                                      col.iconCodePoint,
+                                      col.iconFontFamily,
+                                    ),
                                     color: iconColor,
                                     size: 20,
                                   ),
