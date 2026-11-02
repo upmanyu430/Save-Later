@@ -15,6 +15,131 @@ import '../../utils/url_launcher.dart';
 import '../widgets/bookmark_image.dart';
 import 'package:save_later/config/app_constants.dart';
 
+/// Emil Kowalski's custom ease curve for crisp, physical button transitions.
+const Curve emilEaseOut = Cubic(0.23, 1.0, 0.32, 1.0);
+
+/// Apple-style spring scroll physics combining page snapping,
+/// fluid boundary rubber-band overscroll damping, and momentum flick dismissal.
+class ReviewDeckScrollPhysics extends ScrollPhysics {
+  const ReviewDeckScrollPhysics({super.parent});
+
+  /// Apple's { duration: 0.5, bounce: 0.18 } spring physics parameters.
+  static const SpringDescription appleSpring = SpringDescription(
+    mass: 1.0,
+    stiffness: 120.0,
+    damping: 14.0,
+  );
+
+  /// Flick velocity threshold to trigger card advance (~600-800 dp/s).
+  static const double flickThreshold = 700.0;
+
+  @override
+  ReviewDeckScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return ReviewDeckScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  SpringDescription get spring => appleSpring;
+
+  @override
+  Tolerance toleranceFor(ScrollMetrics metrics) {
+    return Tolerance(
+      velocity: flickThreshold,
+      distance: 1.0 / metrics.devicePixelRatio,
+    );
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    assert(offset != 0.0);
+    assert(position.minScrollExtent <= position.maxScrollExtent);
+
+    if (!position.outOfRange) {
+      return offset;
+    }
+
+    final double overscrollPastStart =
+        math.max(position.minScrollExtent - position.pixels, 0.0);
+    final double overscrollPastEnd =
+        math.max(position.pixels - position.maxScrollExtent, 0.0);
+    final double overscrollPast =
+        math.max(overscrollPastStart, overscrollPastEnd);
+    final bool easing = (overscrollPastStart > 0.0 && offset < 0.0) ||
+        (overscrollPastEnd > 0.0 && offset > 0.0);
+
+    final double friction = easing
+        ? _frictionFactor(
+            (overscrollPast - offset.abs()) / position.viewportDimension)
+        : _frictionFactor(overscrollPast / position.viewportDimension);
+    final double direction = offset.sign;
+
+    return direction * _applyFriction(overscrollPast, offset.abs(), friction);
+  }
+
+  static double _frictionFactor(double overscrollFraction) {
+    return 0.52 * math.pow(1 - overscrollFraction.clamp(0.0, 1.0), 2);
+  }
+
+  static double _applyFriction(
+      double extentOutside, double absDelta, double gamma) {
+    assert(absDelta > 0);
+    double total = 0.0;
+    if (extentOutside > 0) {
+      final double deltaToLimit = extentOutside / gamma;
+      if (absDelta < deltaToLimit) {
+        return absDelta * gamma;
+      }
+      total += extentOutside;
+      absDelta -= deltaToLimit;
+    }
+    return total + absDelta * gamma;
+  }
+
+  @override
+  Simulation? createBallisticSimulation(
+      ScrollMetrics position, double velocity) {
+    final Tolerance tolerance = toleranceFor(position);
+    if (position.outOfRange) {
+      final double end = position.pixels < position.minScrollExtent
+          ? position.minScrollExtent
+          : position.maxScrollExtent;
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        end,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+    if (parent != null) {
+      return parent!.createBallisticSimulation(position, velocity);
+    }
+    // Standalone fallback when instantiated without PageScrollPhysics parent:
+    final double page = position is PageMetrics
+        ? position.page!
+        : position.pixels /
+            (position.viewportDimension == 0 ? 1 : position.viewportDimension);
+    double targetPage = page;
+    if (velocity < -tolerance.velocity) {
+      targetPage -= 0.5;
+    } else if (velocity > tolerance.velocity) {
+      targetPage += 0.5;
+    }
+    final double targetPixels =
+        targetPage.roundToDouble() * position.viewportDimension;
+    if (targetPixels != position.pixels) {
+      return ScrollSpringSimulation(
+        spring,
+        position.pixels,
+        targetPixels,
+        velocity,
+        tolerance: tolerance,
+      );
+    }
+    return null;
+  }
+}
+
 class ReviewModeScreen extends ConsumerStatefulWidget {
   final BookmarkCollection? collection;
   const ReviewModeScreen({super.key, this.collection});
@@ -49,6 +174,33 @@ class ReviewModeScreen extends ConsumerStatefulWidget {
         angle: angle,
         zIndex: zIndex,
       ));
+    }
+
+    // Handle boundary overscroll before card 0 with elastic rubber-band damping
+    if (page < 0.0) {
+      final overscroll = -page;
+      final dampedDx = cardWidth * 0.35 * (1.0 - math.exp(-overscroll * 1.5));
+      final angle = (overscroll * 0.04).clamp(-0.06, 0.06);
+      addCard(0, dampedDx, 1.0, 0.0, angle, 10);
+      addCard(1, 28.0, 0.94, 0.38, 0.0, 8);
+      addCard(2, 28.0, 0.94, 0.38, 0.0, 4);
+      addCard(3, 28.0, 0.94, 0.38, 0.0, 2);
+      list.sort((a, b) => a.zIndex.compareTo(b.zIndex));
+      return list;
+    }
+
+    // Handle boundary overscroll past last card with elastic rubber-band damping
+    if (page > totalCards - 1) {
+      final lastIndex = totalCards - 1;
+      final overscroll = page - lastIndex;
+      final dampedDx = -cardWidth * 0.35 * (1.0 - math.exp(-overscroll * 1.5));
+      final angle = -(overscroll * 0.04).clamp(-0.06, 0.06);
+      addCard(lastIndex, dampedDx, 1.0, 0.0, angle, 10);
+      addCard(lastIndex - 1, -28.0, 0.94, 0.38, 0.0, 7);
+      addCard(lastIndex - 2, -28.0, 0.94, 0.38, 0.0, 3);
+      addCard(lastIndex - 3, -28.0, 0.94, 0.38, 0.0, 2);
+      list.sort((a, b) => a.zIndex.compareTo(b.zIndex));
+      return list;
     }
 
     final t = frac;
@@ -299,8 +451,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       return;
     }
     _pageController.nextPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 240),
+      curve: emilEaseOut,
     );
   }
 
@@ -308,8 +460,8 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     if (currentIndex <= 0 || !_pageController.hasClients) return;
     _dragStartPage = currentIndex;
     _pageController.previousPage(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 240),
+      curve: emilEaseOut,
     );
   }
 
@@ -619,7 +771,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   return Expanded(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 260),
-                      curve: Curves.easeOutCubic,
+                      curve: emilEaseOut,
                       height: 8,
                       margin: EdgeInsets.only(
                           right: index == unreadBookmarks.length - 1 ? 0 : 6),
@@ -727,7 +879,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               clipBehavior: Clip.none,
                               itemCount: unreadBookmarks.length + 1,
                               onPageChanged: _onPageChanged,
-                              physics: const PageScrollPhysics(),
+                              physics: const ReviewDeckScrollPhysics(),
                               itemBuilder: (context, index) {
                                 return const SizedBox.expand();
                               },

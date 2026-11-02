@@ -629,5 +629,126 @@ void main() {
       final card1AtForwardStart = forwardDragStart.firstWhere((c) => c.index == 1);
       expect(card1AtForwardStart.angle, closeTo(0.0, 0.001));
     });
+
+    test('Test 7: Boundary Overscroll Transforms with Elastic Damping (page < 0 and page > totalCards - 1)', () {
+      // 1. Overscroll before Card 0 (page = -0.5)
+      final overscrollStart = ReviewModeScreen.calculateCardTransforms(
+        page: -0.5,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card0 = overscrollStart.firstWhere((c) => c.index == 0);
+      final card1 = overscrollStart.firstWhere((c) => c.index == 1);
+      final card2 = overscrollStart.firstWhere((c) => c.index == 2);
+      final card3 = overscrollStart.firstWhere((c) => c.index == 3);
+
+      expect(card0.dx, greaterThan(0.0)); // Damped rightward offset
+      expect(card0.scale, equals(1.0));
+      expect(card0.dim, equals(0.0));
+      expect(card0.zIndex, equals(10));
+      expect(card1.dx, equals(28.0));
+      expect(card1.scale, equals(0.94));
+      expect(card1.dim, equals(0.38));
+      expect(card1.zIndex, equals(8));
+      expect(card2.dx, equals(28.0));
+      expect(card2.zIndex, equals(4));
+      expect(card3.dx, equals(28.0));
+      expect(card3.zIndex, equals(2));
+      expect(overscrollStart.map((c) => c.zIndex).toList(), equals([2, 4, 8, 10]));
+
+      // Continuous approach at page = -0.001
+      final nearZero = ReviewModeScreen.calculateCardTransforms(
+        page: -0.001,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card0NearZero = nearZero.firstWhere((c) => c.index == 0);
+      expect(card0NearZero.dx, closeTo(0.0, 0.2));
+      expect(card0NearZero.angle, closeTo(0.0, 0.001));
+
+      // 2. Overscroll past last card (page = 4.5 for totalCards = 5)
+      final overscrollEnd = ReviewModeScreen.calculateCardTransforms(
+        page: 4.5,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card4 = overscrollEnd.firstWhere((c) => c.index == 4);
+      final card3Left = overscrollEnd.firstWhere((c) => c.index == 3);
+      final card2Left = overscrollEnd.firstWhere((c) => c.index == 2);
+      final card1Left = overscrollEnd.firstWhere((c) => c.index == 1);
+
+      expect(card4.dx, lessThan(0.0)); // Damped leftward offset
+      expect(card4.scale, equals(1.0));
+      expect(card4.dim, equals(0.0));
+      expect(card4.zIndex, equals(10));
+      expect(card3Left.dx, equals(-28.0));
+      expect(card3Left.scale, equals(0.94));
+      expect(card3Left.dim, equals(0.38));
+      expect(card3Left.zIndex, equals(7));
+      expect(card2Left.dx, equals(-28.0));
+      expect(card2Left.zIndex, equals(3));
+      expect(card1Left.dx, equals(-28.0));
+      expect(card1Left.zIndex, equals(2));
+      expect(overscrollEnd.map((c) => c.zIndex).toList(), equals([2, 3, 7, 10]));
+
+      // Continuous approach at page = 4.001
+      final nearLast = ReviewModeScreen.calculateCardTransforms(
+        page: 4.001,
+        cardWidth: 300.0,
+        totalCards: 5,
+      );
+      final card4NearLast = nearLast.firstWhere((c) => c.index == 4);
+      expect(card4NearLast.dx, closeTo(0.0, 0.2));
+      expect(card4NearLast.angle, closeTo(0.0, 0.001));
+
+      // 3. Single card deck overscroll
+      final singleDeckNeg = ReviewModeScreen.calculateCardTransforms(
+        page: -0.2,
+        cardWidth: 300.0,
+        totalCards: 1,
+      );
+      expect(singleDeckNeg.length, equals(1));
+      expect(singleDeckNeg.first.index, equals(0));
+      expect(singleDeckNeg.first.dx, greaterThan(0.0));
+
+      final singleDeckPos = ReviewModeScreen.calculateCardTransforms(
+        page: 0.2,
+        cardWidth: 300.0,
+        totalCards: 1,
+      );
+      expect(singleDeckPos.length, equals(1));
+      expect(singleDeckPos.first.index, equals(0));
+      expect(singleDeckPos.first.dx, lessThan(0.0));
+    });
+
+    test('Test 8: ReviewDeckScrollPhysics Spring Parameters & Emil Ease Curve', () {
+      expect(emilEaseOut, equals(const Cubic(0.23, 1.0, 0.32, 1.0)));
+
+      const physics = ReviewDeckScrollPhysics();
+      expect(physics.spring.mass, equals(1.0));
+      expect(physics.spring.stiffness, equals(120.0));
+      expect(physics.spring.damping, equals(14.0));
+
+      final metrics = FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -50.0,
+        viewportDimension: 400.0,
+        axisDirection: AxisDirection.right,
+        devicePixelRatio: 1.0,
+      );
+
+      final tolerance = physics.toleranceFor(metrics);
+      expect(tolerance.velocity, equals(700.0));
+
+      // Boundary overscroll damping
+      final dampedOffset = physics.applyPhysicsToUserOffset(metrics, -10.0);
+      expect(dampedOffset.abs(), lessThan(10.0));
+
+      // Out of range ballistic simulation springs back to edge
+      final sim = physics.createBallisticSimulation(metrics, 0.0);
+      expect(sim, isNotNull);
+      expect(sim, isA<ScrollSpringSimulation>());
+    });
   });
 }
