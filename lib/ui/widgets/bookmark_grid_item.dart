@@ -23,6 +23,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
   final VoidCallback? onSelectTapped;
   final bool forceBold;
   final bool showCollectionPill;
+  final bool enableFeedback;
 
   const BookmarkGridItem({
     super.key, 
@@ -32,6 +33,7 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
     this.onSelectTapped,
     this.forceBold = false,
     this.showCollectionPill = false,
+    this.enableFeedback = false,
   });
 
   @override
@@ -90,7 +92,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     final isBusy = isSaving || isRefreshing;
 
     return NeoPressable(
-      enableFeedback: true,
+      enableFeedback: widget.enableFeedback,
       onTap: () {
         if (isBusy) return;
         if (widget.isSelectMode) {
