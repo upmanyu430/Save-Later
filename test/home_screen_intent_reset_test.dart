@@ -161,7 +161,7 @@ void main() {
     expect(mockIntent.initialMedia, isEmpty);
 
     // Verify bookmark was saved from the intent URL
-    expect(find.text('Save Later'), findsOneWidget);
+    expect(find.text('Save to Save Later'), findsOneWidget);
     await tester.tap(find.widgetWithText(NeoButton, 'Save to "Unsorted"'));
     await tester.pumpAndSettle();
 
@@ -183,7 +183,7 @@ void main() {
 
     // Verify reset was called again
     expect(mockIntent.resetCount, 2);
-    expect(find.text('Save Later'), findsOneWidget);
+    expect(find.text('Save to Save Later'), findsOneWidget);
     await tester.tap(find.widgetWithText(NeoButton, 'Save to "Unsorted"'));
     await tester.pumpAndSettle();
 

@@ -228,10 +228,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
+                            const Expanded(
                               child: Text(
-                                l10n?.appName ?? 'Save Later',
-                                style: const TextStyle(
+                                'Save to Save Later',
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w900,
                                   color: AppTheme.border,
