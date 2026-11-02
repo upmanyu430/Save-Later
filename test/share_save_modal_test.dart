@@ -117,7 +117,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Title
-    expect(find.text('Save to Tuckii'), findsOneWidget);
+    expect(find.text('Save Later'), findsOneWidget);
 
     // Verify Shared URL
     expect(find.text('https://flutter.dev/sharing'), findsOneWidget);
