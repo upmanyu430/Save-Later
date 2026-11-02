@@ -9,12 +9,12 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/theme/app_theme.dart';
-import 'package:save_later/ui/widgets/move_to_collection_modal.dart';
+
 import 'package:save_later/ui/widgets/collection_editor_modal.dart';
 import 'package:save_later/ui/widgets/delete_confirmation_dialog.dart';
 import 'package:save_later/ui/widgets/moved_success_dialog.dart';
-import 'package:save_later/ui/widgets/no_url_dialog.dart';
-import 'package:save_later/ui/screens/collection_detail_screen.dart';
+
+
 import 'package:save_later/ui/screens/bookmark_detail_screen.dart';
 
 class FakeIsarRepository implements IsarRepository {

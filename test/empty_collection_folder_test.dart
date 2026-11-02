@@ -92,13 +92,11 @@ class MockEmptyCollectionRepo implements IsarRepository {
     bookmarks.removeWhere((b) => ids.contains(b.id));
   }
 
-  @override
   Future<void> clearAllData() async {
     collections.clear();
     bookmarks.clear();
   }
 
-  @override
   Future<List<String>> getAllTags() async => [];
 }
 

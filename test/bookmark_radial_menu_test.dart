@@ -9,7 +9,7 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/ui/widgets/bookmark_radial_menu.dart';
-import 'package:save_later/ui/widgets/pin_icon.dart';
+
 
 class _FakeIsarRepository implements IsarRepository {
   @override

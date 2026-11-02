@@ -104,7 +104,6 @@ class SubCollectionTestRepo implements IsarRepository {
     bookmarks.removeWhere((b) => bookmarkIds.contains(b.id));
   }
 
-  @override
   Future<List<String>> getAllTags() async => [];
 }
 

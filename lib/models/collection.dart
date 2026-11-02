@@ -36,6 +36,7 @@ class BookmarkCollection {
   /// Only Black (#1C1C1C) and Slate Blue/Purple (#6A5ACD) use white icons.
   /// All other colors use dark border-color (black) icons.
   static bool isWhiteIconColor(Color color) {
+    // ignore: deprecated_member_use
     final v = color.value & 0x00FFFFFF;
     return v == 0x1C1C1C || v == 0x6A5ACD;
   }

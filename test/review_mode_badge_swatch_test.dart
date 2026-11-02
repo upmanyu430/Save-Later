@@ -56,7 +56,6 @@ class FakeIsarRepository implements IsarRepository {
   @override
   Future<List<Bookmark>> getUnsortedBookmarks() async => bookmarks.toList();
 
-  @override
   Future<List<Bookmark>> getUnreadBookmarks() async =>
       bookmarks.where((b) => !b.isRead).toList();
 
@@ -65,7 +64,6 @@ class FakeIsarRepository implements IsarRepository {
     bookmarks.add(bookmark);
   }
 
-  @override
   Future<void> saveBookmark(Bookmark bookmark) async {
     final idx = bookmarks.indexWhere((b) => b.id == bookmark.id);
     if (idx >= 0) {

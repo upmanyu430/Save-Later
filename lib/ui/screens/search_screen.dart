@@ -707,7 +707,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         size: 40, color: Colors.black26),
                     const SizedBox(height: 8),
                     Text(
-                      'No bookmarks found with tag #${_selectedTagFilter}',
+                      'No bookmarks found with tag #$_selectedTagFilter',
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,

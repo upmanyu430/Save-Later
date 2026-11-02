@@ -339,7 +339,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                 if (isBusy)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withOpacity(0.5),
+                      color: Colors.black.withValues(alpha: 0.5),
                       alignment: Alignment.center,
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: isRefreshing ? 12 : 14, vertical: 7),
