@@ -636,6 +636,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
                         // Open Link Button
                         _OpenLinkButton(
+                          url: bookmark.url,
                           onPressed: () async {
                             await openUrl(bookmark.url, context: context);
                           },
@@ -1392,6 +1393,202 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
 
 
 
+
+class _OpenLinkButton extends StatefulWidget {
+  final String url;
+  final VoidCallback onPressed;
+
+  const _OpenLinkButton({
+    required this.url,
+    required this.onPressed,
+  });
+
+  @override
+  State<_OpenLinkButton> createState() => _OpenLinkButtonState();
+}
+
+class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+  Offset? _pointerDownPosition;
+  DateTime? _pointerDownTime;
+  bool _isPointerPressed = false;
+  bool _handledByPointer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 60),
+      reverseDuration: const Duration(milliseconds: 110),
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+      reverseCurve: Curves.easeOutBack,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    _isPointerPressed = true;
+    _handledByPointer = true;
+    _pointerDownPosition = event.position;
+    _pointerDownTime = DateTime.now();
+    HapticFeedback.lightImpact();
+    _controller.forward();
+  }
+
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_isPointerPressed) return;
+    if (_pointerDownPosition != null) {
+      final delta = (event.position - _pointerDownPosition!).distance;
+      if (delta > 14.0) {
+        _isPointerPressed = false;
+        _handledByPointer = false;
+        _controller.reverse();
+      }
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    if (!_isPointerPressed) return;
+    _isPointerPressed = false;
+
+    final elapsed = DateTime.now().difference(_pointerDownTime ?? DateTime.now());
+    final remainingHold = const Duration(milliseconds: 70) - elapsed;
+
+    if (remainingHold > Duration.zero) {
+      Future.delayed(remainingHold, () {
+        if (!mounted) return;
+        _controller.reverse().whenComplete(() {
+          if (mounted) {
+            _handledByPointer = false;
+            widget.onPressed();
+          }
+        });
+      });
+    } else {
+      _controller.reverse().whenComplete(() {
+        if (mounted) {
+          _handledByPointer = false;
+          widget.onPressed();
+        }
+      });
+    }
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _isPointerPressed = false;
+    _handledByPointer = false;
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final displayUrl = widget.url.replaceFirst(RegExp(r'^https?:\/\/', caseSensitive: false), '');
+
+    return Semantics(
+      button: true,
+      enabled: true,
+      label: l10n.openLink,
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: _onPointerDown,
+        onPointerMove: _onPointerMove,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (!_handledByPointer) {
+              _controller.forward().whenComplete(() {
+                if (!mounted) return;
+                _controller.reverse().whenComplete(() {
+                  if (mounted) {
+                    widget.onPressed();
+                  }
+                });
+              });
+            }
+          },
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              final t = _animation.value;
+              const shadowOffset = 2.0;
+              final currentOffset = t * shadowOffset;
+              final currentShadow = (1.0 - t).clamp(0.0, 1.0) * shadowOffset;
+              final scale = 1.0 - (t * 0.02);
+
+              return Transform.translate(
+                offset: Offset(currentOffset, currentOffset),
+                child: Transform.scale(
+                  scale: scale,
+                  child: NeoBox(
+                    color: const Color(0xFFFFD166), // Yellow
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppDimensions.paddingLg,
+                      vertical: 6.8,
+                    ),
+                    borderRadius: AppDimensions.radiusXl,
+                    shadowOffset: currentShadow,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.openLink,
+                                style: const TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              Text(
+                                displayUrl,
+                                style: const TextStyle(
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(5.0),
+                          decoration: const BoxDecoration(
+                            color: AppTheme.border,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_outward,
+                            color: Colors.white,
+                            size: 19.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _AddTagSheet extends ConsumerStatefulWidget {
   final ValueChanged<String> onSubmit;
