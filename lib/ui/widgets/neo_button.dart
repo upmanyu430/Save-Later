@@ -69,14 +69,8 @@ class _NeoButtonState extends State<NeoButton>
 
   void _handleTapUp(TapUpDetails details) {
     if (!_isEnabled) return;
-    _controller.forward().whenComplete(() {
-      if (!mounted) return;
-      _controller.reverse().whenComplete(() {
-        if (mounted) {
-          widget.onPressed?.call();
-        }
-      });
-    });
+    _controller.reverse();
+    widget.onPressed?.call();
   }
 
   void _handleTapCancel() {
