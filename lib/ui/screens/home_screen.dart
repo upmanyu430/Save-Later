@@ -14,6 +14,7 @@ import '../widgets/no_url_dialog.dart';
 import '../widgets/folder_box.dart';
 import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
+import '../widgets/share_save_modal.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 
@@ -60,10 +61,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
-  void _handleIncomingSharedText(String text) {
+  void _handleIncomingSharedText(String text) async {
     final extractedUrl = UrlHelper.extractUrl(text) ?? text.trim();
-    _urlController.text = extractedUrl;
-    _quickSave();
+    if (!UrlHelper.isValidUrl(extractedUrl)) {
+      showNoUrlDialog(context);
+      return;
+    }
+
+    _urlFocusNode.unfocus(disposition: UnfocusDisposition.scope);
+    SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+
+    final result = await ShareSaveModal.show(
+      context: context,
+      url: extractedUrl,
+    );
+
+    if (result != null && mounted) {
+      await SaveSuccessModal.show(context: context);
+
+      if (mounted) {
+        if (result.isUnsorted || result.collection == null) {
+          _pushRoute('/unsorted');
+        } else {
+          _pushRoute(
+            '/collection/${result.collection!.id}',
+            extra: result.collection,
+          );
+        }
+      }
+    }
+
   }
 
   @override
@@ -279,6 +306,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       color: AppTheme.accent, // Yellow button
                       onPressed: () {
                         _quickSave();
+                    
                       },
                       child: isSaving
                           ? const SizedBox(

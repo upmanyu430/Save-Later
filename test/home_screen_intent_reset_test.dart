@@ -161,6 +161,14 @@ void main() {
     expect(mockIntent.initialMedia, isEmpty);
 
     // Verify bookmark was saved from the intent URL
+    expect(find.text('Save to Tuckii'), findsOneWidget);
+    await tester.tap(find.widgetWithText(NeoButton, 'Save to "Unsorted"'));
+    await tester.pumpAndSettle();
+
+    // Dismiss success modal
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pumpAndSettle();
+
     expect(fakeRepo.bookmarks.any((b) => b.url == 'https://flutter.dev/shared-link'), isTrue);
 
     // Now emit media on stream while app is running
@@ -175,6 +183,14 @@ void main() {
 
     // Verify reset was called again
     expect(mockIntent.resetCount, 2);
+    expect(find.text('Save to Tuckii'), findsOneWidget);
+    await tester.tap(find.widgetWithText(NeoButton, 'Save to "Unsorted"'));
+    await tester.pumpAndSettle();
+
+    // Dismiss success modal
+    await tester.pump(const Duration(milliseconds: 1600));
+    await tester.pumpAndSettle();
+
     expect(fakeRepo.bookmarks.any((b) => b.url == 'https://dart.dev/stream-link'), isTrue);
 
     await streamController.close();

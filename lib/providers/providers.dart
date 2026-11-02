@@ -75,7 +75,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
   BookmarkNotifier(this.ref) : super(const AsyncValue.data(null));
 
-  Future<void> quickSave(String url, {BookmarkCollection? collection}) async {
+  Future<void> quickSave(String url, {BookmarkCollection? collection, bool isPinned = false}) async {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
@@ -94,7 +94,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         ..title = cleanUrl
         ..sourceDomain = initialDomain
         ..createdAt = DateTime.now()
-        ..isRead = false;
+        ..isRead = false
+        ..isPinned = isPinned;
 
       if (collection != null) {
         bookmark.collection.value = collection;
