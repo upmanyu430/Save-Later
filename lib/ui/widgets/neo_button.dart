@@ -38,19 +38,26 @@ class _NeoButtonState extends State<NeoButton>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
+  Offset? _pointerDownPosition;
+  DateTime? _pointerDownTime;
+  bool _isPointerPressed = false;
+  bool _handledByPointer = false;
+
   bool get _isEnabled => widget.onPressed != null;
 
   @override
   void initState() {
     super.initState();
+    // Emil Kowalski Design Engineering: Snappy 60ms press-down, 110ms spring release.
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 70),
-      reverseDuration: const Duration(milliseconds: 140),
+      duration: const Duration(milliseconds: 60),
+      reverseDuration: const Duration(milliseconds: 110),
     );
+    // Never use easeIn for UI animations (starts slow/sluggish). Use easeOut for instant responsiveness.
     _animation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeIn,
+      curve: Curves.easeOut,
       reverseCurve: Curves.easeOutBack,
     );
   }
@@ -61,20 +68,58 @@ class _NeoButtonState extends State<NeoButton>
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _onPointerDown(PointerDownEvent event) {
     if (!_isEnabled) return;
+    _isPointerPressed = true;
+    _handledByPointer = true;
+    _pointerDownPosition = event.position;
+    _pointerDownTime = DateTime.now();
     HapticFeedback.lightImpact();
     _controller.forward();
   }
 
-  void _handleTapUp(TapUpDetails details) {
-    if (!_isEnabled) return;
-    _controller.reverse();
-    widget.onPressed?.call();
+  void _onPointerMove(PointerMoveEvent event) {
+    if (!_isPointerPressed) return;
+    if (_pointerDownPosition != null) {
+      final delta = (event.position - _pointerDownPosition!).distance;
+      if (delta > 14.0) {
+        _isPointerPressed = false;
+        _handledByPointer = false;
+        _controller.reverse();
+      }
+    }
   }
 
-  void _handleTapCancel() {
-    if (!_isEnabled) return;
+  void _onPointerUp(PointerUpEvent event) {
+    if (!_isPointerPressed) return;
+    _isPointerPressed = false;
+
+    final elapsed = DateTime.now().difference(_pointerDownTime ?? DateTime.now());
+    final remainingHold = const Duration(milliseconds: 70) - elapsed;
+
+    if (remainingHold > Duration.zero) {
+      Future.delayed(remainingHold, () {
+        if (!mounted) return;
+        _controller.reverse().whenComplete(() {
+          if (mounted) {
+            _handledByPointer = false;
+            widget.onPressed?.call();
+          }
+        });
+      });
+    } else {
+      _controller.reverse().whenComplete(() {
+        if (mounted) {
+          _handledByPointer = false;
+          widget.onPressed?.call();
+        }
+      });
+    }
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _isPointerPressed = false;
+    _handledByPointer = false;
     _controller.reverse();
   }
 
@@ -82,55 +127,74 @@ class _NeoButtonState extends State<NeoButton>
   Widget build(BuildContext context) {
     return Opacity(
       opacity: _isEnabled ? 1.0 : 0.5,
-      child: GestureDetector(
+      child: Listener(
         behavior: HitTestBehavior.opaque,
-        onTapDown: _isEnabled ? _handleTapDown : null,
-        onTapUp: _isEnabled ? _handleTapUp : null,
-        onTapCancel: _isEnabled ? _handleTapCancel : null,
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (context, child) {
-            final t = _animation.value;
-            final baseOffset = widget.customShadowOffset ??
-                Offset(widget.shadowOffset, widget.shadowOffset);
-            final hasShadow = baseOffset.dx != 0 || baseOffset.dy != 0;
-            final pressOffset = baseOffset * t;
-            final currentShadow = baseOffset * (1.0 - t).clamp(0.0, 1.0);
-            final scale = 1.0 - (t * 0.04);
+        onPointerDown: _isEnabled ? _onPointerDown : null,
+        onPointerMove: _isEnabled ? _onPointerMove : null,
+        onPointerUp: _isEnabled ? _onPointerUp : null,
+        onPointerCancel: _isEnabled ? _onPointerCancel : null,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _isEnabled
+              ? () {
+                  if (!_handledByPointer) {
+                    _controller.forward().whenComplete(() {
+                      if (!mounted) return;
+                      _controller.reverse().whenComplete(() {
+                        if (mounted) {
+                          widget.onPressed?.call();
+                        }
+                      });
+                    });
+                  }
+                }
+              : null,
+          child: AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              final t = _animation.value;
+              final baseOffset = widget.customShadowOffset ??
+                  Offset(widget.shadowOffset, widget.shadowOffset);
+              final hasShadow = baseOffset.dx != 0 || baseOffset.dy != 0;
+              final pressOffset = baseOffset * t;
+              final currentShadow = baseOffset * (1.0 - t).clamp(0.0, 1.0);
+              // Subtle scale (0.97 at peak press) per Emil Kowalski's guidelines
+              final scale = 1.0 - (t * 0.03);
 
-            return Transform.translate(
-              offset: pressOffset,
-              child: Transform.scale(
-                scale: scale,
-                child: Container(
-                  padding: widget.padding,
-                  decoration: BoxDecoration(
-                    color: widget.color,
-                    borderRadius: BorderRadius.circular(widget.borderRadius),
-                    border: Border.all(
-                      color: widget.borderColor ?? AppTheme.border,
-                      width: widget.borderWidth,
+              return Transform.translate(
+                offset: pressOffset,
+                child: Transform.scale(
+                  scale: scale,
+                  child: Container(
+                    padding: widget.padding,
+                    decoration: BoxDecoration(
+                      color: widget.color,
+                      borderRadius: BorderRadius.circular(widget.borderRadius),
+                      border: Border.all(
+                        color: widget.borderColor ?? AppTheme.border,
+                        width: widget.borderWidth,
+                      ),
+                      boxShadow: hasShadow
+                          ? [
+                              BoxShadow(
+                                color: widget.shadowColor ?? AppTheme.border,
+                                offset: currentShadow,
+                                blurRadius: 0,
+                                spreadRadius: 0,
+                              ),
+                            ]
+                          : null,
                     ),
-                    boxShadow: hasShadow
-                        ? [
-                            BoxShadow(
-                              color: widget.shadowColor ?? AppTheme.border,
-                              offset: currentShadow,
-                              blurRadius: 0,
-                              spreadRadius: 0,
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Center(
-                    widthFactor: 1.0,
-                    heightFactor: 1.0,
-                    child: widget.child,
+                    child: Center(
+                      widthFactor: 1.0,
+                      heightFactor: 1.0,
+                      child: widget.child,
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
