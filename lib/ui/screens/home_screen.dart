@@ -61,6 +61,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  static const _appControlChannel = MethodChannel('app.savelater/app_control');
+
+  Future<void> _returnToPreviousApp() async {
+    try {
+      await _appControlChannel.invokeMethod('returnToPreviousApp');
+    } catch (_) {
+      try {
+        await SystemNavigator.pop();
+      } catch (_) {}
+    }
+  }
+
   void _handleIncomingSharedText(String text) async {
     final extractedUrl = UrlHelper.extractUrl(text) ?? text.trim();
     if (!UrlHelper.isValidUrl(extractedUrl)) {
@@ -80,15 +92,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       await SaveSuccessModal.show(context: context);
 
       if (mounted) {
-        if (result.isUnsorted || result.collection == null) {
-          _pushRoute('/unsorted');
-        } else {
-          _pushRoute(
-            '/collection/${result.collection!.id}',
-            extra: result.collection,
-          );
-        }
+        await _returnToPreviousApp();
       }
+    } else if (mounted) {
+      await _returnToPreviousApp();
     }
 
   }
