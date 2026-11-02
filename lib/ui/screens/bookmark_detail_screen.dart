@@ -635,54 +635,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: AppDimensions.paddingMd),
 
                         // Open Link Button
-                        NeoPressable(
-                          onTap: () async {
+                        _OpenLinkButton(
+                          onPressed: () async {
                             await openUrl(bookmark.url, context: context);
-                          },
-                          shadowOffset: 2.0,
-                          scaleSquash: 0.02,
-                          builder: (context, t, shadowOffset) {
-                            return NeoBox(
-                              color: const Color(0xFFFFD166), // Yellow
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: AppDimensions.paddingLg,
-                                vertical: 6.8,
-                              ),
-                              borderRadius: AppDimensions.radiusXl,
-                              shadowOffset: shadowOffset,
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          l10n.openLink,
-                                          style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.w800),
-                                        ),
-                                        Text(
-                                          bookmark.url.replaceFirst(RegExp(r'^https?:\/\/', caseSensitive: false), ''),
-                                          style: const TextStyle(
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.all(5.0),
-                                    decoration: const BoxDecoration(
-                                      color: AppTheme.border,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.arrow_outward, color: Colors.white, size: 19.0),
-                                  ),
-                                ],
-                              ),
-                            );
                           },
                         ),
                         const SizedBox(height: AppDimensions.paddingMd),

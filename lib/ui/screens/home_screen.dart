@@ -88,9 +88,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _urlController.clear();
     FocusScope.of(context).unfocus();
     await ref.read(bookmarkNotifierProvider.notifier).quickSave(url);
-    if (mounted) {
-      _pushRoute('/unsorted');
-    }
   }
 
   void _showAddCollectionModal() {
