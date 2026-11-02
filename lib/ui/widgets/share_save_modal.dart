@@ -16,11 +16,13 @@ class ShareSaveResult {
   final BookmarkCollection? collection;
   final bool isUnsorted;
   final bool isPinned;
+  final double? modalHeight;
 
   const ShareSaveResult({
     this.collection,
     required this.isUnsorted,
     required this.isPinned,
+    this.modalHeight,
   });
 }
 
@@ -55,6 +57,7 @@ class ShareSaveModal extends ConsumerStatefulWidget {
 }
 
 class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
+  final GlobalKey _cardKey = GlobalKey();
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = true;
   bool _isPinned = false;
@@ -76,6 +79,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
     HapticFeedback.mediumImpact();
 
     final targetCollection = _isUnsortedSelected ? null : _selectedCollection;
+    final measuredHeight = _cardKey.currentContext?.size?.height;
 
     try {
       if (widget.onSave != null) {
@@ -93,6 +97,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
         collection: targetCollection,
         isUnsorted: _isUnsortedSelected,
         isPinned: _isPinned,
+        modalHeight: measuredHeight,
       ));
     } catch (e) {
       if (mounted) {
@@ -195,6 +200,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
                 child: Container(
+                  key: _cardKey,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(55),
@@ -514,15 +520,18 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
 
 class SaveSuccessModal extends StatefulWidget {
   final Duration autoDismissDuration;
+  final double? targetHeight;
 
   const SaveSuccessModal({
     super.key,
     this.autoDismissDuration = const Duration(milliseconds: 1500),
+    this.targetHeight,
   });
 
   static Future<void> show({
     required BuildContext context,
     Duration autoDismissDuration = const Duration(milliseconds: 1500),
+    double? targetHeight,
   }) async {
     return showModalBottomSheet<void>(
       context: context,
@@ -530,6 +539,7 @@ class SaveSuccessModal extends StatefulWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => SaveSuccessModal(
         autoDismissDuration: autoDismissDuration,
+        targetHeight: targetHeight,
       ),
     );
   }
@@ -559,6 +569,9 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
 
   @override
   Widget build(BuildContext context) {
+    final effectiveHeight =
+        widget.targetHeight ?? (MediaQuery.sizeOf(context).height * 0.55);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -576,8 +589,13 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
           child: Align(
             alignment: Alignment.bottomCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: BoxConstraints(
+                maxWidth: 420,
+                minHeight: effectiveHeight,
+                maxHeight: effectiveHeight,
+              ),
               child: Container(
+                height: effectiveHeight,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(55),
@@ -599,18 +617,19 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                         child: Container(
                           width: 48,
                           height: 4,
-                          margin: const EdgeInsets.only(bottom: 28),
+                          margin: const EdgeInsets.only(bottom: 24),
                           decoration: BoxDecoration(
                             color: AppTheme.border,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 36),
 
                       // Green Circle Check Badge
                       Container(
-                        width: 82,
-                        height: 82,
+                        width: 94,
+                        height: 94,
                         decoration: BoxDecoration(
                           color: const Color(0xFF00D287),
                           shape: BoxShape.circle,
@@ -621,7 +640,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                           boxShadow: const [
                             BoxShadow(
                               color: AppTheme.border,
-                              offset: Offset(2.8, 2.8),
+                              offset: Offset(3.0, 3.0),
                               blurRadius: 0,
                               spreadRadius: 0,
                             ),
@@ -630,10 +649,10 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                         child: const Icon(
                           Icons.check,
                           color: Colors.white,
-                          size: 44,
+                          size: 50,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
 
                       // Title
                       const Text(
@@ -645,7 +664,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                           letterSpacing: -0.5,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 8),
 
                       // Subtitle
                       const Text(

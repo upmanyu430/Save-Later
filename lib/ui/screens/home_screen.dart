@@ -89,7 +89,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
 
     if (result != null && mounted) {
-      await SaveSuccessModal.show(context: context);
+      await SaveSuccessModal.show(
+        context: context,
+        targetHeight: result.modalHeight,
+      );
 
       if (mounted) {
         await _returnToPreviousApp();
