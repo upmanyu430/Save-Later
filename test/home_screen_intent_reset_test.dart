@@ -12,6 +12,7 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/screens/home_screen.dart';
+import 'package:save_later/ui/widgets/neo_button.dart';
 
 class TestReceiveSharingIntent extends ReceiveSharingIntent {
   final List<SharedMediaFile> initialMedia;
@@ -175,6 +176,46 @@ void main() {
     // Verify reset was called again
     expect(mockIntent.resetCount, 2);
     expect(fakeRepo.bookmarks.any((b) => b.url == 'https://dart.dev/stream-link'), isTrue);
+
+    await streamController.close();
+  });
+
+  testWidgets('Quick saving a URL navigates to /unsorted folder', (tester) async {
+    final streamController = StreamController<List<SharedMediaFile>>.broadcast();
+    final mockIntent = TestReceiveSharingIntent(
+      initialMedia: [],
+      streamController: streamController,
+    );
+    ReceiveSharingIntent.instance = mockIntent;
+
+    final fakeRepo = FakeIsarRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+          collectionsProvider.overrideWith((ref) => Future.value([])),
+        ],
+        child: buildTestApp(
+          home: const HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Enter a URL
+    final textFieldFinder = find.byType(TextField);
+    await tester.enterText(textFieldFinder, 'https://flutter.dev/docs');
+    await tester.pumpAndSettle();
+
+    // Tap the quick save (+) NeoButton
+    final saveButtonFinder = find.widgetWithIcon(NeoButton, Icons.add);
+    await tester.tap(saveButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Verify it navigated to /unsorted
+    expect(find.text('Unsorted Screen'), findsOneWidget);
+    expect(fakeRepo.bookmarks.any((b) => b.url == 'https://flutter.dev/docs'), isTrue);
 
     await streamController.close();
   });
