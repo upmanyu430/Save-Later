@@ -402,9 +402,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 // Top Custom App Bar
                 Padding(
                   padding: const EdgeInsets.fromLTRB(
-                    AppDimensions.paddingXl,
                     AppDimensions.paddingLg,
-                    AppDimensions.paddingXl,
+                    AppDimensions.paddingLg,
+                    AppDimensions.paddingLg,
                     AppDimensions.paddingSm,
                   ),
                   child: _isSelectMode
@@ -504,7 +504,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 Expanded(
                   child: LayoutBuilder(
                           builder: (context, constraints) {
-                            const horizontalPadding = AppDimensions.paddingXl * 2;
+                            const horizontalPadding = AppDimensions.paddingLg * 2;
                             const maxCrossAxisExtent = 200.0;
                             const crossAxisSpacing = AppDimensions.gridSpacingMd;
                             const desiredBookmarkCardHeight =
@@ -550,7 +550,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: AppDimensions.paddingXl,
+                                        horizontal: AppDimensions.paddingLg,
                                         vertical: AppDimensions.paddingSm,
                                       ),
                                       child: Text(
@@ -565,9 +565,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   ),
                                   SliverPadding(
                                     padding: const EdgeInsets.fromLTRB(
-                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingLg,
                                       AppDimensions.paddingSm,
-                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingLg,
                                       0,
                                     ),
                                     sliver: SliverGrid(
@@ -609,11 +609,11 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: EdgeInsets.fromLTRB(
-                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingLg,
                                         subCollections.isNotEmpty
                                             ? AppDimensions.paddingMd
                                             : AppDimensions.paddingSm,
-                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingLg,
                                         AppDimensions.paddingSm,
                                       ),
                                       child: Text(
@@ -628,9 +628,9 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   ),
                                   SliverPadding(
                                     padding: const EdgeInsets.fromLTRB(
-                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingLg,
                                       AppDimensions.paddingSm,
-                                      AppDimensions.paddingXl,
+                                      AppDimensions.paddingLg,
                                       0,
                                     ),
                                     sliver: SliverGrid(
@@ -651,11 +651,11 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   SliverToBoxAdapter(
                                     child: Padding(
                                       padding: EdgeInsets.fromLTRB(
-                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingLg,
                                         (pinnedBookmarks.isNotEmpty || subCollections.isNotEmpty)
                                             ? AppDimensions.paddingMd
                                             : AppDimensions.paddingSm,
-                                        AppDimensions.paddingXl,
+                                        AppDimensions.paddingLg,
                                         AppDimensions.paddingSm,
                                       ),
                                       child: Text(

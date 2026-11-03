@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 maxWidth: AppDimensions.maxContentWidth),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.paddingXl,
+                  horizontal: AppDimensions.paddingLg,
                   vertical: AppDimensions.paddingLg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
