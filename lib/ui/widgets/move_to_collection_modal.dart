@@ -485,23 +485,28 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                   buttonLabel = 'Move to Collection';
                                 }
 
-                                return NeoButton(
-                                  onPressed: isEnabled
-                                      ? () => _handleMove(_isUnsortedSelected ? null : _selectedCollection)
-                                      : null,
-                                  color: const Color(0xFFFFD166),
-                                  borderWidth: 2.5,
-                                  borderRadius: 12.0,
-                                  shadowOffset: 2.5,
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  child: Text(
-                                    buttonLabel,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppTheme.border,
+                                return SizedBox(
+                                  height: 48.0,
+                                  width: double.infinity,
+                                  child: NeoButton(
+                                    onPressed: isEnabled
+                                        ? () => _handleMove(_isUnsortedSelected ? null : _selectedCollection)
+                                        : null,
+                                    color: const Color(0xFFFFD166),
+                                    padding: EdgeInsets.zero,
+                                    borderRadius: AppDimensions.radiusMd,
+                                    shadowOffset: 2.0,
+                                    child: Center(
+                                      child: Text(
+                                        buttonLabel,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppTheme.border,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 );
