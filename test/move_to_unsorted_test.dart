@@ -1,3 +1,4 @@
+import 'package:save_later/ui/widgets/collection_editor_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -463,6 +464,40 @@ void main() {
 
       await container.read(bookmarkNotifierProvider.notifier).removeBookmarksFromCollection([b2]);
       expect(b2.collection.value, isNull);
+    });
+    testWidgets('MoveToCollectionModal has exact height matching CollectionEditorModal collapsed height', (tester) async {
+      final repo = MockMoveRepository();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+          child: _buildTestApp(
+            Builder(
+              builder: (context) {
+                return Column(
+                  children: [
+                    Expanded(
+                      child: MoveToCollectionModal(
+                        bookmark: Bookmark()..id = 1..url = 'https://flutter.dev'..title = 'Flutter',
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final cardFinder = find.byKey(const ValueKey('move_to_collection_modal_sheet'));
+      final cardSize = tester.getSize(cardFinder);
+      final context = tester.element(cardFinder);
+      final expected = CollectionEditorModal.getCollapsedModalHeight(context);
+      expect(cardSize.height, closeTo(expected, 0.01));
     });
   });
 }
