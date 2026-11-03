@@ -295,5 +295,37 @@ void main() {
     final starIcon = tester.widget<Icon>(find.byIcon(Icons.star_outline));
     expect(starIcon.color, AppTheme.border, reason: 'Unselected icon must have border color');
   });
-}
+  testWidgets('Drag handle and header are pinned outside SingleChildScrollView and stay fixed on scroll', (tester) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        child: const Scaffold(
+          body: CollectionEditorModal(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
 
+    // Verify header title and close button are NOT inside SingleChildScrollView
+    final scrollFinder = find.byType(SingleChildScrollView);
+    expect(scrollFinder, findsOneWidget);
+    expect(
+      find.descendant(of: scrollFinder, matching: find.byIcon(Icons.close)),
+      findsNothing,
+    );
+    expect(
+      find.descendant(of: scrollFinder, matching: find.text('Add new collection')),
+      findsNothing,
+    );
+
+    // Initial position of header
+    final headerPosBefore = tester.getTopLeft(find.text('Add new collection'));
+
+    // Scroll the content
+    await tester.drag(scrollFinder, const Offset(0, -200));
+    await tester.pumpAndSettle();
+
+    // Header position must remain completely identical
+    final headerPosAfter = tester.getTopLeft(find.text('Add new collection'));
+    expect(headerPosAfter, equals(headerPosBefore));
+  });
+}
