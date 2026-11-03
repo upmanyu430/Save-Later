@@ -292,7 +292,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: _isPinned
                                   ? const Color(0xFFFFF4D0)
