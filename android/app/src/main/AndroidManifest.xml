@@ -29,7 +29,7 @@
             </intent-filter>
 
             <!-- Receive text (URLs) -->
-            <intent-filter>
+            <intent-filter android:label="Save to Save Later">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
