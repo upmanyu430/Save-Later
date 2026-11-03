@@ -265,12 +265,17 @@ void main() {
       reason: 'Drag handle must be pinned outside SingleChildScrollView',
     );
 
-    // Save button is pinned outside SingleChildScrollView
+    // Save button is pinned outside SingleChildScrollView and has exact height 48.0
+    final saveButtonFinder = find.widgetWithText(NeoButton, 'Save to "Unsorted"');
     expect(
-      find.descendant(of: scrollFinder, matching: find.widgetWithText(NeoButton, 'Save to "Unsorted"')),
+      find.descendant(of: scrollFinder, matching: saveButtonFinder),
       findsNothing,
       reason: 'Save button must be pinned outside SingleChildScrollView at bottom',
     );
+    final saveButtonSizedBox = tester.widget<SizedBox>(
+      find.ancestor(of: saveButtonFinder, matching: find.byType(SizedBox)).first,
+    );
+    expect(saveButtonSizedBox.height, 48.0);
 
     // Header and Pin row ARE inside SingleChildScrollView
     expect(
