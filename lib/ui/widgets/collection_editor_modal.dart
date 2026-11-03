@@ -205,67 +205,18 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Pinned Drag Handle & Header Section
+                    // Pinned Drag Handle ONLY
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(18.0, 12.0, 18.0, 0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Drag handle
-                          Center(
-                            child: Container(
-                              width: 44,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: AppTheme.border,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            ),
+                      padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                      child: Center(
+                        child: Container(
+                          width: 44,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppTheme.border,
+                            borderRadius: BorderRadius.circular(2),
                           ),
-                          const SizedBox(height: 14),
-
-                          // Header
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  isEditing
-                                      ? AppLocalizations.of(context)!
-                                          .editCollection
-                                      : (widget.parentId != null
-                                          ? AppLocalizations.of(context)!
-                                              .newSubCollection
-                                          : AppLocalizations.of(context)!
-                                              .newCollection),
-                                  style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              const SizedBox(width: AppDimensions.paddingSm),
-                              SizedBox(
-                                width: 32,
-                                height: 32,
-                                child: NeoButton(
-                                  onPressed: () {
-                                    if (Navigator.canPop(context)) {
-                                      Navigator.pop(context);
-                                    }
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  color: Colors.white,
-                                  borderWidth: 2,
-                                  borderRadius: AppDimensions.radiusSm,
-                                  shadowOffset: 0,
-                                  child: const Icon(Icons.close, size: 18),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                     Flexible(
@@ -278,7 +229,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         child: SingleChildScrollView(
                           padding: EdgeInsets.fromLTRB(
                             18.0,
-                            10.0,
+                            8.0,
                             18.0,
                             bottomInset > 0
                                 ? (14.0 + bottomInset)
@@ -288,6 +239,49 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
+                              // Header
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      isEditing
+                                          ? AppLocalizations.of(context)!
+                                              .editCollection
+                                          : (widget.parentId != null
+                                              ? AppLocalizations.of(context)!
+                                                  .newSubCollection
+                                              : AppLocalizations.of(context)!
+                                                  .newCollection),
+                                      style: const TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      width: AppDimensions.paddingSm),
+                                  SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: NeoButton(
+                                      onPressed: () {
+                                        if (Navigator.canPop(context)) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      color: Colors.white,
+                                      borderWidth: 2,
+                                      borderRadius: AppDimensions.radiusSm,
+                                      shadowOffset: 0,
+                                      child: const Icon(Icons.close, size: 18),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
                               // Name Field
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
