@@ -545,6 +545,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             final unpinnedBookmarks = bookmarks.where((b) => !b.isPinned).toList();
 
                             return CustomScrollView(
+                              clipBehavior: Clip.none,
                               slivers: [
                                 if (subCollections.isNotEmpty) ...[
                                   SliverToBoxAdapter(

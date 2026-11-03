@@ -364,6 +364,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             columnCount;
 
                         return GridView.builder(
+                          clipBehavior: Clip.none,
                           padding: EdgeInsets.only(bottom: bottomInset),
                           gridDelegate:
                               SliverGridDelegateWithMaxCrossAxisExtent(

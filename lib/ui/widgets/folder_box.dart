@@ -40,7 +40,7 @@ class FolderBox extends StatelessWidget {
     this.onLongPressMoveUpdate,
     this.onLongPressEnd,
     this.onLongPressCancel,
-    this.shadowOffset = 3.5,
+    this.shadowOffset = 2.5,
     this.isInteractive = true,
     this.enableFeedback = false,
   });
@@ -67,7 +67,7 @@ class FolderBox extends StatelessWidget {
           padding: const EdgeInsets.all(AppDimensions.paddingLg),
           decoration: BoxDecoration(
             color: AppTheme.cardColor,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             border: Border.all(
               color: AppTheme.border,
               width: AppDimensions.borderWidthMd,
@@ -187,8 +187,8 @@ class FolderBox extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: folderColor,
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(14),
-                          topRight: Radius.circular(14),
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
                         ),
                         border: Border.all(
                           color: AppTheme.border,
