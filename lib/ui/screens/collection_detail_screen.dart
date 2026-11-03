@@ -525,6 +525,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
                             Widget buildGridItem(Bookmark b) {
                               return BookmarkGridItem(
+                                key: ValueKey('bookmark_${b.id}'),
                                 bookmark: b,
                                 isSelectMode: _isSelectMode,
                                 isSelected: _selectedIds.contains(b.id),

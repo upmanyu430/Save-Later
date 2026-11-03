@@ -93,20 +93,21 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
 
     return NeoPressable(
       enableFeedback: widget.enableFeedback,
-      onTap: () {
-        if (isBusy) return;
-        if (widget.isSelectMode) {
-          if (widget.onSelectTapped != null) widget.onSelectTapped!();
-        } else {
-          // Defer markAsRead so it does not trigger Riverpod provider invalidation during the animation
-          Future.delayed(const Duration(milliseconds: 400), () {
-            if (mounted) {
-              ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
-            }
-          });
-          context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
-        }
-      },
+      onTap: isBusy
+          ? null
+          : () {
+              if (widget.isSelectMode) {
+                if (widget.onSelectTapped != null) widget.onSelectTapped!();
+              } else {
+                // Defer markAsRead so it does not trigger Riverpod provider invalidation during the animation
+                Future.delayed(const Duration(milliseconds: 400), () {
+                  if (mounted) {
+                    ref.read(bookmarkNotifierProvider.notifier).markAsRead(widget.bookmark);
+                  }
+                });
+                context.push('/bookmark/${widget.bookmark.id}', extra: widget.bookmark);
+              }
+            },
       onLongPressStart: isBusy ? null : _handleLongPressStart,
       onLongPressMoveUpdate: isBusy ? null : _handleLongPressMoveUpdate,
       onLongPressEnd: isBusy ? null : _handleLongPressEnd,

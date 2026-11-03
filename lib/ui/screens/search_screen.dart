@@ -250,6 +250,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       height: AppDimensions.gridBookmarkCardHeight,
       margin: const EdgeInsets.only(right: AppDimensions.gridSpacingMd),
       child: BookmarkGridItem(
+        key: ValueKey('recent_bookmark_${bookmark.id}'),
         bookmark: bookmark,
         showCollectionPill: true,
       ),
@@ -409,6 +410,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           itemBuilder: (context, index) {
             final b = allBookmarks[index];
             return BookmarkGridItem(
+              key: ValueKey('all_bookmark_${b.id}'),
               bookmark: b,
               showCollectionPill: true,
             );
@@ -491,6 +493,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             itemBuilder: (context, index) {
               final b = pinned[index];
               return BookmarkGridItem(
+                key: ValueKey('pinned_bookmark_${b.id}'),
                 bookmark: b,
                 showCollectionPill: true,
               );
@@ -732,6 +735,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               itemBuilder: (context, index) {
                 final b = matchingBookmarks[index];
                 return BookmarkGridItem(
+                  key: ValueKey('tag_bookmark_${b.id}'),
                   bookmark: b,
                   showCollectionPill: true,
                 );
@@ -899,6 +903,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           itemBuilder: (context, index) {
             final b = results[index];
             return BookmarkGridItem(
+              key: ValueKey('search_bookmark_${b.id}'),
               bookmark: b,
               showCollectionPill: true,
             );

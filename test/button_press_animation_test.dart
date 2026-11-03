@@ -168,5 +168,43 @@ void main() {
 
       expect(tapped, isFalse);
     });
+
+    testWidgets('reliably triggers onTap even with finger micro-movement during touch', (tester) async {
+      bool tapped = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: NeoPressable(
+                onTap: () => tapped = true,
+                builder: (context, t, shadow) {
+                  return Container(
+                    width: 150,
+                    height: 100,
+                    color: Colors.blue,
+                    child: const Text('Micro-move Pressable'),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final finder = find.text('Micro-move Pressable');
+      final gesture = await tester.startGesture(tester.getCenter(finder));
+      await tester.pump(const Duration(milliseconds: 20));
+
+      // Simulate human thumb centroid shifting 15px (which used to be cancelled by 14px threshold)
+      await gesture.moveBy(const Offset(5, 14));
+      await tester.pump(const Duration(milliseconds: 20));
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(tapped, isTrue);
+    });
   });
 }

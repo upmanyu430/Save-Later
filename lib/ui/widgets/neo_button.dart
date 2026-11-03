@@ -39,9 +39,6 @@ class _NeoButtonState extends State<NeoButton>
   late final AnimationController _controller;
   late final Animation<double> _animation;
   Offset? _pointerDownPosition;
-  DateTime? _pointerDownTime;
-  bool _isPointerPressed = false;
-  bool _handledByPointer = false;
 
   bool get _isEnabled => widget.onPressed != null;
 
@@ -70,56 +67,33 @@ class _NeoButtonState extends State<NeoButton>
 
   void _onPointerDown(PointerDownEvent event) {
     if (!_isEnabled) return;
-    _isPointerPressed = true;
-    _handledByPointer = true;
     _pointerDownPosition = event.position;
-    _pointerDownTime = DateTime.now();
     HapticFeedback.lightImpact();
     _controller.forward();
   }
 
   void _onPointerMove(PointerMoveEvent event) {
-    if (!_isPointerPressed) return;
     if (_pointerDownPosition != null) {
       final delta = (event.position - _pointerDownPosition!).distance;
-      if (delta > 14.0) {
-        _isPointerPressed = false;
-        _handledByPointer = false;
+      if (delta > 20.0) {
         _controller.reverse();
       }
     }
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    if (!_isPointerPressed) return;
-    _isPointerPressed = false;
-
-    final elapsed = DateTime.now().difference(_pointerDownTime ?? DateTime.now());
-    final remainingHold = const Duration(milliseconds: 70) - elapsed;
-
-    if (remainingHold > Duration.zero) {
-      Future.delayed(remainingHold, () {
-        if (!mounted) return;
-        _controller.reverse().whenComplete(() {
-          if (mounted) {
-            _handledByPointer = false;
-            widget.onPressed?.call();
-          }
-        });
-      });
-    } else {
-      _controller.reverse().whenComplete(() {
-        if (mounted) {
-          _handledByPointer = false;
-          widget.onPressed?.call();
-        }
-      });
-    }
+  void _onPointerCancel(PointerCancelEvent event) {
+    _pointerDownPosition = null;
+    _controller.reverse();
   }
 
-  void _onPointerCancel(PointerCancelEvent event) {
-    _isPointerPressed = false;
-    _handledByPointer = false;
+  void _handleTap() {
+    _pointerDownPosition = null;
+    _controller.reverse();
+    widget.onPressed?.call();
+  }
+
+  void _handleTapCancel() {
+    _pointerDownPosition = null;
     _controller.reverse();
   }
 
@@ -131,24 +105,18 @@ class _NeoButtonState extends State<NeoButton>
         behavior: HitTestBehavior.opaque,
         onPointerDown: _isEnabled ? _onPointerDown : null,
         onPointerMove: _isEnabled ? _onPointerMove : null,
-        onPointerUp: _isEnabled ? _onPointerUp : null,
         onPointerCancel: _isEnabled ? _onPointerCancel : null,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: _isEnabled
-              ? () {
-                  if (!_handledByPointer) {
-                    _controller.forward().whenComplete(() {
-                      if (!mounted) return;
-                      _controller.reverse().whenComplete(() {
-                        if (mounted) {
-                          widget.onPressed?.call();
-                        }
-                      });
-                    });
+          onTapDown: _isEnabled
+              ? (_) {
+                  if (!_controller.isAnimating && _controller.value == 0.0) {
+                    _controller.forward();
                   }
                 }
               : null,
+          onTap: _isEnabled ? _handleTap : null,
+          onTapCancel: _isEnabled ? _handleTapCancel : null,
           child: AnimatedBuilder(
             animation: _animation,
             builder: (context, child) {

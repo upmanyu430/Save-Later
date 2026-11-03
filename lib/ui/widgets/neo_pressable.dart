@@ -35,10 +35,6 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
   late final AnimationController _controller;
   late final Animation<double> _animation;
   Offset? _pointerDownPosition;
-  DateTime? _pointerDownTime;
-  bool _isPointerPressed = false;
-  bool _handledByPointer = false;
-  bool _isLongPressed = false;
 
   bool get _isPressable => widget.onTap != null || widget.onLongPressStart != null;
 
@@ -66,12 +62,8 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
   }
 
   void _onPointerDown(PointerDownEvent event) {
-    if (widget.onTap == null) return;
-    _isPointerPressed = true;
-    _handledByPointer = true;
-    _isLongPressed = false;
+    if (!_isPressable) return;
     _pointerDownPosition = event.position;
-    _pointerDownTime = DateTime.now();
     if (widget.enableFeedback) {
       HapticFeedback.lightImpact();
     }
@@ -79,55 +71,34 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
   }
 
   void _onPointerMove(PointerMoveEvent event) {
-    if (!_isPointerPressed) return;
     if (_pointerDownPosition != null) {
       final delta = (event.position - _pointerDownPosition!).distance;
-      if (delta > 14.0) {
-        _isPointerPressed = false;
-        _handledByPointer = false;
+      // Spring back up if finger drags beyond threshold (e.g. scroll gesture)
+      if (delta > 20.0) {
         _controller.reverse();
       }
     }
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    if (!_isPointerPressed || _isLongPressed) return;
-    _isPointerPressed = false;
-
-    final elapsed = DateTime.now().difference(_pointerDownTime ?? DateTime.now());
-    final remainingHold = const Duration(milliseconds: 70) - elapsed;
-
-    if (remainingHold > Duration.zero) {
-      Future.delayed(remainingHold, () {
-        if (!mounted || _isLongPressed) return;
-        _controller.reverse().whenComplete(() {
-          if (mounted && !_isLongPressed) {
-            _handledByPointer = false;
-            widget.onTap?.call();
-          }
-        });
-      });
-    } else {
-      _controller.reverse().whenComplete(() {
-        if (mounted && !_isLongPressed) {
-          _handledByPointer = false;
-          widget.onTap?.call();
-        }
-      });
-    }
+  void _onPointerCancel(PointerCancelEvent event) {
+    _pointerDownPosition = null;
+    _controller.reverse();
   }
 
-  void _onPointerCancel(PointerCancelEvent event) {
-    _isPointerPressed = false;
-    _handledByPointer = false;
+  void _handleTap() {
+    _pointerDownPosition = null;
+    _controller.reverse();
+    widget.onTap?.call();
+  }
+
+  void _handleTapCancel() {
+    _pointerDownPosition = null;
     _controller.reverse();
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    _isLongPressed = true;
-    _isPointerPressed = false;
-    _controller.stop();
-    _controller.value = 0.0; // snap back to idle
+    _pointerDownPosition = null;
+    _controller.reverse();
     widget.onLongPressStart?.call(details);
   }
 
@@ -152,26 +123,18 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
 
     return Listener(
       behavior: widget.behavior,
-      onPointerDown: widget.onTap != null ? _onPointerDown : null,
-      onPointerMove: widget.onTap != null ? _onPointerMove : null,
-      onPointerUp: widget.onTap != null ? _onPointerUp : null,
-      onPointerCancel: widget.onTap != null ? _onPointerCancel : null,
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerCancel: _onPointerCancel,
       child: GestureDetector(
         behavior: widget.behavior,
-        onTap: widget.onTap != null
-            ? () {
-                if (!_handledByPointer && !_isLongPressed) {
-                  _controller.forward().whenComplete(() {
-                    if (!mounted) return;
-                    _controller.reverse().whenComplete(() {
-                      if (mounted) {
-                        widget.onTap?.call();
-                      }
-                    });
-                  });
-                }
-              }
-            : null,
+        onTapDown: (_) {
+          if (!_controller.isAnimating && _controller.value == 0.0) {
+            _controller.forward();
+          }
+        },
+        onTap: widget.onTap != null ? _handleTap : null,
+        onTapCancel: _handleTapCancel,
         onLongPressStart: widget.onLongPressStart != null ? _handleLongPressStart : null,
         onLongPressMoveUpdate: widget.onLongPressMoveUpdate != null ? _handleLongPressMoveUpdate : null,
         onLongPressEnd: widget.onLongPressEnd != null ? _handleLongPressEnd : null,
