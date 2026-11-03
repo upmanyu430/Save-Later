@@ -292,7 +292,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                           },
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 11),
+                                horizontal: 16, vertical: 14),
                             decoration: BoxDecoration(
                               color: _isPinned
                                   ? const Color(0xFFFFF4D0)
@@ -307,26 +307,14 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             ),
                             child: Row(
                               children: [
-                                Container(
-                                  width: 38,
-                                  height: 38,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE5E5E5),
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: AppTheme.border,
-                                      width: 2.0,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: PinIcon(
-                                      isPinned: _isPinned,
-                                      size: 20,
-                                      color: AppTheme.border,
-                                    ),
-                                  ),
+                                PinIcon(
+                                  isPinned: _isPinned,
+                                  size: 20,
+                                  color: _isPinned
+                                      ? const Color(0xFFFDD164)
+                                      : AppTheme.border,
                                 ),
-                                const SizedBox(width: 14),
+                                const SizedBox(width: 12),
                                 const Expanded(
                                   child: Text(
                                     'Pin this link',
@@ -339,12 +327,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     ),
                                   ),
                                 ),
-                                if (_isPinned)
-                                  const Icon(
-                                    Icons.check_circle_outline,
-                                    color: Color(0xFFFDD164),
-                                    size: 22,
-                                  ),
                               ],
                             ),
                           ),

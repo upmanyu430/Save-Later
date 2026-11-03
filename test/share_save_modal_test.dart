@@ -10,6 +10,7 @@ import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/widgets/share_save_modal.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
+import 'package:save_later/ui/widgets/pin_icon.dart';
 
 class _MockRepo implements IsarRepository {
   @override
@@ -137,16 +138,21 @@ void main() {
     await tester.tap(pinRowFinder);
     await tester.pumpAndSettle();
 
-    // Verify Pin tile selected (yellow background, yellow line border, and check icon)
+    // Verify Pin tile selected (yellow background, yellow line border, yellow PinIcon)
     final selectedPinContainer = tester.widget<Container>(
       find.descendant(of: pinRowFinder, matching: find.byType(Container)).first,
     );
     final selectedPinDec = selectedPinContainer.decoration as BoxDecoration;
     expect(selectedPinDec.color, const Color(0xFFFFF4D0));
     expect((selectedPinDec.border as Border).top.color, const Color(0xFFFDD164));
+    final pinIconWidget = tester.widget<PinIcon>(
+      find.descendant(of: pinRowFinder, matching: find.byType(PinIcon)),
+    );
+    expect(pinIconWidget.isPinned, isTrue);
+    expect(pinIconWidget.color, const Color(0xFFFDD164));
     expect(
       find.descendant(of: pinRowFinder, matching: find.byIcon(Icons.check_circle_outline)),
-      findsOneWidget,
+      findsNothing,
     );
 
     // Tap Save button
