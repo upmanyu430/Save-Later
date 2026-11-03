@@ -26,7 +26,7 @@ Widget createTestApp(Widget child) {
 }
 
 void main() {
-  testWidgets('FolderBox uses white icon only for Black (#1C1C1C) and Slate Blue/Purple (#6A5ACD)', (tester) async {
+  testWidgets('FolderBox uses white icon for all collection colors', (tester) async {
     // 1. Black (0xFF1C1C1C) -> White icon
     await tester.pumpWidget(
       createTestApp(
@@ -62,10 +62,8 @@ void main() {
     final purpleIcon = tester.widget<Icon>(find.byIcon(Icons.star_outline));
     expect(purpleIcon.color, Colors.white,
         reason: '#6A5ACD must render white icon');
-  });
 
-  testWidgets('FolderBox uses border color (black) icon for all other colors', (tester) async {
-    // 1. Lime green (0xFFA2D149) -> Black/border icon
+    // 3. Lime green (0xFFA2D149) -> White icon
     await tester.pumpWidget(
       createTestApp(
         FolderBox(
@@ -80,10 +78,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final limeIcon = tester.widget<Icon>(find.byIcon(Icons.palette));
-    expect(limeIcon.color, AppTheme.border,
-        reason: 'Lime folder color must render black border-color icons');
+    expect(limeIcon.color, Colors.white,
+        reason: 'Lime folder color must render white icon');
 
-    // 2. Blue (0xFF4A90E2) -> Black/border icon (not white, only 1C1C1C and 6A5ACD are white)
+    // 4. Blue (0xFF4A90E2) -> White icon
     await tester.pumpWidget(
       createTestApp(
         FolderBox(
@@ -98,16 +96,37 @@ void main() {
     await tester.pumpAndSettle();
 
     final blueIcon = tester.widget<Icon>(find.byIcon(Icons.favorite_outline));
-    expect(blueIcon.color, AppTheme.border,
-        reason: 'Blue folder color must render black border-color icon');
+    expect(blueIcon.color, Colors.white,
+        reason: 'Blue folder color must render white icon');
+
+    // 5. Yellow (0xFFFFD166) -> White icon
+    await tester.pumpWidget(
+      createTestApp(
+        FolderBox(
+          title: 'Yellow',
+          itemCountText: '2 items',
+          folderColor: const Color(0xFFFFD166),
+          icon: Icons.bookmark_border,
+          onTap: () {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final yellowIcon = tester.widget<Icon>(find.byIcon(Icons.bookmark_border));
+    expect(yellowIcon.color, Colors.white,
+        reason: 'Yellow folder color must render white icon');
   });
 
   test('BookmarkCollection.isWhiteIconColor helper works accurately', () {
     expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF1C1C1C)), isTrue);
     expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF6A5ACD)), isTrue);
-    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF4A90E2)), isFalse);
-    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFA0522D)), isFalse);
-    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFE74C3C)), isFalse);
-    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFFFD166)), isFalse);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFF4A90E2)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFA0522D)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFE74C3C)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(const Color(0xFFFFD166)), isTrue);
+    expect(BookmarkCollection.isWhiteIconColor(Colors.transparent), isFalse);
+    expect(BookmarkCollection.isWhiteIconColorHex('FFD166'), isTrue);
+    expect(BookmarkCollection.isWhiteIconColorHex(null), isFalse);
   });
 }

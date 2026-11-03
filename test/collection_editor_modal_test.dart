@@ -278,5 +278,22 @@ void main() {
     expect(thinBorderBoxes.isNotEmpty, isTrue);
     expect(thickBorderBoxes.isNotEmpty, isTrue);
   });
+
+  testWidgets('Selected icon in CollectionEditorModal is white on all colors', (tester) async {
+    await tester.pumpWidget(
+      buildTestWidget(
+        child: const Scaffold(
+          body: CollectionEditorModal(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final folderIcon = tester.widget<Icon>(find.byIcon(Icons.folder_outlined));
+    expect(folderIcon.color, Colors.white, reason: 'Selected icon must be white');
+
+    final starIcon = tester.widget<Icon>(find.byIcon(Icons.star_outline));
+    expect(starIcon.color, AppTheme.border, reason: 'Unselected icon must have border color');
+  });
 }
 
