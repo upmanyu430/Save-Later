@@ -18,6 +18,30 @@ class CollectionEditorModal extends ConsumerStatefulWidget {
   /// the `Icons.*` references const (icon tree-shaking in release builds).
   static List<IconData> get quickIcons => _CollectionEditorModalState._allIcons;
 
+  /// Calculates the exact height of CollectionEditorModal in its default collapsed state.
+  static double getCollapsedModalHeight(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+
+    // Outer padding: left 5.0, right 5.0 (total 10.0), capped at maxWidth 420
+    final cardWidth = (screenWidth - 10.0) > 420.0 ? 420.0 : (screenWidth - 10.0);
+    // Card border: 2.5 * 2 = 5.0. ScrollView horizontal padding: 18.0 * 2 = 36.0.
+    final contentWidth = cardWidth - 41.0;
+
+    // Grid item width for 8 columns with 7.0 spacing:
+    final itemWidth = (contentWidth - (7 * 7.0)) / 8.0;
+
+    // Color grid: 2 rows of items + 1 gap of 7.0
+    final colorGridHeight = (2 * itemWidth) + 7.0;
+    // Icon grid: 3 rows of items + 2 gaps of 7.0
+    final iconGridHeight = (3 * itemWidth) + 14.0;
+
+    // Fixed layout elements total: 284.83 dp (adjusted for font metrics)
+    const fixedContentHeight = 284.83;
+    final baseHeight = fixedContentHeight + colorGridHeight + iconGridHeight;
+    return baseHeight + bottomPadding;
+  }
+
   const CollectionEditorModal(
       {super.key, this.existingCollection, this.parentId});
 

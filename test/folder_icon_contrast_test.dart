@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/widgets/folder_box.dart';
 import 'package:save_later/models/collection.dart';
 

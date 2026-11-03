@@ -189,44 +189,43 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
     final topClearance = statusBarHeight + 16.0;
     final screenHeight = MediaQuery.sizeOf(context).height;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
     // Exact height matching the Add New Collection modal (CollectionEditorModal):
-    // 494.0 dp base height + bottom system navigation padding
-    final targetModalHeight = 494.0 + bottomPadding;
+    final targetModalHeight =
+        CollectionEditorModal.getCollapsedModalHeight(context);
     final availableHeight = screenHeight - topClearance - bottomInset;
     final sheetHeight = math.min(availableHeight, targetModalHeight);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.of(context).pop(),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 5.0,
-            right: 5.0,
-            bottom: bottomInset,
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: 420,
-                maxHeight: sheetHeight,
-              ),
-              child: SizedBox(
-                height: sheetHeight,
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {},
-                  child: Container(
-                    key: _cardKey,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(55),
-                      border: Border.all(color: AppTheme.border, width: 2.5),
-                    ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 5.0,
+          right: 5.0,
+          top: topClearance,
+          bottom: bottomInset,
+        ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 420,
+              maxHeight: sheetHeight,
+            ),
+            child: SizedBox(
+              key: const ValueKey('share_save_modal_sheet'),
+              height: sheetHeight,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: Container(
+                  key: _cardKey,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(55),
+                    border: Border.all(color: AppTheme.border, width: 2.5),
+                  ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -508,7 +507,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                       18.0,
                       0.0,
                       18.0,
-                      20.0 + MediaQuery.paddingOf(context).bottom,
+                      14.0 + MediaQuery.paddingOf(context).bottom,
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -517,7 +516,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                         Container(
                           height: 1,
                           color: Colors.black.withValues(alpha: 0.08),
-                          margin: const EdgeInsets.symmetric(vertical: 12),
+                          margin: const EdgeInsets.only(top: 6, bottom: 12),
                         ),
                         Builder(
                           builder: (context) {
@@ -577,7 +576,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
       ),
     ),
   ),
-),
 );
   }
 }

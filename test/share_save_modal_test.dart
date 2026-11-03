@@ -9,6 +9,7 @@ import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/widgets/share_save_modal.dart';
+import 'package:save_later/ui/widgets/collection_editor_modal.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
 import 'package:save_later/ui/widgets/pin_icon.dart';
 import 'package:save_later/theme/app_theme.dart';
@@ -286,5 +287,45 @@ void main() {
       find.descendant(of: scrollFinder, matching: find.byKey(const ValueKey('share_modal_pin_row'))),
       findsOneWidget,
     );
+  });
+
+  testWidgets('ShareSaveModal has exact height matching CollectionEditorModal collapsed height', (tester) async {
+    final repo = _MockRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(repo),
+          allCollectionsProvider.overrideWith((ref) => Future.value(repo.collections)),
+        ],
+        child: _buildTestApp(
+          child: Builder(
+            builder: (context) {
+              final expectedHeight =
+                  CollectionEditorModal.getCollapsedModalHeight(context);
+              return Column(
+                children: [
+                  Expanded(
+                    child: ShareSaveModal(
+                      url: 'https://flutter.dev',
+                      onSave: (col, isPinned) async {},
+                    ),
+                  ),
+                  Text('expected:$expectedHeight'),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Check that the card container in ShareSaveModal has the expected height
+    final cardFinder = find.byKey(const ValueKey('share_save_modal_sheet'));
+    final cardSize = tester.getSize(cardFinder);
+    final context = tester.element(cardFinder);
+    final expected = CollectionEditorModal.getCollapsedModalHeight(context);
+    expect(cardSize.height, closeTo(expected, 0.01));
   });
 }
