@@ -257,7 +257,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
             // Top App Bar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingXl,
+                horizontal: AppDimensions.paddingLg,
                 vertical: AppDimensions.paddingMd,
               ),
               child: Row(
@@ -307,7 +307,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
             // Search Bar
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingXl,
+                horizontal: AppDimensions.paddingLg,
                 vertical: AppDimensions.paddingSm,
               ),
               child: Container(
@@ -351,7 +351,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
               height: 44,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl),
+                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg),
                 itemCount: _categories.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
@@ -427,7 +427,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
 
                         return GridView.builder(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: AppDimensions.paddingXl,
+                            horizontal: AppDimensions.paddingLg,
                             vertical: AppDimensions.paddingMd,
                           ),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -478,7 +478,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
             // Bottom "Select Icon" Button
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppDimensions.paddingXl,
+                horizontal: AppDimensions.paddingLg,
                 vertical: AppDimensions.paddingMd,
               ),
               child: Builder(

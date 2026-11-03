@@ -222,7 +222,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             // Top Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingXl, vertical: AppDimensions.paddingLg),
+              padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: AppDimensions.paddingLg),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -259,9 +259,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Expanded(
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
-                  AppDimensions.paddingXl,
+                  AppDimensions.paddingLg,
                   AppDimensions.paddingSm,
-                  AppDimensions.paddingXl,
+                  AppDimensions.paddingLg,
                   AppDimensions.paddingSm + bottomInset,
                 ),
                 children: [

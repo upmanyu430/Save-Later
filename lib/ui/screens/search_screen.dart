@@ -261,7 +261,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final availableWidth = (MediaQuery.sizeOf(context)
             .width
             .clamp(0.0, AppDimensions.maxContentWidth)) -
-        (AppDimensions.paddingXl * 2);
+        (AppDimensions.paddingLg * 2);
     final columnCount = (availableWidth /
             (AppDimensions.gridMaxCrossAxisExtent + AppDimensions.gridSpacingMd))
         .ceil()
@@ -880,7 +880,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const horizontalPadding = 48.0;
+        const horizontalPadding = AppDimensions.paddingLg * 2;
         const maxCrossAxisExtent = 200.0;
         const crossAxisSpacing = AppDimensions.gridSpacingMd;
         const desiredCardHeight = AppDimensions.gridBookmarkCardHeight;
@@ -892,7 +892,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             .toInt();
 
         return GridView.builder(
-          padding: EdgeInsets.fromLTRB(24, 24, 24, 24 + bottomInset),
+          clipBehavior: Clip.none,
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columnCount,
             crossAxisSpacing: crossAxisSpacing,
@@ -1051,10 +1052,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   child: _searchQuery.isNotEmpty
                       ? _buildSearchResults(allBookmarks, bottomInset)
                       : ListView(
+                          clipBehavior: Clip.none,
                           padding: EdgeInsets.fromLTRB(
-                            20,
+                            16,
                             8,
-                            20,
+                            16,
                             24 + bottomInset,
                           ),
                           children: [

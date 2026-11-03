@@ -595,7 +595,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         ),
         const Spacer(),
         Padding(
-          padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0 + bottomInset),
+          padding: EdgeInsets.fromLTRB(AppDimensions.paddingLg, 24.0, AppDimensions.paddingLg, 24.0 + bottomInset),
           child: Row(
             children: [
               Expanded(
@@ -697,7 +697,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       children: [
         // Top Bar
         Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg, vertical: 24.0),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -762,7 +762,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
         ),
         // Progress Bars
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.paddingLg),
           child: ValueListenableBuilder<int>(
             valueListenable: _currentIndexNotifier,
             builder: (context, current, _) {
@@ -897,7 +897,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
         // Bottom Action Bar
         Padding(
-          padding: EdgeInsets.fromLTRB(24.0, 24.0, 24.0, 24.0 + bottomInset),
+          padding: EdgeInsets.fromLTRB(AppDimensions.paddingLg, 24.0, AppDimensions.paddingLg, 24.0 + bottomInset),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
