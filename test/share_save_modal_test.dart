@@ -122,15 +122,32 @@ void main() {
     // Verify Shared URL
     expect(find.text('https://flutter.dev/sharing'), findsOneWidget);
 
-    // Verify Pin row
+    // Verify Pin tile initially unselected (white background)
     expect(find.text('Pin this link'), findsOneWidget);
+    final pinRowFinder = find.byKey(const ValueKey('share_modal_pin_row'));
+    final unselectedPinContainer = tester.widget<Container>(
+      find.descendant(of: pinRowFinder, matching: find.byType(Container)).first,
+    );
+    expect((unselectedPinContainer.decoration as BoxDecoration).color, Colors.white);
 
     // Verify Unsorted is selected by default
     expect(find.text('Save to "Unsorted"'), findsOneWidget);
 
     // Tap Pin this link
-    await tester.tap(find.byKey(const ValueKey('share_modal_pin_row')));
+    await tester.tap(pinRowFinder);
     await tester.pumpAndSettle();
+
+    // Verify Pin tile selected (yellow background, yellow line border, and check icon)
+    final selectedPinContainer = tester.widget<Container>(
+      find.descendant(of: pinRowFinder, matching: find.byType(Container)).first,
+    );
+    final selectedPinDec = selectedPinContainer.decoration as BoxDecoration;
+    expect(selectedPinDec.color, const Color(0xFFFFF4D0));
+    expect((selectedPinDec.border as Border).top.color, const Color(0xFFFDD164));
+    expect(
+      find.descendant(of: pinRowFinder, matching: find.byIcon(Icons.check_circle_outline)),
+      findsOneWidget,
+    );
 
     // Tap Save button
     await tester.tap(find.widgetWithText(NeoButton, 'Save to "Unsorted"'));

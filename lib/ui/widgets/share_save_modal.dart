@@ -278,9 +278,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             color: Colors.black54,
                           ),
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 12),
 
-                        // Pin this link row
+                        // Pin this link tile
                         GestureDetector(
                           key: const ValueKey('share_modal_pin_row'),
                           behavior: HitTestBehavior.opaque,
@@ -290,26 +290,66 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                               _isPinned = !_isPinned;
                             });
                           },
-                          child: Row(
-                            children: [
-                              PinIcon(
-                                isPinned: _isPinned,
-                                size: 20,
-                                color: _isPinned ? AppTheme.border : Colors.black87,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 11),
+                            decoration: BoxDecoration(
+                              color: _isPinned
+                                  ? const Color(0xFFFFF4D0)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: _isPinned
+                                    ? const Color(0xFFFDD164)
+                                    : Colors.black.withValues(alpha: 0.08),
+                                width: _isPinned ? 1.5 : 2.0,
                               ),
-                              const SizedBox(width: 10),
-                              const Text(
-                                'Pin this link',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.border,
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 38,
+                                  height: 38,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E5E5),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppTheme.border,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: PinIcon(
+                                      isPinned: _isPinned,
+                                      size: 20,
+                                      color: AppTheme.border,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 14),
+                                const Expanded(
+                                  child: Text(
+                                    'Pin this link',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppTheme.border,
+                                    ),
+                                  ),
+                                ),
+                                if (_isPinned)
+                                  const Icon(
+                                    Icons.check_circle_outline,
+                                    color: Color(0xFFFDD164),
+                                    size: 22,
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 10),
 
                         // Collections List
                         collectionsAsync.when(
