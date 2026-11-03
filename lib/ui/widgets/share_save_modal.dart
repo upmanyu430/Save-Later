@@ -276,12 +276,12 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     child: NeoButton(
                                       onPressed: _openCreateCollection,
                                       padding: EdgeInsets.zero,
-                                      color: AppTheme.cardColor,
-                                      borderRadius: AppDimensions.radiusSm,
+                                      color: Colors.white,
+                                      borderRadius: AppDimensions.radiusMd,
                                       borderWidth: AppDimensions.borderWidthMd,
                                       child: const Icon(
                                         Icons.create_new_folder_outlined,
-                                        size: AppDimensions.iconSizeLg,
+                                        size: AppDimensions.iconSizeMd,
                                         color: AppTheme.border,
                                       ),
                                     ),
