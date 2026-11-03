@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -187,7 +188,13 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
         : MediaQuery.paddingOf(context).top;
     final topClearance = statusBarHeight + 16.0;
     final screenHeight = MediaQuery.sizeOf(context).height;
-    final maxCardHeight = screenHeight - topClearance;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    // Exact height matching the Add New Collection modal (CollectionEditorModal):
+    // 494.0 dp base height + bottom system navigation padding
+    final targetModalHeight = 494.0 + bottomPadding;
+    final availableHeight = screenHeight - topClearance - bottomInset;
+    final sheetHeight = math.min(availableHeight, targetModalHeight);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -198,46 +205,47 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           padding: EdgeInsets.only(
             left: 5.0,
             right: 5.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+            bottom: bottomInset,
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: 420,
-                maxHeight: maxCardHeight,
+                maxHeight: sheetHeight,
               ),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  key: _cardKey,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Pinned Drag Handle ONLY
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                        child: Center(
-                          child: Container(
-                            width: 44,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(2),
+              child: SizedBox(
+                height: sheetHeight,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {},
+                  child: Container(
+                    key: _cardKey,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(55),
+                      border: Border.all(color: AppTheme.border, width: 2.5),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Pinned Drag Handle ONLY
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                          child: Center(
+                            child: Container(
+                              width: 44,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: AppTheme.border,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Flexible(
-                        child: SingleChildScrollView(
+                        Expanded(
+                          child: SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(horizontal: 18.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -564,6 +572,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
       ),
     ),
   ),
+),
 );
   }
 }
