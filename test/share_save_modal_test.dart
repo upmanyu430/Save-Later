@@ -11,6 +11,7 @@ import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/widgets/share_save_modal.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
 import 'package:save_later/ui/widgets/pin_icon.dart';
+import 'package:save_later/theme/app_theme.dart';
 
 class _MockRepo implements IsarRepository {
   @override
@@ -221,5 +222,64 @@ void main() {
     expect(find.text('Saved!'), findsOneWidget);
     expect(find.text('Link saved'), findsOneWidget);
     expect(find.byIcon(Icons.check), findsOneWidget);
+  });
+
+  testWidgets('ShareSaveModal pins drag handle at top and Save button at bottom outside SingleChildScrollView', (tester) async {
+    final repo = _MockRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(repo),
+          allCollectionsProvider.overrideWith((ref) => Future.value(repo.collections)),
+        ],
+        child: _buildTestApp(
+          child: ShareSaveModal(
+            url: 'https://flutter.dev',
+            onSave: (col, isPinned) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final scrollFinder = find.byType(SingleChildScrollView);
+    expect(scrollFinder, findsOneWidget);
+
+    // Drag handle is pinned outside SingleChildScrollView
+    final dragHandleFinder = find.byWidgetPredicate((widget) {
+      if (widget is Container) {
+        final dec = widget.decoration;
+        if (dec is BoxDecoration &&
+            dec.color == AppTheme.border &&
+            dec.borderRadius == BorderRadius.circular(2)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    expect(dragHandleFinder, findsOneWidget);
+    expect(
+      find.descendant(of: scrollFinder, matching: dragHandleFinder),
+      findsNothing,
+      reason: 'Drag handle must be pinned outside SingleChildScrollView',
+    );
+
+    // Save button is pinned outside SingleChildScrollView
+    expect(
+      find.descendant(of: scrollFinder, matching: find.widgetWithText(NeoButton, 'Save to "Unsorted"')),
+      findsNothing,
+      reason: 'Save button must be pinned outside SingleChildScrollView at bottom',
+    );
+
+    // Header and Pin row ARE inside SingleChildScrollView
+    expect(
+      find.descendant(of: scrollFinder, matching: find.text('Save to Save Later')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: scrollFinder, matching: find.byKey(const ValueKey('share_modal_pin_row'))),
+      findsOneWidget,
+    );
   });
 }

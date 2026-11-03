@@ -180,6 +180,14 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
   Widget build(BuildContext context) {
     final collectionsAsync = ref.watch(allCollectionsProvider);
     final l10n = AppLocalizations.of(context);
+    final view = View.of(context);
+    final windowPadding = MediaQueryData.fromView(view).padding;
+    final statusBarHeight = windowPadding.top > 0
+        ? windowPadding.top
+        : MediaQuery.paddingOf(context).top;
+    final topClearance = statusBarHeight + 16.0;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxCardHeight = screenHeight - topClearance;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -195,76 +203,84 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           child: Align(
             alignment: Alignment.bottomCenter,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
+              constraints: BoxConstraints(
+                maxWidth: 420,
+                maxHeight: maxCardHeight,
+              ),
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
                 child: Container(
                   key: _cardKey,
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(55),
                     border: Border.all(color: AppTheme.border, width: 2.5),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      18.0,
-                      14.0,
-                      18.0,
-                      20.0 + MediaQuery.paddingOf(context).bottom,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Top Drag Handle
-                        Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Pinned Drag Handle ONLY
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                        child: Center(
                           child: Container(
-                            width: 48,
+                            width: 44,
                             height: 4,
-                            margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               color: AppTheme.border,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ),
-
-                        // Header Row: Title & Create Collection Button
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Expanded(
-                              child: Text(
-                                'Save to Save Later',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
-                                  letterSpacing: -0.3,
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                      ),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 6),
+                              // Header Row: Title & Create Collection Button
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Expanded(
+                                    child: Text(
+                                      'Save to Save Later',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppTheme.border,
+                                        letterSpacing: -0.3,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      width: AppDimensions.paddingSm),
+                                  SizedBox(
+                                    width: 44,
+                                    height: 44,
+                                    child: NeoButton(
+                                      onPressed: _openCreateCollection,
+                                      padding: EdgeInsets.zero,
+                                      color: AppTheme.cardColor,
+                                      borderRadius: AppDimensions.radiusSm,
+                                      borderWidth: AppDimensions.borderWidthMd,
+                                      child: const Icon(
+                                        Icons.create_new_folder_outlined,
+                                        size: AppDimensions.iconSizeLg,
+                                        color: AppTheme.border,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(width: AppDimensions.paddingSm),
-                            SizedBox(
-                              width: 44,
-                              height: 44,
-                              child: NeoButton(
-                                onPressed: _openCreateCollection,
-                                padding: EdgeInsets.zero,
-                                color: AppTheme.cardColor,
-                                borderRadius: AppDimensions.radiusSm,
-                                borderWidth: AppDimensions.borderWidthMd,
-                                child: const Icon(
-                                  Icons.create_new_folder_outlined,
-                                  size: AppDimensions.iconSizeLg,
-                                  color: AppTheme.border,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 6),
 
                         // Shared URL Text
@@ -338,16 +354,14 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                           data: (collections) {
                             final selected = _selectedCollection;
 
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxHeight: MediaQuery.of(context).size.height * 0.38,
-                              ),
-                              child: ListView.separated(
-                                shrinkWrap: true,
-                                physics: const ClampingScrollPhysics(),
-                                itemCount: collections.length + 1,
-                                separatorBuilder: (_, __) => const SizedBox(height: 8),
-                                itemBuilder: (ctx, index) {
+                            return ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.zero,
+                              itemCount: collections.length + 1,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 8),
+                              itemBuilder: (ctx, index) {
                                   if (index == 0) {
                                     return _buildUnsortedTile(context);
                                   }
@@ -461,30 +475,42 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     ),
                                   );
                                 },
+                              );
+                            },
+                            loading: () => const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32),
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                            error: (e, _) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Text(
+                                e.toString(),
+                                style: const TextStyle(color: Colors.red),
                               ),
-                            );
-                          },
-                          loading: () => const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 32),
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                          error: (e, _) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Text(
-                              e.toString(),
-                              style: const TextStyle(color: Colors.red),
                             ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+                  ),
 
-                        // Thin Divider
+                  // Pinned Bottom Section: Divider & Save Button
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      18.0,
+                      0.0,
+                      18.0,
+                      20.0 + MediaQuery.paddingOf(context).bottom,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                         Container(
                           height: 1,
                           color: Colors.black.withValues(alpha: 0.08),
                           margin: const EdgeInsets.symmetric(vertical: 14),
                         ),
-
-                        // Bottom Action Button
                         Builder(
                           builder: (context) {
                             final String buttonLabel;
@@ -530,13 +556,15 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                       ],
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }
 
