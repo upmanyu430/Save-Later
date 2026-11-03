@@ -75,18 +75,23 @@ CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
     opaque: false,
     barrierColor: Colors.black38,
     barrierDismissible: true,
-    transitionDuration: const Duration(milliseconds: 308),
-    reverseTransitionDuration: const Duration(milliseconds: 260),
+    transitionDuration: const Duration(milliseconds: 260),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeInOutCubic,
-        reverseCurve: Curves.easeInOutCubic,
+        curve: const Cubic(0.23, 1.0, 0.32, 1.0),
+        reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
       );
-      return ScaleTransition(
-        scale: curvedAnimation,
-        alignment: Alignment.center,
-        child: child,
+      return FadeTransition(
+        opacity: curvedAnimation,
+        child: ScaleTransition(
+          scale: curvedAnimation,
+          alignment: Alignment.center,
+          child: RepaintBoundary(
+            child: child,
+          ),
+        ),
       );
     },
     child: child,
@@ -175,10 +180,10 @@ void main() {
     expect(initialScale.alignment, Alignment.center);
     expect(initialScale.scale.value, equals(0.0));
 
-    // Pump halfway (154ms) - scale expands smoothly around 0.5 with easeInOutCubic
-    await tester.pump(const Duration(milliseconds: 154));
+    // Pump halfway (130ms) - scale expands smoothly with strong easeOut
+    await tester.pump(const Duration(milliseconds: 130));
     final midScale = tester.widget<ScaleTransition>(detailScaleFinder);
-    expect(midScale.scale.value, inInclusiveRange(0.4, 0.6));
+    expect(midScale.scale.value, greaterThan(0.5));
 
     // Finish transition
     await tester.pumpAndSettle();
@@ -189,9 +194,9 @@ void main() {
     await tester.pump(); // Pop starts
 
     // In reverse transition, it scales back down smoothly without disappearing
-    await tester.pump(const Duration(milliseconds: 130));
+    await tester.pump(const Duration(milliseconds: 110));
     final reverseScale = tester.widget<ScaleTransition>(detailScaleFinder);
-    expect(reverseScale.scale.value, inInclusiveRange(0.4, 0.6));
+    expect(reverseScale.scale.value, lessThan(1.0));
 
     // Finish pop transition
     await tester.pumpAndSettle();

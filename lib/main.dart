@@ -58,18 +58,23 @@ CustomTransitionPage<T> _buildBookmarkTransitionPage<T>({
     opaque: false,
     barrierColor: Colors.black38,
     barrierDismissible: true,
-    transitionDuration: const Duration(milliseconds: 308),
-    reverseTransitionDuration: const Duration(milliseconds: 260),
+    transitionDuration: const Duration(milliseconds: 260),
+    reverseTransitionDuration: const Duration(milliseconds: 220),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curvedAnimation = CurvedAnimation(
         parent: animation,
-        curve: Curves.easeInOutCubic,
-        reverseCurve: Curves.easeInOutCubic,
+        curve: const Cubic(0.23, 1.0, 0.32, 1.0),
+        reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
       );
-      return ScaleTransition(
-        scale: curvedAnimation,
-        alignment: Alignment.center,
-        child: child,
+      return FadeTransition(
+        opacity: curvedAnimation,
+        child: ScaleTransition(
+          scale: curvedAnimation,
+          alignment: Alignment.center,
+          child: RepaintBoundary(
+            child: child,
+          ),
+        ),
       );
     },
     child: child,
