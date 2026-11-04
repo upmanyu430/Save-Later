@@ -400,7 +400,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top Custom App Bar
-                Padding(
+                Container(
+                  color: AppTheme.background,
                   padding: const EdgeInsets.fromLTRB(
                     AppDimensions.paddingLg,
                     AppDimensions.paddingLg,
@@ -448,22 +449,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                 borderWidth: AppDimensions.borderWidthMd,
                                 child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
                               ),
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  widget.collectionId != null
-                                      ? (effectiveCollection?.name ?? '...')
-                                      : l10n.unsorted,
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-                                ),
-                                Text(
-                                  widget.collectionId != null
-                                      ? '${l10n.itemsCount(bookmarks.length)} · ${l10n.subcollectionsCount(subCollections.length)}'
-                                      : l10n.itemsCount(bookmarks.length),
-                                  style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.bold),
-                                ),
-                              ],
                             ),
                             Row(
                               children: [
@@ -545,8 +530,44 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             final unpinnedBookmarks = bookmarks.where((b) => !b.isPinned).toList();
 
                             return CustomScrollView(
-                              clipBehavior: Clip.none,
+                              clipBehavior: Clip.hardEdge,
                               slivers: [
+                                SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppDimensions.paddingLg,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(height: AppDimensions.paddingXl),
+                                        Text(
+                                          widget.collectionId != null
+                                              ? (effectiveCollection?.name ?? '...')
+                                              : l10n.unsorted,
+                                          style: GoogleFonts.gabarito(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
+                                            height: 1.1,
+                                            letterSpacing: -0.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppDimensions.paddingXs),
+                                        Text(
+                                          widget.collectionId != null
+                                              ? '${l10n.itemsCount(bookmarks.length)} · ${l10n.subcollectionsCount(subCollections.length)}'
+                                              : l10n.itemsCount(bookmarks.length),
+                                          style: GoogleFonts.gabarito(
+                                            color: Colors.black54,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const SizedBox(height: AppDimensions.paddingLg),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                                 if (subCollections.isNotEmpty) ...[
                                   SliverToBoxAdapter(
                                     child: Padding(
