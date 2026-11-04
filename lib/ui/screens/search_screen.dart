@@ -1069,7 +1069,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       ),
                       if (_searchQuery.isEmpty)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
                           child: _buildLibraryStats(
                             collectionsCount,
                             bookmarksCount,
@@ -1089,7 +1089,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           clipBehavior: Clip.hardEdge,
                           padding: EdgeInsets.fromLTRB(
                             16,
-                            8,
+                            14,
                             16,
                             24 + bottomInset,
                           ),
