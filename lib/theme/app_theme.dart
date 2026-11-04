@@ -24,6 +24,7 @@ class AppTheme {
         onSecondary: border,
         onSurface: border,
       ),
+      fontFamily: 'Gabarito',
       textTheme: GoogleFonts.gabaritoTextTheme().apply(
         bodyColor: border,
         displayColor: border,
