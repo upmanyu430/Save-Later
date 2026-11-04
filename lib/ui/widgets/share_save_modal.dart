@@ -65,7 +65,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
   bool _isSaving = false;
 
   void _openCreateCollection() async {
-    HapticFeedback.lightImpact();
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -77,7 +76,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
   Future<void> _handleSave() async {
     if (_isSaving) return;
     setState(() => _isSaving = true);
-    HapticFeedback.mediumImpact();
 
     final targetCollection = _isUnsortedSelected ? null : _selectedCollection;
     final measuredHeight = _cardKey.currentContext?.size?.height;

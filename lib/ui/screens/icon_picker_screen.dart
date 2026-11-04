@@ -235,7 +235,6 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
   Color get _themeColor => BookmarkCollection.parseColor(widget.selectedColorHex);
 
   void _selectAndReturn(int iconCodePoint) {
-    HapticFeedback.lightImpact();
     Navigator.pop(context, iconCodePoint);
   }
 
@@ -444,6 +443,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                               message: item.name,
                               child: GestureDetector(
                                 onTap: () {
+                                  HapticFeedback.lightImpact();
                                   setState(() {
                                     _selectedIconCode = item.icon.codePoint;
                                   });

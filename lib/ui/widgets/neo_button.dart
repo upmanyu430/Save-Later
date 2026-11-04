@@ -14,6 +14,7 @@ class NeoButton extends StatefulWidget {
   final double shadowOffset;
   final Offset? customShadowOffset;
   final EdgeInsetsGeometry padding;
+  final bool enableFeedback;
 
   const NeoButton({
     super.key,
@@ -28,6 +29,7 @@ class NeoButton extends StatefulWidget {
     this.customShadowOffset,
     this.padding = const EdgeInsets.symmetric(
         horizontal: AppDimensions.paddingXl, vertical: 14),
+    this.enableFeedback = true,
   });
 
   @override
@@ -68,7 +70,9 @@ class _NeoButtonState extends State<NeoButton>
   void _onPointerDown(PointerDownEvent event) {
     if (!_isEnabled) return;
     _pointerDownPosition = event.position;
-    HapticFeedback.lightImpact();
+    if (widget.enableFeedback) {
+      HapticFeedback.lightImpact();
+    }
     _controller.forward();
   }
 

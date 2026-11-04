@@ -168,7 +168,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _addTag(String tag) async {
-    HapticFeedback.lightImpact();
     final cleanTag = tag.trim();
     if (cleanTag.isEmpty) return;
 
@@ -1891,6 +1890,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
 
               const SizedBox(height: AppDimensions.paddingLg),
               NeoButton(
+                enableFeedback: false,
                 onPressed: canAdd ? () => _submitTag(tagToSubmit) : null,
                 color: canAdd ? AppTheme.accent : const Color(0xFFDDDDDD),
                 borderRadius: AppDimensions.radiusMd,

@@ -233,7 +233,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       height: 44,
                       child: NeoButton(
                         onPressed: () {
-                          if (_hapticFeedback) HapticFeedback.lightImpact();
                           context.pop();
                         },
                         padding: EdgeInsets.zero,

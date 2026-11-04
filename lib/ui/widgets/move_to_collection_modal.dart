@@ -73,8 +73,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   }
 
   Future<void> _handleMove(BookmarkCollection? collection) async {
-    HapticFeedback.mediumImpact();
-
     if (widget.onMove != null) {
       await widget.onMove!(collection);
     } else if (widget.bookmark != null) {
@@ -88,7 +86,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   }
 
   void _openCreateCollection() async {
-    HapticFeedback.lightImpact();
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,

@@ -1132,6 +1132,7 @@ class _ReviewIconButton extends StatelessWidget {
       height: 50,
       child: NeoButton(
         onPressed: onPressed,
+        enableFeedback: false,
         padding: EdgeInsets.zero,
         color: const Color(0xFF222222),
         borderColor: Colors.white24,

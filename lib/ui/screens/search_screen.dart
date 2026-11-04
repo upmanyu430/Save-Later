@@ -606,7 +606,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 tilt: tilt,
                 isSelected: isTagSelected,
                 onTap: () {
-                  HapticFeedback.lightImpact();
                   setState(() {
                     if (isTagSelected) {
                       _selectedTagFilter = null;
