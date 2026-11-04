@@ -300,55 +300,72 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
+        const crossAxisSpacing = AppDimensions.gridSpacingMd;
+        const desiredCardHeight = AppDimensions.gridFolderCardHeight;
+        final gridWidth = constraints.maxWidth;
+        final columnCount = (gridWidth /
+                (maxCrossAxisExtent + crossAxisSpacing))
+            .ceil()
+            .clamp(1, 10)
+            .toInt();
+        final itemWidth = (gridWidth -
+                (columnCount - 1) * crossAxisSpacing) /
+            columnCount;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.folder_outlined,
-                size: 18, color: AppTheme.border),
-            const SizedBox(width: 8),
-            Text(
-              l10n.collections.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.border,
-                letterSpacing: 0.5,
+            Row(
+              children: [
+                const Icon(Icons.folder_outlined,
+                    size: 18, color: AppTheme.border),
+                const SizedBox(width: 8),
+                Text(
+                  l10n.collections.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.border,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: maxCrossAxisExtent,
+                crossAxisSpacing: crossAxisSpacing,
+                mainAxisSpacing: AppDimensions.gridSpacingLg,
+                childAspectRatio: itemWidth / desiredCardHeight,
               ),
+              itemCount: collections.length,
+              itemBuilder: (context, index) {
+                final col = collections[index];
+                final colBookmarks = allBookmarks.where((b) {
+                  return b.collection.value?.id == col.id;
+                }).toList();
+                final hasNew = colBookmarks.any((b) => !b.isRead);
+                final newCount = colBookmarks.where((b) => !b.isRead).length;
+
+                return CollectionGridItem(
+                  collection: col,
+                  itemCount: colBookmarks.length,
+                  hasNewItems: hasNew,
+                  newCount: newCount,
+                  onTap: () =>
+                      context.push('/collection/${col.id}', extra: col),
+                );
+              },
             ),
           ],
-        ),
-        const SizedBox(height: 18),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: AppDimensions.gridSpacingMd,
-            mainAxisSpacing: AppDimensions.gridSpacingLg,
-            childAspectRatio: 0.85,
-          ),
-          itemCount: collections.length,
-          itemBuilder: (context, index) {
-            final col = collections[index];
-            final colBookmarks = allBookmarks.where((b) {
-              return b.collection.value?.id == col.id;
-            }).toList();
-            final hasNew = colBookmarks.any((b) => !b.isRead);
-            final newCount = colBookmarks.where((b) => !b.isRead).length;
-
-            return CollectionGridItem(
-              collection: col,
-              itemCount: colBookmarks.length,
-              hasNewItems: hasNew,
-              newCount: newCount,
-              onTap: () =>
-                  context.push('/collection/${col.id}', extra: col),
-            );
-          },
-        ),
-      ],
+        );
+      },
     );
   }
 
