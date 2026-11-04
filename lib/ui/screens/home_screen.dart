@@ -123,21 +123,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       FocusScope.of(context).unfocus();
       final repo = ref.read(repositoryProvider);
       final sampleItems = [
-        ('Flutter Official Docs', 'https://docs.flutter.dev', 'docs.flutter.dev'),
-        ('Dart Language Guide', 'https://dart.dev/guides', 'dart.dev'),
-        ('GitHub Trending Repos', 'https://github.com/trending', 'github.com'),
-        ('Hacker News', 'https://news.ycombinator.com', 'news.ycombinator.com'),
-        ('Smashing Magazine Articles', 'https://www.smashingmagazine.com', 'smashingmagazine.com'),
-        ('CSS Tricks - Layouts', 'https://css-tricks.com', 'css-tricks.com'),
-        ('Dev.to Community Posts', 'https://dev.to', 'dev.to'),
-        ('Medium Technology Feed', 'https://medium.com/topic/technology', 'medium.com'),
-        ('Product Hunt Daily', 'https://www.producthunt.com', 'producthunt.com'),
-        ('TechCrunch News', 'https://techcrunch.com', 'techcrunch.com'),
-        ('The Verge Tech Reviews', 'https://www.theverge.com/tech', 'theverge.com'),
-        ('Wired Latest Stories', 'https://www.wired.com', 'wired.com'),
-        ('Ars Technica Science', 'https://arstechnica.com', 'arstechnica.com'),
-        ('Lobsters Tech Discussions', 'https://lobste.rs', 'lobste.rs'),
-        ('Dribbble Design Showcase', 'https://dribbble.com', 'dribbble.com'),
+        ('Flutter Official Docs', 'https://docs.flutter.dev', 'docs.flutter.dev', 'https://storage.googleapis.com/cms-storage-bucket/70760bf1e882184bb105.png'),
+        ('Dart Language Guide', 'https://dart.dev/guides', 'dart.dev', 'https://dart.dev/assets/shared/dart-logo-for-shares.png'),
+        ('GitHub Trending Repos', 'https://github.com/trending', 'github.com', 'https://github.githubassets.com/images/modules/open_graph/github-logo.png'),
+        ('Hacker News', 'https://news.ycombinator.com', 'news.ycombinator.com', null),
+        ('Smashing Magazine Articles', 'https://www.smashingmagazine.com', 'smashingmagazine.com', 'https://www.smashingmagazine.com/images/smashing-cat/smashing-cat-standard.png'),
+        ('CSS Tricks - Layouts', 'https://css-tricks.com', 'css-tricks.com', 'https://css-tricks.com/apple-touch-icon.png'),
+        ('Dev.to Community Posts', 'https://dev.to', 'dev.to', 'https://dev-to-uploads.s3.amazonaws.com/uploads/logos/resized_logo_UQww2soKuUsjaOGNB38o.png'),
+        ('Medium Technology Feed', 'https://medium.com/topic/technology', 'medium.com', null),
+        ('Product Hunt Daily', 'https://www.producthunt.com', 'producthunt.com', 'https://ph-static.imgix.net/ph-logo-orange-circle.png'),
+        ('TechCrunch News', 'https://techcrunch.com', 'techcrunch.com', 'https://techcrunch.com/wp-content/uploads/2015/02/cropped-cropped-tc-logo.png'),
+        ('The Verge Tech Reviews', 'https://www.theverge.com/tech', 'theverge.com', 'https://cdn.vox-cdn.com/uploads/chorus_asset/file/7395367/the-verge-small.0.png'),
+        ('Wired Latest Stories', 'https://www.wired.com', 'wired.com', null),
+        ('Ars Technica Science', 'https://arstechnica.com', 'arstechnica.com', null),
+        ('Lobsters Tech Discussions', 'https://lobste.rs', 'lobste.rs', null),
+        ('Dribbble Design Showcase', 'https://dribbble.com', 'dribbble.com', 'https://cdn.dribbble.com/assets/dribbble-ball-icon-eab99088334a84e8e4e758784d1668e9.png'),
       ];
       final isar = await repo.db;
       await isar.writeTxn(() async {
@@ -147,6 +147,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ..title = item.$1
             ..url = item.$2
             ..sourceDomain = item.$3
+            ..imageUrl = item.$4
             ..description = 'Saved reference item for ${item.$1}'
             ..createdAt = DateTime.now().subtract(Duration(minutes: (sampleItems.length - i) * 15))
             ..isRead = i % 3 == 0;
