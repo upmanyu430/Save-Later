@@ -179,15 +179,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(
                 maxWidth: AppDimensions.maxContentWidth),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppDimensions.paddingLg,
-                  vertical: AppDimensions.paddingLg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Action Bar
-              Row(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const maxCrossAxisExtent =
+                    AppDimensions.gridMaxCrossAxisExtent;
+                const crossAxisSpacing = AppDimensions.gridSpacingMd;
+                const desiredCardHeight =
+                    AppDimensions.gridFolderCardHeight;
+                final gridWidth = constraints.maxWidth -
+                    (AppDimensions.paddingLg * 2);
+                final columnCount = (gridWidth /
+                        (maxCrossAxisExtent + crossAxisSpacing))
+                    .ceil()
+                    .clamp(1, 10)
+                    .toInt();
+                final itemWidth = (gridWidth -
+                        (columnCount - 1) * crossAxisSpacing) /
+                    columnCount;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Pinned Top Action Bar
+                    Container(
+                      color: AppTheme.background,
+                      padding: const EdgeInsets.fromLTRB(
+                        AppDimensions.paddingLg,
+                        AppDimensions.paddingLg,
+                        AppDimensions.paddingLg,
+                        AppDimensions.paddingSm,
+                      ),
+                      child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
@@ -233,12 +255,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
-              const SizedBox(height: AppDimensions.paddingXxl),
+            ),
 
-              // Title
+            // Scrollable content
+            Expanded(
+              child: CustomScrollView(
+                clipBehavior: Clip.hardEdge,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: AppDimensions.paddingLg),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: AppDimensions.paddingXl),
+
+                          // Title
               Text(
                 l10n.saveNowFindAnytime,
                 textScaler: TextScaler.noScaling,
@@ -342,97 +378,113 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               const SizedBox(height: AppDimensions.paddingMd),
+                        ],
+                      ),
+                    ),
+                  ),
 
-              // Collections Grid
-              Expanded(
-                child: collectionsAsync.when(
-                  data: (collections) {
-                    return LayoutBuilder(
-                      builder: (context, constraints) {
-                        const maxCrossAxisExtent =
-                            AppDimensions.gridMaxCrossAxisExtent;
-                        const crossAxisSpacing = AppDimensions.gridSpacingMd;
-                        const desiredCardHeight =
-                            AppDimensions.gridFolderCardHeight;
-                        final columnCount = (constraints.maxWidth /
-                                (maxCrossAxisExtent + crossAxisSpacing))
-                            .ceil()
-                            .clamp(1, 10)
-                            .toInt();
-                        final itemWidth = (constraints.maxWidth -
-                                (columnCount - 1) * crossAxisSpacing) /
-                            columnCount;
-
-                        return GridView.builder(
-                          clipBehavior: Clip.none,
-                          padding: EdgeInsets.only(bottom: bottomInset),
-                          gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: maxCrossAxisExtent,
-                            crossAxisSpacing: crossAxisSpacing,
-                            mainAxisSpacing: AppDimensions
-                                .gridSpacingLg, // Extra space for the folder tabs
-                            childAspectRatio: itemWidth / desiredCardHeight,
+                  // Collections Grid
+                  ...collectionsAsync.when(
+                    data: (collections) {
+                      return [
+                        SliverPadding(
+                          padding: EdgeInsets.fromLTRB(
+                            AppDimensions.paddingLg,
+                            0,
+                            AppDimensions.paddingLg,
+                            bottomInset + AppDimensions.paddingLg,
                           ),
-                          itemCount: collections.length + 1, // +1 for Unsorted
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              // Unsorted Folder
-                              return Consumer(builder: (context, ref, _) {
-                                final countAsync =
-                                    ref.watch(unsortedBookmarksProvider);
-                                final bookmarks = countAsync.valueOrNull ?? [];
-                                final count = bookmarks.length;
-                                final newCount = bookmarks.where((b) => !b.isRead).length;
-                                final hasNew = newCount > 0;
-                                return FolderBox(
-                                  forceBold: true,
-                                  title: l10n.unsorted,
-                                  itemCountText: l10n.itemsCount(count),
-                                  folderColor: Colors.grey.shade400,
-                                  onTap: () {
-                                    _pushRoute('/unsorted');
-                                  },
-                                  hasNewItems: hasNew,
-                                  newCount: newCount,
-                                );
-                              });
-                            }
+                          sliver: SliverGrid(
+                            gridDelegate:
+                                SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: maxCrossAxisExtent,
+                              crossAxisSpacing: crossAxisSpacing,
+                              mainAxisSpacing:
+                                  AppDimensions.gridSpacingLg,
+                              childAspectRatio:
+                                  itemWidth / desiredCardHeight,
+                            ),
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                if (index == 0) {
+                                  return Consumer(builder: (context, ref, _) {
+                                    final countAsync =
+                                        ref.watch(unsortedBookmarksProvider);
+                                    final bookmarks =
+                                        countAsync.valueOrNull ?? [];
+                                    final count = bookmarks.length;
+                                    final newCount = bookmarks
+                                        .where((b) => !b.isRead)
+                                        .length;
+                                    final hasNew = newCount > 0;
+                                    return FolderBox(
+                                      forceBold: true,
+                                      title: l10n.unsorted,
+                                      itemCountText:
+                                          l10n.itemsCount(count),
+                                      folderColor: Colors.grey.shade400,
+                                      onTap: () {
+                                        _pushRoute('/unsorted');
+                                      },
+                                      hasNewItems: hasNew,
+                                      newCount: newCount,
+                                    );
+                                  });
+                                }
 
-                            final col = collections[index - 1];
-                            return Consumer(builder: (context, ref, _) {
-                              final countAsync = ref
-                                  .watch(collectionBookmarksProvider(col.id));
-                              final bookmarks = countAsync.valueOrNull ?? [];
-                              final count = bookmarks.length;
-                              final newCount = bookmarks.where((b) => !b.isRead).length;
-                              final hasNew = newCount > 0;
-                              return CollectionGridItem(
-                                collection: col,
-                                itemCount: count,
-                                hasNewItems: hasNew,
-                                newCount: newCount,
-                                onTap: () => _pushRoute('/collection/${col.id}',
-                                    extra: col),
-                              );
-                            });
-                          },
-                        );
-                      },
-                    );
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (e, st) =>
-                      Center(child: Text(l10n.errorWithMessage(e.toString()))),
-                ),
+                                final col = collections[index - 1];
+                                return Consumer(builder: (context, ref, _) {
+                                  final countAsync = ref.watch(
+                                      collectionBookmarksProvider(col.id));
+                                  final bookmarks =
+                                      countAsync.valueOrNull ?? [];
+                                  final count = bookmarks.length;
+                                  final newCount = bookmarks
+                                      .where((b) => !b.isRead)
+                                      .length;
+                                  final hasNew = newCount > 0;
+                                  return CollectionGridItem(
+                                    collection: col,
+                                    itemCount: count,
+                                    hasNewItems: hasNew,
+                                    newCount: newCount,
+                                    onTap: () => _pushRoute(
+                                        '/collection/${col.id}',
+                                        extra: col),
+                                  );
+                                });
+                              },
+                              childCount: collections.length + 1,
+                            ),
+                          ),
+                        ),
+                      ];
+                    },
+                    loading: () => [
+                      const SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ],
+                    error: (e, st) => [
+                      SliverFillRemaining(
+                        hasScrollBody: false,
+                        child: Center(
+                            child:
+                                Text(l10n.errorWithMessage(e.toString()))),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          ],
+        );
+      },
     ),
   ),
+),
+),
 );
 }
 }
