@@ -963,112 +963,130 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
             child: Column(
               children: [
-                // Header (Search Bar & Cancel Button)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  child: Row(
+                // Pinned Header: Search Bar & Cancel Button + Library Stats (when not searching)
+                Container(
+                  color: AppTheme.background,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: 50.4,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => _searchFocusNode.requestFocus(),
-                            child: NeoBox(
-                              padding: const EdgeInsets.only(
-                                left: 10,
-                                right: 8,
-                              ),
-                              color: Colors.white,
-                              borderRadius: 14.0,
-                              borderWidth: 2.5,
-                              shadowOffset: 2.0,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.search,
-                                    color: AppTheme.border,
-                                    size: 21,
-                                  ),
-                                  const SizedBox(width: 7),
-                                  Expanded(
-                                    child: TextField(
-                                      controller: _searchController,
-                                      focusNode: _searchFocusNode,
-                                      textAlignVertical: TextAlignVertical.center,
-                                      decoration: InputDecoration(
-                                        isDense: true,
-                                        border: InputBorder.none,
-                                        contentPadding: EdgeInsets.zero,
-                                        hintText: l10n.findCollectionsOrSavesHint,
-                                        hintStyle: GoogleFonts.gabarito(
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.black38,
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 50.4,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () => _searchFocusNode.requestFocus(),
+                                  child: NeoBox(
+                                    padding: const EdgeInsets.only(
+                                      left: 10,
+                                      right: 8,
+                                    ),
+                                    color: Colors.white,
+                                    borderRadius: 14.0,
+                                    borderWidth: 2.5,
+                                    shadowOffset: 2.0,
+                                    child: Row(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        const Icon(
+                                          Icons.search,
+                                          color: AppTheme.border,
+                                          size: 21,
                                         ),
-                                      ),
-                                      style: GoogleFonts.gabarito(
-                                        fontSize: 14.5,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppTheme.border,
-                                      ),
+                                        const SizedBox(width: 7),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _searchController,
+                                            focusNode: _searchFocusNode,
+                                            textAlignVertical: TextAlignVertical.center,
+                                            decoration: InputDecoration(
+                                              isDense: true,
+                                              border: InputBorder.none,
+                                              contentPadding: EdgeInsets.zero,
+                                              hintText: l10n.findCollectionsOrSavesHint,
+                                              hintStyle: GoogleFonts.gabarito(
+                                                fontSize: 13.5,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.black38,
+                                              ),
+                                            ),
+                                            style: GoogleFonts.gabarito(
+                                              fontSize: 14.5,
+                                              fontWeight: FontWeight.w600,
+                                              color: AppTheme.border,
+                                            ),
+                                          ),
+                                        ),
+                                        if (_searchController.text.isNotEmpty)
+                                          GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () {
+                                              _searchController.clear();
+                                              setState(() {
+                                                _searchQuery = '';
+                                              });
+                                            },
+                                            child: const Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 4.0),
+                                              child: Icon(Icons.close,
+                                                  color: AppTheme.border, size: 20),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
-                                  if (_searchController.text.isNotEmpty)
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () {
-                                        _searchController.clear();
-                                        setState(() {
-                                          _searchQuery = '';
-                                        });
-                                      },
-                                      child: const Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 4.0),
-                                        child: Icon(Icons.close,
-                                            color: AppTheme.border, size: 20),
-                                      ),
-                                    ),
-                                ],
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: AppDimensions.paddingMd),
-                      SizedBox(
-                        height: 50.4,
-                        child: NeoButton(
-                          onPressed: () => context.pop(),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 0,
-                          ),
-                          color: Colors.white,
-                          borderWidth: 2.5,
-                          borderRadius: 14.0,
-                          shadowOffset: 2.0,
-                          child: Text(
-                            l10n.cancel,
-                            style: GoogleFonts.gabarito(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.border,
+                            const SizedBox(width: AppDimensions.paddingMd),
+                            SizedBox(
+                              height: 50.4,
+                              child: NeoButton(
+                                onPressed: () => context.pop(),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                  vertical: 0,
+                                ),
+                                color: Colors.white,
+                                borderWidth: 2.5,
+                                borderRadius: 14.0,
+                                shadowOffset: 2.0,
+                                child: Text(
+                                  l10n.cancel,
+                                  style: GoogleFonts.gabarito(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppTheme.border,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
+                      if (_searchQuery.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                          child: _buildLibraryStats(
+                            collectionsCount,
+                            bookmarksCount,
+                            pinnedCount,
+                            tagsCount,
+                          ),
+                        ),
                     ],
                   ),
                 ),
 
-                // Body
+                // Scrollable Body
                 Expanded(
                   child: _searchQuery.isNotEmpty
                       ? _buildSearchResults(allBookmarks, bottomInset)
                       : ListView(
-                          clipBehavior: Clip.none,
+                          clipBehavior: Clip.hardEdge,
                           padding: EdgeInsets.fromLTRB(
                             16,
                             8,
@@ -1076,13 +1094,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             24 + bottomInset,
                           ),
                           children: [
-                            _buildLibraryStats(
-                              collectionsCount,
-                              bookmarksCount,
-                              pinnedCount,
-                              tagsCount,
-                            ),
-                            const SizedBox(height: AppDimensions.paddingXxl),
                             if (_selectedTab == LibraryTab.tags)
                               _buildTagsView(allBookmarks)
                             else if (_selectedTab == LibraryTab.collections)
