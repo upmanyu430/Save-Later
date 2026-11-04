@@ -272,6 +272,126 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         columnCount;
   }
 
+  Widget _buildActiveSectionHeader(
+    AppLocalizations l10n,
+    List<Bookmark> allBookmarks,
+  ) {
+    switch (_selectedTab) {
+      case LibraryTab.collections:
+        return Row(
+          children: [
+            const Icon(Icons.folder_outlined, size: 18, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.collections.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        );
+      case LibraryTab.saves:
+        return Row(
+          children: [
+            const Icon(Icons.link, size: 18, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.saves.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        );
+      case LibraryTab.pinned:
+        return Row(
+          children: [
+            const PinIcon(size: 18, isPinned: true, color: AppTheme.border),
+            const SizedBox(width: 8),
+            Text(
+              l10n.pinned.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        );
+      case LibraryTab.tags:
+        final Map<String, int> tagCounts = {};
+        for (final b in allBookmarks) {
+          for (final t in b.tags) {
+            final clean = t.trim();
+            if (clean.isNotEmpty) {
+              tagCounts[clean] = (tagCounts[clean] ?? 0) + 1;
+            }
+          }
+        }
+        final displayedCount =
+            tagCounts.isNotEmpty ? tagCounts.length : NeoTagBadge.sampleTags.length;
+        return Row(
+          children: [
+            const Icon(
+              Icons.local_offer_outlined,
+              size: 18,
+              color: AppTheme.border,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              l10n.tagsLabel,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: AppTheme.border, width: 1.5),
+              ),
+              child: Text(
+                '$displayedCount',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.border,
+                ),
+              ),
+            ),
+          ],
+        );
+      case LibraryTab.overview:
+        return Row(
+          children: [
+            const Icon(Icons.schedule, color: AppTheme.border, size: 20),
+            const SizedBox(width: AppDimensions.paddingSm),
+            Text(
+              l10n.recentlySaved,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                color: AppTheme.border,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        );
+    }
+  }
+
   Widget _buildCollectionsView(
     List<BookmarkCollection> collections,
     List<Bookmark> allBookmarks,
@@ -318,23 +438,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.folder_outlined,
-                    size: 18, color: AppTheme.border),
-                const SizedBox(width: 8),
-                Text(
-                  l10n.collections.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.border,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 18),
+
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -398,22 +502,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Icon(Icons.link, size: 18, color: AppTheme.border),
-            const SizedBox(width: 8),
-            Text(
-              l10n.saves.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.border,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
+
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -446,26 +535,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const PinIcon(
-              size: 18,
-              isPinned: true,
-              color: AppTheme.border,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.pinned.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.border,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
+
         if (pinned.isEmpty)
           const Center(
             child: Padding(
@@ -521,7 +591,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildTagsView(List<Bookmark> allBookmarks) {
-    final l10n = AppLocalizations.of(context)!;
 
     // Collect tags from real bookmarks
     final Map<String, int> tagCounts = {};
@@ -564,43 +633,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.local_offer_outlined,
-              size: 18,
-              color: AppTheme.border,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              l10n.tagsLabel,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.border,
-                letterSpacing: 0.5,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 1.5),
-              ),
-              child: Text(
-                '${displayedTags.length}',
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.border,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 18),
         SizedBox(
           width: double.infinity,
           child: Wrap(
@@ -792,23 +824,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Recently Saved Header
-        Row(
-          children: [
-            const Icon(Icons.schedule, color: AppTheme.border, size: 22),
-            const SizedBox(width: AppDimensions.paddingSm),
-            Text(
-              l10n.recentlySaved,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w900,
-                color: AppTheme.border,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppDimensions.paddingLg),
+
 
         // Horizontal Cards
         if (allBookmarks.isNotEmpty)
@@ -1067,9 +1083,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           ],
                         ),
                       ),
-                      if (_searchQuery.isEmpty)
+                      if (_searchQuery.isEmpty) ...[
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 4),
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
                           child: _buildLibraryStats(
                             collectionsCount,
                             bookmarksCount,
@@ -1077,6 +1093,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                             tagsCount,
                           ),
                         ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                          child: _buildActiveSectionHeader(l10n, allBookmarks),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -1089,7 +1110,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           clipBehavior: Clip.hardEdge,
                           padding: EdgeInsets.fromLTRB(
                             16,
-                            14,
+                            0,
                             16,
                             24 + bottomInset,
                           ),
