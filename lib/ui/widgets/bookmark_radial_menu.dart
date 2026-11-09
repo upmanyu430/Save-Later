@@ -447,17 +447,12 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
               return AnimatedBuilder(
                 animation: _anim,
                 builder: (context, _) {
-                  final currentDx =
-                      _origin.dx + (pos.dx - _origin.dx) * _anim.value;
-                  final currentDy =
-                      _origin.dy + (pos.dy - _origin.dy) * _anim.value;
-
                   final buttonColor = isSelected ? action.color : Colors.white;
                   final iconColor = isSelected ? Colors.white : Colors.black;
 
                   return Positioned(
-                    left: currentDx - buttonRadius,
-                    top: currentDy - buttonRadius - (isSelected ? 6.0 : 0.0),
+                    left: _origin.dx - buttonRadius,
+                    top: _origin.dy - buttonRadius,
                     width: buttonRadius * 2,
                     height: buttonRadius * 2,
                     child: GestureDetector(
@@ -467,8 +462,12 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
                         BookmarkRadialMenu.dismiss();
                         action.onTap();
                       },
-                      child: Transform.scale(
-                        scale: _anim.value,
+                      child: Transform(
+                        transform: Matrix4.translationValues(
+                          (pos.dx - _origin.dx) * _anim.value,
+                          (pos.dy - _origin.dy) * _anim.value - (isSelected ? 6.0 : 0.0),
+                          0.0,
+                        )..scale(_anim.value),
                         child: AnimatedScale(
                           duration: const Duration(milliseconds: 180),
                           curve: Curves.easeOutBack,
