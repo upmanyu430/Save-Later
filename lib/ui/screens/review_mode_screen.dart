@@ -18,14 +18,46 @@ import 'package:save_later/config/app_constants.dart';
 /// Emil Kowalski's custom ease curve for crisp, physical button transitions.
 const Curve emilEaseOut = Cubic(0.23, 1.0, 0.32, 1.0);
 
-/// Apple-style spring scroll physics combining page snapping,
-/// fluid boundary rubber-band overscroll damping, and momentum flick dismissal.
+/// Ease-out, duration-based snap physics (no spring) for review deck cards.
+/// Emil: high-frequency swipes use crisp ease-out transitions instead of
+/// underdamped spring simulations that bounce and settle unpredictably.
+class EmilEaseOutDeckSimulation extends Simulation {
+  EmilEaseOutDeckSimulation({
+    required this.start,
+    required this.end,
+    this.duration = const Duration(milliseconds: 240),
+    this.curve = emilEaseOut,
+  });
+
+  final double start;
+  final double end;
+  final Duration duration;
+  final Curve curve;
+
+  double get _durationSeconds =>
+      duration.inMicroseconds / 1000000.0;
+
+  @override
+  double x(double time) {
+    final progress = (time / _durationSeconds).clamp(0.0, 1.0);
+    return start + (end - start) * curve.transform(progress);
+  }
+
+  @override
+  double dx(double time) {
+    const epsilon = 0.001;
+    return (x(time + epsilon) - x(time - epsilon)) / (2 * epsilon);
+  }
+
+  @override
+  bool isDone(double time) => time >= _durationSeconds;
+}
+
 class ReviewDeckScrollPhysics extends ScrollPhysics {
   const ReviewDeckScrollPhysics({super.parent});
 
-  /// Critically damped (zero-bounce) spring parameters.
-  /// Emil's guidance: avoid bounce in most UI contexts; keep springs
-  /// neutral so swipes settle without overshoot.
+  /// No spring is used for ballistic snapping. Kept only to satisfy
+  /// [ScrollPhysics.spring]; neutral/no-bounce description.
   static final SpringDescription appleSpring = SpringDescription.withDampingRatio(
     mass: 1.0,
     stiffness: 120.0,
@@ -104,12 +136,10 @@ class ReviewDeckScrollPhysics extends ScrollPhysics {
       final double end = position.pixels < position.minScrollExtent
           ? position.minScrollExtent
           : position.maxScrollExtent;
-      return ScrollSpringSimulation(
-        spring,
-        position.pixels,
-        end,
-        velocity,
-        tolerance: tolerance,
+      if (end == position.pixels) return null;
+      return EmilEaseOutDeckSimulation(
+        start: position.pixels,
+        end: end,
       );
     }
     if (parent != null) {
@@ -129,12 +159,9 @@ class ReviewDeckScrollPhysics extends ScrollPhysics {
     final double targetPixels =
         targetPage.roundToDouble() * position.viewportDimension;
     if (targetPixels != position.pixels) {
-      return ScrollSpringSimulation(
-        spring,
-        position.pixels,
-        targetPixels,
-        velocity,
-        tolerance: tolerance,
+      return EmilEaseOutDeckSimulation(
+        start: position.pixels,
+        end: targetPixels,
       );
     }
     return null;

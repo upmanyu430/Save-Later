@@ -745,10 +745,10 @@ void main() {
       final dampedOffset = physics.applyPhysicsToUserOffset(metrics, -10.0);
       expect(dampedOffset.abs(), lessThan(10.0));
 
-      // Out of range ballistic simulation springs back to edge
+      // Out of range ballistic simulation eases back to edge without spring
       final sim = physics.createBallisticSimulation(metrics, 0.0);
       expect(sim, isNotNull);
-      expect(sim, isA<ScrollSpringSimulation>());
+      expect(sim, isA<EmilEaseOutDeckSimulation>());
     });
   });
 }
