@@ -252,6 +252,22 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
           Offset(widget.cardRect.right + 24.0, widget.cardRect.top + 120.0),
         ]);
       }
+
+      // Keep bubbles inside the visible/safe viewport even for edge cards.
+      final padding = MediaQuery.paddingOf(context);
+      final viewportSize = MediaQuery.sizeOf(context);
+      final screenHeight = viewportSize.height;
+      final minDx = buttonRadius + padding.left;
+      final maxDx = viewportSize.width - buttonRadius - padding.right;
+      final minDy = buttonRadius + padding.top + kToolbarHeight;
+      final maxDy = screenHeight - buttonRadius - padding.bottom;
+      for (int i = 0; i < _buttonPositions.length; i++) {
+        final pos = _buttonPositions[i];
+        _buttonPositions[i] = Offset(
+          pos.dx.clamp(minDx, maxDx),
+          pos.dy.clamp(minDy, maxDy),
+        );
+      }
     }
   }
 
@@ -381,6 +397,8 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
                     duration: AppDurations.animationFast,
                     child: Text(
                       widget.actions[_selectedIndex].label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       textScaler: TextScaler.noScaling,
                       style: TextStyle(
                         color: selectedLabelColor,
