@@ -727,7 +727,7 @@ void main() {
       const physics = ReviewDeckScrollPhysics();
       expect(physics.spring.mass, equals(1.0));
       expect(physics.spring.stiffness, equals(120.0));
-      expect(physics.spring.damping, equals(14.0));
+      expect(physics.spring.damping, closeTo(21.908902300206645, 0.0001));
 
       final metrics = FixedScrollMetrics(
         minScrollExtent: 0.0,

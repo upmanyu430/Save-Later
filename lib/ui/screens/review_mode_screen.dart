@@ -23,13 +23,14 @@ const Curve emilEaseOut = Cubic(0.23, 1.0, 0.32, 1.0);
 class ReviewDeckScrollPhysics extends ScrollPhysics {
   const ReviewDeckScrollPhysics({super.parent});
 
-  /// Apple's { duration: 0.5, bounce: 0.18 } spring physics parameters.
-  static const SpringDescription appleSpring = SpringDescription(
+  /// Critically damped (zero-bounce) spring parameters.
+  /// Emil's guidance: avoid bounce in most UI contexts; keep springs
+  /// neutral so swipes settle without overshoot.
+  static final SpringDescription appleSpring = SpringDescription.withDampingRatio(
     mass: 1.0,
     stiffness: 120.0,
-    damping: 14.0,
+    ratio: 1.0,
   );
-
   /// Flick velocity threshold to trigger card advance (~600-800 dp/s).
   static const double flickThreshold = 700.0;
 
