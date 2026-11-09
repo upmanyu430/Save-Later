@@ -452,8 +452,8 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
                       child: Transform.scale(
                         scale: _anim.value,
                         child: AnimatedScale(
-                          duration: const Duration(milliseconds: 140),
-                          curve: const Cubic(0.23, 1.0, 0.32, 1.0),
+                          duration: const Duration(milliseconds: 180),
+                          curve: Curves.easeOutBack,
                           scale: isSelected ? 1.15 : 1.0,
                           child: Container(
                             decoration: BoxDecoration(
