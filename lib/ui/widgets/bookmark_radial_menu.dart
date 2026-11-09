@@ -439,7 +439,7 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
 
                   return Positioned(
                     left: currentDx - buttonRadius,
-                    top: currentDy - buttonRadius,
+                    top: currentDy - buttonRadius - (isSelected ? 6.0 : 0.0),
                     width: buttonRadius * 2,
                     height: buttonRadius * 2,
                     child: GestureDetector(
