@@ -192,7 +192,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         return ScaleTransition(
           scale: animation.drive(
             Tween<double>(begin: 0.82, end: 1.0).chain(
-              CurveTween(curve: Curves.easeOutBack),
+              CurveTween(curve: const Cubic(0.23, 1.0, 0.32, 1.0)),
             ),
           ),
           child: FadeTransition(opacity: animation, child: child),
@@ -979,7 +979,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         return ScaleTransition(
           scale: animation.drive(
             Tween<double>(begin: 0.85, end: 1.0).chain(
-              CurveTween(curve: Curves.easeOutBack),
+              CurveTween(curve: const Cubic(0.23, 1.0, 0.32, 1.0)),
             ),
           ),
           child: FadeTransition(
@@ -1220,7 +1220,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
-      reverseCurve: Curves.easeOutBack,
+      reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
     );
   }
 
@@ -1425,7 +1425,7 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
-      reverseCurve: Curves.easeOutBack,
+      reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
     );
   }
 

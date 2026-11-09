@@ -34,7 +34,7 @@ class DeleteConfirmationDialog extends StatelessWidget {
         return ScaleTransition(
           scale: animation.drive(
             Tween<double>(begin: 0.85, end: 1.0).chain(
-              CurveTween(curve: Curves.easeOutBack),
+              CurveTween(curve: const Cubic(0.23, 1.0, 0.32, 1.0)),
             ),
           ),
           child: FadeTransition(

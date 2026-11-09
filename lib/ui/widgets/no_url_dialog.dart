@@ -72,7 +72,7 @@ void showNoUrlDialog(BuildContext context) {
     },
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       return ScaleTransition(
-        scale: animation.drive(Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack))),
+        scale: animation.drive(Tween(begin: 0.8, end: 1.0).chain(CurveTween(curve: const Cubic(0.23, 1.0, 0.32, 1.0)))),
         child: FadeTransition(opacity: animation, child: child),
       );
     },

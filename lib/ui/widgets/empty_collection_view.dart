@@ -29,9 +29,6 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
   late final AnimationController _floatController;
   late final Animation<double> _floatAnimation;
 
-  late final AnimationController _bounceController;
-  late final Animation<double> _bounceAnimation;
-
   bool _isTestEnvironment() {
     if (kIsWeb) return false;
     try {
@@ -53,15 +50,6 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
       curve: Curves.easeInOutSine,
     );
 
-    _bounceController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 650),
-    );
-    _bounceAnimation = CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.elasticOut,
-    );
-
     if (widget.animate && !_isTestEnvironment()) {
       _floatController.repeat(reverse: true);
     }
@@ -70,13 +58,11 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
   @override
   void dispose() {
     _floatController.dispose();
-    _bounceController.dispose();
     super.dispose();
   }
 
   void _handleTap() {
     HapticFeedback.lightImpact();
-    _bounceController.forward(from: 0.0);
   }
 
   @override
@@ -91,17 +77,13 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
         width: w,
         height: h,
         child: AnimatedBuilder(
-          animation: Listenable.merge([_floatAnimation, _bounceAnimation]),
+          animation: _floatAnimation,
           builder: (context, _) {
             final floatProgress = _floatAnimation.value;
-            final bounceProgress = _bounceAnimation.value;
 
-            // Vertical translation: subtle float + spring bounce hop
+            // Vertical translation: subtle float
             final floatY = lerpDouble(0.0, -6.0, floatProgress)!;
-            final bounceHopY = bounceProgress > 0.0 && bounceProgress < 1.0
-                ? (1.0 - bounceProgress) * -10.0
-                : 0.0;
-            final totalOffsetY = floatY + bounceHopY;
+            final totalOffsetY = floatY;
 
             // Tilt rotation: slight playful sway
             final tiltAngle = lerpDouble(-0.015, 0.015, floatProgress)!;

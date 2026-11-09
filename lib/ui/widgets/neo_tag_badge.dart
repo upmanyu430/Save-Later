@@ -154,7 +154,7 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
     _animation = CurvedAnimation(
       parent: _pressController,
       curve: Curves.easeIn,
-      reverseCurve: Curves.easeOutBack,
+      reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
     );
   }
 

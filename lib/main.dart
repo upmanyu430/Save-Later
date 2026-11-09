@@ -41,7 +41,7 @@ CustomTransitionPage<T> _buildPageWithTransition<T>({
         position: animation.drive(Tween(
           begin: const Offset(1, 0),
           end: Offset.zero,
-        ).chain(CurveTween(curve: Curves.easeOutBack))),
+        ).chain(CurveTween(curve: const Cubic(0.23, 1.0, 0.32, 1.0)))),
         child: child,
       );
     },

@@ -205,7 +205,7 @@ class _CollectionRadialMenuOverlayWidgetState
     );
     _anim = CurvedAnimation(
       parent: _animController,
-      curve: Curves.easeOutBack,
+      curve: const Cubic(0.23, 1.0, 0.32, 1.0),
       reverseCurve: Curves.easeInCubic,
     );
     _scrimAnim = CurvedAnimation(
@@ -438,7 +438,7 @@ class _CollectionRadialMenuOverlayWidgetState
                         scale: _anim.value,
                         child: AnimatedScale(
                           duration: const Duration(milliseconds: 140),
-                          curve: Curves.easeOutBack,
+                          curve: const Cubic(0.23, 1.0, 0.32, 1.0),
                           scale: isSelected ? 1.15 : 1.0,
                           child: Container(
                             decoration: BoxDecoration(

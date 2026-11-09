@@ -57,7 +57,7 @@ class _NeoButtonState extends State<NeoButton>
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOut,
-      reverseCurve: Curves.easeOutBack,
+      reverseCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
     );
   }
 

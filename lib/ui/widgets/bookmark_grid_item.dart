@@ -126,7 +126,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
         );
       },
-    ).animate().slideY(curve: Curves.easeOutBack, duration: 400.ms).fadeIn();
+    ).animate().slideY(curve: const Cubic(0.23, 1.0, 0.32, 1.0), duration: 400.ms).fadeIn();
   }
   
   static const double _cardRadius = AppDimensions.radiusBookmarkCard;
@@ -263,7 +263,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         child: AnimatedScale(
                           scale: widget.isSelected ? 1.0 : 0.0,
                           duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeOutBack,
+                          curve: const Cubic(0.23, 1.0, 0.32, 1.0),
                           child: const Icon(
                             Icons.check, 
                             size: 16, 
