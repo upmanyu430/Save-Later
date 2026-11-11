@@ -47,7 +47,7 @@ class _NeoButtonState extends State<NeoButton>
   @override
   void initState() {
     super.initState();
-    // Emil Kowalski Design Engineering: Snappy 60ms press-down, 110ms spring release.
+    // Snappy 60ms press-down, 110ms spring release for immediate tactile feedback.
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 60),
@@ -130,7 +130,7 @@ class _NeoButtonState extends State<NeoButton>
               final hasShadow = baseOffset.dx != 0 || baseOffset.dy != 0;
               final pressOffset = baseOffset * t;
               final currentShadow = baseOffset * (1.0 - t).clamp(0.0, 1.0);
-              // Subtle scale (0.97 at peak press) per Emil Kowalski's guidelines
+              // Subtle scale compression (0.97 at peak press) simulating mechanical depression.
               final scale = 1.0 - (t * 0.03);
 
               return Transform.translate(

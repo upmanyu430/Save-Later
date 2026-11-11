@@ -41,7 +41,7 @@ class _NeoPressableState extends State<NeoPressable> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    // Emil Kowalski Design Engineering: Snappy 60ms press-down, 110ms spring release.
+    // Snappy 60ms press-down, 110ms spring release for immediate tactile feedback.
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 60),

@@ -15,11 +15,11 @@ import '../../utils/url_launcher.dart';
 import '../widgets/bookmark_image.dart';
 import 'package:save_later/config/app_constants.dart';
 
-/// Emil Kowalski's custom ease curve for crisp, physical button transitions.
+/// Custom ease-out curve providing snappy initial motion and crisp settling.
 const Curve emilEaseOut = Cubic(0.23, 1.0, 0.32, 1.0);
 
 /// Ease-out, duration-based snap physics (no spring) for review deck cards.
-/// Emil: high-frequency swipes use crisp ease-out transitions instead of
+/// High-frequency swipes use crisp ease-out transitions instead of
 /// underdamped spring simulations that bounce and settle unpredictably.
 class EmilEaseOutDeckSimulation extends Simulation {
   EmilEaseOutDeckSimulation({
