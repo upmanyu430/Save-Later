@@ -473,6 +473,42 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
+  Widget _buildBookmarkGrid(List<Bookmark> bookmarks, {required String keyPrefix}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
+        const crossAxisSpacing = AppDimensions.gridSpacingMd;
+        const desiredCardHeight = AppDimensions.gridBookmarkCardHeight;
+        final gridWidth = constraints.maxWidth;
+        final columnCount = (gridWidth /
+                (maxCrossAxisExtent + crossAxisSpacing))
+            .ceil()
+            .clamp(1, 10)
+            .toInt();
+
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columnCount,
+            crossAxisSpacing: crossAxisSpacing,
+            mainAxisSpacing: AppDimensions.gridSpacingMd,
+            mainAxisExtent: desiredCardHeight,
+          ),
+          itemCount: bookmarks.length,
+          itemBuilder: (context, index) {
+            final b = bookmarks[index];
+            return BookmarkGridItem(
+              key: ValueKey('${keyPrefix}_${b.id}'),
+              bookmark: b,
+              showCollectionPill: true,
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildSavesView(
     List<Bookmark> allBookmarks,
     AppLocalizations l10n,
@@ -502,26 +538,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: AppDimensions.gridSpacingMd,
-            mainAxisSpacing: AppDimensions.gridSpacingMd,
-            mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
-          ),
-          itemCount: allBookmarks.length,
-          itemBuilder: (context, index) {
-            final b = allBookmarks[index];
-            return BookmarkGridItem(
-              key: ValueKey('all_bookmark_${b.id}'),
-              bookmark: b,
-              showCollectionPill: true,
-            );
-          },
-        ),
+        _buildBookmarkGrid(allBookmarks, keyPrefix: 'all_bookmark'),
       ],
     );
   }
@@ -535,7 +552,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         if (pinned.isEmpty)
           const Center(
             child: Padding(
@@ -567,25 +583,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ),
           )
         else
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: AppDimensions.gridSpacingMd,
-              mainAxisSpacing: AppDimensions.gridSpacingMd,
-              mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
-            ),
-            itemCount: pinned.length,
-            itemBuilder: (context, index) {
-              final b = pinned[index];
-              return BookmarkGridItem(
-                key: ValueKey('pinned_bookmark_${b.id}'),
-                bookmark: b,
-                showCollectionPill: true,
-              );
-            },
-          ),
+          _buildBookmarkGrid(pinned, keyPrefix: 'pinned_bookmark'),
       ],
     );
   }
@@ -770,25 +768,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             )
           else
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: AppDimensions.gridSpacingMd,
-                mainAxisSpacing: AppDimensions.gridSpacingMd,
-                mainAxisExtent: AppDimensions.gridBookmarkCardHeight,
-              ),
-              itemCount: matchingBookmarks.length,
-              itemBuilder: (context, index) {
-                final b = matchingBookmarks[index];
-                return BookmarkGridItem(
-                  key: ValueKey('tag_bookmark_${b.id}'),
-                  bookmark: b,
-                  showCollectionPill: true,
-                );
-              },
-            ),
+            _buildBookmarkGrid(matchingBookmarks, keyPrefix: 'tag_bookmark'),
         ] else ...[
           const SizedBox(height: 24),
           const Center(

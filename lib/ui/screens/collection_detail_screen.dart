@@ -283,17 +283,14 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   }
   
   Widget _buildSelectButton(String label, {Color? color, Color? textColor, VoidCallback? onTap}) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
-      child: NeoButton(
-        onPressed: onTap,
-        color: color ?? Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        borderRadius: AppDimensions.radiusSm,
-        borderWidth: AppDimensions.borderWidthMd,
-        shadowOffset: 2.0,
-        child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
-      ),
+    return NeoButton(
+      onPressed: onTap,
+      color: color ?? Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      borderRadius: AppDimensions.radiusSm,
+      borderWidth: AppDimensions.borderWidthMd,
+      shadowOffset: 2.0,
+      child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
     );
   }
 
@@ -409,31 +406,47 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                     AppDimensions.paddingSm,
                   ),
                   child: _isSelectMode
-                      ? SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              Text(
-                                l10n.selectedCount(_selectedIds.length),
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                              ),
-                              const SizedBox(width: AppDimensions.paddingSm),
-                              _buildSelectButton(l10n.selectAll, onTap: () {
-                                setState(() {
-                                  _selectedIds.addAll(bookmarks.map((b) => b.id));
-                                });
-                              }),
-                              _buildSelectButton(l10n.share, onTap: () => _shareSelected(bookmarks)),
-                              _buildSelectButton(l10n.move, onTap: () => _moveSelected(bookmarks)),
-                              _buildSelectButton(l10n.delete, color: const Color(0xFFEF476F), textColor: Colors.white, onTap: () => _deleteSelected(bookmarks)),
-                              _buildSelectButton(l10n.cancel, onTap: () {
-                                setState(() {
-                                  _isSelectMode = false;
-                                  _selectedIds.clear();
-                                });
-                              }),
-                            ],
-                          ),
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  l10n.selectedCount(_selectedIds.length),
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                                ),
+                                _buildSelectButton(l10n.cancel, onTap: () {
+                                  setState(() {
+                                    _isSelectMode = false;
+                                    _selectedIds.clear();
+                                  });
+                                }),
+                              ],
+                            ),
+                            const SizedBox(height: AppDimensions.paddingSm),
+                            Row(
+                              children: [
+                                _buildSelectButton(l10n.selectAll, onTap: () {
+                                  setState(() {
+                                    _selectedIds.addAll(bookmarks.map((b) => b.id));
+                                  });
+                                }),
+                                const SizedBox(width: AppDimensions.paddingSm),
+                                _buildSelectButton(l10n.share, onTap: () => _shareSelected(bookmarks)),
+                                const SizedBox(width: AppDimensions.paddingSm),
+                                _buildSelectButton(l10n.move, onTap: () => _moveSelected(bookmarks)),
+                                const SizedBox(width: AppDimensions.paddingSm),
+                                _buildSelectButton(
+                                  l10n.delete,
+                                  color: const Color(0xFFEF476F),
+                                  textColor: Colors.white,
+                                  onTap: () => _deleteSelected(bookmarks),
+                                ),
+                              ],
+                            ),
+                          ],
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

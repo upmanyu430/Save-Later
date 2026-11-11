@@ -735,17 +735,23 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           spacing: 8.0,
                           runSpacing: 8.0,
                           children: [
-                            ...bookmark.tags.map((tag) => GestureDetector(
-                                  onLongPress: () => _confirmRemoveTag(tag),
-                                  child: NeoBox(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                    borderRadius: AppDimensions.radiusSm,
-                                    borderWidth: 2,
-                                    child: Text(
-                                      tag.isEmpty
-                                          ? tag
-                                          : '${tag[0].toUpperCase()}${tag.substring(1)}',
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                            ...bookmark.tags.map((tag) => ConstrainedBox(
+                                  constraints: const BoxConstraints(minHeight: 44),
+                                  child: Center(
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onLongPress: () => _confirmRemoveTag(tag),
+                                      child: NeoBox(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                        borderRadius: AppDimensions.radiusSm,
+                                        borderWidth: 2,
+                                        child: Text(
+                                          tag.isEmpty
+                                              ? tag
+                                              : '${tag[0].toUpperCase()}${tag.substring(1)}',
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 )),
@@ -1715,15 +1721,15 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                             ),
                           ),
                           SizedBox(
-                            width: 32,
-                            height: 32,
+                            width: 44,
+                            height: 44,
                             child: NeoButton(
                               onPressed: () => Navigator.of(context).pop(),
                               padding: EdgeInsets.zero,
                               color: AppTheme.cardColor,
                               borderRadius: AppDimensions.radiusSm,
                               borderWidth: 2,
-                              child: const Icon(Icons.close, size: 18),
+                              child: const Icon(Icons.close, size: 20),
                             ),
                           ),
                         ],
@@ -1927,32 +1933,37 @@ class _TagAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NeoPressable(
-      onTap: onPressed,
-      shadowOffset: 2.0,
-      scaleSquash: 0.04,
-      builder: (context, t, shadowOffset) {
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppTheme.accent,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-            border: Border.all(color: AppTheme.border, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.border,
-                offset: Offset(shadowOffset, shadowOffset),
-                blurRadius: 0,
-                spreadRadius: 0,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+      child: Center(
+        child: NeoPressable(
+          onTap: onPressed,
+          shadowOffset: 2.0,
+          scaleSquash: 0.04,
+          builder: (context, t, shadowOffset) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppTheme.accent,
+                borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                border: Border.all(color: AppTheme.border, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.border,
+                    offset: Offset(shadowOffset, shadowOffset),
+                    blurRadius: 0,
+                    spreadRadius: 0,
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-          ),
-        );
-      },
+              child: Text(
+                label,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

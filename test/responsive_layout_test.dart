@@ -4,6 +4,7 @@ import 'package:save_later/config/app_constants.dart';
 import 'package:save_later/ui/widgets/delete_confirmation_dialog.dart';
 import 'package:save_later/ui/widgets/moved_success_dialog.dart';
 import 'package:save_later/ui/widgets/no_url_dialog.dart';
+import 'package:save_later/ui/widgets/collection_editor_modal.dart';
 import 'package:save_later/ui/screens/settings_screen.dart';
 import 'package:save_later/ui/screens/icon_picker_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -166,5 +167,36 @@ void main() {
       ),
     );
     expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isTrue);
+  });
+
+  testWidgets('CollectionEditorModal close button has minimum 44x44 touch target dimensions',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        localizationsDelegates: [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        home: Scaffold(
+          body: CollectionEditorModal(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final closeButtonFinder = find.descendant(
+      of: find.byType(CollectionEditorModal),
+      matching: find.byIcon(Icons.close),
+    );
+    expect(closeButtonFinder, findsOneWidget);
+
+    final sizedBoxFinder = find.ancestor(
+      of: closeButtonFinder,
+      matching: find.byType(SizedBox),
+    );
+    final sizedBox = tester.widget<SizedBox>(sizedBoxFinder.first);
+    expect(sizedBox.width, greaterThanOrEqualTo(44.0));
+    expect(sizedBox.height, greaterThanOrEqualTo(44.0));
   });
 }

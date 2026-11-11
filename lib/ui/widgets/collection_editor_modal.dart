@@ -287,8 +287,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   const SizedBox(
                                       width: AppDimensions.paddingSm),
                                   SizedBox(
-                                    width: 32,
-                                    height: 32,
+                                    width: 44,
+                                    height: 44,
                                     child: NeoButton(
                                       onPressed: () {
                                         if (Navigator.canPop(context)) {
@@ -300,7 +300,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                       borderWidth: 2,
                                       borderRadius: AppDimensions.radiusSm,
                                       shadowOffset: 0,
-                                      child: const Icon(Icons.close, size: 18),
+                                      child: const Icon(Icons.close, size: 20),
                                     ),
                                   ),
                                 ],
@@ -376,6 +376,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               final isSelected = _selectedColorHex == colorHex;
 
                               return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
                                 onTap: () {
                                   HapticFeedback.lightImpact();
                                   setState(() => _selectedColorHex = colorHex);
@@ -470,6 +471,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                       _selectedIconCode == icon.codePoint;
 
                                   return GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
                                     onTap: () {
                                       HapticFeedback.lightImpact();
                                       setState(() =>
