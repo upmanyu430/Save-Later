@@ -244,6 +244,50 @@ class _CollectionRadialMenuOverlayWidgetState
           Offset(widget.cardRect.right - 98.0, widget.cardRect.top - 32.0),
         ]);
       }
+
+      // Keep bubbles inside the visible/safe viewport as a cohesive group
+      // so relative spacing and clearances between bubbles are never distorted.
+      final padding = MediaQuery.paddingOf(context);
+      final viewportSize = MediaQuery.sizeOf(context);
+      final screenHeight = viewportSize.height;
+      final minDx = buttonRadius + padding.left;
+      final maxDx = viewportSize.width - buttonRadius - padding.right;
+      final minDy = buttonRadius + padding.top;
+      final maxDy = screenHeight - buttonRadius - padding.bottom;
+
+      double minBubbleX = double.infinity;
+      double maxBubbleX = -double.infinity;
+      double minBubbleY = double.infinity;
+      double maxBubbleY = -double.infinity;
+
+      for (final pos in _buttonPositions) {
+        minBubbleX = math.min(minBubbleX, pos.dx);
+        maxBubbleX = math.max(maxBubbleX, pos.dx);
+        minBubbleY = math.min(minBubbleY, pos.dy);
+        maxBubbleY = math.max(maxBubbleY, pos.dy);
+      }
+
+      double shiftX = 0.0;
+      double shiftY = 0.0;
+
+      if (minBubbleX < minDx) {
+        shiftX = minDx - minBubbleX;
+      } else if (maxBubbleX > maxDx) {
+        shiftX = maxDx - maxBubbleX;
+      }
+
+      if (minBubbleY < minDy) {
+        shiftY = minDy - minBubbleY;
+      } else if (maxBubbleY > maxDy) {
+        shiftY = maxDy - maxBubbleY;
+      }
+
+      if (shiftX != 0.0 || shiftY != 0.0) {
+        final shift = Offset(shiftX, shiftY);
+        for (int i = 0; i < _buttonPositions.length; i++) {
+          _buttonPositions[i] = _buttonPositions[i] + shift;
+        }
+      }
     }
   }
 

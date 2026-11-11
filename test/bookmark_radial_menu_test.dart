@@ -201,4 +201,87 @@ void main() {
     BookmarkRadialMenu.dismiss();
     await tester.pumpAndSettle();
   });
+
+  testWidgets(
+      'Bookmark radial menu buttons maintain non-overlapping balanced spacing when card is near top edge',
+      (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.625;
+    tester.view.padding = const FakeViewPadding(top: 63, bottom: 0, left: 0, right: 0);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+      tester.view.resetPadding();
+    });
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(fakeRepo),
+        ],
+        child: buildTestApp(
+          home: Scaffold(
+            body: Consumer(
+              builder: (context, ref, _) {
+                return ElevatedButton(
+                  onPressed: () {
+                    BookmarkRadialMenu.show(
+                      context: context,
+                      child: const SizedBox(width: 180, height: 200),
+                      bookmark: testBookmark,
+                      cardRect: const Rect.fromLTWH(16, 40, 180, 200),
+                      ref: ref,
+                    );
+                  },
+                  child: const Text('Show Menu'),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Open menu
+    await tester.tap(find.text('Show Menu'));
+    await tester.pumpAndSettle();
+
+    final openFinder = find.byIcon(Icons.open_in_new);
+    final pinFinder = find.byIcon(Icons.push_pin_outlined);
+    final shareFinder = find.byIcon(Icons.share_outlined);
+    final deleteFinder = find.byIcon(Icons.delete_outline);
+
+    final openCenter = tester.getCenter(openFinder);
+    final pinCenter = tester.getCenter(pinFinder);
+    final shareCenter = tester.getCenter(shareFinder);
+    final deleteCenter = tester.getCenter(deleteFinder);
+
+    final distOpenPin = (openCenter - pinCenter).distance;
+    final distPinShare = (pinCenter - shareCenter).distance;
+    final distShareDelete = (shareCenter - deleteCenter).distance;
+
+    // All consecutive buttons must maintain equidistant spacing (~75.3 dp)
+    expect(distOpenPin, closeTo(75.3, 1.0));
+    expect(distPinShare, closeTo(75.3, 1.0));
+    expect(distShareDelete, closeTo(75.3, 1.0));
+
+    // Every button center must be far enough from every other button (diameter 62.0 dp + gap >= 13 dp)
+    expect(distOpenPin, greaterThan(70.0));
+    expect(distPinShare, greaterThan(70.0));
+    expect(distShareDelete, greaterThan(70.0));
+
+    // Check all pairwise distances to guarantee no overlaps
+    final centers = [openCenter, pinCenter, shareCenter, deleteCenter];
+    for (int i = 0; i < centers.length; i++) {
+      for (int j = i + 1; j < centers.length; j++) {
+        expect((centers[i] - centers[j]).distance, greaterThan(62.0),
+            reason: 'Buttons $i and $j must not overlap');
+      }
+    }
+
+    BookmarkRadialMenu.dismiss();
+    await tester.pumpAndSettle();
+  });
 }
