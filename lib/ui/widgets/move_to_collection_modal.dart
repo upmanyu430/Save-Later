@@ -109,7 +109,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFFFFF4D0)
@@ -126,30 +126,30 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           children: [
             // Unsorted Icon Box
             Container(
-              width: 38,
-              height: 38,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: const Color(0xFFE5E5E5),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: AppTheme.border,
-                  width: 2.0,
+                  width: 1.8,
                 ),
               ),
               child: const Icon(
                 Icons.folder_off_outlined,
                 color: AppTheme.border,
-                size: 20,
+                size: 18,
               ),
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 l10n?.unsorted ?? 'Unsorted',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.border,
                 ),
@@ -346,7 +346,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     });
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? const Color(0xFFFFF4D0)
@@ -363,14 +363,14 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                       children: [
                                         // Collection Icon Box
                                         Container(
-                                          width: 38,
-                                          height: 38,
+                                          width: 32,
+                                          height: 32,
                                           decoration: BoxDecoration(
                                             color: col.color,
-                                            borderRadius: BorderRadius.circular(8),
+                                            borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
                                               color: AppTheme.border,
-                                              width: 2.0,
+                                              width: 1.8,
                                             ),
                                           ),
                                           child: Icon(
@@ -379,10 +379,10 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                               col.iconFontFamily,
                                             ),
                                             color: iconColor,
-                                            size: 20,
+                                            size: 18,
                                           ),
                                         ),
-                                        const SizedBox(width: 14),
+                                        const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -393,7 +393,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
-                                                  fontSize: 16,
+                                                  fontSize: 15,
                                                   fontWeight: FontWeight.w800,
                                                   color: AppTheme.border,
                                                 ),
