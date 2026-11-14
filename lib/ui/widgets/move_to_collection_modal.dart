@@ -458,7 +458,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           18.0,
                           0.0,
                           18.0,
-                          14.0 + MediaQuery.paddingOf(context).bottom,
+                          30.0 + MediaQuery.paddingOf(context).bottom,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
