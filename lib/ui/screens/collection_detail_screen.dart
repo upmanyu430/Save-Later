@@ -853,6 +853,11 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final bottomPadding = bottomInset > 0
+        ? 16.0
+        : (20.0 + MediaQuery.paddingOf(context).bottom);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => Navigator.pop(context),
@@ -860,9 +865,9 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
         bottom: false,
         child: Padding(
           padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+            left: 5.0,
+            right: 5.0,
+            bottom: bottomInset,
           ),
           child: Align(
             alignment: Alignment.bottomCenter,
@@ -872,24 +877,34 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
                 child: Container(
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
-                    borderRadius: BorderRadius.circular(28),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(55),
                     border: Border.all(color: AppTheme.border, width: 2.5),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(2.8, 2.8),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                      ),
-                    ],
                   ),
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.only(
+                    top: 14,
+                    left: 20,
+                    right: 20,
+                    bottom: bottomPadding,
+                  ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      // Drag handle
+                      Center(
+                        child: Container(
+                          width: 48,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: AppTheme.border,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.paddingLg),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [

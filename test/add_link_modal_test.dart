@@ -9,6 +9,7 @@ import 'package:save_later/models/bookmark.dart';
 import 'package:save_later/models/collection.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/repositories/isar_repository.dart';
+import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/screens/collection_detail_screen.dart';
 import 'package:save_later/ui/widgets/neo_box.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
@@ -150,6 +151,19 @@ void main() {
 
     // Verify Close button
     expect(find.byIcon(Icons.close), findsOneWidget);
+
+    // Verify 55dp corner radius, 2.5 border, and white background
+    final containers = tester.widgetList<Container>(find.byType(Container));
+    final modalContainer = containers.firstWhere(
+      (c) =>
+          c.decoration is BoxDecoration &&
+          (c.decoration as BoxDecoration).borderRadius ==
+              BorderRadius.circular(55),
+    );
+    final boxDecoration = modalContainer.decoration as BoxDecoration;
+    expect(boxDecoration.borderRadius, BorderRadius.circular(55));
+    expect(boxDecoration.border, Border.all(color: AppTheme.border, width: 2.5));
+    expect(boxDecoration.color, Colors.white);
   });
 
   testWidgets('Tapping Paste button populates TextField from clipboard', (tester) async {
