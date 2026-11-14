@@ -289,7 +289,7 @@ void main() {
     );
   });
 
-  testWidgets('ShareSaveModal has exact height matching CollectionEditorModal collapsed height', (tester) async {
+  testWidgets('ShareSaveModal fits content without large gap and caps at CollectionEditorModal collapsed height', (tester) async {
     final repo = _MockRepo();
 
     await tester.pumpWidget(
@@ -321,11 +321,49 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Check that the card container in ShareSaveModal has the expected height
+    // Check that the card container in ShareSaveModal wraps content without the gap
     final cardFinder = find.byKey(const ValueKey('share_save_modal_sheet'));
     final cardSize = tester.getSize(cardFinder);
     final context = tester.element(cardFinder);
     final expected = CollectionEditorModal.getCollapsedModalHeight(context);
-    expect(cardSize.height, closeTo(expected, 0.01));
+    expect(cardSize.height, lessThan(expected));
+
+    // When there are many collections, height is capped at expected
+    for (int i = 0; i < 15; i++) {
+      repo.collections.add(BookmarkCollection()
+        ..id = 100 + i
+        ..name = 'Collection $i'
+        ..colorHex = 'FF2196F3'
+        ..iconCodePoint = Icons.folder.codePoint
+        ..iconFontFamily = kStoredIconFontFamily);
+    }
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(repo),
+          allCollectionsProvider.overrideWith((ref) => Future.value(repo.collections)),
+        ],
+        child: _buildTestApp(
+          child: Builder(
+            builder: (context) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: ShareSaveModal(
+                      url: 'https://flutter.dev',
+                      onSave: (col, isPinned) async {},
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final cappedCardSize = tester.getSize(cardFinder);
+    expect(cappedCardSize.height, closeTo(expected, 0.01));
   });
 }

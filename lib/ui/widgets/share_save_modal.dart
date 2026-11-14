@@ -212,7 +212,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
             ),
             child: SizedBox(
               key: const ValueKey('share_save_modal_sheet'),
-              height: sheetHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
@@ -224,25 +223,26 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                     borderRadius: BorderRadius.circular(55),
                     border: Border.all(color: AppTheme.border, width: 2.5),
                   ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Pinned Drag Handle ONLY
-                        Padding(
-                          padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                          child: Center(
-                            child: Container(
-                              width: 44,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: AppTheme.border,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Pinned Drag Handle ONLY
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                        child: Center(
+                          child: Container(
+                            width: 44,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppTheme.border,
+                              borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ),
-                        Expanded(
-                          child: SingleChildScrollView(
+                      ),
+                      Flexible(
+                        child: SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(horizontal: 18.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -629,8 +629,11 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveHeight =
-        widget.targetHeight ?? (MediaQuery.sizeOf(context).height * 0.55);
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final effectiveHeight = math.max(
+      270.0 + bottomPadding,
+      widget.targetHeight ?? (MediaQuery.sizeOf(context).height * 0.55),
+    );
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -666,25 +669,27 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                     24.0,
                     14.0,
                     24.0,
-                    36.0 + MediaQuery.paddingOf(context).bottom,
+                    24.0 + bottomPadding,
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Top Drag Handle
-                      Center(
-                        child: Container(
-                          width: 48,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 24),
-                          decoration: BoxDecoration(
-                            color: AppTheme.border,
-                            borderRadius: BorderRadius.circular(2),
+                  child: SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Top Drag Handle
+                        Center(
+                          child: Container(
+                            width: 48,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: AppTheme.border,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 36),
+                        const SizedBox(height: 16),
 
                       // Green Circle Check Badge
                       Container(
@@ -740,6 +745,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                 ),
               ),
             ),
+          ),
           ),
         ),
       ),
