@@ -856,7 +856,8 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final bottomPadding = bottomInset > 0
         ? 16.0
-        : (20.0 + MediaQuery.paddingOf(context).bottom);
+        : (AppDimensions.modalActionButtonBottomPadding +
+            MediaQuery.paddingOf(context).bottom);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,

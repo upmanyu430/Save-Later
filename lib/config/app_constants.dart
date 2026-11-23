@@ -47,6 +47,9 @@ class AppDimensions {
   static const double dialogHeaderButtonSize = 39.6;
   static const double dialogHeaderIconSize = 21.6;
 
+  // Dialog Modals Bottom Action Button Clearance
+  static const double modalActionButtonBottomPadding = 38.0;
+
   // Responsive Layout
   static const double maxContentWidth = 600.0;
   static const double maxDialogWidth = 400.0;

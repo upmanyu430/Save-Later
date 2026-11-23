@@ -36,8 +36,8 @@ class CollectionEditorModal extends ConsumerStatefulWidget {
     // Icon grid: 3 rows of items + 2 gaps of 7.0
     final iconGridHeight = (3 * itemWidth) + 14.0;
 
-    // Fixed layout elements total: 284.83 dp (adjusted for font metrics)
-    const fixedContentHeight = 284.83;
+    // Fixed layout elements total: 308.83 dp (adjusted for font metrics and modalActionButtonBottomPadding 38.0)
+    const fixedContentHeight = 308.83;
     final baseHeight = fixedContentHeight + colorGridHeight + iconGridHeight;
     return baseHeight + bottomPadding;
   }
@@ -251,7 +251,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                           18.0,
                           bottomInset > 0
                               ? (14.0 + bottomInset)
-                              : (14.0 + MediaQuery.paddingOf(context).bottom),
+                              : (AppDimensions.modalActionButtonBottomPadding +
+                                  MediaQuery.paddingOf(context).bottom),
                         ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,

@@ -507,7 +507,8 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                       18.0,
                       0.0,
                       18.0,
-                      30.0 + MediaQuery.paddingOf(context).bottom,
+                      AppDimensions.modalActionButtonBottomPadding +
+                          MediaQuery.paddingOf(context).bottom,
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
