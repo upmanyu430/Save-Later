@@ -114,7 +114,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFFFFF4D0)
@@ -131,20 +132,20 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           children: [
             // Unsorted Icon Box
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: const Color(0xFFE5E5E5),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: AppTheme.border,
-                  width: 1.8,
+                  width: 1.5,
                 ),
               ),
               child: const Icon(
                 Icons.folder_off_outlined,
                 color: AppTheme.border,
-                size: 18,
+                size: 16,
               ),
             ),
             const SizedBox(width: 12),
@@ -154,7 +155,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14.5,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.border,
                 ),
@@ -164,7 +165,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
               const Icon(
                 Icons.check_circle_rounded,
                 color: AppTheme.border,
-                size: 20,
+                size: 18,
               ),
           ],
         ),
@@ -340,7 +341,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     });
                                   },
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? const Color(0xFFFFF4D0)
@@ -357,14 +359,14 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                       children: [
                                         // Collection Icon Box
                                         Container(
-                                          width: 32,
-                                          height: 32,
+                                          width: 28,
+                                          height: 28,
                                           decoration: BoxDecoration(
                                             color: col.color,
                                             borderRadius: BorderRadius.circular(6),
                                             border: Border.all(
                                               color: AppTheme.border,
-                                              width: 1.8,
+                                              width: 1.5,
                                             ),
                                           ),
                                           child: Icon(
@@ -373,7 +375,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                               col.iconFontFamily,
                                             ),
                                             color: iconColor,
-                                            size: 18,
+                                            size: 16,
                                           ),
                                         ),
                                         const SizedBox(width: 12),
@@ -387,7 +389,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
-                                                  fontSize: 15,
+                                                  fontSize: 14.5,
                                                   fontWeight: FontWeight.w800,
                                                   color: AppTheme.border,
                                                 ),
@@ -404,7 +406,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                     return Text(
                                                       'in ${parent.name}',
                                                       style: TextStyle(
-                                                        fontSize: 12,
+                                                        fontSize: 11,
                                                         fontWeight: FontWeight.w600,
                                                         color: Colors.black.withValues(alpha: 0.5),
                                                       ),
@@ -419,7 +421,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                           const Icon(
                                             Icons.check_circle_rounded,
                                             color: AppTheme.border,
-                                            size: 20,
+                                            size: 18,
                                           ),
                                       ],
                                     ),

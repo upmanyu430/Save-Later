@@ -120,7 +120,8 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -134,20 +135,20 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
         child: Row(
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 color: const Color(0xFFE5E5E5),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: AppTheme.border,
-                  width: 1.8,
+                  width: 1.5,
                 ),
               ),
               child: const Icon(
                 Icons.folder_outlined,
                 color: AppTheme.border,
-                size: 18,
+                size: 16,
               ),
             ),
             const SizedBox(width: 12),
@@ -157,7 +158,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14.5,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.border,
                 ),
@@ -167,7 +168,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
               const Icon(
                 Icons.check_circle_outline,
                 color: Color(0xFFFDD164),
-                size: 20,
+                size: 18,
               ),
           ],
         ),
@@ -312,8 +313,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             });
                           },
                           child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 16.0),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                                horizontal: 14, vertical: 5.5),
                             decoration: BoxDecoration(
                               color: _isPinned
                                   ? const Color(0xFFFFF4D0)
@@ -330,7 +332,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                               children: [
                                 PinIcon(
                                   isPinned: _isPinned,
-                                  size: 20,
+                                  size: 18,
                                   color: _isPinned
                                       ? const Color(0xFFFDD164)
                                       : AppTheme.border,
@@ -342,7 +344,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 14.5,
                                       fontWeight: FontWeight.w800,
                                       color: AppTheme.border,
                                     ),
@@ -391,8 +393,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                       });
                                     },
                                     child: Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 16.0),
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 14, vertical: 6),
+                                          horizontal: 14, vertical: 4.5),
                                       decoration: BoxDecoration(
                                         color: isSelected
                                             ? const Color(0xFFFFF4D0)
@@ -408,14 +411,14 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                       child: Row(
                                         children: [
                                           Container(
-                                            width: 32,
-                                            height: 32,
+                                            width: 28,
+                                            height: 28,
                                             decoration: BoxDecoration(
                                               color: col.color,
                                               borderRadius: BorderRadius.circular(6),
                                               border: Border.all(
                                                 color: AppTheme.border,
-                                                width: 1.8,
+                                                width: 1.5,
                                               ),
                                             ),
                                             child: Icon(
@@ -424,7 +427,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                 col.iconFontFamily,
                                               ),
                                               color: iconColor,
-                                              size: 18,
+                                              size: 16,
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -439,7 +442,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: const TextStyle(
-                                                    fontSize: 15,
+                                                    fontSize: 14.5,
                                                     fontWeight: FontWeight.w800,
                                                     color: AppTheme.border,
                                                   ),
@@ -457,7 +460,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                       return Text(
                                                         'in ${parent.name}',
                                                         style: TextStyle(
-                                                          fontSize: 12,
+                                                          fontSize: 11,
                                                           fontWeight: FontWeight.w600,
                                                           color: Colors.black
                                                               .withValues(alpha: 0.5),
@@ -473,7 +476,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                             const Icon(
                                               Icons.check_circle_outline,
                                               color: Color(0xFFFDD164),
-                                              size: 20,
+                                              size: 18,
                                             ),
                                         ],
                                       ),
