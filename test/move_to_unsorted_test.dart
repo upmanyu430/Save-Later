@@ -275,7 +275,7 @@ void main() {
       expect(find.byKey(const ValueKey('collection_unsorted')), findsOneWidget);
       expect(find.text('Unsorted'), findsOneWidget);
       expect(find.text('No collections yet'), findsOneWidget);
-      expect(find.text('Create New Collection'), findsOneWidget);
+      expect(find.text('Create New Collection'), findsNothing);
 
       // Tap Unsorted
       await tester.tap(find.byKey(const ValueKey('collection_unsorted')));

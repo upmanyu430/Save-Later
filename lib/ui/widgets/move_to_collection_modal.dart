@@ -282,32 +282,17 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     _buildUnsortedTile(context),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 24.0),
-                                      child: Column(
-                                        children: [
-                                          const Text(
-                                            'No collections yet',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w700,
-                                              color: Colors.black54,
-                                            ),
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                                      child: Center(
+                                        child: Text(
+                                          'No collections yet',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.black54,
                                           ),
-                                          const SizedBox(height: 12),
-                                          NeoButton(
-                                            onPressed: _openCreateCollection,
-                                            color: AppTheme.accent,
-                                            borderWidth: 2,
-                                            borderRadius: 12,
-                                            shadowOffset: 2,
-                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                            child: const Text(
-                                              'Create New Collection',
-                                              style: TextStyle(fontWeight: FontWeight.w800, color: AppTheme.border),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ],
