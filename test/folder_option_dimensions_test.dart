@@ -161,5 +161,24 @@ void main() {
     );
     expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
     expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5));
+
+    // Tap on Unsorted to select it and verify yellow selection colors
+    await tester.tap(unsortedFinder);
+    await tester.pumpAndSettle();
+
+    final selectedUnsorted = tester.widget<Container>(
+      find.descendant(of: unsortedFinder, matching: find.byType(Container)).first,
+    );
+    final dec = selectedUnsorted.decoration as BoxDecoration;
+    expect(dec.color, const Color(0xFFFFF4D0));
+    expect((dec.border as Border).top.color, const Color(0xFFFDD164));
+    expect(
+      find.descendant(of: unsortedFinder, matching: find.byIcon(Icons.check_circle_outline)),
+      findsOneWidget,
+    );
+    final checkIcon = tester.widget<Icon>(
+      find.descendant(of: unsortedFinder, matching: find.byIcon(Icons.check_circle_outline)),
+    );
+    expect(checkIcon.color, const Color(0xFFFDD164));
   });
 }

@@ -123,9 +123,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
-                ? AppTheme.border
+                ? const Color(0xFFFDD164)
                 : Colors.black.withValues(alpha: 0.08),
-            width: 2.0,
+            width: isSelected ? 1.5 : 2.0,
           ),
         ),
         child: Row(
@@ -163,8 +163,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
             ),
             if (isSelected)
               const Icon(
-                Icons.check_circle_rounded,
-                color: AppTheme.border,
+                Icons.check_circle_outline,
+                color: Color(0xFFFDD164),
                 size: 18,
               ),
           ],
@@ -350,9 +350,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                       borderRadius: BorderRadius.circular(10),
                                       border: Border.all(
                                         color: isSelected
-                                            ? AppTheme.border
+                                            ? const Color(0xFFFDD164)
                                             : Colors.black.withValues(alpha: 0.08),
-                                        width: 2.0,
+                                        width: isSelected ? 1.5 : 2.0,
                                       ),
                                     ),
                                     child: Row(
@@ -419,8 +419,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                         ),
                                         if (isSelected)
                                           const Icon(
-                                            Icons.check_circle_rounded,
-                                            color: AppTheme.border,
+                                            Icons.check_circle_outline,
+                                            color: Color(0xFFFDD164),
                                             size: 18,
                                           ),
                                       ],

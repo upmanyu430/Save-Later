@@ -169,7 +169,7 @@ void main() {
 
       // Button should now say 'Move to "Unsorted"'
       expect(find.text('Move to "Unsorted"'), findsOneWidget);
-      expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
 
       // Tap the 'Move to "Unsorted"' button
       await tester.tap(find.text('Move to "Unsorted"'));
