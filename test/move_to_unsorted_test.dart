@@ -283,6 +283,40 @@ void main() {
       expect(find.text('Move to "Unsorted"'), findsOneWidget);
     });
 
+    testWidgets('uses a compact sheet when there are no collections', (tester) async {
+      final repo = MockMoveRepository();
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (ctx) => const MoveToCollectionModal(),
+                );
+              },
+              child: const Text('Open Modal'),
+            ),
+          ),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value([])),
+          ],
+        ),
+      );
+
+      await tester.tap(find.text('Open Modal'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getSize(find.byKey(const ValueKey('move_to_collection_modal_sheet'))).height,
+        352.0,
+      );
+    });
+
     testWidgets('Moves single bookmark to Unsorted via BookmarkNotifier when onMove is null', (tester) async {
       final repo = MockMoveRepository();
       final col = BookmarkCollection()
@@ -471,6 +505,14 @@ void main() {
     });
     testWidgets('MoveToCollectionModal has exact height matching CollectionEditorModal collapsed height', (tester) async {
       final repo = MockMoveRepository();
+      repo.collectionsList.add(
+        BookmarkCollection()
+          ..id = 1
+          ..name = 'Reading'
+          ..iconCodePoint = Icons.book.codePoint
+          ..iconFontFamily = 'MaterialIcons'
+          ..colorHex = '#FFD166',
+      );
 
       await tester.pumpWidget(
         ProviderScope(

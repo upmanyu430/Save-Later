@@ -62,6 +62,11 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
 }
 
 class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
+  // The empty state only contains the Unsorted destination and its helper text.
+  // Keeping it independent of the collection editor's height avoids a large,
+  // empty scroll area when there are no collections to choose from.
+  static const _emptyStateModalHeight = 352.0;
+
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = false;
 
@@ -182,7 +187,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     final targetModalHeight =
         CollectionEditorModal.getCollapsedModalHeight(context);
     final availableHeight = screenHeight - topClearance - bottomInset;
-    final sheetHeight = math.min(availableHeight, targetModalHeight);
+    final hasNoCollections = collectionsAsync.valueOrNull?.isEmpty ?? false;
+    final desiredModalHeight = hasNoCollections
+        ? _emptyStateModalHeight + MediaQuery.paddingOf(context).bottom
+        : targetModalHeight;
+    final sheetHeight = math.min(availableHeight, desiredModalHeight);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
