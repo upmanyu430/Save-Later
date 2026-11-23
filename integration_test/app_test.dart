@@ -13,24 +13,7 @@ void main() {
     // 1. Verify Home Screen is present
     expect(find.textContaining('Save now'), findsOneWidget);
 
-    // 2. Test Quick Save
-    // Find the url text field
-    final urlField = find.byType(TextField);
-    expect(urlField, findsOneWidget);
-    await tester.enterText(urlField, 'https://flutter.dev');
-    
-    // Tap the submit button
-    // It's the NeoButton inside the row.
-    final addIcon = find.byIcon(Icons.add);
-    expect(addIcon, findsOneWidget);
-    await tester.tap(addIcon);
-    await tester.pumpAndSettle();
-
-    // Wait for the metadata fetch to complete
-    // Since it's a real HTTP call, we'll give it some time
-    await tester.pump(const Duration(seconds: 3));
-
-    // 3. Test Create Collection Modal
+    // 2. Test Create Collection Modal
     final createColIcon = find.byIcon(Icons.create_new_folder_outlined);
     expect(createColIcon, findsOneWidget);
     await tester.tap(createColIcon);
@@ -51,6 +34,23 @@ void main() {
 
     // Verify collection was created and is visible
     expect(find.text('Test Collection'), findsOneWidget);
+
+    // 3. Test Quick Save
+    // Find the url text field
+    final urlField = find.byType(TextField).first;
+    expect(urlField, findsOneWidget);
+    await tester.enterText(urlField, 'https://flutter.dev');
+    
+    // Tap the submit button
+    // It's the NeoButton inside the row.
+    final addIcon = find.byIcon(Icons.add);
+    expect(addIcon, findsOneWidget);
+    await tester.tap(addIcon);
+    await tester.pumpAndSettle();
+
+    // Wait for the metadata fetch to complete
+    // Since it's a real HTTP call, we'll give it some time
+    await tester.pump(const Duration(seconds: 3));
     
     // Test completed: Quick Save + Create Collection exercised on Home.
   });
