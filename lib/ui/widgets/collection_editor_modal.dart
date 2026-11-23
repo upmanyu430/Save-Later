@@ -244,21 +244,15 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                     Flexible(
-                      child: AnimatedSize(
-                        duration: bottomInset > 0
-                            ? Duration.zero
-                            : const Duration(milliseconds: 300),
-                        curve: Curves.easeInOutCubic,
-                        alignment: Alignment.topCenter,
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(
-                            18.0,
-                            8.0,
-                            18.0,
-                            bottomInset > 0
-                                ? (14.0 + bottomInset)
-                                : (14.0 + MediaQuery.paddingOf(context).bottom),
-                          ),
+                      child: SingleChildScrollView(
+                        padding: EdgeInsets.fromLTRB(
+                          18.0,
+                          8.0,
+                          18.0,
+                          bottomInset > 0
+                              ? (14.0 + bottomInset)
+                              : (14.0 + MediaQuery.paddingOf(context).bottom),
+                        ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -560,9 +554,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                       ),
                     ),
                   ),
+                ],
                 ),
-              ],
-            ),
           ),
         ),
       ),

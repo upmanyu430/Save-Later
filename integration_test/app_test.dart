@@ -25,10 +25,14 @@ void main() {
     // Enter collection name
     final nameField = find.byType(TextField).last;
     await tester.enterText(nameField, 'Test Collection');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
 
     // Tap "Create Collection"
     final createColBtn = find.text('Create collection');
     expect(createColBtn, findsOneWidget);
+    await tester.ensureVisible(createColBtn);
+    await tester.pumpAndSettle();
     await tester.tap(createColBtn);
     await tester.pumpAndSettle();
 
