@@ -50,6 +50,12 @@ class AppDimensions {
   // Dialog Modals Bottom Action Button Clearance
   static const double modalActionButtonBottomPadding = 38.0;
 
+  // Modal Folder Options (wider & thicker)
+  static const double modalFolderOptionHorizontalMargin = 8.0;
+  static const double modalFolderOptionVerticalPadding = 7.0;
+  static const double modalFolderOptionIconBoxSize = 32.0;
+  static const double modalFolderOptionIconSize = 18.0;
+
   // Responsive Layout
   static const double maxContentWidth = 600.0;
   static const double maxDialogWidth = 400.0;

@@ -110,8 +110,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
         });
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16.0),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
+        margin: const EdgeInsets.symmetric(
+            horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
+        padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: AppDimensions.modalFolderOptionVerticalPadding),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFFFFF4D0)
@@ -128,20 +131,20 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           children: [
             // Unsorted Icon Box
             Container(
-              width: 28,
-              height: 28,
+              width: AppDimensions.modalFolderOptionIconBoxSize,
+              height: AppDimensions.modalFolderOptionIconBoxSize,
               decoration: BoxDecoration(
                 color: const Color(0xFFE5E5E5),
                 borderRadius: BorderRadius.circular(6),
                 border: Border.all(
                   color: AppTheme.border,
-                  width: 1.5,
+                  width: 1.8,
                 ),
               ),
               child: const Icon(
                 Icons.folder_off_outlined,
                 color: AppTheme.border,
-                size: 16,
+                size: AppDimensions.modalFolderOptionIconSize,
               ),
             ),
             const SizedBox(width: 12),
@@ -151,7 +154,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 14.5,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.border,
                 ),
@@ -333,8 +336,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                           });
                                         },
                                         child: Container(
-                                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: AppDimensions.modalFolderOptionVerticalPadding),
                                           decoration: BoxDecoration(
                                             color: isSelected
                                                 ? const Color(0xFFFFF4D0)
@@ -351,14 +357,14 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                             children: [
                                               // Collection Icon Box
                                               Container(
-                                                width: 28,
-                                                height: 28,
+                                                width: AppDimensions.modalFolderOptionIconBoxSize,
+                                                height: AppDimensions.modalFolderOptionIconBoxSize,
                                                 decoration: BoxDecoration(
                                                   color: col.color,
                                                   borderRadius: BorderRadius.circular(6),
                                                   border: Border.all(
                                                     color: AppTheme.border,
-                                                    width: 1.5,
+                                                    width: 1.8,
                                                   ),
                                                 ),
                                                 child: Icon(
@@ -367,7 +373,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                     col.iconFontFamily,
                                                   ),
                                                   color: iconColor,
-                                                  size: 16,
+                                                  size: AppDimensions.modalFolderOptionIconSize,
                                                 ),
                                               ),
                                               const SizedBox(width: 12),
@@ -381,7 +387,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
                                                       style: const TextStyle(
-                                                        fontSize: 14.5,
+                                                        fontSize: 15,
                                                         fontWeight: FontWeight.w800,
                                                         color: AppTheme.border,
                                                       ),

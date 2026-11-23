@@ -8,6 +8,7 @@ import 'package:save_later/models/bookmark.dart';
 import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
+import 'package:save_later/config/app_constants.dart';
 import 'package:save_later/ui/widgets/share_save_modal.dart';
 import 'package:save_later/ui/widgets/move_to_collection_modal.dart';
 
@@ -99,26 +100,26 @@ void main() {
     final unsortedContainer = tester.widget<Container>(
       find.descendant(of: unsortedFinder, matching: find.byType(Container)).first,
     );
-    expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5));
+    expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
+    expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
 
-    // Check Pin row has 16 horizontal margin
+    // Check Pin row has horizontal margin
     final pinRowFinder = find.byKey(const ValueKey('share_modal_pin_row'));
     expect(pinRowFinder, findsOneWidget);
     final pinContainer = tester.widget<Container>(
       find.descendant(of: pinRowFinder, matching: find.byType(Container)).first,
     );
-    expect(pinContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(pinContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 5.5));
+    expect(pinContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
+    expect(pinContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
 
-    // Check collection tile has 16 horizontal margin
+    // Check collection tile has horizontal margin
     final colFinder = find.byKey(const ValueKey('share_modal_collection_1'));
     expect(colFinder, findsOneWidget);
     final colContainer = tester.widget<Container>(
       find.descendant(of: colFinder, matching: find.byType(Container)).first,
     );
-    expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5));
+    expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
+    expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
   });
 
   testWidgets('MoveToCollectionModal folder options have horizontal margin and slim height', (tester) async {
@@ -150,8 +151,8 @@ void main() {
     final unsortedContainer = tester.widget<Container>(
       find.descendant(of: unsortedFinder, matching: find.byType(Container)).first,
     );
-    expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5));
+    expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
+    expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
 
     // Check collection tile in MoveToCollectionModal
     final colFinder = find.byKey(const ValueKey('collection_2'));
@@ -159,8 +160,8 @@ void main() {
     final colContainer = tester.widget<Container>(
       find.descendant(of: colFinder, matching: find.byType(Container)).first,
     );
-    expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: 16.0));
-    expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5));
+    expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
+    expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
 
     // Tap on Unsorted to select it and verify yellow selection colors
     await tester.tap(unsortedFinder);
