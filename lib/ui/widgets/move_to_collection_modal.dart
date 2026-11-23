@@ -63,11 +63,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
 }
 
 class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
-  // The empty state only contains the Unsorted destination and its helper text.
-  // Keeping it independent of the collection editor's height avoids a large,
-  // empty scroll area when there are no collections to choose from.
-  static const _emptyStateModalHeight = 352.0;
-
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = false;
 
@@ -188,11 +183,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     final targetModalHeight =
         CollectionEditorModal.getCollapsedModalHeight(context);
     final availableHeight = screenHeight - topClearance - bottomInset;
-    final hasNoCollections = collectionsAsync.valueOrNull?.isEmpty ?? false;
-    final desiredModalHeight = hasNoCollections
-        ? _emptyStateModalHeight + MediaQuery.paddingOf(context).bottom
-        : targetModalHeight;
-    final sheetHeight = math.min(availableHeight, desiredModalHeight);
+    final sheetHeight = math.min(availableHeight, targetModalHeight);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -213,7 +204,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
             ),
             child: SizedBox(
               key: const ValueKey('move_to_collection_modal_sheet'),
-              height: sheetHeight,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {},
@@ -225,6 +215,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                     border: Border.all(color: AppTheme.border, width: 2.5),
                   ),
                   child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       // Top Grab Handle
@@ -241,208 +232,212 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           ),
                         ),
                       ),
-
-                      // Header Row: Title & Action Button
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(18.0, 8.0, 18.0, 12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Expanded(
-                              child: Text(
-                                'Move to Collection',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
-                                  letterSpacing: -0.3,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: AppDimensions.paddingSm),
-                            SizedBox(
-                              width: AppDimensions.dialogHeaderButtonSize,
-                              height: AppDimensions.dialogHeaderButtonSize,
-                              child: NeoButton(
-                                onPressed: _openCreateCollection,
-                                padding: EdgeInsets.zero,
-                                color: Colors.white,
-                                borderRadius: AppDimensions.radiusMd,
-                                borderWidth: AppDimensions.borderWidthMd,
-                                child: const Icon(
-                                  Icons.create_new_folder_outlined,
-                                  size: AppDimensions.dialogHeaderIconSize,
-                                  color: AppTheme.border,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Collections List
-                      Expanded(
-                        child: collectionsAsync.when(
-                          data: (collections) {
-                            if (collections.isEmpty) {
-                              return SingleChildScrollView(
-                                padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildUnsortedTile(context),
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 24.0),
-                                      child: Center(
-                                        child: Text(
-                                          'No collections yet',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
+                      Flexible(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 6),
+                              // Header Row: Title & Action Button
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Expanded(
+                                    child: Text(
+                                      'Move to Collection',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppTheme.border,
+                                        letterSpacing: -0.3,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppDimensions.paddingSm),
+                                  SizedBox(
+                                    width: AppDimensions.dialogHeaderButtonSize,
+                                    height: AppDimensions.dialogHeaderButtonSize,
+                                    child: NeoButton(
+                                      onPressed: _openCreateCollection,
+                                      padding: EdgeInsets.zero,
+                                      color: Colors.white,
+                                      borderRadius: AppDimensions.radiusMd,
+                                      borderWidth: AppDimensions.borderWidthMd,
+                                      child: const Icon(
+                                        Icons.create_new_folder_outlined,
+                                        size: AppDimensions.dialogHeaderIconSize,
+                                        color: AppTheme.border,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            final selected = _selectedCollection;
-
-                            return ListView.separated(
-                              padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                              physics: const ClampingScrollPhysics(),
-                              itemCount: collections.length + 1,
-                              separatorBuilder: (_, __) => const SizedBox(height: 8),
-                              itemBuilder: (ctx, index) {
-                                if (index == 0) {
-                                  return _buildUnsortedTile(context);
-                                }
-
-                                final col = collections[index - 1];
-                                final isSelected = !_isUnsortedSelected && selected?.id == col.id;
-
-                                final iconColor =
-                                    BookmarkCollection.isWhiteIconColor(col.color)
-                                        ? Colors.white
-                                        : AppTheme.border;
-
-                                return GestureDetector(
-                                  key: ValueKey('collection_${col.id}'),
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    HapticFeedback.lightImpact();
-                                    setState(() {
-                                      _selectedCollection = col;
-                                      _isUnsortedSelected = false;
-                                    });
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? const Color(0xFFFFF4D0)
-                                          : Colors.white,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? const Color(0xFFFDD164)
-                                            : Colors.black.withValues(alpha: 0.08),
-                                        width: isSelected ? 1.5 : 2.0,
-                                      ),
-                                    ),
-                                    child: Row(
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Collections List
+                              collectionsAsync.when(
+                                data: (collections) {
+                                  if (collections.isEmpty) {
+                                    return Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Collection Icon Box
-                                        Container(
-                                          width: 28,
-                                          height: 28,
-                                          decoration: BoxDecoration(
-                                            color: col.color,
-                                            borderRadius: BorderRadius.circular(6),
-                                            border: Border.all(
-                                              color: AppTheme.border,
-                                              width: 1.5,
+                                        _buildUnsortedTile(context),
+                                        const Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 24.0),
+                                          child: Center(
+                                            child: Text(
+                                              'No collections yet',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.black54,
+                                              ),
                                             ),
-                                          ),
-                                          child: Icon(
-                                            storedIcon(
-                                              col.iconCodePoint,
-                                              col.iconFontFamily,
-                                            ),
-                                            color: iconColor,
-                                            size: 16,
                                           ),
                                         ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
+                                      ],
+                                    );
+                                  }
+
+                                  final selected = _selectedCollection;
+
+                                  return ListView.separated(
+                                    shrinkWrap: true,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    padding: EdgeInsets.zero,
+                                    itemCount: collections.length + 1,
+                                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                    itemBuilder: (ctx, index) {
+                                      if (index == 0) {
+                                        return _buildUnsortedTile(context);
+                                      }
+
+                                      final col = collections[index - 1];
+                                      final isSelected = !_isUnsortedSelected && selected?.id == col.id;
+
+                                      final iconColor =
+                                          BookmarkCollection.isWhiteIconColor(col.color)
+                                              ? Colors.white
+                                              : AppTheme.border;
+
+                                      return GestureDetector(
+                                        key: ValueKey('collection_${col.id}'),
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: () {
+                                          HapticFeedback.lightImpact();
+                                          setState(() {
+                                            _selectedCollection = col;
+                                            _isUnsortedSelected = false;
+                                          });
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
+                                          decoration: BoxDecoration(
+                                            color: isSelected
+                                                ? const Color(0xFFFFF4D0)
+                                                : Colors.white,
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? const Color(0xFFFDD164)
+                                                  : Colors.black.withValues(alpha: 0.08),
+                                              width: isSelected ? 1.5 : 2.0,
+                                            ),
+                                          ),
+                                          child: Row(
                                             children: [
-                                              Text(
-                                                col.name,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  fontSize: 14.5,
-                                                  fontWeight: FontWeight.w800,
-                                                  color: AppTheme.border,
+                                              // Collection Icon Box
+                                              Container(
+                                                width: 28,
+                                                height: 28,
+                                                decoration: BoxDecoration(
+                                                  color: col.color,
+                                                  borderRadius: BorderRadius.circular(6),
+                                                  border: Border.all(
+                                                    color: AppTheme.border,
+                                                    width: 1.5,
+                                                  ),
+                                                ),
+                                                child: Icon(
+                                                  storedIcon(
+                                                    col.iconCodePoint,
+                                                    col.iconFontFamily,
+                                                  ),
+                                                  color: iconColor,
+                                                  size: 16,
                                                 ),
                                               ),
-                                              if (col.parentId != null) ...[
-                                                Builder(
-                                                  builder: (context) {
-                                                    final parent = collections
-                                                        .where((c) => c.id == col.parentId)
-                                                        .firstOrNull;
-                                                    if (parent == null) {
-                                                      return const SizedBox.shrink();
-                                                    }
-                                                    return Text(
-                                                      'in ${parent.name}',
-                                                      style: TextStyle(
-                                                        fontSize: 11,
-                                                        fontWeight: FontWeight.w600,
-                                                        color: Colors.black.withValues(alpha: 0.5),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Text(
+                                                      col.name,
+                                                      maxLines: 1,
+                                                      overflow: TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontSize: 14.5,
+                                                        fontWeight: FontWeight.w800,
+                                                        color: AppTheme.border,
                                                       ),
-                                                    );
-                                                  },
+                                                    ),
+                                                    if (col.parentId != null) ...[
+                                                      Builder(
+                                                        builder: (context) {
+                                                          final parent = collections
+                                                              .where((c) => c.id == col.parentId)
+                                                              .firstOrNull;
+                                                          if (parent == null) {
+                                                            return const SizedBox.shrink();
+                                                          }
+                                                          return Text(
+                                                            'in ${parent.name}',
+                                                            style: TextStyle(
+                                                              fontSize: 11,
+                                                              fontWeight: FontWeight.w600,
+                                                              color: Colors.black.withValues(alpha: 0.5),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ],
                                                 ),
-                                              ],
+                                              ),
+                                              AnimatedCheckmark(
+                                                isSelected: isSelected,
+                                                color: const Color(0xFFFDD164),
+                                                size: 18,
+                                              ),
                                             ],
                                           ),
                                         ),
-                                        AnimatedCheckmark(
-                                          isSelected: isSelected,
-                                          color: const Color(0xFFFDD164),
-                                          size: 18,
-                                        ),
-                                      ],
+                                      );
+                                    },
+                                  );
+                                },
+                                loading: () => const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 32),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                                error: (e, _) => Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text(
+                                      e.toString(),
+                                      style: const TextStyle(color: Colors.red),
                                     ),
                                   ),
-                                );
-                              },
-                            );
-                          },
-                          loading: () => const Center(
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 32),
-                              child: CircularProgressIndicator(),
-                            ),
-                          ),
-                          error: (e, _) => Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Text(
-                                e.toString(),
-                                style: const TextStyle(color: Colors.red),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       ),

@@ -313,7 +313,7 @@ void main() {
 
       expect(
         tester.getSize(find.byKey(const ValueKey('move_to_collection_modal_sheet'))).height,
-        352.0,
+        lessThan(352.0),
       );
     });
 
@@ -503,7 +503,7 @@ void main() {
       await container.read(bookmarkNotifierProvider.notifier).removeBookmarksFromCollection([b2]);
       expect(b2.collection.value, isNull);
     });
-    testWidgets('MoveToCollectionModal has exact height matching CollectionEditorModal collapsed height', (tester) async {
+    testWidgets('MoveToCollectionModal wraps content compactly and caps height at CollectionEditorModal height when many collections', (tester) async {
       final repo = MockMoveRepository();
       repo.collectionsList.add(
         BookmarkCollection()
@@ -543,7 +543,44 @@ void main() {
       final cardSize = tester.getSize(cardFinder);
       final context = tester.element(cardFinder);
       final expected = CollectionEditorModal.getCollapsedModalHeight(context);
-      expect(cardSize.height, closeTo(expected, 0.01));
+      expect(cardSize.height, lessThan(expected));
+
+      // When there are many collections, height is capped at expected
+      for (int i = 0; i < 15; i++) {
+        repo.collectionsList.add(BookmarkCollection()
+          ..id = 100 + i
+          ..name = 'Collection $i'
+          ..colorHex = '#FFD166'
+          ..iconCodePoint = Icons.folder.codePoint
+          ..iconFontFamily = 'MaterialIcons');
+      }
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+          child: _buildTestApp(
+            Builder(
+              builder: (context) {
+                return Column(
+                  children: [
+                    Expanded(
+                      child: MoveToCollectionModal(
+                        bookmark: Bookmark()..id = 1..url = 'https://flutter.dev'..title = 'Flutter',
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final cappedCardSize = tester.getSize(cardFinder);
+      expect(cappedCardSize.height, closeTo(expected, 0.01));
     });
   });
 }
