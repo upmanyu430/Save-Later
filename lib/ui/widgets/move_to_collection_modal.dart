@@ -8,6 +8,7 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
+import 'animated_checkmark.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
 import 'neo_button.dart';
@@ -161,12 +162,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                 ),
               ),
             ),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle_outline,
-                color: Color(0xFFFDD164),
-                size: 18,
-              ),
+            AnimatedCheckmark(
+              isSelected: isSelected,
+              color: const Color(0xFFFDD164),
+              size: 18,
+            ),
           ],
         ),
       ),
@@ -417,12 +417,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                             ],
                                           ),
                                         ),
-                                        if (isSelected)
-                                          const Icon(
-                                            Icons.check_circle_outline,
-                                            color: Color(0xFFFDD164),
-                                            size: 18,
-                                          ),
+                                        AnimatedCheckmark(
+                                          isSelected: isSelected,
+                                          color: const Color(0xFFFDD164),
+                                          size: 18,
+                                        ),
                                       ],
                                     ),
                                   ),
