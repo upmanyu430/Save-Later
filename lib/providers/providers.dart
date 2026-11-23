@@ -448,8 +448,9 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
+      final sanitizedName = BookmarkCollection.sanitizeName(name);
       final collection = BookmarkCollection()
-        ..name = name
+        ..name = sanitizedName
         ..colorHex = colorHex
         ..iconCodePoint = iconCode
         ..iconFontFamily = 'MaterialIcons'
@@ -473,7 +474,7 @@ class CollectionNotifier extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       final repo = ref.read(repositoryProvider);
-      collection.name = name;
+      collection.name = BookmarkCollection.sanitizeName(name);
       collection.colorHex = colorHex;
       collection.iconCodePoint = iconCode;
       await repo.addCollection(collection); 

@@ -54,6 +54,14 @@ class ShareSaveModal extends ConsumerStatefulWidget {
     );
   }
 
+  static String formatTargetLabel(String prefix, String name) {
+    if (name.length <= 22) {
+      return '$prefix "$name"';
+    }
+    final truncated = '${name.substring(0, 10)}...${name.substring(name.length - 8)}';
+    return '$prefix "$truncated"';
+  }
+
   @override
   ConsumerState<ShareSaveModal> createState() => _ShareSaveModalState();
 }
@@ -120,60 +128,63 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           _selectedCollection = null;
         });
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
-        padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: AppDimensions.modalFolderOptionVerticalPadding),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? const Color(0xFFFDD164)
-                : Colors.black.withValues(alpha: 0.08),
-            width: isSelected ? 1.5 : 2.0,
+      child: Tooltip(
+        message: l10n?.unsorted ?? 'Unsorted',
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: AppDimensions.modalFolderOptionVerticalPadding),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFFFDD164)
+                  : Colors.black.withValues(alpha: 0.08),
+              width: isSelected ? 1.5 : 2.0,
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: AppDimensions.modalFolderOptionIconBoxSize,
-              height: AppDimensions.modalFolderOptionIconBoxSize,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE5E5E5),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
+          child: Row(
+            children: [
+              Container(
+                width: AppDimensions.modalFolderOptionIconBoxSize,
+                height: AppDimensions.modalFolderOptionIconBoxSize,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E5E5),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: AppTheme.border,
+                    width: 1.8,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.folder_outlined,
                   color: AppTheme.border,
-                  width: 1.8,
+                  size: AppDimensions.modalFolderOptionIconSize,
                 ),
               ),
-              child: const Icon(
-                Icons.folder_outlined,
-                color: AppTheme.border,
-                size: AppDimensions.modalFolderOptionIconSize,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                l10n?.unsorted ?? 'Unsorted',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.border,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n?.unsorted ?? 'Unsorted',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.border,
+                  ),
                 ),
               ),
-            ),
-            AnimatedCheckmark(
-              isSelected: isSelected,
-              color: const Color(0xFFFDD164),
-              size: 18,
-            ),
-          ],
+              AnimatedCheckmark(
+                isSelected: isSelected,
+                color: const Color(0xFFFDD164),
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -397,7 +408,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                         _isUnsortedSelected = false;
                                       });
                                     },
-                                    child: Container(
+                                    child: Tooltip(
+                                      message: col.name,
+                                      child: Container(
                                       margin: const EdgeInsets.symmetric(
                                           horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
                                       padding: const EdgeInsets.symmetric(
@@ -466,6 +479,8 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                       }
                                                       return Text(
                                                         'in ${parent.name}',
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
                                                         style: TextStyle(
                                                           fontSize: 11,
                                                           fontWeight: FontWeight.w600,
@@ -487,8 +502,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                         ],
                                       ),
                                     ),
-                                  );
-                                },
+                                  ),
+                                );
+                              },
                               );
                             },
                             loading: () => const Padding(
@@ -530,11 +546,11 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                           builder: (context) {
                             final String buttonLabel;
                             if (_isUnsortedSelected) {
-                              buttonLabel =
-                                  'Save to "${l10n?.unsorted ?? 'Unsorted'}"';
+                              buttonLabel = ShareSaveModal.formatTargetLabel(
+                                  'Save to', l10n?.unsorted ?? 'Unsorted');
                             } else if (_selectedCollection != null) {
-                              buttonLabel =
-                                  'Save to "${_selectedCollection!.name}"';
+                              buttonLabel = ShareSaveModal.formatTargetLabel(
+                                  'Save to', _selectedCollection!.name);
                             } else {
                               buttonLabel = 'Save';
                             }

@@ -27,6 +27,17 @@ class BookmarkCollection {
   @Index()
   int? parentId;
 
+  static const int maxNameLength = 40;
+
+  /// Sanitizes collection name by trimming whitespace and enforcing max length.
+  static String sanitizeName(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.length > maxNameLength) {
+      return trimmed.substring(0, maxNameLength);
+    }
+    return trimmed;
+  }
+
   @ignore
   Color get color => parseColor(colorHex);
 

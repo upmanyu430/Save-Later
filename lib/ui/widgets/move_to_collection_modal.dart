@@ -58,6 +58,14 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     return moved;
   }
 
+  static String formatTargetLabel(String prefix, String name) {
+    if (name.length <= 22) {
+      return '$prefix "$name"';
+    }
+    final truncated = '${name.substring(0, 10)}...${name.substring(name.length - 8)}';
+    return '$prefix "$truncated"';
+  }
+
   @override
   ConsumerState<MoveToCollectionModal> createState() => _MoveToCollectionModalState();
 }
@@ -109,63 +117,66 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           _selectedCollection = null;
         });
       },
-      child: Container(
-        margin: const EdgeInsets.symmetric(
-            horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
-        padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: AppDimensions.modalFolderOptionVerticalPadding),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFFFF4D0)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
+      child: Tooltip(
+        message: l10n?.unsorted ?? 'Unsorted',
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+              horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
+          padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: AppDimensions.modalFolderOptionVerticalPadding),
+          decoration: BoxDecoration(
             color: isSelected
-                ? const Color(0xFFFDD164)
-                : Colors.black.withValues(alpha: 0.08),
-            width: isSelected ? 1.5 : 2.0,
+                ? const Color(0xFFFFF4D0)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFFFDD164)
+                  : Colors.black.withValues(alpha: 0.08),
+              width: isSelected ? 1.5 : 2.0,
+            ),
           ),
-        ),
-        child: Row(
-          children: [
-            // Unsorted Icon Box
-            Container(
-              width: AppDimensions.modalFolderOptionIconBoxSize,
-              height: AppDimensions.modalFolderOptionIconBoxSize,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE5E5E5),
-                borderRadius: BorderRadius.circular(6),
-                border: Border.all(
+          child: Row(
+            children: [
+              // Unsorted Icon Box
+              Container(
+                width: AppDimensions.modalFolderOptionIconBoxSize,
+                height: AppDimensions.modalFolderOptionIconBoxSize,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE5E5E5),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: AppTheme.border,
+                    width: 1.8,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.folder_off_outlined,
                   color: AppTheme.border,
-                  width: 1.8,
+                  size: AppDimensions.modalFolderOptionIconSize,
                 ),
               ),
-              child: const Icon(
-                Icons.folder_off_outlined,
-                color: AppTheme.border,
-                size: AppDimensions.modalFolderOptionIconSize,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                l10n?.unsorted ?? 'Unsorted',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.border,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  l10n?.unsorted ?? 'Unsorted',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.border,
+                  ),
                 ),
               ),
-            ),
-            AnimatedCheckmark(
-              isSelected: isSelected,
-              color: const Color(0xFFFDD164),
-              size: 18,
-            ),
-          ],
+              AnimatedCheckmark(
+                isSelected: isSelected,
+                color: const Color(0xFFFDD164),
+                size: 18,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -335,92 +346,97 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                             _isUnsortedSelected = false;
                                           });
                                         },
-                                        child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 14,
-                                              vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                                          decoration: BoxDecoration(
-                                            color: isSelected
-                                                ? const Color(0xFFFFF4D0)
-                                                : Colors.white,
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(
+                                        child: Tooltip(
+                                          message: col.name,
+                                          child: Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 14,
+                                                vertical: AppDimensions.modalFolderOptionVerticalPadding),
+                                            decoration: BoxDecoration(
                                               color: isSelected
-                                                  ? const Color(0xFFFDD164)
-                                                  : Colors.black.withValues(alpha: 0.08),
-                                              width: isSelected ? 1.5 : 2.0,
+                                                  ? const Color(0xFFFFF4D0)
+                                                  : Colors.white,
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(
+                                                color: isSelected
+                                                    ? const Color(0xFFFDD164)
+                                                    : Colors.black.withValues(alpha: 0.08),
+                                                width: isSelected ? 1.5 : 2.0,
+                                              ),
                                             ),
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              // Collection Icon Box
-                                              Container(
-                                                width: AppDimensions.modalFolderOptionIconBoxSize,
-                                                height: AppDimensions.modalFolderOptionIconBoxSize,
-                                                decoration: BoxDecoration(
-                                                  color: col.color,
-                                                  borderRadius: BorderRadius.circular(6),
-                                                  border: Border.all(
-                                                    color: AppTheme.border,
-                                                    width: 1.8,
-                                                  ),
-                                                ),
-                                                child: Icon(
-                                                  storedIcon(
-                                                    col.iconCodePoint,
-                                                    col.iconFontFamily,
-                                                  ),
-                                                  color: iconColor,
-                                                  size: AppDimensions.modalFolderOptionIconSize,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisSize: MainAxisSize.min,
-                                                  children: [
-                                                    Text(
-                                                      col.name,
-                                                      maxLines: 1,
-                                                      overflow: TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                        fontSize: 15,
-                                                        fontWeight: FontWeight.w800,
-                                                        color: AppTheme.border,
-                                                      ),
+                                            child: Row(
+                                              children: [
+                                                // Collection Icon Box
+                                                Container(
+                                                  width: AppDimensions.modalFolderOptionIconBoxSize,
+                                                  height: AppDimensions.modalFolderOptionIconBoxSize,
+                                                  decoration: BoxDecoration(
+                                                    color: col.color,
+                                                    borderRadius: BorderRadius.circular(6),
+                                                    border: Border.all(
+                                                      color: AppTheme.border,
+                                                      width: 1.8,
                                                     ),
-                                                    if (col.parentId != null) ...[
-                                                      Builder(
-                                                        builder: (context) {
-                                                          final parent = collections
-                                                              .where((c) => c.id == col.parentId)
-                                                              .firstOrNull;
-                                                          if (parent == null) {
-                                                            return const SizedBox.shrink();
-                                                          }
-                                                          return Text(
-                                                            'in ${parent.name}',
-                                                            style: TextStyle(
-                                                              fontSize: 11,
-                                                              fontWeight: FontWeight.w600,
-                                                              color: Colors.black.withValues(alpha: 0.5),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                                    ],
-                                                  ],
+                                                  ),
+                                                  child: Icon(
+                                                    storedIcon(
+                                                      col.iconCodePoint,
+                                                      col.iconFontFamily,
+                                                    ),
+                                                    color: iconColor,
+                                                    size: AppDimensions.modalFolderOptionIconSize,
+                                                  ),
                                                 ),
-                                              ),
-                                              AnimatedCheckmark(
-                                                isSelected: isSelected,
-                                                color: const Color(0xFFFDD164),
-                                                size: 18,
-                                              ),
-                                            ],
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        col.name,
+                                                        maxLines: 1,
+                                                        overflow: TextOverflow.ellipsis,
+                                                        style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight: FontWeight.w800,
+                                                          color: AppTheme.border,
+                                                        ),
+                                                      ),
+                                                      if (col.parentId != null) ...[
+                                                        Builder(
+                                                          builder: (context) {
+                                                            final parent = collections
+                                                                .where((c) => c.id == col.parentId)
+                                                                .firstOrNull;
+                                                            if (parent == null) {
+                                                                return const SizedBox.shrink();
+                                                            }
+                                                            return Text(
+                                                              'in ${parent.name}',
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                fontWeight: FontWeight.w600,
+                                                                color: Colors.black.withValues(alpha: 0.5),
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
+                                                AnimatedCheckmark(
+                                                  isSelected: isSelected,
+                                                  color: const Color(0xFFFDD164),
+                                                  size: 18,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       );
@@ -472,9 +488,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 final isEnabled = _isUnsortedSelected || _selectedCollection != null;
                                 final String buttonLabel;
                                 if (_isUnsortedSelected) {
-                                  buttonLabel = 'Move to "${l10n?.unsorted ?? 'Unsorted'}"';
+                                  buttonLabel = MoveToCollectionModal.formatTargetLabel('Move to', l10n?.unsorted ?? 'Unsorted');
                                 } else if (_selectedCollection != null) {
-                                  buttonLabel = 'Move to "${_selectedCollection!.name}"';
+                                  buttonLabel = MoveToCollectionModal.formatTargetLabel('Move to', _selectedCollection!.name);
                                 } else {
                                   buttonLabel = 'Move to Collection';
                                 }

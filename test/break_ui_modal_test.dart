@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:save_later/models/bookmark.dart';
 import 'package:save_later/models/collection.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/repositories/isar_repository.dart';
@@ -66,6 +65,39 @@ Widget _buildHarness({
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('Collection name boundary and sanitization tests', () {
+    test('enforces max length 40 and trims whitespace', () {
+      expect(BookmarkCollection.maxNameLength, equals(40));
+
+      final trimmed = BookmarkCollection.sanitizeName('   Design Systems   ');
+      expect(trimmed, equals('Design Systems'));
+
+      final tooLong = 'A' * 60;
+      final sanitized = BookmarkCollection.sanitizeName(tooLong);
+      expect(sanitized.length, equals(40));
+      expect(sanitized, equals('A' * 40));
+    });
+
+    test('formatTargetLabel helper respects <=22 boundary and middle-truncates long labels', () {
+      // <= 22 chars: exact full string
+      expect(
+        MoveToCollectionModal.formatTargetLabel('Move to', 'Tech'),
+        equals('Move to "Tech"'),
+      );
+      expect(
+        MoveToCollectionModal.formatTargetLabel('Move to', '1234567890123456789012'),
+        equals('Move to "1234567890123456789012"'),
+      );
+
+      // > 22 chars: preserves opening and closing quotes with middle ellipsis
+      const longName = 'Senior Product Design Engineer Platform';
+      final formatted = MoveToCollectionModal.formatTargetLabel('Move to', longName);
+      expect(formatted, equals('Move to "Senior Pro...Platform"'));
+      expect(formatted.startsWith('Move to "'), isTrue);
+      expect(formatted.endsWith('"'), isTrue);
+    });
+  });
 
   testWidgets('Break UI Test: Feed worst-case realistic data into MoveToCollectionModal', (tester) async {
     final repo = _BreakUiRepo();
@@ -147,29 +179,26 @@ void main() {
     // Verify no render overflows at 360px width
     expect(tester.takeException(), isNull);
 
+    // Verify Tooltip widgets are rendered for accessibility and inspection
+    expect(find.byType(Tooltip), findsWidgets);
+    expect(find.widgetWithText(Tooltip, 'Unsorted'), findsOneWidget);
+
+    // Verify sub-collection label displays 'in Christopher Alexander Montgomery III' without overflowing
+    expect(find.text('in Christopher Alexander Montgomery III'), findsOneWidget);
+
     // Tap on the child collection under long parent to select it
     await tester.tap(find.text('Senior Product Design Engineer Platform'));
     await tester.pumpAndSettle();
 
-    // Verify button label updates to Move to "Senior Product Design Engineer Platform"
-    expect(find.text('Move to "Senior Product Design Engineer Platform"'), findsOneWidget);
+    // Verify button label updates with middle-truncation and intact closing quote
+    expect(find.text('Move to "Senior Pro...Platform"'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
-    // Test extreme font scale (accessibility 2.0x zoom) at narrow width 320px
-    await tester.pumpWidget(
-      _buildHarness(
-        child: const MoveToCollectionModal(),
-        repo: repo,
-        width: 320,
-        textScale: 2.0,
-      ),
-    );
+    // Tap on Unsorted
+    await tester.tap(find.text('Unsorted'));
     await tester.pumpAndSettle();
-
-    final exception = tester.takeException();
-    if (exception != null) {
-      debugPrint('Break-UI caught exception at 2.0x scale: $exception');
-    }
+    expect(find.text('Move to "Unsorted"'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Break UI Test: Feed worst-case realistic data into ShareSaveModal', (tester) async {
@@ -208,9 +237,18 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final exception = tester.takeException();
-    if (exception != null) {
-      debugPrint('ShareSaveModal caught exception at 1.5x scale: $exception');
-    }
+    expect(tester.takeException(), isNull);
+
+    // Verify Tooltips exist
+    expect(find.byType(Tooltip), findsWidgets);
+    expect(find.widgetWithText(Tooltip, 'Unsorted'), findsOneWidget);
+
+    // Tap on child collection
+    await tester.tap(find.text('Senior Product Design Engineer Platform'));
+    await tester.pumpAndSettle();
+
+    // Verify button label updates with middle-truncation and intact quotes
+    expect(find.text('Save to "Senior Pro...Platform"'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
