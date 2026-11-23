@@ -43,6 +43,10 @@ class AppDimensions {
   static const double gridFolderCardHeight = 160.0;
   static const double gridBookmarkCardHeight = 155.0;
 
+  // Dialog Header Buttons (10% smaller than original 44.0 dp)
+  static const double dialogHeaderButtonSize = 39.6;
+  static const double dialogHeaderIconSize = 21.6;
+
   // Responsive Layout
   static const double maxContentWidth = 600.0;
   static const double maxDialogWidth = 400.0;
