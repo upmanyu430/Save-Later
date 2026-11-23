@@ -281,8 +281,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                   const SizedBox(
                                       width: AppDimensions.paddingSm),
                                   SizedBox(
-                                    width: 44,
-                                    height: 44,
+                                    width: AppDimensions.dialogHeaderButtonSize,
+                                    height: AppDimensions.dialogHeaderButtonSize,
                                     child: NeoButton(
                                       onPressed: () {
                                         if (Navigator.canPop(context)) {
@@ -294,7 +294,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                       borderWidth: 2,
                                       borderRadius: AppDimensions.radiusSm,
                                       shadowOffset: 0,
-                                      child: const Icon(Icons.close, size: 20),
+                                      child: const Icon(Icons.close, size: 18),
                                     ),
                                   ),
                                 ],

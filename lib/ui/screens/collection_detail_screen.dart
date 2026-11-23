@@ -919,8 +919,8 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
                             ),
                           ),
                           SizedBox(
-                            width: 32,
-                            height: 32,
+                            width: AppDimensions.dialogHeaderButtonSize,
+                            height: AppDimensions.dialogHeaderButtonSize,
                             child: NeoButton(
                               onPressed: () {
                                 if (Navigator.canPop(context)) {

@@ -261,8 +261,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                             ),
                             const SizedBox(width: AppDimensions.paddingSm),
                             SizedBox(
-                              width: 44,
-                              height: 44,
+                              width: AppDimensions.dialogHeaderButtonSize,
+                              height: AppDimensions.dialogHeaderButtonSize,
                               child: NeoButton(
                                 onPressed: _openCreateCollection,
                                 padding: EdgeInsets.zero,
@@ -271,7 +271,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 borderWidth: AppDimensions.borderWidthMd,
                                 child: const Icon(
                                   Icons.create_new_folder_outlined,
-                                  size: AppDimensions.iconSizeMd,
+                                  size: AppDimensions.dialogHeaderIconSize,
                                   color: AppTheme.border,
                                 ),
                               ),

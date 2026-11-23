@@ -169,7 +169,7 @@ void main() {
     expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isTrue);
   });
 
-  testWidgets('CollectionEditorModal close button has minimum 44x44 touch target dimensions',
+  testWidgets('CollectionEditorModal close button has unified dialogHeaderButtonSize dimensions',
       (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
@@ -196,7 +196,7 @@ void main() {
       matching: find.byType(SizedBox),
     );
     final sizedBox = tester.widget<SizedBox>(sizedBoxFinder.first);
-    expect(sizedBox.width, greaterThanOrEqualTo(44.0));
-    expect(sizedBox.height, greaterThanOrEqualTo(44.0));
+    expect(sizedBox.width, equals(AppDimensions.dialogHeaderButtonSize));
+    expect(sizedBox.height, equals(AppDimensions.dialogHeaderButtonSize));
   });
 }

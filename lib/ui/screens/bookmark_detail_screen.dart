@@ -1721,15 +1721,15 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                             ),
                           ),
                           SizedBox(
-                            width: 44,
-                            height: 44,
+                            width: AppDimensions.dialogHeaderButtonSize,
+                            height: AppDimensions.dialogHeaderButtonSize,
                             child: NeoButton(
                               onPressed: () => Navigator.of(context).pop(),
                               padding: EdgeInsets.zero,
                               color: AppTheme.cardColor,
                               borderRadius: AppDimensions.radiusSm,
                               borderWidth: 2,
-                              child: const Icon(Icons.close, size: 20),
+                              child: const Icon(Icons.close, size: 18),
                             ),
                           ),
                         ],
