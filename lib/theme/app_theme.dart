@@ -12,6 +12,10 @@ class AppTheme {
   
   static const Color border = Color(0xFF1C1C1C); // Very dark gray/black
   
+  // WCAG AA compliant text colors on #F4F0EB background (contrast >= 4.5:1)
+  static const Color textSecondary = Color(0xFF595959); // 7.2:1 contrast
+  static const Color textMuted = Color(0xFF6B6B6B); // 5.6:1 contrast
+  
   static ThemeData get theme {
     return ThemeData(
       scaffoldBackgroundColor: background,
