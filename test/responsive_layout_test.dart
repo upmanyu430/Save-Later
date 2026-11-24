@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:save_later/config/app_constants.dart';
+import 'package:save_later/models/collection.dart';
+import 'package:save_later/providers/providers.dart';
+import 'package:save_later/ui/screens/home_screen.dart';
 import 'package:save_later/ui/widgets/delete_confirmation_dialog.dart';
 import 'package:save_later/ui/widgets/moved_success_dialog.dart';
 import 'package:save_later/ui/widgets/no_url_dialog.dart';
@@ -117,7 +121,7 @@ void main() {
     expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxDialogWidth), isTrue);
   });
 
-  testWidgets('SettingsScreen content is constrained to maxContentWidth on large screens',
+  testWidgets('SettingsScreen content fills full width on large screens and is not clamped to maxContentWidth',
       (tester) async {
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1.0;
@@ -135,16 +139,20 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final settingsFinder = find.byType(SettingsScreen);
+    final size = tester.getSize(settingsFinder);
+    expect(size.width, equals(1200.0));
+
     final constrainedBoxes = tester.widgetList<ConstrainedBox>(
       find.descendant(
-        of: find.byType(SettingsScreen),
+        of: settingsFinder,
         matching: find.byType(ConstrainedBox),
       ),
     );
-    expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isTrue);
+    expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isFalse);
   });
 
-  testWidgets('IconPickerScreen content is constrained to maxContentWidth on large screens',
+  testWidgets('IconPickerScreen content fills full width on large screens with responsive columns',
       (tester) async {
     tester.view.physicalSize = const Size(1200, 800);
     tester.view.devicePixelRatio = 1.0;
@@ -160,13 +168,60 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    final iconPickerFinder = find.byType(IconPickerScreen);
+    final size = tester.getSize(iconPickerFinder);
+    expect(size.width, equals(1200.0));
+
+    final gridFinder = find.byType(GridView);
+    expect(gridFinder, findsOneWidget);
+    final gridView = tester.widget<GridView>(gridFinder);
+    final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+    // On 1200 width, columnCount is calculated from constraints and exceeds previous 8 clamp
+    expect(delegate.crossAxisCount, greaterThan(8));
+
     final constrainedBoxes = tester.widgetList<ConstrainedBox>(
       find.descendant(
-        of: find.byType(IconPickerScreen),
+        of: iconPickerFinder,
         matching: find.byType(ConstrainedBox),
       ),
     );
-    expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isTrue);
+    expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isFalse);
+  });
+
+  testWidgets('HomeScreen fills full width on tablet (900x1200) without maxContentWidth constraint',
+      (tester) async {
+    tester.view.physicalSize = const Size(900, 1200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          collectionsProvider.overrideWith((ref) => Future.value(<BookmarkCollection>[])),
+        ],
+        child: const MaterialApp(
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          home: HomeScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final homeFinder = find.byType(HomeScreen);
+    final size = tester.getSize(homeFinder);
+    expect(size.width, equals(900.0));
+
+    final constrainedBoxes = tester.widgetList<ConstrainedBox>(
+      find.descendant(
+        of: homeFinder,
+        matching: find.byType(ConstrainedBox),
+      ),
+    );
+    expect(constrainedBoxes.any((cb) => cb.constraints.maxWidth == AppDimensions.maxContentWidth), isFalse);
   });
 
   testWidgets('CollectionEditorModal close button has unified dialogHeaderButtonSize dimensions',
