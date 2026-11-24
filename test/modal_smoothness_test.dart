@@ -220,13 +220,11 @@ void main() {
 
         // Header remains unclipped inside viewport and inside card.
         expect(kbdTitleRect.top, greaterThanOrEqualTo(0));
-        expect(kbdTitleRect.bottom, lessThanOrEqualTo(viewportHeight - 350.0));
         expect(kbdTitleRect.top, greaterThanOrEqualTo(kbdCardRect.top));
 
-        // Card lifts cleanly above the 350dp keyboard without stretching bottom padding by 350dp.
-        expect(kbdCardRect.bottom, lessThanOrEqualTo(viewportHeight - 350.0 + 0.01));
-        expect(kbdScrollPadding.bottom, equals(14.0));
-        expect(kbdCardRect.height, lessThanOrEqualTo(initialCardRect.height));
+        // Card stays anchored to bottom of screen (bottom: 0) as a bottom sheet.
+        expect(kbdCardRect.bottom, closeTo(viewportHeight, 0.1));
+        expect(kbdScrollPadding.bottom, equals(14.0 + 350.0));
 
         // Typing updates ValueListenableBuilder widgets without rebuilding color/icon grids.
         await tester.tap(find.byType(TextField));
@@ -269,6 +267,7 @@ void main() {
       (tester) async {
         _configurePhoneView(tester);
         const dpr = 3.0;
+        const viewportHeight = 2332.0 / dpr;
 
         await tester.pumpWidget(
           _buildHostApp(
@@ -330,31 +329,21 @@ void main() {
         tester.view.viewInsets = FakeViewPadding(bottom: 350.0 * dpr);
         await tester.pumpAndSettle();
 
-        // Top CollectionEditorModal lifts by 350dp.
-        final editorLiftFinder = find.ancestor(
-          of: find.descendant(
-            of: find.byType(CollectionEditorModal),
-            matching: find.text('Add new collection'),
+        // Top CollectionEditorModal stays anchored to bottom of screen (bottom: 0).
+        final editorCardFinder = find.descendant(
+          of: find.byType(CollectionEditorModal),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).borderRadius ==
+                    BorderRadius.circular(55),
           ),
-          matching: find.byType(AppModalKeyboardLift),
         );
-        final editorLiftPadding = tester
-            .widget<Padding>(
-              find
-                  .descendant(
-                    of: editorLiftFinder,
-                    matching: find.byWidgetPredicate(
-                      (w) =>
-                          w is Padding &&
-                          w.padding is EdgeInsets &&
-                          (w.padding as EdgeInsets).left == 5.0 &&
-                          (w.padding as EdgeInsets).right == 5.0,
-                    ),
-                  )
-                  .first,
-            )
-            .padding as EdgeInsets;
-        expect(editorLiftPadding.bottom, equals(350.0));
+        expect(
+          tester.getRect(editorCardFinder).bottom,
+          closeTo(viewportHeight, 0.1),
+        );
 
         // Covered MoveToCollectionModal freezes its AppModalKeyboardLift inset & maxHeight.
         final coveredMaxHeight = tester

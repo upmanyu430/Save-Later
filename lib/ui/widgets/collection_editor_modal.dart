@@ -195,6 +195,15 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
     final l10n = AppLocalizations.of(context)!;
+    final view = View.maybeOf(context);
+    final windowPaddingTop =
+        view != null ? MediaQueryData.fromView(view).padding.top : 0.0;
+    final statusBarHeight = windowPaddingTop > 0
+        ? windowPaddingTop
+        : MediaQuery.paddingOf(context).top;
+    final topClearance = statusBarHeight + 16.0;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxCardHeight = screenHeight - topClearance;
 
     final scrollContent = Column(
       mainAxisSize: MainAxisSize.min,
@@ -472,57 +481,83 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
       ],
     );
 
-    return AppModalKeyboardLift(
-      child: Material(
-        type: MaterialType.transparency,
-        child: Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: AppTheme.cardColor,
-            borderRadius: BorderRadius.circular(55),
-            border: Border.all(color: AppTheme.border, width: 2.5),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Pinned Drag Handle ONLY
-              Padding(
-                padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                child: Center(
-                  child: Container(
-                    width: 44,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: AppTheme.border,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => dismissAppModalSheet(context),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 5.0,
+          right: 5.0,
+          top: topClearance,
+          bottom: 0,
+        ),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 420,
+              maxHeight: maxCardHeight,
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Material(
+                type: MaterialType.transparency,
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardColor,
+                    borderRadius: BorderRadius.circular(55),
+                    border: Border.all(color: AppTheme.border, width: 2.5),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Pinned Drag Handle ONLY
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                        child: Center(
+                          child: Container(
+                            width: 44,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: AppTheme.border,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Builder(
+                          builder: (scrollContext) {
+                            final bottomInset =
+                                MediaQuery.viewInsetsOf(scrollContext).bottom;
+                            final safeBottom =
+                                MediaQuery.paddingOf(scrollContext).bottom;
+                            final bottomPadding = bottomInset > 0
+                                ? (14.0 + bottomInset)
+                                : (AppDimensions.modalActionButtonBottomPadding +
+                                    safeBottom);
+
+                            return SingleChildScrollView(
+                              controller: _scrollController,
+                              padding: EdgeInsets.fromLTRB(
+                                18.0,
+                                8.0,
+                                18.0,
+                                bottomPadding,
+                              ),
+                              child: RepaintBoundary(child: scrollContent),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Flexible(
-                child: Builder(
-                  builder: (scrollContext) {
-                    final hasKeyboard =
-                        MediaQuery.viewInsetsOf(scrollContext).bottom > 0;
-                    final safeBottom = MediaQuery.paddingOf(scrollContext).bottom;
-                    return SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: EdgeInsets.fromLTRB(
-                        18.0,
-                        8.0,
-                        18.0,
-                        hasKeyboard
-                            ? 14.0
-                            : (AppDimensions.modalActionButtonBottomPadding +
-                                safeBottom),
-                      ),
-                      child: scrollContent,
-                    );
-                  },
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
