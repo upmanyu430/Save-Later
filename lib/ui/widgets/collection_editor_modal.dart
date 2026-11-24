@@ -520,10 +520,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         child: Center(
                           child: Container(
                             width: 44,
-                            height: 6,
+                            height: 4,
                             decoration: BoxDecoration(
                               color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(3),
+                              borderRadius: BorderRadius.circular(2),
                             ),
                           ),
                         ),
