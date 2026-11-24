@@ -174,41 +174,51 @@ class FolderBox extends StatelessWidget {
         );
 
         final content = showTab
-            ? Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  // The Tab
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    child: Container(
-                      width: MediaQuery.sizeOf(context).width * 0.22,
-                      height: MediaQuery.sizeOf(context).width * 0.085,
-                      decoration: BoxDecoration(
-                        color: folderColor,
-                        borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(12),
-                          topRight: Radius.circular(12),
-                        ),
-                        border: Border.all(
-                          color: AppTheme.border,
-                          width: AppDimensions.borderWidthMd,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.border,
-                            offset: Offset(currentShadow, currentShadow),
+            ? LayoutBuilder(
+                builder: (context, constraints) {
+                  final cardWidth = constraints.maxWidth.isFinite
+                      ? constraints.maxWidth
+                      : (MediaQuery.sizeOf(context).width * 0.45);
+                  final tabWidth = (cardWidth * 0.46).clamp(68.0, 100.0);
+                  const tabHeight = 32.0;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // The Tab
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        child: Container(
+                          width: tabWidth,
+                          height: tabHeight,
+                          decoration: BoxDecoration(
+                            color: folderColor,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                            border: Border.all(
+                              color: AppTheme.border,
+                              width: AppDimensions.borderWidthMd,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.border,
+                                offset: Offset(currentShadow, currentShadow),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  // The Main Body
-                  Padding(
-                    padding: const EdgeInsets.only(top: 15.0),
-                    child: body,
-                  ),
-                ],
+                      // The Main Body
+                      Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: body,
+                      ),
+                    ],
+                  );
+                },
               )
             : body;
 
