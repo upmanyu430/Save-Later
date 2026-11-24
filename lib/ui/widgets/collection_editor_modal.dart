@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
+import 'app_modal_sheet.dart';
 import 'neo_button.dart';
 import 'stored_icon.dart';
 import 'package:save_later/config/app_constants.dart';
@@ -51,7 +52,9 @@ class CollectionEditorModal extends ConsumerStatefulWidget {
 }
 
 class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
-  late TextEditingController _nameController;
+  late final TextEditingController _nameController;
+  late final ScrollController _scrollController;
+  late final FocusNode _nameFocusNode;
   late String _selectedColorHex;
   late int _selectedIconCode;
   bool _isExpanded = false;
@@ -142,6 +145,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     super.initState();
     _nameController =
         TextEditingController(text: widget.existingCollection?.name ?? '');
+    _scrollController = ScrollController();
+    _nameFocusNode = FocusNode();
     _selectedColorHex = widget.existingCollection?.colorHex ?? _colors[0];
     _selectedIconCode =
         widget.existingCollection?.iconCodePoint ?? _allIcons[0].codePoint;
@@ -157,6 +162,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   @override
   void dispose() {
     _nameController.dispose();
+    _scrollController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
@@ -179,389 +186,346 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
             _selectedIconCode,
           );
     }
-    if (mounted && Navigator.canPop(context)) {
-      Navigator.pop(context);
+    if (mounted) {
+      dismissAppModalSheet(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
-    final viewInsets = MediaQuery.of(context).viewInsets;
-    final view = View.of(context);
-    final windowPadding = MediaQueryData.fromView(view).padding;
-    final statusBarHeight = windowPadding.top > 0
-        ? windowPadding.top
-        : MediaQuery.paddingOf(context).top;
-    final topClearance = statusBarHeight + 16.0;
-    final bottomInset = viewInsets.bottom;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final maxCardHeight = screenHeight - topClearance;
+    final l10n = AppLocalizations.of(context)!;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 5.0,
-          right: 5.0,
-          top: topClearance,
-          bottom: 0,
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 420,
-              maxHeight: maxCardHeight,
+    final scrollContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                isEditing
+                    ? l10n.editCollection
+                    : (widget.parentId != null
+                        ? l10n.newSubCollection
+                        : l10n.newCollection),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {},
-              child: Container(
-                clipBehavior: Clip.antiAlias,
-                decoration: BoxDecoration(
-                  color: AppTheme.cardColor,
-                  borderRadius: BorderRadius.circular(55),
-                  border: Border.all(color: AppTheme.border, width: 2.5),
+            const SizedBox(width: AppDimensions.paddingSm),
+            SizedBox(
+              width: AppDimensions.dialogHeaderButtonSize,
+              height: AppDimensions.dialogHeaderButtonSize,
+              child: NeoButton(
+                onPressed: () => dismissAppModalSheet(context),
+                padding: EdgeInsets.zero,
+                color: Colors.white,
+                borderWidth: 2,
+                borderRadius: AppDimensions.radiusSm,
+                shadowOffset: 0,
+                child: const Icon(Icons.close, size: 18),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Name Field
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.nameUpper,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: _nameController,
+              builder: (context, value, _) {
+                return Text(
+                  '${value.text.length}/40',
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
+        SizedBox(
+          height: 48.0,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+              border: Border.all(color: AppTheme.border, width: 1.0),
+            ),
+            child: Center(
+              child: TextField(
+                controller: _nameController,
+                focusNode: _nameFocusNode,
+                maxLength: 40,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: const InputDecoration(
+                  hintText: 'e.g. Travel, Design Inspiration...',
+                  hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                  border: InputBorder.none,
+                  isDense: true,
+                  counterText: '',
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Pinned Drag Handle ONLY
-                    Padding(
-                      padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                      child: Center(
-                        child: Container(
-                          width: 44,
-                          height: 4,
-                          decoration: BoxDecoration(
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Color Picker
+        Text(l10n.colorUpper,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        const SizedBox(height: 5),
+        GridView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          clipBehavior: Clip.none,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 8,
+            crossAxisSpacing: 7,
+            mainAxisSpacing: 7,
+          ),
+          itemCount: _colors.length,
+          itemBuilder: (context, index) {
+            final colorHex = _colors[index];
+            final color = BookmarkCollection.parseColor(colorHex);
+            final isSelected = _selectedColorHex == colorHex;
+
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                setState(() => _selectedColorHex = colorHex);
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: color,
+                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                  border: Border.all(
+                    color: AppTheme.border,
+                    width: isSelected ? 2.0 : 1.0,
+                  ),
+                  boxShadow: isSelected
+                      ? const [
+                          BoxShadow(
                             color: AppTheme.border,
-                            borderRadius: BorderRadius.circular(2),
+                            offset: Offset(2, 2),
+                            blurRadius: 0,
+                            spreadRadius: 0,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: isSelected
+                    ? Icon(
+                        Icons.check,
+                        size: 16,
+                        color: BookmarkCollection.isWhiteIconColor(color)
+                            ? Colors.white
+                            : Colors.black,
+                      )
+                    : null,
+              ),
+            );
+          },
+        ),
+        const SizedBox(height: 10),
+
+        // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
+        Text(l10n.iconUpper,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        const SizedBox(height: 5),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.topCenter,
+          child: Builder(
+            builder: (context) {
+              final icons = _displayIcons;
+              final currentColor =
+                  BookmarkCollection.parseColor(_selectedColorHex);
+              final count = _isExpanded ? icons.length : 24;
+
+              return GridView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                clipBehavior: Clip.none,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 8,
+                  crossAxisSpacing: 7,
+                  mainAxisSpacing: 7,
+                ),
+                itemCount: count,
+                itemBuilder: (context, index) {
+                  // In collapsed state, slot 24 (index 23) is the 3-dots expand button
+                  if (!_isExpanded && index == 23) {
+                    return GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _isExpanded = true);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.radiusSm),
+                          border: Border.all(
+                            color: AppTheme.border,
+                            width: 1.0,
                           ),
                         ),
+                        child: const Icon(Icons.more_horiz, size: 20),
+                      ),
+                    );
+                  }
+
+                  final icon = icons[index];
+                  final isSelected = _selectedIconCode == icon.codePoint;
+
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() => _selectedIconCode = icon.codePoint);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected ? currentColor : Colors.transparent,
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusSm),
+                        border: Border.all(
+                          color: AppTheme.border,
+                          width: isSelected ? 2.0 : 1.0,
+                        ),
+                        boxShadow: isSelected
+                            ? const [
+                                BoxShadow(
+                                  color: AppTheme.border,
+                                  offset: Offset(2, 2),
+                                  blurRadius: 0,
+                                  spreadRadius: 0,
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 20,
+                        color: isSelected &&
+                                BookmarkCollection.isWhiteIconColor(
+                                    currentColor)
+                            ? Colors.white
+                            : AppTheme.border,
                       ),
                     ),
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: EdgeInsets.fromLTRB(
-                          18.0,
-                          8.0,
-                          18.0,
-                          bottomInset > 0
-                              ? (14.0 + bottomInset)
-                              : (AppDimensions.modalActionButtonBottomPadding +
-                                  MediaQuery.paddingOf(context).bottom),
-                        ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // Header
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      isEditing
-                                          ? AppLocalizations.of(context)!
-                                              .editCollection
-                                          : (widget.parentId != null
-                                              ? AppLocalizations.of(context)!
-                                                  .newSubCollection
-                                              : AppLocalizations.of(context)!
-                                                  .newCollection),
-                                      style: const TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                      width: AppDimensions.paddingSm),
-                                  SizedBox(
-                                    width: AppDimensions.dialogHeaderButtonSize,
-                                    height: AppDimensions.dialogHeaderButtonSize,
-                                    child: NeoButton(
-                                      onPressed: () {
-                                        if (Navigator.canPop(context)) {
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                      padding: EdgeInsets.zero,
-                                      color: Colors.white,
-                                      borderWidth: 2,
-                                      borderRadius: AppDimensions.radiusSm,
-                                      shadowOffset: 0,
-                                      child: const Icon(Icons.close, size: 18),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 10),
-                              // Name Field
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(AppLocalizations.of(context)!.nameUpper,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12)),
-                              Text('${_nameController.text.length}/40',
-                                  style: const TextStyle(
-                                      color: Colors.grey, fontSize: 12)),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          SizedBox(
-                            height: 48.0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                    AppDimensions.radiusMd),
-                                border: Border.all(
-                                    color: AppTheme.border, width: 1.0),
-                              ),
-                              child: Center(
-                                child: TextField(
-                                  controller: _nameController,
-                                  maxLength: 40,
-                                  textAlignVertical: TextAlignVertical.center,
-                                  onChanged: (val) => setState(() {}),
-                                  decoration: const InputDecoration(
-                                    hintText:
-                                        'e.g. Travel, Design Inspiration...',
-                                    hintStyle: TextStyle(
-                                        color: Colors.black38, fontSize: 15),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 16),
-                                    border: InputBorder.none,
-                                    isDense: true,
-                                    counterText: '',
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
 
-                          // Color Picker
-                          Text(AppLocalizations.of(context)!.colorUpper,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12)),
-                          const SizedBox(height: 5),
-                          GridView.builder(
-                            shrinkWrap: true,
-                            padding: EdgeInsets.zero,
-                            clipBehavior: Clip.none,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 8,
-                              crossAxisSpacing: 7,
-                              mainAxisSpacing: 7,
-                            ),
-                            itemCount: _colors.length,
-                            itemBuilder: (context, index) {
-                              final colorHex = _colors[index];
-                              final color =
-                                  BookmarkCollection.parseColor(colorHex);
-                              final isSelected = _selectedColorHex == colorHex;
-
-                              return GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  HapticFeedback.lightImpact();
-                                  setState(() => _selectedColorHex = colorHex);
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: color,
-                                    borderRadius: BorderRadius.circular(
-                                        AppDimensions.radiusSm),
-                                    border: Border.all(
-                                      color: AppTheme.border,
-                                      width: isSelected ? 2.0 : 1.0,
-                                    ),
-                                    boxShadow: isSelected
-                                        ? const [
-                                            BoxShadow(
-                                              color: AppTheme.border,
-                                              offset: Offset(2, 2),
-                                              blurRadius: 0,
-                                              spreadRadius: 0,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: isSelected
-                                      ? Icon(
-                                          Icons.check,
-                                          size: 16,
-                                          color: BookmarkCollection
-                                                  .isWhiteIconColor(color)
-                                              ? Colors.white
-                                              : Colors.black,
-                                        )
-                                      : null,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
-                          Text(AppLocalizations.of(context)!.iconUpper,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 12)),
-                          const SizedBox(height: 5),
-                          Builder(
-                            builder: (context) {
-                              final icons = _displayIcons;
-                              final currentColor =
-                                  BookmarkCollection.parseColor(
-                                      _selectedColorHex);
-                              final count = _isExpanded ? icons.length : 24;
-
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                padding: EdgeInsets.zero,
-                                clipBehavior: Clip.none,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 8,
-                                  crossAxisSpacing: 7,
-                                  mainAxisSpacing: 7,
-                                ),
-                                itemCount: count,
-                                itemBuilder: (context, index) {
-                                  // In collapsed state, slot 24 (index 23) is the 3-dots expand button
-                                  if (!_isExpanded && index == 23) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        HapticFeedback.lightImpact();
-                                        setState(() => _isExpanded = true);
-                                      },
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          borderRadius: BorderRadius.circular(
-                                              AppDimensions.radiusSm),
-                                          border: Border.all(
-                                            color: AppTheme.border,
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                        child: const Icon(Icons.more_horiz,
-                                            size: 20),
-                                      ),
-                                    );
-                                  }
-
-                                  final icon = icons[index];
-                                  final isSelected =
-                                      _selectedIconCode == icon.codePoint;
-
-                                  return GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () {
-                                      HapticFeedback.lightImpact();
-                                      setState(() =>
-                                          _selectedIconCode = icon.codePoint);
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? currentColor
-                                            : Colors.transparent,
-                                        borderRadius: BorderRadius.circular(
-                                            AppDimensions.radiusSm),
-                                        border: Border.all(
-                                          color: AppTheme.border,
-                                          width: isSelected ? 2.0 : 1.0,
-                                        ),
-                                        boxShadow: isSelected
-                                            ? const [
-                                                BoxShadow(
-                                                  color: AppTheme.border,
-                                                  offset: Offset(2, 2),
-                                                  blurRadius: 0,
-                                                  spreadRadius: 0,
-                                                ),
-                                              ]
-                                            : null,
-                                      ),
-                                      child: Icon(
-                                        icon,
-                                        size: 20,
-                                        color: isSelected &&
-                                                BookmarkCollection
-                                                    .isWhiteIconColor(
-                                                        currentColor)
-                                            ? Colors.white
-                                            : AppTheme.border,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Save Button
-                          Builder(
-                            builder: (context) {
-                              final isNameEmpty =
-                                  _nameController.text.trim().isEmpty;
-                              return SizedBox(
-                                height: 48.0,
-                                width: double.infinity,
-                                child: NeoButton(
-                                  onPressed: !isNameEmpty ? _save : () {},
-                                  color: !isNameEmpty
-                                      ? const Color(0xFFFFD166)
-                                      : AppTheme.cardColor,
-                                  padding: EdgeInsets.zero,
-                                  borderRadius: AppDimensions.radiusMd,
-                                  shadowOffset: 2.0,
-                                  child: Center(
-                                    child: Text(
-                                      isEditing
-                                          ? AppLocalizations.of(context)!
-                                              .updateCollection
-                                          : (widget.parentId != null
-                                              ? AppLocalizations.of(context)!
-                                                  .createSubCollectionButton
-                                              : AppLocalizations.of(context)!
-                                                  .createCollection),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: !isNameEmpty
-                                            ? AppTheme.border
-                                            : Colors.black38,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
+        // Save Button
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _nameController,
+          builder: (context, value, _) {
+            final isNameEmpty = value.text.trim().isEmpty;
+            return SizedBox(
+              height: 48.0,
+              width: double.infinity,
+              child: NeoButton(
+                onPressed: !isNameEmpty ? _save : () {},
+                color: !isNameEmpty
+                    ? const Color(0xFFFFD166)
+                    : AppTheme.cardColor,
+                padding: EdgeInsets.zero,
+                borderRadius: AppDimensions.radiusMd,
+                shadowOffset: 2.0,
+                child: Center(
+                  child: Text(
+                    isEditing
+                        ? l10n.updateCollection
+                        : (widget.parentId != null
+                            ? l10n.createSubCollectionButton
+                            : l10n.createCollection),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: !isNameEmpty ? AppTheme.border : Colors.black38,
                     ),
                   ),
-                ],
                 ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+
+    return AppModalKeyboardLift(
+      child: Material(
+        type: MaterialType.transparency,
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: AppTheme.cardColor,
+            borderRadius: BorderRadius.circular(55),
+            border: Border.all(color: AppTheme.border, width: 2.5),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pinned Drag Handle ONLY
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Builder(
+                  builder: (scrollContext) {
+                    final hasKeyboard =
+                        MediaQuery.viewInsetsOf(scrollContext).bottom > 0;
+                    final safeBottom = MediaQuery.paddingOf(scrollContext).bottom;
+                    return SingleChildScrollView(
+                      controller: _scrollController,
+                      padding: EdgeInsets.fromLTRB(
+                        18.0,
+                        8.0,
+                        18.0,
+                        hasKeyboard
+                            ? 14.0
+                            : (AppDimensions.modalActionButtonBottomPadding +
+                                safeBottom),
+                      ),
+                      child: scrollContent,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),
-    ),
-  ),
-);
+    );
   }
 }

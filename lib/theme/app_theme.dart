@@ -43,6 +43,11 @@ class AppTheme {
           fontWeight: FontWeight.bold,
         ),
       ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        modalElevation: 0,
+      ),
     );
   }
 }

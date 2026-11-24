@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
+import 'app_modal_sheet.dart';
 import 'collection_editor_modal.dart';
 import 'delete_confirmation_dialog.dart';
 
@@ -59,10 +60,8 @@ class CollectionRadialMenu {
         color: const Color(0xFFFFD166),
         labelColor: const Color(0xFFFFD166),
         onTap: () {
-          showModalBottomSheet(
+          showAppModalSheet(
             context: context,
-            backgroundColor: Colors.transparent,
-            isScrollControlled: true,
             builder: (ctx) =>
                 CollectionEditorModal(existingCollection: collection),
           );
@@ -142,10 +141,12 @@ class CollectionRadialMenu {
   }
 
   static void handleLongPressEnd() {
-    if (_overlayStateKey.currentState != null) {
-      final executed = _overlayStateKey.currentState!.executeSelectedIfAny();
-      if (executed) {
+    final state = _overlayStateKey.currentState;
+    if (state != null) {
+      final selectedAction = state.takeSelectedAction();
+      if (selectedAction != null) {
         dismiss();
+        selectedAction();
       } else {
         dismiss(animated: true);
       }
@@ -312,13 +313,12 @@ class _CollectionRadialMenuOverlayWidgetState
     }
   }
 
-  bool executeSelectedIfAny() {
+  VoidCallback? takeSelectedAction() {
     if (_selectedIndex != -1) {
       HapticFeedback.lightImpact();
-      widget.actions[_selectedIndex].onTap();
-      return true;
+      return widget.actions[_selectedIndex].onTap;
     }
-    return false;
+    return null;
   }
 
   Future<void> dismissAnimated() async {
