@@ -14,6 +14,7 @@ import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_pressable.dart';
 import '../widgets/move_to_collection_modal.dart';
+import '../widgets/app_modal_sheet.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/pin_icon.dart';
 import '../widgets/favicon_image.dart';
@@ -156,10 +157,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   }
 
   void _showAddTagModal() {
-    showModalBottomSheet<void>(
+    showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => _AddTagSheet(
         currentTags: bookmark.tags,
         onSubmit: (tag) => _addTag(tag),
@@ -1598,18 +1597,31 @@ class _AddTagSheet extends ConsumerStatefulWidget {
   ConsumerState<_AddTagSheet> createState() => _AddTagSheetState();
 }
 
-class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
+class _AddTagSheetState extends ConsumerState<_AddTagSheet>
+    with AppModalDeferredFocusMixin {
   late final TextEditingController _controller;
+  late final ScrollController _scrollController;
+  late final FocusNode _tagFocusNode;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
+    _scrollController = ScrollController();
+    _tagFocusNode = FocusNode();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    scheduleDeferredFocus(_tagFocusNode);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
+    _tagFocusNode.dispose();
     super.dispose();
   }
 
@@ -1620,7 +1632,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
 
     HapticFeedback.lightImpact();
     widget.onSubmit(clean);
-    Navigator.of(context).pop();
+    dismissAppModalSheet(context);
   }
 
   @override
@@ -1629,59 +1641,37 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
     final allTagsAsync = ref.watch(allTagsProvider);
     final existingTags = allTagsAsync.value ?? [];
 
-    final rawText = _controller.text;
-    final cleanQuery = rawText.trim();
-    final isDuplicateOnBookmark = cleanQuery.isNotEmpty &&
-        TagHelper.isDuplicate(cleanQuery, widget.currentTags);
-    final canonicalMatch = cleanQuery.isNotEmpty
-        ? TagHelper.findCanonicalTag(cleanQuery, existingTags)
-        : null;
+    return AppModalKeyboardLift(
+      horizontalPadding: 16.0,
+      child: Builder(
+        builder: (cardContext) {
+          final hasKeyboard = MediaQuery.viewInsetsOf(cardContext).bottom > 0;
+          final safeBottom = MediaQuery.paddingOf(cardContext).bottom;
 
-    final suggestions = TagHelper.getSuggestions(
-      cleanQuery,
-      existingTags,
-      exclude: widget.currentTags,
-      limit: 6,
-    );
-
-    final canAdd = cleanQuery.isNotEmpty && !isDuplicateOnBookmark;
-    final tagToSubmit = canonicalMatch ?? cleanQuery;
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
-          ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(2.8, 2.8),
-                        blurRadius: 0,
-                        spreadRadius: 0,
-                      ),
-                    ],
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: hasKeyboard ? 12.0 : (16.0 + safeBottom),
+            ),
+            child: Container(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: AppTheme.border, width: 2.5),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppTheme.border,
+                    offset: Offset(2.8, 2.8),
+                    blurRadius: 0,
+                    spreadRadius: 0,
                   ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
+                ],
+              ),
+              child: Material(
+                type: MaterialType.transparency,
                 child: SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1714,7 +1704,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                             width: AppDimensions.dialogHeaderButtonSize,
                             height: AppDimensions.dialogHeaderButtonSize,
                             child: NeoButton(
-                              onPressed: () => Navigator.of(context).pop(),
+                              onPressed: () => dismissAppModalSheet(context),
                               padding: EdgeInsets.zero,
                               color: AppTheme.cardColor,
                               borderRadius: AppDimensions.radiusSm,
@@ -1725,192 +1715,300 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet> {
                         ],
                       ),
                       const SizedBox(height: AppDimensions.paddingLg),
-              TextField(
-                controller: _controller,
-                autofocus: true,
-                textInputAction: TextInputAction.done,
-                onChanged: (_) => setState(() {}),
-                onSubmitted: (_) {
-                  if (canAdd) _submitTag(tagToSubmit);
-                },
-                decoration: InputDecoration(
-                  hintText: l10n.tagNameHint,
-                  hintStyle: const TextStyle(color: Colors.black38),
-                  prefixIcon: const Icon(Icons.local_offer_outlined, color: AppTheme.border),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                    borderSide: const BorderSide(color: AppTheme.border, width: 3),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                    borderSide: const BorderSide(color: AppTheme.border, width: 3),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                    borderSide: const BorderSide(color: AppTheme.border, width: 3),
-                  ),
-                ),
-              ),
-
-              // Duplicate on current bookmark warning
-              if (isDuplicateOnBookmark) ...[
-                const SizedBox(height: 10),
-                NeoBox(
-                  color: const Color(0xFFFFD1D1),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  borderRadius: AppDimensions.radiusSm,
-                  borderWidth: 2,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.info_outline, size: 16, color: Color(0xFFC0392B)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.tagAlreadyAdded,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFC0392B),
+                      TextField(
+                        controller: _controller,
+                        focusNode: _tagFocusNode,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (val) {
+                          final cleanQuery = val.trim();
+                          if (cleanQuery.isEmpty) return;
+                          if (TagHelper.isDuplicate(
+                              cleanQuery, widget.currentTags)) {
+                            return;
+                          }
+                          final canonicalMatch = TagHelper.findCanonicalTag(
+                              cleanQuery, existingTags);
+                          _submitTag(canonicalMatch ?? cleanQuery);
+                        },
+                        decoration: InputDecoration(
+                          hintText: l10n.tagNameHint,
+                          hintStyle: const TextStyle(color: Colors.black38),
+                          prefixIcon: const Icon(Icons.local_offer_outlined,
+                              color: AppTheme.border),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusMd),
+                            borderSide: const BorderSide(
+                                color: AppTheme.border, width: 3),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusMd),
+                            borderSide: const BorderSide(
+                                color: AppTheme.border, width: 3),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusMd),
+                            borderSide: const BorderSide(
+                                color: AppTheme.border, width: 3),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ] else if (canonicalMatch != null && canonicalMatch != cleanQuery) ...[
-                const SizedBox(height: 10),
-                NeoBox(
-                  color: const Color(0xFFD4EDDA),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  borderRadius: AppDimensions.radiusSm,
-                  borderWidth: 2,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle_outline, size: 16, color: Color(0xFF155724)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          l10n.matchesExistingTag(canonicalMatch),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF155724),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: _controller,
+                        builder: (context, value, _) {
+                          final cleanQuery = value.text.trim();
+                          final isDuplicateOnBookmark = cleanQuery.isNotEmpty &&
+                              TagHelper.isDuplicate(
+                                  cleanQuery, widget.currentTags);
+                          final canonicalMatch = cleanQuery.isNotEmpty
+                              ? TagHelper.findCanonicalTag(
+                                  cleanQuery, existingTags)
+                              : null;
 
-              // Suggestions dropdown or chips
-              if (suggestions.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                Text(
-                  cleanQuery.isEmpty ? l10n.existingTags : 'Suggestions',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                    color: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (cleanQuery.isEmpty)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: suggestions.map((tag) {
-                      return GestureDetector(
-                        onTap: () => _submitTag(tag),
-                        child: NeoBox(
-                          color: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          borderRadius: AppDimensions.radiusSm,
-                          borderWidth: 2,
-                          child: Row(
+                          final suggestions = TagHelper.getSuggestions(
+                            cleanQuery,
+                            existingTags,
+                            exclude: widget.currentTags,
+                            limit: 6,
+                          );
+
+                          final canAdd =
+                              cleanQuery.isNotEmpty && !isDuplicateOnBookmark;
+                          final tagToSubmit = canonicalMatch ?? cleanQuery;
+
+                          return Column(
                             mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Icon(Icons.add, size: 14, color: AppTheme.border),
-                              const SizedBox(width: 4),
-                              Text(
-                                tag,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment.topCenter,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    // Duplicate on current bookmark warning
+                                    if (isDuplicateOnBookmark) ...[
+                                      const SizedBox(height: 10),
+                                      NeoBox(
+                                        color: const Color(0xFFFFD1D1),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        borderRadius: AppDimensions.radiusSm,
+                                        borderWidth: 2,
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.info_outline,
+                                                size: 16,
+                                                color: Color(0xFFC0392B)),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                l10n.tagAlreadyAdded,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFFC0392B),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ] else if (canonicalMatch != null &&
+                                        canonicalMatch != cleanQuery) ...[
+                                      const SizedBox(height: 10),
+                                      NeoBox(
+                                        color: const Color(0xFFD4EDDA),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 8),
+                                        borderRadius: AppDimensions.radiusSm,
+                                        borderWidth: 2,
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                                Icons.check_circle_outline,
+                                                size: 16,
+                                                color: Color(0xFF155724)),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                l10n.matchesExistingTag(
+                                                    canonicalMatch),
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF155724),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+
+                                    // Suggestions dropdown or chips
+                                    if (suggestions.isNotEmpty) ...[
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        cleanQuery.isEmpty
+                                            ? l10n.existingTags
+                                            : 'Suggestions',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w800,
+                                          letterSpacing: 0.8,
+                                          color: Colors.black54,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      if (cleanQuery.isEmpty)
+                                        Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: suggestions.map((tag) {
+                                            return GestureDetector(
+                                              onTap: () => _submitTag(tag),
+                                              child: NeoBox(
+                                                color: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 10,
+                                                        vertical: 6),
+                                                borderRadius:
+                                                    AppDimensions.radiusSm,
+                                                borderWidth: 2,
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(Icons.add,
+                                                        size: 14,
+                                                        color: AppTheme.border),
+                                                    const SizedBox(width: 4),
+                                                    Text(
+                                                      tag,
+                                                      style: const TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 13),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        )
+                                      else
+                                        NeoBox(
+                                          color: Colors.white,
+                                          padding: EdgeInsets.zero,
+                                          borderRadius: AppDimensions.radiusMd,
+                                          borderWidth: 2,
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              for (int i = 0;
+                                                  i < suggestions.length;
+                                                  i++) ...[
+                                                if (i > 0)
+                                                  const Divider(
+                                                      height: 1,
+                                                      thickness: 1,
+                                                      color: AppTheme.border),
+                                                InkWell(
+                                                  onTap: () =>
+                                                      _submitTag(suggestions[i]),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          AppDimensions
+                                                              .radiusMd),
+                                                  child: Padding(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 14,
+                                                        vertical: 10),
+                                                    child: Row(
+                                                      children: [
+                                                        const Icon(
+                                                            Icons
+                                                                .local_offer_outlined,
+                                                            size: 16,
+                                                            color: AppTheme
+                                                                .border),
+                                                        const SizedBox(
+                                                            width: 10),
+                                                        Expanded(
+                                                          child: Text(
+                                                            suggestions[i],
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                fontSize: 14),
+                                                          ),
+                                                        ),
+                                                        const Icon(
+                                                            Icons.north_west,
+                                                            size: 14,
+                                                            color:
+                                                                Colors.black38),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: AppDimensions.paddingLg),
+                              NeoButton(
+                                enableFeedback: false,
+                                onPressed: canAdd
+                                    ? () => _submitTag(tagToSubmit)
+                                    : null,
+                                color: canAdd
+                                    ? AppTheme.accent
+                                    : const Color(0xFFDDDDDD),
+                                borderRadius: AppDimensions.radiusMd,
+                                borderWidth: 2,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                child: Text(
+                                  l10n.addTag,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    color: canAdd
+                                        ? AppTheme.border
+                                        : Colors.black38,
+                                  ),
+                                ),
                               ),
                             ],
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  )
-                else
-                  NeoBox(
-                    color: Colors.white,
-                    padding: EdgeInsets.zero,
-                    borderRadius: AppDimensions.radiusMd,
-                    borderWidth: 2,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        for (int i = 0; i < suggestions.length; i++) ...[
-                          if (i > 0)
-                            const Divider(height: 1, thickness: 1, color: AppTheme.border),
-                          InkWell(
-                            onTap: () => _submitTag(suggestions[i]),
-                            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.local_offer_outlined, size: 16, color: AppTheme.border),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: Text(
-                                      suggestions[i],
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                    ),
-                                  ),
-                                  const Icon(Icons.north_west, size: 14, color: Colors.black38),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-              ],
-
-              const SizedBox(height: AppDimensions.paddingLg),
-              NeoButton(
-                enableFeedback: false,
-                onPressed: canAdd ? () => _submitTag(tagToSubmit) : null,
-                color: canAdd ? AppTheme.accent : const Color(0xFFDDDDDD),
-                borderRadius: AppDimensions.radiusMd,
-                borderWidth: 2,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                child: Text(
-                  l10n.addTag,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    color: canAdd ? AppTheme.border : Colors.black38,
-                  ),
-                ),
-              ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
-    ),
-  ),
-);
+    );
   }
 }
 

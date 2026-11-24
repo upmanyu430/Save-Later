@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +8,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'animated_checkmark.dart';
+import 'app_modal_sheet.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
 import 'neo_button.dart';
@@ -38,10 +38,8 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     bool initialUnsorted = false,
     Future<void> Function(BookmarkCollection? collection)? onMove,
   }) async {
-    final moved = await showModalBottomSheet<bool>(
+    final moved = await showAppModalSheet<bool>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => MoveToCollectionModal(
         bookmark: bookmark,
         bookmarks: bookmarks,
@@ -71,14 +69,22 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
 }
 
 class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
+  late final ScrollController _scrollController;
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController = ScrollController();
     _selectedCollection = widget.initialCollection;
     _isUnsortedSelected = widget.initialUnsorted && widget.initialCollection == null;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _handleMove(BookmarkCollection? collection) async {
@@ -91,14 +97,13 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     }
 
     if (!mounted) return;
-    Navigator.of(context).pop(true);
+    dismissAppModalSheet(context, true);
   }
 
   void _openCreateCollection() async {
-    await showModalBottomSheet<void>(
+    await showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      unfocusBeforeOpen: false,
       builder: (ctx) => const CollectionEditorModal(),
     );
   }
@@ -185,70 +190,44 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   @override
   Widget build(BuildContext context) {
     final collectionsAsync = ref.watch(allCollectionsProvider);
-    final view = View.of(context);
-    final windowPadding = MediaQueryData.fromView(view).padding;
-    final statusBarHeight = windowPadding.top > 0
-        ? windowPadding.top
-        : MediaQuery.paddingOf(context).top;
-    final topClearance = statusBarHeight + 16.0;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     // Exact height matching the Add New Collection modal (CollectionEditorModal):
     final targetModalHeight =
         CollectionEditorModal.getCollapsedModalHeight(context);
-    final availableHeight = screenHeight - topClearance - bottomInset;
-    final sheetHeight = math.min(availableHeight, targetModalHeight);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 5.0,
-          right: 5.0,
-          top: topClearance,
-          bottom: bottomInset,
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 420,
-              maxHeight: sheetHeight,
-            ),
-            child: SizedBox(
-              key: const ValueKey('move_to_collection_modal_sheet'),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
+    return AppModalKeyboardLift(
+      maxHeight: targetModalHeight,
+      freezeWhenCovered: true,
+      child: SizedBox(
+        key: const ValueKey('move_to_collection_modal_sheet'),
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(55),
+            border: Border.all(color: AppTheme.border, width: 2.5),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Top Grab Handle
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Top Grab Handle
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                        child: Center(
-                          child: Container(
-                            width: 44,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -291,7 +270,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                               ),
                               const SizedBox(height: 12),
                               // Collections List
-                              collectionsAsync.when(
+                              AnimatedSize(
+                                duration: const Duration(milliseconds: 200),
+                                curve: Curves.easeOutCubic,
+                                alignment: Alignment.topCenter,
+                                child: collectionsAsync.when(
                                 data: (collections) {
                                   if (collections.isEmpty) {
                                     return Column(
@@ -459,6 +442,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                   ),
                                 ),
                               ),
+                              ),
                             ],
                           ),
                         ),
@@ -529,10 +513,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

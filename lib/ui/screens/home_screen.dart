@@ -15,6 +15,7 @@ import '../widgets/folder_box.dart';
 import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
 import '../widgets/share_save_modal.dart';
+import '../widgets/app_modal_sheet.dart';
 import '../../theme/app_theme.dart';
 import '../../models/bookmark.dart';
 import 'package:save_later/config/app_constants.dart';
@@ -175,10 +176,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _showAddCollectionModal() {
-    showModalBottomSheet(
+    _urlFocusNode.unfocus(disposition: UnfocusDisposition.scope);
+    SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
+    showAppModalSheet<void>(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (context) => const CollectionEditorModal(),
     );
   }
@@ -215,6 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
         child: LayoutBuilder(
@@ -300,8 +302,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // Scrollable content
             Expanded(
-              child: CustomScrollView(
-                clipBehavior: Clip.hardEdge,
+              child: RepaintBoundary(
+                child: CustomScrollView(
+                  clipBehavior: Clip.hardEdge,
                 slivers: [
                   SliverToBoxAdapter(
                     child: Padding(
@@ -576,6 +579,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
+            ),
             ),
           ],
         );

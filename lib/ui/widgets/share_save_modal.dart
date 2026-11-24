@@ -9,6 +9,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
 import 'animated_checkmark.dart';
+import 'app_modal_sheet.dart';
 import 'collection_editor_modal.dart';
 import 'neo_button.dart';
 import 'pin_icon.dart';
@@ -43,10 +44,8 @@ class ShareSaveModal extends ConsumerStatefulWidget {
     required String url,
     Future<void> Function(BookmarkCollection? collection, bool isPinned)? onSave,
   }) async {
-    return showModalBottomSheet<ShareSaveResult?>(
+    return showAppModalSheet<ShareSaveResult?>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => ShareSaveModal(
         url: url,
         onSave: onSave,
@@ -68,16 +67,28 @@ class ShareSaveModal extends ConsumerStatefulWidget {
 
 class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
   final GlobalKey _cardKey = GlobalKey();
+  late final ScrollController _scrollController;
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = true;
   bool _isPinned = false;
   bool _isSaving = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   void _openCreateCollection() async {
-    await showModalBottomSheet<void>(
+    await showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      unfocusBeforeOpen: false,
       builder: (ctx) => const CollectionEditorModal(),
     );
   }
@@ -101,12 +112,17 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
       }
 
       if (!mounted) return;
-      Navigator.of(context).pop(ShareSaveResult(
+      final result = ShareSaveResult(
         collection: targetCollection,
         isUnsorted: _isUnsortedSelected,
         isPinned: _isPinned,
         modalHeight: measuredHeight,
-      ));
+      );
+      if (Navigator.canPop(context)) {
+        dismissAppModalSheet(context, result);
+      } else {
+        setState(() => _isSaving = false);
+      }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
@@ -194,71 +210,45 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
   Widget build(BuildContext context) {
     final collectionsAsync = ref.watch(allCollectionsProvider);
     final l10n = AppLocalizations.of(context);
-    final view = View.of(context);
-    final windowPadding = MediaQueryData.fromView(view).padding;
-    final statusBarHeight = windowPadding.top > 0
-        ? windowPadding.top
-        : MediaQuery.paddingOf(context).top;
-    final topClearance = statusBarHeight + 16.0;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     // Exact height matching the Add New Collection modal (CollectionEditorModal):
     final targetModalHeight =
         CollectionEditorModal.getCollapsedModalHeight(context);
-    final availableHeight = screenHeight - topClearance - bottomInset;
-    final sheetHeight = math.min(availableHeight, targetModalHeight);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.of(context).pop(),
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 5.0,
-          right: 5.0,
-          top: topClearance,
-          bottom: bottomInset,
-        ),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 420,
-              maxHeight: sheetHeight,
-            ),
-            child: SizedBox(
-              key: const ValueKey('share_save_modal_sheet'),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  key: _cardKey,
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
+    return AppModalKeyboardLift(
+      maxHeight: targetModalHeight,
+      freezeWhenCovered: true,
+      child: SizedBox(
+        key: const ValueKey('share_save_modal_sheet'),
+        child: Container(
+          key: _cardKey,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(55),
+            border: Border.all(color: AppTheme.border, width: 2.5),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Pinned Drag Handle ONLY
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
+                child: Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Pinned Drag Handle ONLY
-                      Padding(
-                        padding: const EdgeInsets.only(top: 12.0, bottom: 6.0),
-                        child: Center(
-                          child: Container(
-                            width: 44,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Flexible(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                ),
+              ),
+              Flexible(
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -373,7 +363,11 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                         const SizedBox(height: 10),
 
                         // Collections List
-                        collectionsAsync.when(
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeOutCubic,
+                          alignment: Alignment.topCenter,
+                          child: collectionsAsync.when(
                           data: (collections) {
                             final selected = _selectedCollection;
 
@@ -519,6 +513,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                               ),
                             ),
                           ),
+                        ),
                         ],
                       ),
                     ),
@@ -596,11 +591,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
               ),
             ),
           ),
-        ),
-      ),
-    ),
-  ),
-);
+    );
   }
 }
 
@@ -619,10 +610,8 @@ class SaveSuccessModal extends StatefulWidget {
     Duration autoDismissDuration = const Duration(milliseconds: 1500),
     double? targetHeight,
   }) async {
-    return showModalBottomSheet<void>(
+    return showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => SaveSuccessModal(
         autoDismissDuration: autoDismissDuration,
         targetHeight: targetHeight,
@@ -642,7 +631,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
     super.initState();
     _dismissTimer = Timer(widget.autoDismissDuration, () {
       if (mounted) {
-        Navigator.of(context).pop();
+        dismissAppModalSheet(context);
       }
     });
   }
@@ -656,122 +645,114 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    final effectiveHeight = math.max(
+    final view = View.maybeOf(context);
+    final windowPaddingTop = view != null
+        ? MediaQueryData.fromView(view).padding.top
+        : 0.0;
+    final mediaPaddingTop = MediaQuery.paddingOf(context).top;
+    final statusBarHeight =
+        windowPaddingTop > 0 ? windowPaddingTop : mediaPaddingTop;
+    final topClearance = statusBarHeight + 16.0;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final maxAllowedHeight = math.max(0.0, screenHeight - topClearance);
+    final desiredHeight = math.max(
       270.0 + bottomPadding,
-      widget.targetHeight ?? (MediaQuery.sizeOf(context).height * 0.55),
+      widget.targetHeight ?? (screenHeight * 0.55),
     );
+    final effectiveHeight = math.min(desiredHeight, maxAllowedHeight);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
+    return AppModalKeyboardLift(
+      maxHeight: effectiveHeight,
+      onOutsideTap: () {
         _dismissTimer?.cancel();
-        Navigator.of(context).pop();
+        dismissAppModalSheet(context);
       },
-      child: SafeArea(
-        bottom: false,
+      child: Container(
+        height: effectiveHeight,
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(55),
+          border: Border.all(color: AppTheme.border, width: 2.5),
+        ),
         child: Padding(
-          padding: EdgeInsets.only(
-            left: 5.0,
-            right: 5.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom,
+          padding: EdgeInsets.fromLTRB(
+            24.0,
+            14.0,
+            24.0,
+            24.0 + bottomPadding,
           ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: 420,
-                minHeight: effectiveHeight,
-                maxHeight: effectiveHeight,
-              ),
-              child: Container(
-                height: effectiveHeight,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(55),
-                  border: Border.all(color: AppTheme.border, width: 2.5),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    24.0,
-                    14.0,
-                    24.0,
-                    24.0 + bottomPadding,
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Top Drag Handle
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                  child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        // Top Drag Handle
-                        Center(
-                          child: Container(
-                            width: 48,
-                            height: 4,
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
-                      // Green Circle Check Badge
-                      Container(
-                        width: 94,
-                        height: 94,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00D287),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppTheme.border,
-                            width: 2.8,
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: AppTheme.border,
-                              offset: Offset(3.0, 3.0),
-                              blurRadius: 0,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 50,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Title
-                      const Text(
-                        'Saved!',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.border,
-                          letterSpacing: -0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      // Subtitle
-                      const Text(
-                        'Link saved',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black54,
-                        ),
+                // Green Circle Check Badge
+                Container(
+                  width: 94,
+                  height: 94,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF00D287),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppTheme.border,
+                      width: 2.8,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: AppTheme.border,
+                        offset: Offset(3.0, 3.0),
+                        blurRadius: 0,
+                        spreadRadius: 0,
                       ),
                     ],
                   ),
+                  child: const Icon(
+                    Icons.check,
+                    color: Colors.white,
+                    size: 50,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+
+                // Title
+                const Text(
+                  'Saved!',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.border,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                // Subtitle
+                const Text(
+                  'Link saved',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
             ),
-          ),
           ),
         ),
       ),

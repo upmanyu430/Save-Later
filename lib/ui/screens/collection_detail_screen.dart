@@ -15,6 +15,7 @@ import '../widgets/no_url_dialog.dart';
 import '../widgets/bookmark_grid_item.dart';
 import '../widgets/collection_grid_item.dart';
 import '../widgets/collection_editor_modal.dart';
+import '../widgets/app_modal_sheet.dart';
 import '../widgets/review_cards_icon.dart';
 import '../widgets/move_to_collection_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
@@ -42,10 +43,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   final Set<int> _selectedIds = {};
 
   void _showAddLinkModal(BuildContext context, [BookmarkCollection? currentCollection]) {
-    showModalBottomSheet(
+    showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (modalCtx) => AddLinkModal(
         collection: currentCollection ?? widget.collection,
         parentContext: context,
@@ -55,10 +54,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
   void _showCreateSubCollectionModal(BuildContext context) {
     if (widget.collectionId == null) return;
-    showModalBottomSheet(
+    showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => CollectionEditorModal(
         parentId: widget.collectionId,
       ),
@@ -73,10 +70,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     target ??= await ref.read(repositoryProvider).getCollection(widget.collectionId!);
     if (target == null || !mounted) return;
 
-    showModalBottomSheet(
+    showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => CollectionEditorModal(
         existingCollection: target,
       ),
@@ -114,130 +109,121 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     }
   }
 
+  void _runAfterMenuDismiss(BuildContext menuContext, VoidCallback action) {
+    dismissAppModalSheet(menuContext);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        action();
+      }
+    });
+  }
+
   void _showMenuModal(BuildContext context, [BookmarkCollection? currentCollection]) {
-    showModalBottomSheet(
+    showAppModalSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.pop(ctx),
-        child: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 5.0,
-              right: 5.0,
-              bottom: MediaQuery.of(ctx).viewInsets.bottom,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () {},
-                  child: Container(
-                    padding: EdgeInsets.only(
-                      top: 14,
-                      bottom: 20 + MediaQuery.paddingOf(ctx).bottom,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(55),
-                      border: Border.all(color: AppTheme.border, width: 2.5),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Drag handle
-                        Center(
-                          child: Container(
-                            width: 48,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: AppTheme.border,
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: AppDimensions.paddingXl),
-                        
-                        // Add Link
-                        _buildMenuItem(
-                          icon: Icons.add,
-                          title: AppLocalizations.of(context)!.addLink,
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            _showAddLinkModal(context, currentCollection);
-                          },
-                        ),
-                        _buildDivider(),
-                        
-                        // Select Links
-                        _buildMenuItem(
-                          icon: Icons.check_box_outlined,
-                          title: AppLocalizations.of(context)!.selectLinks,
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            setState(() {
-                              _isSelectMode = true;
-                              _selectedIds.clear();
-                            });
-                          },
-                        ),
-                        _buildDivider(),
-
-                        // Create Sub-collection
-                        if (widget.collectionId != null) ...[
-                          _buildMenuItem(
-                            icon: Icons.create_new_folder_outlined,
-                            title: AppLocalizations.of(context)!.createSubCollection,
-                            onTap: () {
-                              Navigator.pop(ctx);
-                              _showCreateSubCollectionModal(context);
-                            },
-                          ),
-                          _buildDivider(),
-                        ],
-
-                        // Share Collection
-                        _buildMenuItem(
-                          icon: Icons.share_outlined,
-                          title: AppLocalizations.of(context)!.shareCollection,
-                          onTap: () {
-                            Navigator.pop(ctx);
-                            _shareCollection(currentCollection);
-                          },
-                        ),
-                        if (widget.collectionId != null) ...[
-                          _buildDivider(),
-
-                          // Edit Collection
-                          _buildMenuItem(
-                            icon: Icons.edit_outlined,
-                            title: AppLocalizations.of(context)!.editCollection,
-                            onTap: () {
-                              Navigator.pop(ctx);
-                              _showEditCollectionModal(currentCollection);
-                            },
-                          ),
-                          _buildDivider(),
-
-                          // Delete Collection
-                          _buildMenuItem(
-                            icon: Icons.delete_outline,
-                            title: AppLocalizations.of(context)!.deleteCollection,
-                            onTap: () {
-                              Navigator.pop(ctx);
-                              _showDeleteCollectionDialog(currentCollection);
-                            },
-                          ),
-                        ],
-                      ],
+      builder: (ctx) => AppModalKeyboardLift(
+        child: Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(55),
+            border: Border.all(color: AppTheme.border, width: 2.5),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                top: 14,
+                bottom: 20 + MediaQuery.paddingOf(ctx).bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 48,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppTheme.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(height: AppDimensions.paddingXl),
+
+                  // Add Link
+                  _buildMenuItem(
+                    icon: Icons.add,
+                    title: AppLocalizations.of(context)!.addLink,
+                    onTap: () => _runAfterMenuDismiss(
+                      ctx,
+                      () => _showAddLinkModal(context, currentCollection),
+                    ),
+                  ),
+                  _buildDivider(),
+
+                  // Select Links
+                  _buildMenuItem(
+                    icon: Icons.check_box_outlined,
+                    title: AppLocalizations.of(context)!.selectLinks,
+                    onTap: () {
+                      dismissAppModalSheet(ctx);
+                      setState(() {
+                        _isSelectMode = true;
+                        _selectedIds.clear();
+                      });
+                    },
+                  ),
+                  _buildDivider(),
+
+                  // Create Sub-collection
+                  if (widget.collectionId != null) ...[
+                    _buildMenuItem(
+                      icon: Icons.create_new_folder_outlined,
+                      title: AppLocalizations.of(context)!.createSubCollection,
+                      onTap: () => _runAfterMenuDismiss(
+                        ctx,
+                        () => _showCreateSubCollectionModal(context),
+                      ),
+                    ),
+                    _buildDivider(),
+                  ],
+
+                  // Share Collection
+                  _buildMenuItem(
+                    icon: Icons.share_outlined,
+                    title: AppLocalizations.of(context)!.shareCollection,
+                    onTap: () {
+                      dismissAppModalSheet(ctx);
+                      _shareCollection(currentCollection);
+                    },
+                  ),
+                  if (widget.collectionId != null) ...[
+                    _buildDivider(),
+
+                    // Edit Collection
+                    _buildMenuItem(
+                      icon: Icons.edit_outlined,
+                      title: AppLocalizations.of(context)!.editCollection,
+                      onTap: () => _runAfterMenuDismiss(
+                        ctx,
+                        () => _showEditCollectionModal(currentCollection),
+                      ),
+                    ),
+                    _buildDivider(),
+
+                    // Delete Collection
+                    _buildMenuItem(
+                      icon: Icons.delete_outline,
+                      title: AppLocalizations.of(context)!.deleteCollection,
+                      onTap: () => _runAfterMenuDismiss(
+                        ctx,
+                        () => _showDeleteCollectionDialog(currentCollection),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
@@ -383,6 +369,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
     return Scaffold(
       backgroundColor: AppTheme.background,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
         child: bookmarksAsync.when(
@@ -495,7 +482,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
 
                 // Content Grid
                 Expanded(
-                  child: LayoutBuilder(
+                  child: RepaintBoundary(
+                    child: LayoutBuilder(
                           builder: (context, constraints) {
                             const horizontalPadding = AppDimensions.paddingLg * 2;
                             const maxCrossAxisExtent = 200.0;
@@ -765,6 +753,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                             );
                           },
                         ),
+                  ),
                 ),
               ],
             );
@@ -865,20 +854,30 @@ class AddLinkModal extends ConsumerStatefulWidget {
   ConsumerState<AddLinkModal> createState() => _AddLinkModalState();
 }
 
-class _AddLinkModalState extends ConsumerState<AddLinkModal> {
+class _AddLinkModalState extends ConsumerState<AddLinkModal>
+    with AppModalDeferredFocusMixin {
   late final TextEditingController _urlController;
+  late final ScrollController _scrollController;
   late final FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
     _urlController = TextEditingController();
+    _scrollController = ScrollController();
     _focusNode = FocusNode();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    scheduleDeferredFocus(_focusNode);
   }
 
   @override
   void dispose() {
     _urlController.dispose();
+    _scrollController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -914,187 +913,170 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal> {
       collection: widget.collection,
     );
 
-    Navigator.pop(context);
+    dismissAppModalSheet(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-    final bottomPadding = bottomInset > 0
-        ? 16.0
-        : (AppDimensions.modalActionButtonBottomPadding +
-            MediaQuery.paddingOf(context).bottom);
-
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.pop(context),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: 5.0,
-            right: 5.0,
-            bottom: bottomInset,
+    final l10n = AppLocalizations.of(context)!;
+    final scrollContent = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Drag handle
+        Center(
+          child: Container(
+            width: 48,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppTheme.border,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
+        ),
+        const SizedBox(height: AppDimensions.paddingLg),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                l10n.addLinkToCollection,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.border,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: AppDimensions.dialogHeaderButtonSize,
+              height: AppDimensions.dialogHeaderButtonSize,
+              child: NeoButton(
+                onPressed: () => dismissAppModalSheet(context),
+                padding: EdgeInsets.zero,
+                color: Colors.white,
+                borderWidth: 2,
+                borderRadius: AppDimensions.radiusSm,
+                shadowOffset: 0,
+                child: const Icon(Icons.close, size: 18),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppDimensions.paddingLg),
+        SizedBox(
+          height: 52.0,
+          child: NeoBox(
+            color: AppTheme.cardColor,
+            borderRadius: AppDimensions.radiusMd,
+            borderWidth: AppDimensions.borderWidthMd,
+            shadowOffset: 2.0,
+            padding: const EdgeInsets.only(
+              left: AppDimensions.paddingMd,
+              right: AppDimensions.paddingXs,
+            ),
+            child: TextField(
+              controller: _urlController,
+              focusNode: _focusNode,
+              textAlignVertical: TextAlignVertical.center,
+              style: GoogleFonts.gabarito(
+                fontSize: 14.0,
+                fontWeight: FontWeight.w500,
+                color: AppTheme.border,
+              ),
+              decoration: InputDecoration(
+                hintText: l10n.linkUrlHint,
+                hintStyle: GoogleFonts.gabarito(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black38,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                suffixIcon: IconButton(
+                  tooltip: 'Paste',
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
                   ),
-                  padding: EdgeInsets.only(
-                    top: 14,
-                    left: 20,
-                    right: 20,
-                    bottom: bottomPadding,
-                  ),
-                  child: Column(
+                  icon: Row(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Drag handle
-                      Center(
-                        child: Container(
-                          width: 48,
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: AppTheme.border,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.paddingLg),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              AppLocalizations.of(context)!.addLinkToCollection,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.border,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: AppDimensions.dialogHeaderButtonSize,
-                            height: AppDimensions.dialogHeaderButtonSize,
-                            child: NeoButton(
-                              onPressed: () {
-                                if (Navigator.canPop(context)) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              color: Colors.white,
-                              borderWidth: 2,
-                              borderRadius: AppDimensions.radiusSm,
-                              shadowOffset: 0,
-                              child: const Icon(Icons.close, size: 18),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppDimensions.paddingLg),
-                      SizedBox(
-                        height: 52.0,
-                        child: NeoBox(
-                          color: AppTheme.cardColor,
-                          borderRadius: AppDimensions.radiusMd,
-                          borderWidth: AppDimensions.borderWidthMd,
-                          shadowOffset: 2.0,
-                          padding: const EdgeInsets.only(
-                            left: AppDimensions.paddingMd,
-                            right: AppDimensions.paddingXs,
-                          ),
-                          child: TextField(
-                            controller: _urlController,
-                            focusNode: _focusNode,
-                            autofocus: true,
-                            textAlignVertical: TextAlignVertical.center,
-                            style: GoogleFonts.gabarito(
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.border,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: AppLocalizations.of(context)!.linkUrlHint,
-                              hintStyle: GoogleFonts.gabarito(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.black38,
-                              ),
-                              border: InputBorder.none,
-                              isDense: true,
-                              suffixIcon: IconButton(
-                                tooltip: 'Paste',
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                constraints: const BoxConstraints(
-                                  minWidth: 40,
-                                  minHeight: 40,
-                                ),
-                                icon: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.paste_outlined,
-                                        size: 18, color: AppTheme.border),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Paste',
-                                      style: GoogleFonts.gabarito(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppTheme.border,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                onPressed: _pasteFromClipboard,
-                              ),
-                            ),
-                            onSubmitted: (_) => _handleSave(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: AppDimensions.paddingLg),
-                      SizedBox(
-                        height: 48.0,
-                        width: double.infinity,
-                        child: NeoButton(
-                          onPressed: _handleSave,
-                          color: AppTheme.accent,
-                          padding: EdgeInsets.zero,
-                          borderRadius: AppDimensions.radiusMd,
-                          borderWidth: AppDimensions.borderWidthMd,
-                          shadowOffset: 2.0,
-                          child: Center(
-                            child: Text(
-                              AppLocalizations.of(context)!.save,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.border,
-                              ),
-                            ),
-                          ),
+                      const Icon(Icons.paste_outlined,
+                          size: 18, color: AppTheme.border),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Paste',
+                        style: GoogleFonts.gabarito(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.border,
                         ),
                       ),
                     ],
                   ),
+                  onPressed: _pasteFromClipboard,
+                ),
+              ),
+              onSubmitted: (_) => _handleSave(),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppDimensions.paddingLg),
+        SizedBox(
+          height: 48.0,
+          width: double.infinity,
+          child: NeoButton(
+            onPressed: _handleSave,
+            color: AppTheme.accent,
+            padding: EdgeInsets.zero,
+            borderRadius: AppDimensions.radiusMd,
+            borderWidth: AppDimensions.borderWidthMd,
+            shadowOffset: 2.0,
+            child: Center(
+              child: Text(
+                l10n.save,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.border,
                 ),
               ),
             ),
           ),
         ),
+      ],
+    );
+
+    return AppModalKeyboardLift(
+      child: Builder(
+        builder: (innerContext) {
+          final bottomInset = MediaQuery.viewInsetsOf(innerContext).bottom;
+          final bottomPadding = bottomInset > 0
+              ? 16.0
+              : (AppDimensions.modalActionButtonBottomPadding +
+                  MediaQuery.paddingOf(innerContext).bottom);
+
+          return Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(55),
+              border: Border.all(color: AppTheme.border, width: 2.5),
+            ),
+            padding: EdgeInsets.only(
+              top: 14,
+              left: 20,
+              right: 20,
+              bottom: bottomPadding,
+            ),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: scrollContent,
+            ),
+          );
+        },
       ),
     );
   }
