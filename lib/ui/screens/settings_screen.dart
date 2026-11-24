@@ -213,12 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.maxContentWidth,
-            ),
-            child: Column(
+        child: Column(
           children: [
             // Top Bar
             Padding(
@@ -348,9 +343,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 }
 

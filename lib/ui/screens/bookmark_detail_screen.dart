@@ -430,11 +430,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   child: SizedBox(height: MediaQuery.of(context).size.height * 0.29),
                 ),
                 SliverToBoxAdapter(
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.all(Radius.circular(32)),
@@ -873,8 +870,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           ],
                         ),
                       ),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -895,10 +890,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 child: IgnorePointer(
                   ignoring: !_isTopBarVisible,
                   child: SafeArea(
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: AppDimensions.maxContentWidth),
-                        child: Padding(
+                    child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -939,10 +931,8 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             ],
                           ),
                         ),
-                      ),
                     ),
                   ),
-                ),
               ),
             ),
           ),

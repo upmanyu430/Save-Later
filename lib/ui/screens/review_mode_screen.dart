@@ -541,16 +541,9 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       backgroundColor: const Color(0xFF111111), // Almost black
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.maxContentWidth,
-            ),
-            child: isDone
-                ? _buildCaughtUp(bottomInset)
-                : _buildReviewUI(bottomInset),
-          ),
-        ),
+        child: isDone
+            ? _buildCaughtUp(bottomInset)
+            : _buildReviewUI(bottomInset),
       ),
     );
   }
@@ -819,17 +812,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
 
         // Swiper
         Expanded(
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppDimensions.maxContentWidth,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final screenWidth = MediaQuery.sizeOf(context).width;
-                    final cardWidth = (screenWidth * 0.736).clamp(280.0, 420.0);
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final screenWidth = MediaQuery.sizeOf(context).width;
+                final cardWidth = (screenWidth * 0.736).clamp(280.0, 480.0);
                     final cardHeight = (cardWidth * 1.70).clamp(0.0, constraints.maxHeight * 0.88);
 
                     return Stack(
@@ -919,8 +907,6 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                   },
                 ),
               ),
-            ),
-          ),
         ),
 
         // Bottom Action Bar
