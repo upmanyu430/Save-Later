@@ -774,8 +774,81 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, st) => Center(child: Text(l10n.errorWithMessage(e.toString()))),
+          loading: () => Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(
+                  color: AppTheme.border,
+                ),
+                const SizedBox(height: AppDimensions.paddingMd),
+                Text(
+                  widget.collectionId != null
+                      ? 'Loading collection...'
+                      : 'Loading bookmarks...',
+                  style: GoogleFonts.gabarito(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.border,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          error: (e, st) => Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.paddingLg,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 48,
+                    color: Color(0xFFEF476F),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingMd),
+                  Text(
+                    l10n.errorWithMessage(e.toString()),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.gabarito(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.border,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.paddingLg),
+                  NeoButton(
+                    onPressed: () {
+                      if (widget.collectionId != null) {
+                        ref.invalidate(collectionBookmarksProvider(widget.collectionId!));
+                        ref.invalidate(subCollectionsProvider(widget.collectionId!));
+                        ref.invalidate(singleCollectionProvider(widget.collectionId!));
+                      } else {
+                        ref.invalidate(unsortedBookmarksProvider);
+                      }
+                    },
+                    color: AppTheme.accent,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    borderRadius: AppDimensions.radiusMd,
+                    borderWidth: AppDimensions.borderWidthMd,
+                    child: Text(
+                      'Retry',
+                      style: GoogleFonts.gabarito(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.border,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     ),

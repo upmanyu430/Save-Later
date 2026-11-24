@@ -505,17 +505,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ];
                     },
                     loading: () => [
-                      const SliverFillRemaining(
+                      SliverFillRemaining(
                         hasScrollBody: false,
-                        child: Center(child: CircularProgressIndicator()),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const CircularProgressIndicator(
+                                color: AppTheme.border,
+                              ),
+                              const SizedBox(height: AppDimensions.paddingMd),
+                              Text(
+                                'Loading collections...',
+                                style: GoogleFonts.gabarito(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.border,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                     error: (e, st) => [
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(
-                            child:
-                                Text(l10n.errorWithMessage(e.toString()))),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimensions.paddingLg,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 48,
+                                  color: Color(0xFFEF476F),
+                                ),
+                                const SizedBox(height: AppDimensions.paddingMd),
+                                Text(
+                                  l10n.errorWithMessage(e.toString()),
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.gabarito(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.border,
+                                  ),
+                                ),
+                                const SizedBox(height: AppDimensions.paddingLg),
+                                NeoButton(
+                                  onPressed: () => ref.invalidate(collectionsProvider),
+                                  color: AppTheme.accent,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 12,
+                                  ),
+                                  borderRadius: AppDimensions.radiusMd,
+                                  borderWidth: AppDimensions.borderWidthMd,
+                                  child: Text(
+                                    'Retry',
+                                    style: GoogleFonts.gabarito(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.border,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),

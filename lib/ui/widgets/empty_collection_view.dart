@@ -1,13 +1,11 @@
-import 'dart:io' show Platform;
 import 'dart:ui' show lerpDouble;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 
-/// Graphic illustrating an empty folder with smooth floating animation,
-/// breathing ground shadow, and interactive spring bounce on tap.
+/// Graphic illustrating an empty folder with a calm entrance transition
+/// and stable, grounded resting state.
 class EmptyFolderGraphic extends StatefulWidget {
   final double width;
   final double height;
@@ -25,33 +23,26 @@ class EmptyFolderGraphic extends StatefulWidget {
 }
 
 class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
-    with TickerProviderStateMixin {
+    with SingleTickerProviderStateMixin {
   late final AnimationController _floatController;
   late final Animation<double> _floatAnimation;
-
-  bool _isTestEnvironment() {
-    if (kIsWeb) return false;
-    try {
-      return Platform.environment.containsKey('FLUTTER_TEST');
-    } catch (_) {
-      return false;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
     _floatController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 650),
     );
     _floatAnimation = CurvedAnimation(
       parent: _floatController,
-      curve: Curves.easeInOutSine,
+      curve: Curves.easeOutBack,
     );
 
-    if (widget.animate && !_isTestEnvironment()) {
-      _floatController.repeat(reverse: true);
+    if (widget.animate) {
+      _floatController.forward();
+    } else {
+      _floatController.value = 1.0;
     }
   }
 
@@ -79,25 +70,24 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
         child: AnimatedBuilder(
           animation: _floatAnimation,
           builder: (context, _) {
-            final floatProgress = _floatAnimation.value;
+            final progress = _floatAnimation.value;
 
-            // Vertical translation: subtle float
-            final floatY = lerpDouble(0.0, -6.0, floatProgress)!;
+            // Calm entrance transition settling to 0.0 at rest
+            final floatY = lerpDouble(-8.0, 0.0, progress)!;
             final totalOffsetY = floatY;
 
-            // Tilt rotation: slight playful sway
-            final tiltAngle = lerpDouble(-0.015, 0.015, floatProgress)!;
+            // Subtle tilt settling to 0.0
+            final tiltAngle = lerpDouble(-0.015, 0.0, progress)!;
 
-            // Ground shadow breathing: shrinks and softens as folder rises
-            final heightRatio = ((-totalOffsetY) / 16.0).clamp(0.0, 1.0);
-            final shadowScale = lerpDouble(1.0, 0.78, heightRatio)!;
-            final shadowOpacity = lerpDouble(0.85, 0.40, heightRatio)!;
+            // Ground shadow settles to grounded resting state
+            final shadowScale = lerpDouble(0.85, 1.0, progress)!.clamp(0.0, 1.2);
+            final shadowOpacity = lerpDouble(0.50, 0.85, progress)!.clamp(0.0, 1.0);
 
             return Stack(
               alignment: Alignment.center,
               clipBehavior: Clip.none,
               children: [
-                // 1. Breathing ground shadow (anchored at base)
+                // 1. Ground shadow (anchored at base)
                 Positioned(
                   bottom: h * 0.01,
                   child: Transform.scale(
@@ -116,7 +106,7 @@ class _EmptyFolderGraphicState extends State<EmptyFolderGraphic>
                     ),
                   ),
                 ),
-                // 2. Levitating folder body + tabs
+                // 2. Folder body + tabs
                 Transform.translate(
                   offset: Offset(0, totalOffsetY),
                   child: Transform.rotate(
