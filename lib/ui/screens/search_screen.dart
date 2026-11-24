@@ -258,9 +258,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   double _recentCardWidth(BuildContext context) {
-    final availableWidth = (MediaQuery.sizeOf(context)
-            .width
-            .clamp(0.0, AppDimensions.maxContentWidth)) -
+    final availableWidth = MediaQuery.sizeOf(context).width -
         (AppDimensions.paddingLg * 2);
     final columnCount = (availableWidth /
             (AppDimensions.gridMaxCrossAxisExtent + AppDimensions.gridSpacingMd))
@@ -952,12 +950,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       backgroundColor: AppTheme.background,
       body: SafeArea(
         bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.maxContentWidth,
-            ),
-            child: Column(
+        child: Column(
               children: [
                 // Pinned Header: Search Bar & Cancel Button + Library Stats (when not searching)
                 Container(
@@ -1114,8 +1107,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ],
             ),
-          ),
-        ),
       ),
     );
   }

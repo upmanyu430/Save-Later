@@ -246,12 +246,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: AppDimensions.maxContentWidth,
-            ),
-            child: Column(
+        child: Column(
           children: [
             // Top App Bar
             Padding(
@@ -422,7 +417,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                     )
                   : LayoutBuilder(
                       builder: (context, constraints) {
-                        final columnCount = (constraints.maxWidth / 62).floor().clamp(4, 8);
+                        final columnCount = (constraints.maxWidth / 62).floor().clamp(4, 24);
 
                         return GridView.builder(
                           padding: const EdgeInsets.symmetric(
@@ -519,8 +514,6 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
           ],
         ),
       ),
-    ),
-  ),
-);
-}
+    );
+  }
 }
