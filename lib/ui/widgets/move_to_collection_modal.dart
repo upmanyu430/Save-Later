@@ -254,39 +254,44 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                             children: [
                               const SizedBox(height: 6),
                               // Header Row: Title & Action Button
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Expanded(
-                                    child: Text(
-                                      'Move to Collection',
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w900,
-                                        color: AppTheme.border,
-                                        letterSpacing: -0.3,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppDimensions.paddingSm),
-                                  SizedBox(
-                                    width: AppDimensions.dialogHeaderButtonSize,
-                                    height: AppDimensions.dialogHeaderButtonSize,
-                                    child: NeoButton(
-                                      onPressed: _openCreateCollection,
-                                      padding: EdgeInsets.zero,
-                                      color: Colors.white,
-                                      borderRadius: AppDimensions.radiusMd,
-                                      borderWidth: AppDimensions.borderWidthMd,
-                                      child: const Icon(
-                                        Icons.create_new_folder_outlined,
-                                        size: AppDimensions.dialogHeaderIconSize,
-                                        color: AppTheme.border,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppDimensions.modalFolderOptionHorizontalMargin,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Expanded(
+                                      child: Text(
+                                        'Move to Collection',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                          color: AppTheme.border,
+                                          letterSpacing: -0.3,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: AppDimensions.paddingSm),
+                                    SizedBox(
+                                      width: AppDimensions.dialogHeaderButtonSize,
+                                      height: AppDimensions.dialogHeaderButtonSize,
+                                      child: NeoButton(
+                                        onPressed: _openCreateCollection,
+                                        padding: EdgeInsets.zero,
+                                        color: Colors.white,
+                                        borderRadius: AppDimensions.radiusMd,
+                                        borderWidth: AppDimensions.borderWidthMd,
+                                        child: const Icon(
+                                          Icons.create_new_folder_outlined,
+                                          size: AppDimensions.dialogHeaderIconSize,
+                                          color: AppTheme.border,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               const SizedBox(height: 12),
                               // Collections List
@@ -461,9 +466,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                       // Bottom Move Action Button
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                          18.0,
+                          18.0 + AppDimensions.modalFolderOptionHorizontalMargin,
                           0.0,
-                          18.0,
+                          18.0 + AppDimensions.modalFolderOptionHorizontalMargin,
                           AppDimensions.modalActionButtonBottomPadding +
                               MediaQuery.paddingOf(context).bottom,
                         ),
