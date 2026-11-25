@@ -363,7 +363,12 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const SizedBox(height: 18),
+                            Container(
+                              key: const ValueKey('move_to_collection_divider'),
+                              height: 1,
+                              color: Colors.black.withValues(alpha: 0.08),
+                              margin: const EdgeInsets.only(top: 6, bottom: 12),
+                            ),
                             Builder(
                               builder: (context) {
                                 final isEnabled = _selectedCollection != null;

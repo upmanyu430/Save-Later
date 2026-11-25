@@ -659,5 +659,46 @@ void main() {
       expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
       expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
     });
+
+    testWidgets('renders gray divider line above the bottom action button', (tester) async {
+      final repo = MockMoveRepository();
+      repo.collectionsList.add(
+        BookmarkCollection()
+          ..id = 1
+          ..name = 'Tech'
+          ..iconCodePoint = Icons.computer.codePoint
+          ..iconFontFamily = 'MaterialIcons'
+          ..colorHex = '#4A90E2',
+      );
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          const MoveToCollectionModal(),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final dividerFinder = find.byKey(const ValueKey('move_to_collection_divider'));
+      expect(dividerFinder, findsOneWidget);
+
+      final dividerContainer = tester.widget<Container>(dividerFinder);
+      expect(dividerContainer.color, Colors.black.withValues(alpha: 0.08));
+      expect(tester.getSize(dividerFinder).height, 19.0);
+      final coloredBoxFinder = find.descendant(
+        of: dividerFinder,
+        matching: find.byType(ColoredBox),
+      );
+      expect(tester.getSize(coloredBoxFinder).height, 1.0);
+
+      final buttonFinder = find.widgetWithText(NeoButton, 'Move to Collection');
+      expect(
+        tester.getBottomLeft(coloredBoxFinder).dy,
+        lessThan(tester.getTopLeft(buttonFinder).dy),
+      );
+    });
   });
 }
