@@ -489,6 +489,12 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                   ),
 
                   // Pinned Bottom Section: Divider & Save Button
+                  Container(
+                    key: const ValueKey('share_save_divider'),
+                    height: 1,
+                    color: Colors.black.withValues(alpha: 0.08),
+                    margin: const EdgeInsets.only(top: 6, bottom: 12),
+                  ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(
                       18.0,
@@ -501,12 +507,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Container(
-                          key: const ValueKey('share_save_divider'),
-                          height: 1,
-                          color: Colors.black.withValues(alpha: 0.08),
-                          margin: const EdgeInsets.only(top: 6, bottom: 12),
-                        ),
                         Builder(
                           builder: (context) {
                             final String buttonLabel;

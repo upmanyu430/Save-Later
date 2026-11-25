@@ -350,7 +350,13 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                         ),
                       ),
 
-                      // Bottom Move Action Button
+                      // Bottom Divider & Move Action Button
+                      Container(
+                        key: const ValueKey('move_to_collection_divider'),
+                        height: 1,
+                        color: Colors.black.withValues(alpha: 0.08),
+                        margin: const EdgeInsets.only(top: 6, bottom: 12),
+                      ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           18.0 + AppDimensions.modalFolderOptionHorizontalMargin,
@@ -363,12 +369,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(
-                              key: const ValueKey('move_to_collection_divider'),
-                              height: 1,
-                              color: Colors.black.withValues(alpha: 0.08),
-                              margin: const EdgeInsets.only(top: 6, bottom: 12),
-                            ),
                             Builder(
                               builder: (context) {
                                 final isEnabled = _selectedCollection != null;

@@ -694,6 +694,12 @@ void main() {
       );
       expect(tester.getSize(coloredBoxFinder).height, 1.0);
 
+      final sheetFinder = find.byKey(const ValueKey('move_to_collection_modal_sheet'));
+      expect(
+        tester.getSize(coloredBoxFinder).width,
+        closeTo(tester.getSize(sheetFinder).width - 5.0, 0.01),
+      );
+
       final buttonFinder = find.widgetWithText(NeoButton, 'Move to Collection');
       expect(
         tester.getBottomLeft(coloredBoxFinder).dy,
