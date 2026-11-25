@@ -527,7 +527,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             }
 
                             return SizedBox(
-                              height: 48.0,
+                              height: 50.0,
                               width: double.infinity,
                               child: NeoButton(
                                 onPressed: _isSaving ? null : _handleSave,

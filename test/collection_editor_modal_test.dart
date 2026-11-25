@@ -472,7 +472,7 @@ void main() {
 
     );
 
-    expect(sizedBox.height, 48.0);
+    expect(sizedBox.height, 50.0);
 
 
 

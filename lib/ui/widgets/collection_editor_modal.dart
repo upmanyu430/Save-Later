@@ -450,7 +450,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
           builder: (context, value, _) {
             final isNameEmpty = value.text.trim().isEmpty;
             return SizedBox(
-              height: 48.0,
+              height: 50.0,
               width: double.infinity,
               child: NeoButton(
                 onPressed: !isNameEmpty ? _save : () {},

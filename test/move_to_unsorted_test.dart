@@ -153,7 +153,7 @@ void main() {
       expect(find.text('Unsorted'), findsOneWidget);
       expect(find.text('Tech'), findsOneWidget);
 
-      // Initially, bottom button says 'Move to Collection' and is disabled with exact height 48.0
+      // Initially, bottom button says 'Move to Collection' and is disabled with exact height 50.0
       final bottomBtnFinder = find.widgetWithText(NeoButton, 'Move to Collection');
       expect(bottomBtnFinder, findsOneWidget);
       final neoBtn = tester.widget<NeoButton>(bottomBtnFinder);
@@ -161,7 +161,7 @@ void main() {
       final buttonSizedBox = tester.widget<SizedBox>(
         find.ancestor(of: bottomBtnFinder, matching: find.byType(SizedBox)).first,
       );
-      expect(buttonSizedBox.height, 48.0);
+      expect(buttonSizedBox.height, 50.0);
 
       // Tap on "Unsorted"
       await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
