@@ -170,12 +170,8 @@ void main() {
     expect((dec.border as Border).top.color, const Color(0xFFFDD164));
     expect(
       find.descendant(of: colFinder, matching: find.byIcon(Icons.check_circle_outline)),
-      findsOneWidget,
+      findsNothing,
     );
-    final checkIcon = tester.widget<Icon>(
-      find.descendant(of: colFinder, matching: find.byIcon(Icons.check_circle_outline)),
-    );
-    expect(checkIcon.color, const Color(0xFFFDD164));
   });
 
   testWidgets('ShareSaveModal unselected folder options have no gray outline', (tester) async {
@@ -203,6 +199,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.check_circle_outline), findsNothing);
 
     final colFinder = find.byKey(const ValueKey('share_modal_collection_3'));
     expect(colFinder, findsOneWidget);

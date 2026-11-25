@@ -167,9 +167,9 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('collection_1')));
       await tester.pumpAndSettle();
 
-      // Button should now say 'Move to "Tech"'
+      // Button should now say 'Move to "Tech"' without a checkmark tick
       expect(find.text('Move to "Tech"'), findsOneWidget);
-      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
+      expect(find.byIcon(Icons.check_circle_outline), findsNothing);
 
       // Tap the 'Move to "Tech"' button
       await tester.tap(find.text('Move to "Tech"'));

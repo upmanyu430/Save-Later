@@ -8,7 +8,6 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
-import 'animated_checkmark.dart';
 import 'app_modal_sheet.dart';
 import 'collection_editor_modal.dart';
 import 'neo_button.dart';
@@ -195,11 +194,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                     color: AppTheme.border,
                   ),
                 ),
-              ),
-              AnimatedCheckmark(
-                isSelected: isSelected,
-                color: const Color(0xFFFDD164),
-                size: 18,
               ),
             ],
           ),
@@ -467,11 +461,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                 ],
                                               ],
                                             ),
-                                          ),
-                                          AnimatedCheckmark(
-                                            isSelected: isSelected,
-                                            color: const Color(0xFFFDD164),
-                                            size: 18,
                                           ),
                                         ],
                                       ),

@@ -6,7 +6,6 @@ import '../../models/collection.dart';
 import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
-import 'animated_checkmark.dart';
 import 'app_modal_sheet.dart';
 import 'collection_editor_modal.dart';
 import 'moved_success_dialog.dart';
@@ -320,11 +319,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                       ],
                                                     ],
                                                   ),
-                                                ),
-                                                AnimatedCheckmark(
-                                                  isSelected: isSelected,
-                                                  color: const Color(0xFFFDD164),
-                                                  size: 18,
                                                 ),
                                               ],
                                             ),
