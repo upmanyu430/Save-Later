@@ -471,11 +471,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Container(
-                              height: 1,
-                              color: Colors.black.withValues(alpha: 0.08),
-                              margin: const EdgeInsets.only(top: 6, bottom: 12),
-                            ),
+                            const SizedBox(height: 18),
                             Builder(
                               builder: (context) {
                                 final l10n = AppLocalizations.of(context);
