@@ -19,6 +19,7 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
   final List<Bookmark>? bookmarks;
   final BookmarkCollection? initialCollection;
   final bool initialUnsorted;
+  final bool? showUnsortedOption;
   final Future<void> Function(BookmarkCollection? collection)? onMove;
 
   const MoveToCollectionModal({
@@ -27,6 +28,7 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     this.bookmarks,
     this.initialCollection,
     this.initialUnsorted = false,
+    this.showUnsortedOption,
     this.onMove,
   });
 
@@ -36,6 +38,7 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     List<Bookmark>? bookmarks,
     BookmarkCollection? initialCollection,
     bool initialUnsorted = false,
+    bool? showUnsortedOption,
     Future<void> Function(BookmarkCollection? collection)? onMove,
   }) async {
     final moved = await showAppModalSheet<bool>(
@@ -45,6 +48,7 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
         bookmarks: bookmarks,
         initialCollection: initialCollection,
         initialUnsorted: initialUnsorted,
+        showUnsortedOption: showUnsortedOption,
         onMove: onMove,
       ),
     );
@@ -73,12 +77,39 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   BookmarkCollection? _selectedCollection;
   bool _isUnsortedSelected = false;
 
+  bool get _shouldShowUnsortedOption {
+    if (widget.showUnsortedOption != null) {
+      return widget.showUnsortedOption!;
+    }
+    if (widget.bookmark != null) {
+      return widget.bookmark!.collection.value != null;
+    }
+    if (widget.bookmarks != null && widget.bookmarks!.isNotEmpty) {
+      return widget.bookmarks!.any((b) => b.collection.value != null);
+    }
+    return true;
+  }
+
+  BoxDecoration _optionDecoration(bool isSelected) {
+    return BoxDecoration(
+      color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(
+        color: isSelected ? const Color(0xFFFDD164) : Colors.transparent,
+        width: 1.5,
+      ),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController();
     _selectedCollection = widget.initialCollection;
-    _isUnsortedSelected = widget.initialUnsorted && widget.initialCollection == null;
+    _isUnsortedSelected =
+        widget.initialUnsorted &&
+        widget.initialCollection == null &&
+        _shouldShowUnsortedOption;
   }
 
   @override
@@ -130,18 +161,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
           padding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: AppDimensions.modalFolderOptionVerticalPadding),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFFFFF4D0)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFFFDD164)
-                  : Colors.black.withValues(alpha: 0.08),
-              width: isSelected ? 1.5 : 2.0,
-            ),
-          ),
+          decoration: _optionDecoration(isSelected),
           child: Row(
             children: [
               // Unsorted Icon Box
@@ -276,11 +296,12 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 alignment: Alignment.topCenter,
                                 child: collectionsAsync.when(
                                 data: (collections) {
+                                  final showUnsorted = _shouldShowUnsortedOption;
                                   if (collections.isEmpty) {
                                     return Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        _buildUnsortedTile(context),
+                                        if (showUnsorted) _buildUnsortedTile(context),
                                         const Padding(
                                           padding: EdgeInsets.symmetric(vertical: 24.0),
                                           child: Center(
@@ -304,14 +325,14 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
                                     padding: EdgeInsets.zero,
-                                    itemCount: collections.length + 1,
+                                    itemCount: collections.length + (showUnsorted ? 1 : 0),
                                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                                     itemBuilder: (ctx, index) {
-                                      if (index == 0) {
+                                      if (showUnsorted && index == 0) {
                                         return _buildUnsortedTile(context);
                                       }
 
-                                      final col = collections[index - 1];
+                                      final col = collections[index - (showUnsorted ? 1 : 0)];
                                       final isSelected = !_isUnsortedSelected && selected?.id == col.id;
 
                                       final iconColor =
@@ -337,18 +358,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 14,
                                                 vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                                            decoration: BoxDecoration(
-                                              color: isSelected
-                                                  ? const Color(0xFFFFF4D0)
-                                                  : Colors.white,
-                                              borderRadius: BorderRadius.circular(10),
-                                              border: Border.all(
-                                                color: isSelected
-                                                    ? const Color(0xFFFDD164)
-                                                    : Colors.black.withValues(alpha: 0.08),
-                                                width: isSelected ? 1.5 : 2.0,
-                                              ),
-                                            ),
+                                            decoration: _optionDecoration(isSelected),
                                             child: Row(
                                               children: [
                                                 // Collection Icon Box

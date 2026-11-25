@@ -130,6 +130,17 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
     }
   }
 
+  BoxDecoration _optionDecoration(bool isSelected) {
+    return BoxDecoration(
+      color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(
+        color: isSelected ? const Color(0xFFFDD164) : Colors.transparent,
+        width: 1.5,
+      ),
+    );
+  }
+
   Widget _buildUnsortedTile(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final isSelected = _isUnsortedSelected;
@@ -152,16 +163,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           padding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: AppDimensions.modalFolderOptionVerticalPadding),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFFFDD164)
-                  : Colors.black.withValues(alpha: 0.08),
-              width: isSelected ? 1.5 : 2.0,
-            ),
-          ),
+          decoration: _optionDecoration(isSelected),
           child: Row(
             children: [
               Container(
@@ -322,18 +324,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                            decoration: BoxDecoration(
-                              color: _isPinned
-                                  ? const Color(0xFFFFF4D0)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: _isPinned
-                                    ? const Color(0xFFFDD164)
-                                    : Colors.black.withValues(alpha: 0.08),
-                                width: _isPinned ? 1.5 : 2.0,
-                              ),
-                            ),
+                            decoration: _optionDecoration(_isPinned),
                             child: Row(
                               children: [
                                 PinIcon(
@@ -410,18 +401,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 14,
                                           vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? const Color(0xFFFFF4D0)
-                                            : Colors.white,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? const Color(0xFFFDD164)
-                                              : Colors.black.withValues(alpha: 0.08),
-                                          width: isSelected ? 1.5 : 2.0,
-                                        ),
-                                      ),
+                                      decoration: _optionDecoration(isSelected),
                                       child: Row(
                                         children: [
                                           Container(

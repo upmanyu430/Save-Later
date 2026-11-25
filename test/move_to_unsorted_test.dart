@@ -582,5 +582,86 @@ void main() {
       final cappedCardSize = tester.getSize(cardFinder);
       expect(cappedCardSize.height, closeTo(expected, 0.01));
     });
+
+    testWidgets('Hides Unsorted option when moving an unsorted bookmark or when showUnsortedOption is false', (tester) async {
+      final repo = MockMoveRepository();
+      final col = BookmarkCollection()
+        ..id = 1
+        ..name = 'Tech'
+        ..iconCodePoint = Icons.computer.codePoint
+        ..iconFontFamily = 'MaterialIcons'
+        ..colorHex = '#4A90E2';
+      repo.collectionsList.add(col);
+
+      final unsortedBookmark = Bookmark()
+        ..id = 10
+        ..url = 'https://example.com'
+        ..title = 'Unsorted Item';
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          MoveToCollectionModal(bookmark: unsortedBookmark),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+      expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
+
+      // Also verify batch unsorted bookmarks
+      await tester.pumpWidget(
+        _buildTestApp(
+          MoveToCollectionModal(bookmarks: [unsortedBookmark]),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+      expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
+
+      // Verify explicit showUnsortedOption: false
+      await tester.pumpWidget(
+        _buildTestApp(
+          const MoveToCollectionModal(showUnsortedOption: false),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+      expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
+
+      // Verify Unsorted IS shown when bookmark belongs to a collection
+      final sortedBookmark = Bookmark()
+        ..id = 11
+        ..url = 'https://example.org'
+        ..title = 'Sorted Item'
+        ..collection.value = col;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          MoveToCollectionModal(bookmark: sortedBookmark),
+          [
+            repositoryProvider.overrideWithValue(repo),
+            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsOneWidget);
+      expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
+    });
   });
 }

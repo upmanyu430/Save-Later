@@ -154,7 +154,7 @@ void main() {
     expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
     expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
 
-    // Check collection tile in MoveToCollectionModal
+    // Check collection tile in MoveToCollectionModal (unselected should have transparent border)
     final colFinder = find.byKey(const ValueKey('collection_2'));
     expect(colFinder, findsOneWidget);
     final colContainer = tester.widget<Container>(
@@ -162,6 +162,9 @@ void main() {
     );
     expect(colContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
     expect(colContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
+    final unselectedDec = colContainer.decoration as BoxDecoration;
+    expect(unselectedDec.color, Colors.white);
+    expect((unselectedDec.border as Border).top.color, Colors.transparent);
 
     // Tap on Unsorted to select it and verify yellow selection colors
     await tester.tap(unsortedFinder);
@@ -181,5 +184,41 @@ void main() {
       find.descendant(of: unsortedFinder, matching: find.byIcon(Icons.check_circle_outline)),
     );
     expect(checkIcon.color, const Color(0xFFFDD164));
+  });
+
+  testWidgets('ShareSaveModal unselected folder options have no gray outline', (tester) async {
+    final repo = _MockRepo();
+    final col1 = BookmarkCollection()
+      ..id = 3
+      ..name = 'Design'
+      ..colorHex = 'FF4CAF50'
+      ..iconCodePoint = Icons.palette.codePoint
+      ..iconFontFamily = kStoredIconFontFamily;
+    repo.collections.add(col1);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          repositoryProvider.overrideWithValue(repo),
+          allCollectionsProvider.overrideWith((ref) => Future.value(repo.collections)),
+        ],
+        child: _buildTestApp(
+          child: ShareSaveModal(
+            url: 'https://example.com',
+            onSave: (col, isPinned) async {},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final colFinder = find.byKey(const ValueKey('share_modal_collection_3'));
+    expect(colFinder, findsOneWidget);
+    final colContainer = tester.widget<Container>(
+      find.descendant(of: colFinder, matching: find.byType(Container)).first,
+    );
+    final unselectedDec = colContainer.decoration as BoxDecoration;
+    expect(unselectedDec.color, Colors.white);
+    expect((unselectedDec.border as Border).top.color, Colors.transparent);
   });
 }
