@@ -523,5 +523,206 @@ void main() {
         expect(find.byType(SaveSuccessModal), findsNothing);
       },
     );
+
+    testWidgets(
+      'showAppModalSheet animates smoothly at 120fps frame steps without rebuilding child or jumping on mid-entrance dismiss or drag',
+      (tester) async {
+        _configurePhoneView(tester);
+        var buildCount = 0;
+
+        await tester.pumpWidget(
+          _buildHostApp(
+            repo: repo,
+            builder: (context) => Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  showAppModalSheet<void>(
+                    context: context,
+                    builder: (_) {
+                      buildCount++;
+                      return const CollectionEditorModal();
+                    },
+                  );
+                },
+                child: const Text('Open Editor'),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.text('Open Editor'));
+        await tester.pump();
+        expect(buildCount, equals(1));
+
+        final cardFinder = find.descendant(
+          of: find.byType(CollectionEditorModal),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).borderRadius ==
+                    BorderRadius.circular(55),
+          ),
+        );
+
+        // Step at ~120fps (8.33ms -> 8333us) and verify monotonic rise with 0 child rebuilds.
+        double prevTop = tester.getRect(cardFinder).top;
+        for (int i = 0; i < 12; i++) {
+          await tester.pump(const Duration(microseconds: 8333));
+          final currentTop = tester.getRect(cardFinder).top;
+          expect(currentTop, lessThanOrEqualTo(prevTop));
+          prevTop = currentTop;
+        }
+        expect(buildCount, equals(1));
+
+        // Interrupt mid-entrance via backdrop tap: no jump downward on first reverse tick.
+        final topBeforeInterrupt = tester.getRect(cardFinder).top;
+        await tester.tapAt(const Offset(10, 10));
+        await tester.pump();
+        await tester.pump(const Duration(microseconds: 8333));
+        final topAfterInterrupt = tester.getRect(cardFinder).top;
+        expect(topAfterInterrupt - topBeforeInterrupt, lessThan(25.0));
+
+        await tester.pumpAndSettle();
+        expect(find.byType(CollectionEditorModal), findsNothing);
+
+        // Re-open and test drag-to-dismiss gesture.
+        await tester.tap(find.text('Open Editor'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CollectionEditorModal), findsOneWidget);
+
+        // Slight drag snaps back open.
+        await tester.drag(find.text('Add new collection'), const Offset(0, 40));
+        await tester.pumpAndSettle();
+        expect(find.byType(CollectionEditorModal), findsOneWidget);
+
+        // Strong downward fling dismisses cleanly.
+        await tester.fling(
+          find.text('Add new collection'),
+          const Offset(0, 260),
+          1400,
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(CollectionEditorModal), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'CollectionEditorModal and AddLinkModal interpolate IME bottom padding continuously without jumps or rebuilding content',
+      (tester) async {
+        _configurePhoneView(tester);
+        const dpr = 3.0;
+
+        await tester.pumpWidget(
+          _buildHostApp(
+            repo: repo,
+            builder: (context) => Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    showAppModalSheet<void>(
+                      context: context,
+                      builder: (_) => const CollectionEditorModal(),
+                    );
+                  },
+                  child: const Text('Open Editor'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    showAppModalSheet<void>(
+                      context: context,
+                      builder: (_) => AddLinkModal(collection: repo.collections.first),
+                    );
+                  },
+                  child: const Text('Open AddLink'),
+                ),
+              ],
+            ),
+          ),
+        );
+
+        // 1. CollectionEditorModal continuous IME bottomPadding & identical GridViews.
+        await tester.tap(find.text('Open Editor'));
+        await tester.pumpAndSettle();
+
+        final editorScrollFinder = find.descendant(
+          of: find.byType(CollectionEditorModal),
+          matching: find.byType(SingleChildScrollView),
+        );
+        final editorGrids = find.descendant(
+          of: find.byType(CollectionEditorModal),
+          matching: find.byType(GridView),
+        );
+        final colorGridBefore = tester.widget<GridView>(editorGrids.first);
+        final iconGridBefore = tester.widget<GridView>(editorGrids.last);
+
+        double prevEditorBottom = (tester
+                .widget<SingleChildScrollView>(editorScrollFinder)
+                .padding! as EdgeInsets)
+            .bottom;
+        for (final inset in [8.0, 24.0, 120.0, 240.0, 350.0]) {
+          tester.view.viewInsets = FakeViewPadding(bottom: inset * dpr);
+          await tester.pump();
+          final currentBottom = (tester
+                  .widget<SingleChildScrollView>(editorScrollFinder)
+                  .padding! as EdgeInsets)
+              .bottom;
+          expect(currentBottom, greaterThanOrEqualTo(prevEditorBottom));
+          prevEditorBottom = currentBottom;
+        }
+        expect(prevEditorBottom, equals(14.0 + 350.0));
+        expect(
+          identical(tester.widget<GridView>(editorGrids.first), colorGridBefore),
+          isTrue,
+        );
+        expect(
+          identical(tester.widget<GridView>(editorGrids.last), iconGridBefore),
+          isTrue,
+        );
+
+        // Dismiss editor and reset insets.
+        await tester.tap(find.byIcon(Icons.close));
+        await tester.pumpAndSettle();
+        tester.view.viewInsets = FakeViewPadding.zero;
+        await tester.pumpAndSettle();
+
+        // 2. AddLinkModal continuous IME bottomPadding without 31.5dp snap.
+        await tester.tap(find.text('Open AddLink'));
+        await tester.pumpAndSettle();
+
+        Container findAddLinkCard() => tester
+            .widgetList<Container>(
+              find.descendant(
+                of: find.byType(AddLinkModal),
+                matching: find.byType(Container),
+              ),
+            )
+            .firstWhere(
+              (c) =>
+                  c.decoration is BoxDecoration &&
+                  (c.decoration as BoxDecoration).borderRadius ==
+                      BorderRadius.circular(55),
+            );
+
+        final idlePadding = (findAddLinkCard().padding! as EdgeInsets).bottom;
+        expect(
+          idlePadding,
+          closeTo(AppDimensions.modalActionButtonBottomPadding + 16.0, 0.1),
+        );
+
+        tester.view.viewInsets = FakeViewPadding(bottom: 10.0 * dpr);
+        await tester.pump();
+        final earlyImePadding =
+            (findAddLinkCard().padding! as EdgeInsets).bottom;
+        expect(earlyImePadding, closeTo(idlePadding - 10.0, 0.1));
+
+        tester.view.viewInsets = FakeViewPadding(bottom: 350.0 * dpr);
+        await tester.pump();
+        final fullImePadding =
+            (findAddLinkCard().padding! as EdgeInsets).bottom;
+        expect(fullImePadding, equals(16.0));
+      },
+    );
   });
 }

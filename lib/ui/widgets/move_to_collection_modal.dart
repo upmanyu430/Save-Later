@@ -149,10 +149,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                 ),
               ),
               Flexible(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                          child: Column(
+                child: RepaintBoundary(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -225,6 +226,8 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
 
                                   return ListView.separated(
                                     shrinkWrap: true,
+                                    addAutomaticKeepAlives: false,
+                                    addRepaintBoundaries: false,
                                     physics: const NeverScrollableScrollPhysics(),
                                     padding: EdgeInsets.zero,
                                     itemCount: collections.length,
@@ -349,6 +352,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                           ),
                         ),
                       ),
+                    ),
 
                       // Bottom Divider & Move Action Button
                       Container(
