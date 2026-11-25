@@ -51,7 +51,7 @@ Widget _wrapWithApp(Widget child) {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('All dialog modals share consistent modalActionButtonBottomPadding (38.0)', (tester) async {
+  testWidgets('All dialog modals share consistent modalActionButtonBottomPadding (36.5)', (tester) async {
     // 1. MoveToCollectionModal
     await tester.pumpWidget(_wrapWithApp(const MoveToCollectionModal()));
     await tester.pumpAndSettle();

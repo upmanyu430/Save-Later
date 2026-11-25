@@ -37,8 +37,8 @@ class CollectionEditorModal extends ConsumerStatefulWidget {
     // Icon grid: 3 rows of items + 2 gaps of 7.0
     final iconGridHeight = (3 * itemWidth) + 14.0;
 
-    // Fixed layout elements total: 308.83 dp (adjusted for font metrics and modalActionButtonBottomPadding 38.0)
-    const fixedContentHeight = 308.83;
+    // Fixed layout elements total: 309.33 dp (adjusted for 50.0 button height and modalActionButtonBottomPadding 36.5)
+    const fixedContentHeight = 309.33;
     final baseHeight = fixedContentHeight + colorGridHeight + iconGridHeight;
     return baseHeight + bottomPadding;
   }
