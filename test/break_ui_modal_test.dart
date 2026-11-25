@@ -179,9 +179,9 @@ void main() {
     // Verify no render overflows at 360px width
     expect(tester.takeException(), isNull);
 
-    // Verify Tooltip widgets are rendered for accessibility and inspection
+    // Verify Tooltip widgets are rendered for accessibility and Unsorted is absent
     expect(find.byType(Tooltip), findsWidgets);
-    expect(find.widgetWithText(Tooltip, 'Unsorted'), findsOneWidget);
+    expect(find.widgetWithText(Tooltip, 'Unsorted'), findsNothing);
 
     // Verify sub-collection label displays 'in Christopher Alexander Montgomery III' without overflowing
     expect(find.text('in Christopher Alexander Montgomery III'), findsOneWidget);
@@ -192,12 +192,6 @@ void main() {
 
     // Verify button label updates with middle-truncation and intact closing quote
     expect(find.text('Move to "Senior Pro...Platform"'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-
-    // Tap on Unsorted
-    await tester.tap(find.text('Unsorted'));
-    await tester.pumpAndSettle();
-    expect(find.text('Move to "Unsorted"'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

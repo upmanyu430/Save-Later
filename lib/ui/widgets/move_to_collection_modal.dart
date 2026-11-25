@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../models/bookmark.dart';
 import '../../models/collection.dart';
 import '../../providers/providers.dart';
@@ -18,8 +17,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
   final Bookmark? bookmark;
   final List<Bookmark>? bookmarks;
   final BookmarkCollection? initialCollection;
-  final bool initialUnsorted;
-  final bool? showUnsortedOption;
   final Future<void> Function(BookmarkCollection? collection)? onMove;
 
   const MoveToCollectionModal({
@@ -27,8 +24,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     this.bookmark,
     this.bookmarks,
     this.initialCollection,
-    this.initialUnsorted = false,
-    this.showUnsortedOption,
     this.onMove,
   });
 
@@ -37,8 +32,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
     Bookmark? bookmark,
     List<Bookmark>? bookmarks,
     BookmarkCollection? initialCollection,
-    bool initialUnsorted = false,
-    bool? showUnsortedOption,
     Future<void> Function(BookmarkCollection? collection)? onMove,
   }) async {
     final moved = await showAppModalSheet<bool>(
@@ -47,8 +40,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
         bookmark: bookmark,
         bookmarks: bookmarks,
         initialCollection: initialCollection,
-        initialUnsorted: initialUnsorted,
-        showUnsortedOption: showUnsortedOption,
         onMove: onMove,
       ),
     );
@@ -75,20 +66,6 @@ class MoveToCollectionModal extends ConsumerStatefulWidget {
 class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   late final ScrollController _scrollController;
   BookmarkCollection? _selectedCollection;
-  bool _isUnsortedSelected = false;
-
-  bool get _shouldShowUnsortedOption {
-    if (widget.showUnsortedOption != null) {
-      return widget.showUnsortedOption!;
-    }
-    if (widget.bookmark != null) {
-      return widget.bookmark!.collection.value != null;
-    }
-    if (widget.bookmarks != null && widget.bookmarks!.isNotEmpty) {
-      return widget.bookmarks!.any((b) => b.collection.value != null);
-    }
-    return true;
-  }
 
   BoxDecoration _optionDecoration(bool isSelected) {
     return BoxDecoration(
@@ -106,10 +83,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
     super.initState();
     _scrollController = ScrollController();
     _selectedCollection = widget.initialCollection;
-    _isUnsortedSelected =
-        widget.initialUnsorted &&
-        widget.initialCollection == null &&
-        _shouldShowUnsortedOption;
   }
 
   @override
@@ -136,74 +109,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
       context: context,
       unfocusBeforeOpen: false,
       builder: (ctx) => const CollectionEditorModal(),
-    );
-  }
-
-  Widget _buildUnsortedTile(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final isSelected = _isUnsortedSelected;
-
-    return GestureDetector(
-      key: const ValueKey('collection_unsorted'),
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        HapticFeedback.lightImpact();
-        setState(() {
-          _isUnsortedSelected = true;
-          _selectedCollection = null;
-        });
-      },
-      child: Tooltip(
-        message: l10n?.unsorted ?? 'Unsorted',
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-              horizontal: AppDimensions.modalFolderOptionHorizontalMargin),
-          padding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: AppDimensions.modalFolderOptionVerticalPadding),
-          decoration: _optionDecoration(isSelected),
-          child: Row(
-            children: [
-              // Unsorted Icon Box
-              Container(
-                width: AppDimensions.modalFolderOptionIconBoxSize,
-                height: AppDimensions.modalFolderOptionIconBoxSize,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE5E5E5),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: AppTheme.border,
-                    width: 1.8,
-                  ),
-                ),
-                child: const Icon(
-                  Icons.folder_off_outlined,
-                  color: AppTheme.border,
-                  size: AppDimensions.modalFolderOptionIconSize,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  l10n?.unsorted ?? 'Unsorted',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.border,
-                  ),
-                ),
-              ),
-              AnimatedCheckmark(
-                isSelected: isSelected,
-                color: const Color(0xFFFDD164),
-                size: 18,
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -301,26 +206,19 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 alignment: Alignment.topCenter,
                                 child: collectionsAsync.when(
                                 data: (collections) {
-                                  final showUnsorted = _shouldShowUnsortedOption;
                                   if (collections.isEmpty) {
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (showUnsorted) _buildUnsortedTile(context),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 24.0),
-                                          child: Center(
-                                            child: Text(
-                                              'No collections yet',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w700,
-                                                color: Colors.black54,
-                                              ),
-                                            ),
+                                    return const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                                      child: Center(
+                                        child: Text(
+                                          'No collections yet',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.black54,
                                           ),
                                         ),
-                                      ],
+                                      ),
                                     );
                                   }
 
@@ -330,15 +228,11 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     shrinkWrap: true,
                                     physics: const NeverScrollableScrollPhysics(),
                                     padding: EdgeInsets.zero,
-                                    itemCount: collections.length + (showUnsorted ? 1 : 0),
+                                    itemCount: collections.length,
                                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                                     itemBuilder: (ctx, index) {
-                                      if (showUnsorted && index == 0) {
-                                        return _buildUnsortedTile(context);
-                                      }
-
-                                      final col = collections[index - (showUnsorted ? 1 : 0)];
-                                      final isSelected = !_isUnsortedSelected && selected?.id == col.id;
+                                      final col = collections[index];
+                                      final isSelected = selected?.id == col.id;
 
                                       final iconColor =
                                           BookmarkCollection.isWhiteIconColor(col.color)
@@ -352,7 +246,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                           HapticFeedback.lightImpact();
                                           setState(() {
                                             _selectedCollection = col;
-                                            _isUnsortedSelected = false;
                                           });
                                         },
                                         child: Tooltip(
@@ -479,23 +372,17 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                             const SizedBox(height: 18),
                             Builder(
                               builder: (context) {
-                                final l10n = AppLocalizations.of(context);
-                                final isEnabled = _isUnsortedSelected || _selectedCollection != null;
-                                final String buttonLabel;
-                                if (_isUnsortedSelected) {
-                                  buttonLabel = MoveToCollectionModal.formatTargetLabel('Move to', l10n?.unsorted ?? 'Unsorted');
-                                } else if (_selectedCollection != null) {
-                                  buttonLabel = MoveToCollectionModal.formatTargetLabel('Move to', _selectedCollection!.name);
-                                } else {
-                                  buttonLabel = 'Move to Collection';
-                                }
+                                final isEnabled = _selectedCollection != null;
+                                final buttonLabel = _selectedCollection != null
+                                    ? MoveToCollectionModal.formatTargetLabel('Move to', _selectedCollection!.name)
+                                    : 'Move to Collection';
 
                                 return SizedBox(
                                   height: 50.0,
                                   width: double.infinity,
                                   child: NeoButton(
                                     onPressed: isEnabled
-                                        ? () => _handleMove(_isUnsortedSelected ? null : _selectedCollection)
+                                        ? () => _handleMove(_selectedCollection)
                                         : null,
                                     color: const Color(0xFFFFD166),
                                     padding: EdgeInsets.zero,

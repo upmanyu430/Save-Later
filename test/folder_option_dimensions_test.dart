@@ -145,16 +145,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Check Unsorted tile in MoveToCollectionModal
-    final unsortedFinder = find.byKey(const ValueKey('collection_unsorted'));
-    expect(unsortedFinder, findsOneWidget);
-    final unsortedContainer = tester.widget<Container>(
-      find.descendant(of: unsortedFinder, matching: find.byType(Container)).first,
-    );
-    expect(unsortedContainer.margin, const EdgeInsets.symmetric(horizontal: AppDimensions.modalFolderOptionHorizontalMargin));
-    expect(unsortedContainer.padding, const EdgeInsets.symmetric(horizontal: 14, vertical: AppDimensions.modalFolderOptionVerticalPadding));
-
     // Check collection tile in MoveToCollectionModal (unselected should have transparent border)
+    expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
     final colFinder = find.byKey(const ValueKey('collection_2'));
     expect(colFinder, findsOneWidget);
     final colContainer = tester.widget<Container>(
@@ -166,22 +158,22 @@ void main() {
     expect(unselectedDec.color, Colors.white);
     expect((unselectedDec.border as Border).top.color, Colors.transparent);
 
-    // Tap on Unsorted to select it and verify yellow selection colors
-    await tester.tap(unsortedFinder);
+    // Tap on collection to select it and verify yellow selection colors
+    await tester.tap(colFinder);
     await tester.pumpAndSettle();
 
-    final selectedUnsorted = tester.widget<Container>(
-      find.descendant(of: unsortedFinder, matching: find.byType(Container)).first,
+    final selectedCol = tester.widget<Container>(
+      find.descendant(of: colFinder, matching: find.byType(Container)).first,
     );
-    final dec = selectedUnsorted.decoration as BoxDecoration;
+    final dec = selectedCol.decoration as BoxDecoration;
     expect(dec.color, const Color(0xFFFFF4D0));
     expect((dec.border as Border).top.color, const Color(0xFFFDD164));
     expect(
-      find.descendant(of: unsortedFinder, matching: find.byIcon(Icons.check_circle_outline)),
+      find.descendant(of: colFinder, matching: find.byIcon(Icons.check_circle_outline)),
       findsOneWidget,
     );
     final checkIcon = tester.widget<Icon>(
-      find.descendant(of: unsortedFinder, matching: find.byIcon(Icons.check_circle_outline)),
+      find.descendant(of: colFinder, matching: find.byIcon(Icons.check_circle_outline)),
     );
     expect(checkIcon.color, const Color(0xFFFDD164));
   });

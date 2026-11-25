@@ -104,8 +104,8 @@ Widget _buildTestApp(Widget child, [List<Override> overrides = const []]) {
 }
 
 void main() {
-  group('MoveToCollectionModal Unsorted option tests', () {
-    testWidgets('Renders Unsorted option at the top and enables moving to Unsorted', (tester) async {
+  group('MoveToCollectionModal Unsorted option removal tests', () {
+    testWidgets('Does not render Unsorted option and enables moving to a collection', (tester) async {
       final repo = MockMoveRepository();
       final col = BookmarkCollection()
         ..id = 1
@@ -148,9 +148,9 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      // Verify "Unsorted" option exists
-      expect(find.byKey(const ValueKey('collection_unsorted')), findsOneWidget);
-      expect(find.text('Unsorted'), findsOneWidget);
+      // Verify "Unsorted" option does NOT exist
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+      expect(find.text('Unsorted'), findsNothing);
       expect(find.text('Tech'), findsOneWidget);
 
       // Initially, bottom button says 'Move to Collection' and is disabled with exact height 50.0
@@ -163,23 +163,23 @@ void main() {
       );
       expect(buttonSizedBox.height, 50.0);
 
-      // Tap on "Unsorted"
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
+      // Tap on "Tech"
+      await tester.tap(find.byKey(const ValueKey('collection_1')));
       await tester.pumpAndSettle();
 
-      // Button should now say 'Move to "Unsorted"'
-      expect(find.text('Move to "Unsorted"'), findsOneWidget);
+      // Button should now say 'Move to "Tech"'
+      expect(find.text('Move to "Tech"'), findsOneWidget);
       expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
 
-      // Tap the 'Move to "Unsorted"' button
-      await tester.tap(find.text('Move to "Unsorted"'));
+      // Tap the 'Move to "Tech"' button
+      await tester.tap(find.text('Move to "Tech"'));
       await tester.pumpAndSettle();
 
       expect(onMoveInvoked, isTrue);
-      expect(movedTarget, isNull);
+      expect(movedTarget?.id, 1);
     });
 
-    testWidgets('Toggling selection between Unsorted and a collection updates label and target', (tester) async {
+    testWidgets('Selecting a collection updates button label and target', (tester) async {
       final repo = MockMoveRepository();
       final col1 = BookmarkCollection()
         ..id = 1
@@ -187,7 +187,13 @@ void main() {
         ..iconCodePoint = Icons.work.codePoint
         ..iconFontFamily = 'MaterialIcons'
         ..colorHex = '#FF6B6B';
-      repo.collectionsList.add(col1);
+      final col2 = BookmarkCollection()
+        ..id = 2
+        ..name = 'Personal'
+        ..iconCodePoint = Icons.person.codePoint
+        ..iconFontFamily = 'MaterialIcons'
+        ..colorHex = '#4ECDC4';
+      repo.collectionsList.addAll([col1, col2]);
 
       BookmarkCollection? movedTarget;
 
@@ -220,31 +226,25 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+
       // Tap Work
       await tester.tap(find.byKey(const ValueKey('collection_1')));
       await tester.pumpAndSettle();
       expect(find.text('Move to "Work"'), findsOneWidget);
 
-      // Tap Unsorted
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
+      // Tap Personal
+      await tester.tap(find.byKey(const ValueKey('collection_2')));
       await tester.pumpAndSettle();
-      expect(find.text('Move to "Unsorted"'), findsOneWidget);
+      expect(find.text('Move to "Personal"'), findsOneWidget);
 
-      // Tap Work again
-      await tester.tap(find.byKey(const ValueKey('collection_1')));
-      await tester.pumpAndSettle();
-      expect(find.text('Move to "Work"'), findsOneWidget);
-
-      // Tap Unsorted again and confirm
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Move to "Unsorted"'));
+      await tester.tap(find.text('Move to "Personal"'));
       await tester.pumpAndSettle();
 
-      expect(movedTarget, isNull);
+      expect(movedTarget?.id, 2);
     });
 
-    testWidgets('Unsorted option is present even when collections list is empty', (tester) async {
+    testWidgets('Unsorted option is absent when collections list is empty', (tester) async {
       final repo = MockMoveRepository();
 
       await tester.pumpWidget(
@@ -272,15 +272,10 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('collection_unsorted')), findsOneWidget);
-      expect(find.text('Unsorted'), findsOneWidget);
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+      expect(find.text('Unsorted'), findsNothing);
       expect(find.text('No collections yet'), findsOneWidget);
       expect(find.text('Create New Collection'), findsNothing);
-
-      // Tap Unsorted
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
-      await tester.pumpAndSettle();
-      expect(find.text('Move to "Unsorted"'), findsOneWidget);
     });
 
     testWidgets('uses a compact sheet when there are no collections', (tester) async {
@@ -317,21 +312,27 @@ void main() {
       );
     });
 
-    testWidgets('Moves single bookmark to Unsorted via BookmarkNotifier when onMove is null', (tester) async {
+    testWidgets('Moves single bookmark to a collection via BookmarkNotifier when onMove is null', (tester) async {
       final repo = MockMoveRepository();
-      final col = BookmarkCollection()
+      final col1 = BookmarkCollection()
         ..id = 10
         ..name = 'Reading'
         ..iconCodePoint = Icons.book.codePoint
         ..iconFontFamily = 'MaterialIcons'
         ..colorHex = '#FFD166';
-      repo.collectionsList.add(col);
+      final col2 = BookmarkCollection()
+        ..id = 11
+        ..name = 'Archive'
+        ..iconCodePoint = Icons.archive.codePoint
+        ..iconFontFamily = 'MaterialIcons'
+        ..colorHex = '#06D6A0';
+      repo.collectionsList.addAll([col1, col2]);
 
       final bookmark = Bookmark()
         ..id = 42
         ..url = 'https://flutter.dev'
         ..title = 'Flutter';
-      bookmark.collection.value = col;
+      bookmark.collection.value = col1;
       repo.bookmarks.add(bookmark);
 
       await tester.pumpWidget(
@@ -361,37 +362,45 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('collection_11')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Move to "Unsorted"'));
+      await tester.tap(find.text('Move to "Archive"'));
       await tester.pumpAndSettle();
 
-      expect(bookmark.collection.value, isNull);
+      expect(bookmark.collection.value?.id, 11);
       expect(repo.updateBookmarksCallCount, 1);
     });
 
-    testWidgets('Moves multiple bookmarks to Unsorted in batch via BookmarkNotifier', (tester) async {
+    testWidgets('Moves multiple bookmarks to a collection in batch via BookmarkNotifier', (tester) async {
       final repo = MockMoveRepository();
-      final col = BookmarkCollection()
+      final col1 = BookmarkCollection()
         ..id = 5
         ..name = 'Articles'
         ..iconCodePoint = Icons.article.codePoint
         ..iconFontFamily = 'MaterialIcons'
         ..colorHex = '#06D6A0';
-      repo.collectionsList.add(col);
+      final col2 = BookmarkCollection()
+        ..id = 6
+        ..name = 'Favorites'
+        ..iconCodePoint = Icons.star.codePoint
+        ..iconFontFamily = 'MaterialIcons'
+        ..colorHex = '#FFD166';
+      repo.collectionsList.addAll([col1, col2]);
 
       final b1 = Bookmark()
         ..id = 101
         ..url = 'https://a.com'
         ..title = 'A';
-      b1.collection.value = col;
+      b1.collection.value = col1;
 
       final b2 = Bookmark()
         ..id = 102
         ..url = 'https://b.com'
         ..title = 'B';
-      b2.collection.value = col;
+      b2.collection.value = col1;
 
       repo.bookmarks.addAll([b1, b2]);
 
@@ -422,14 +431,16 @@ void main() {
       await tester.tap(find.text('Open Modal'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const ValueKey('collection_unsorted')));
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
+
+      await tester.tap(find.byKey(const ValueKey('collection_6')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Move to "Unsorted"'));
+      await tester.tap(find.text('Move to "Favorites"'));
       await tester.pumpAndSettle();
 
-      expect(b1.collection.value, isNull);
-      expect(b2.collection.value, isNull);
+      expect(b1.collection.value?.id, 6);
+      expect(b2.collection.value?.id, 6);
       expect(repo.updateBookmarksCallCount, 1);
       expect(repo.lastUpdatedBookmarks.length, 2);
     });
@@ -583,7 +594,7 @@ void main() {
       expect(cappedCardSize.height, closeTo(expected, 0.01));
     });
 
-    testWidgets('Hides Unsorted option when moving an unsorted bookmark or when showUnsortedOption is false', (tester) async {
+    testWidgets('Hides Unsorted option for both unsorted and sorted bookmarks', (tester) async {
       final repo = MockMoveRepository();
       final col = BookmarkCollection()
         ..id = 1
@@ -627,22 +638,7 @@ void main() {
       expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
       expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
 
-      // Verify explicit showUnsortedOption: false
-      await tester.pumpWidget(
-        _buildTestApp(
-          const MoveToCollectionModal(showUnsortedOption: false),
-          [
-            repositoryProvider.overrideWithValue(repo),
-            allCollectionsProvider.overrideWith((ref) => Future.value(repo.collectionsList)),
-          ],
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
-      expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
-
-      // Verify Unsorted IS shown when bookmark belongs to a collection
+      // Verify Unsorted is ALSO hidden when bookmark belongs to another collection
       final sortedBookmark = Bookmark()
         ..id = 11
         ..url = 'https://example.org'
@@ -660,7 +656,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const ValueKey('collection_unsorted')), findsOneWidget);
+      expect(find.byKey(const ValueKey('collection_unsorted')), findsNothing);
       expect(find.byKey(const ValueKey('collection_1')), findsOneWidget);
     });
   });

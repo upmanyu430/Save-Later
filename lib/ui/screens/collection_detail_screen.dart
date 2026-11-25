@@ -340,7 +340,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
     MoveToCollectionModal.show(
       context: context,
       bookmarks: selectedBookmarks,
-      showUnsortedOption: widget.collectionId != null,
       onMove: (c) async {
         await ref.read(bookmarkNotifierProvider.notifier).moveBookmarksToCollection(selectedBookmarks, c);
         if (mounted) {
