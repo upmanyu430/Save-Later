@@ -37,8 +37,8 @@ class CollectionEditorModal extends ConsumerStatefulWidget {
     // Icon grid: 3 rows of items + 2 gaps of 7.0
     final iconGridHeight = (3 * itemWidth) + 14.0;
 
-    // Fixed layout elements total: 304.33 dp (adjusted for 50.0 button height and modalActionButtonBottomPadding 31.5)
-    const fixedContentHeight = 304.33;
+    // Fixed layout elements total: 310.33 dp (adjusted for 56.0 button height and modalActionButtonBottomPadding 31.5)
+    const fixedContentHeight = 310.33;
     final baseHeight = fixedContentHeight + colorGridHeight + iconGridHeight;
     return baseHeight + bottomPadding;
   }
@@ -450,7 +450,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
           builder: (context, value, _) {
             final isNameEmpty = value.text.trim().isEmpty;
             return SizedBox(
-              height: 50.0,
+              height: AppDimensions.modalActionButtonHeight,
               width: double.infinity,
               child: NeoButton(
                 onPressed: !isNameEmpty ? _save : () {},

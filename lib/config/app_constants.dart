@@ -47,7 +47,8 @@ class AppDimensions {
   static const double dialogHeaderButtonSize = 39.6;
   static const double dialogHeaderIconSize = 21.6;
 
-  // Dialog Modals Bottom Action Button Clearance (31.5 + ~16 nav inset + 2.5 border = 50.0 dp)
+  // Dialog Modals Bottom Action Button Height & Clearance (31.5 + ~16 nav inset + 2.5 border = 50.0 dp)
+  static const double modalActionButtonHeight = 56.0;
   static const double modalActionButtonBottomPadding = 31.5;
 
   // Modal Folder Options (wider & thicker)

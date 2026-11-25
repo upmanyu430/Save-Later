@@ -1974,25 +1974,30 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                 ),
                               ),
                               const SizedBox(height: AppDimensions.paddingLg),
-                              NeoButton(
-                                enableFeedback: false,
-                                onPressed: canAdd
-                                    ? () => _submitTag(tagToSubmit)
-                                    : null,
-                                color: canAdd
-                                    ? AppTheme.accent
-                                    : const Color(0xFFDDDDDD),
-                                borderRadius: AppDimensions.radiusMd,
-                                borderWidth: 2,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
-                                child: Text(
-                                  l10n.addTag,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    color: canAdd
-                                        ? AppTheme.border
-                                        : Colors.black38,
+                              SizedBox(
+                                height: AppDimensions.modalActionButtonHeight,
+                                width: double.infinity,
+                                child: NeoButton(
+                                  enableFeedback: false,
+                                  onPressed: canAdd
+                                      ? () => _submitTag(tagToSubmit)
+                                      : null,
+                                  color: canAdd
+                                      ? AppTheme.accent
+                                      : const Color(0xFFDDDDDD),
+                                  borderRadius: AppDimensions.radiusMd,
+                                  borderWidth: 2,
+                                  padding: EdgeInsets.zero,
+                                  child: Center(
+                                    child: Text(
+                                      l10n.addTag,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w900,
+                                        color: canAdd
+                                            ? AppTheme.border
+                                            : Colors.black38,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

@@ -1025,7 +1025,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
         ),
         const SizedBox(height: AppDimensions.paddingLg),
         SizedBox(
-          height: 48.0,
+          height: AppDimensions.modalActionButtonHeight,
           width: double.infinity,
           child: NeoButton(
             onPressed: _handleSave,

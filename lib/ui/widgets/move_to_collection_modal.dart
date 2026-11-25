@@ -372,7 +372,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                     : 'Move to Collection';
 
                                 return SizedBox(
-                                  height: 50.0,
+                                  height: AppDimensions.modalActionButtonHeight,
                                   width: double.infinity,
                                   child: NeoButton(
                                     onPressed: isEnabled
