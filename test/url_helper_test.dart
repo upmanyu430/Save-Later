@@ -204,6 +204,11 @@ Hope you like it!
             ..statusCode = HttpStatus.movedPermanently
             ..headers.set(HttpHeaders.locationHeader, '$serverUrl/final')
             ..close();
+        } else if (request.uri.path == '/relative') {
+          request.response
+            ..statusCode = HttpStatus.movedTemporarily
+            ..headers.set(HttpHeaders.locationHeader, '/final')
+            ..close();
         } else if (request.uri.path == '/final') {
           request.response
             ..statusCode = HttpStatus.ok
@@ -252,5 +257,87 @@ Hope you like it!
       );
       expect(resolved, 'http://127.0.0.1:1/unreachable');
     });
+
+    test('resolves relative redirect Location headers', () async {
+      final resolved = await UrlHelper.resolveFinalUrl('$serverUrl/relative');
+      expect(resolved, '$serverUrl/final');
+    });
+
+    test('does not set badCertificateCallback and falls back on TLS handshake failure', () async {
+      bool badCertCallbackAssigned = false;
+
+      final resolvedSuccess = await HttpOverrides.runZoned(
+        () => UrlHelper.resolveFinalUrl('$serverUrl/step1'),
+        createHttpClient: (SecurityContext? context) {
+          final realClient = HttpOverrides.runWithHttpOverrides(
+            () => HttpClient(context: context),
+            _DefaultHttpOverrides(),
+          );
+          return _RecordingHttpClient(
+            realClient,
+            onBadCertCallbackSet: () => badCertCallbackAssigned = true,
+          );
+        },
+      );
+
+      expect(badCertCallbackAssigned, isFalse);
+      expect(resolvedSuccess, '$serverUrl/final');
+
+      final resolvedTlsError = await HttpOverrides.runZoned(
+        () => UrlHelper.resolveFinalUrl('https://untrusted.example/step1'),
+        createHttpClient: (SecurityContext? context) {
+          final realClient = HttpOverrides.runWithHttpOverrides(
+            () => HttpClient(context: context),
+            _DefaultHttpOverrides(),
+          );
+          return _RecordingHttpClient(
+            realClient,
+            onBadCertCallbackSet: () => badCertCallbackAssigned = true,
+            throwOnOpenUrl: const HandshakeException('Certificate verification failed'),
+          );
+        },
+      );
+
+      expect(badCertCallbackAssigned, isFalse);
+      expect(resolvedTlsError, 'https://untrusted.example/step1');
+    });
   });
+}
+
+class _DefaultHttpOverrides extends HttpOverrides {}
+
+class _RecordingHttpClient implements HttpClient {
+  _RecordingHttpClient(
+    this._inner, {
+    required this.onBadCertCallbackSet,
+    this.throwOnOpenUrl,
+  });
+
+  final HttpClient _inner;
+  final void Function() onBadCertCallbackSet;
+  final Object? throwOnOpenUrl;
+
+  @override
+  set badCertificateCallback(
+    bool Function(X509Certificate cert, String host, int port)? callback,
+  ) {
+    if (callback != null) {
+      onBadCertCallbackSet();
+    }
+    _inner.badCertificateCallback = callback;
+  }
+
+  @override
+  Future<HttpClientRequest> openUrl(String method, Uri url) {
+    if (throwOnOpenUrl != null) {
+      return Future.error(throwOnOpenUrl!);
+    }
+    return _inner.openUrl(method, url);
+  }
+
+  @override
+  void close({bool force = false}) => _inner.close(force: force);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

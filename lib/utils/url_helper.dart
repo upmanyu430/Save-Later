@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:metadata_fetch/metadata_fetch.dart';
@@ -175,29 +174,32 @@ class UrlHelper {
         ? trimmed
         : 'https://$trimmed';
 
-    HttpClient? client;
+    final uri = Uri.tryParse(normalized);
+    if (uri == null) return normalized;
+
+    final client = http.Client();
     try {
-      client = HttpClient();
-      client.connectionTimeout = timeout;
-      client.badCertificateCallback = (cert, host, port) => true;
+      final request = http.Request('GET', uri)
+        ..followRedirects = true
+        ..maxRedirects = 5
+        ..headers['User-Agent'] =
+            'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
-      final uri = Uri.parse(normalized);
-      final request = await client.getUrl(uri).timeout(timeout);
-      request.followRedirects = true;
-      request.maxRedirects = 5;
-      request.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
+      final response = await client.send(request).timeout(timeout);
+      try {
+        // Cancel the response body stream immediately so large payloads aren't downloaded.
+        await response.stream.listen((_) {}).cancel().timeout(timeout);
+      } catch (_) {}
 
-      final response = await request.close().timeout(timeout);
-      Uri currentUri = uri;
-      for (final redirect in response.redirects) {
-        currentUri = currentUri.resolveUri(redirect.location);
+      if (response case http.BaseResponseWithUrl(url: final finalUri)) {
+        final resolved = finalUri.hasScheme ? finalUri : uri.resolveUri(finalUri);
+        return resolved.toString();
       }
-      await response.drain().catchError((_) {});
-      return currentUri.toString();
+      return (response.request?.url ?? uri).toString();
     } catch (_) {
       return normalized;
     } finally {
-      client?.close(force: true);
+      client.close();
     }
   }
 
