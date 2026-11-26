@@ -322,7 +322,7 @@ void main() {
       expect(find.byIcon(Icons.push_pin_outlined), findsNothing);
     });
 
-    testWidgets('When library has no tags, sample tags from design mockup are displayed', (tester) async {
+    testWidgets('When library has no tags, empty state is shown instead of fake sample tags', (tester) async {
       final fakeRepo = FakeIsarRepository();
 
       await tester.pumpWidget(
@@ -338,29 +338,88 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // TAGS header is present
+      // TAGS header is present with count 0
       expect(find.text('TAGS'), findsOneWidget);
+      expect(find.text('0'), findsWidgets);
 
-      // Sample tags from image are rendered
-      expect(find.text('#recipes'), findsOneWidget);
-      expect(find.text('11'), findsOneWidget);
-      expect(find.text('#travel'), findsOneWidget);
-      expect(find.text('9'), findsOneWidget);
-      expect(find.text('#design'), findsOneWidget);
-      expect(find.text('8'), findsOneWidget);
-      expect(find.text('#japan'), findsOneWidget);
-      expect(find.text('7'), findsOneWidget);
-      expect(find.text('#reading list'), findsOneWidget);
-      expect(find.text('#interior'), findsOneWidget);
-      expect(find.text('#workout'), findsOneWidget);
-      expect(find.text('#coffee'), findsOneWidget);
-      expect(find.text('#gift ideas'), findsOneWidget);
-      expect(find.text('#weeknight'), findsOneWidget);
-      expect(find.text('#typography'), findsOneWidget);
-      expect(find.text('#beach'), findsOneWidget);
-      expect(find.text('#podcast'), findsOneWidget);
-      expect(find.text('#music'), findsOneWidget);
-      expect(find.text('#diy'), findsOneWidget);
+      // Empty state is displayed and no fake sample tags are rendered
+      expect(find.text('No tags yet'), findsOneWidget);
+      expect(
+        find.text('Add tags to your saves to organize and find them here'),
+        findsOneWidget,
+      );
+      expect(find.byType(NeoTagBadge), findsNothing);
+      expect(find.text('#recipes'), findsNothing);
+      expect(find.text('#travel'), findsNothing);
+    });
+
+    testWidgets('Library tabs use responsive LayoutBuilder grid columns across screen widths', (tester) async {
+      final fakeRepo = FakeIsarRepository();
+      fakeRepo.collections.add(
+        BookmarkCollection()
+          ..id = 1
+          ..name = 'Design'
+          ..colorHex = 'FF5733'
+          ..iconCodePoint = Icons.folder_outlined.codePoint
+          ..iconFontFamily = 'MaterialIcons',
+      );
+      fakeRepo.bookmarks.add(
+        Bookmark()
+          ..id = 1
+          ..title = 'Pinned Tagged Save'
+          ..url = 'https://example.com/1'
+          ..isPinned = true
+          ..tags = ['design'],
+      );
+
+      // Tablet width (900px): > 2 columns for Collections, Saves, Pinned, and filtered Tags
+      tester.view.physicalSize = const Size(900, 1200);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            repositoryProvider.overrideWithValue(fakeRepo),
+          ],
+          child: buildTestApp(
+            home: const SearchScreen(initialTab: LibraryTab.collections),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      int currentCrossAxisCount() {
+        final gridView = tester.widget<GridView>(find.byType(GridView));
+        final delegate =
+            gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+        return delegate.crossAxisCount;
+      }
+
+      // Collections tab on 900px width -> 5 columns
+      expect(currentCrossAxisCount(), greaterThan(2));
+
+      // Saves tab on 900px width -> 5 columns
+      await tester.tap(find.text('Saves'));
+      await tester.pumpAndSettle();
+      expect(currentCrossAxisCount(), greaterThan(2));
+
+      // Pinned tab on 900px width -> 5 columns
+      await tester.tap(find.text('Pinned'));
+      await tester.pumpAndSettle();
+      expect(currentCrossAxisCount(), greaterThan(2));
+
+      // Tags tab filtered results on 900px width -> 5 columns
+      await tester.tap(find.text('Tags'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('#design'));
+      await tester.pumpAndSettle();
+      expect(currentCrossAxisCount(), greaterThan(2));
+
+      // Narrow phone width (390px) -> 2 columns
+      tester.view.physicalSize = const Size(390, 844);
+      await tester.pumpAndSettle();
+      expect(currentCrossAxisCount(), equals(2));
     });
   });
 

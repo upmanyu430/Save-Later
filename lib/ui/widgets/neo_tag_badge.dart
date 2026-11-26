@@ -115,25 +115,6 @@ class NeoTagBadge extends StatefulWidget {
     return defaultTilts[index % defaultTilts.length];
   }
 
-  /// Default sample tags from design mockup when library has no tags yet.
-  static const List<MapEntry<String, int>> sampleTags = [
-    MapEntry('recipes', 11),
-    MapEntry('travel', 9),
-    MapEntry('design', 8),
-    MapEntry('japan', 7),
-    MapEntry('reading list', 6),
-    MapEntry('interior', 6),
-    MapEntry('workout', 5),
-    MapEntry('coffee', 4),
-    MapEntry('gift ideas', 4),
-    MapEntry('weeknight', 4),
-    MapEntry('typography', 4),
-    MapEntry('beach', 3),
-    MapEntry('podcast', 3),
-    MapEntry('music', 2),
-    MapEntry('diy', 2),
-  ];
-
   @override
   State<NeoTagBadge> createState() => _NeoTagBadgeState();
 }

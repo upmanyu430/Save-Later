@@ -257,14 +257,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 
-  double _recentCardWidth(BuildContext context) {
-    final availableWidth = MediaQuery.sizeOf(context).width -
-        (AppDimensions.paddingLg * 2);
-    final columnCount = (availableWidth /
-            (AppDimensions.gridMaxCrossAxisExtent + AppDimensions.gridSpacingMd))
+  int _responsiveColumnCount(double availableWidth) {
+    return (availableWidth /
+            (AppDimensions.gridMaxCrossAxisExtent +
+                AppDimensions.gridSpacingMd))
         .ceil()
         .clamp(1, 10)
         .toInt();
+  }
+
+  Map<String, int> _collectTagCounts(List<Bookmark> bookmarks) {
+    final Map<String, int> tagCounts = {};
+    for (final b in bookmarks) {
+      for (final t in b.tags) {
+        final clean = t.trim();
+        if (clean.isNotEmpty) {
+          tagCounts[clean] = (tagCounts[clean] ?? 0) + 1;
+        }
+      }
+    }
+    return tagCounts;
+  }
+
+  double _recentCardWidth(BuildContext context) {
+    final availableWidth = MediaQuery.sizeOf(context).width -
+        (AppDimensions.paddingLg * 2);
+    final columnCount = _responsiveColumnCount(availableWidth);
     return (availableWidth -
             (columnCount - 1) * AppDimensions.gridSpacingMd) /
         columnCount;
@@ -324,17 +342,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         );
       case LibraryTab.tags:
-        final Map<String, int> tagCounts = {};
-        for (final b in allBookmarks) {
-          for (final t in b.tags) {
-            final clean = t.trim();
-            if (clean.isNotEmpty) {
-              tagCounts[clean] = (tagCounts[clean] ?? 0) + 1;
-            }
-          }
-        }
-        final displayedCount =
-            tagCounts.isNotEmpty ? tagCounts.length : NeoTagBadge.sampleTags.length;
+        final displayedCount = _collectTagCounts(allBookmarks).length;
         return Row(
           children: [
             const Icon(
@@ -420,31 +428,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
         const crossAxisSpacing = AppDimensions.gridSpacingMd;
         const desiredCardHeight = AppDimensions.gridFolderCardHeight;
-        final gridWidth = constraints.maxWidth;
-        final columnCount = (gridWidth /
-                (maxCrossAxisExtent + crossAxisSpacing))
-            .ceil()
-            .clamp(1, 10)
-            .toInt();
-        final itemWidth = (gridWidth -
-                (columnCount - 1) * crossAxisSpacing) /
-            columnCount;
+        final columnCount = _responsiveColumnCount(constraints.maxWidth);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: maxCrossAxisExtent,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columnCount,
                 crossAxisSpacing: crossAxisSpacing,
                 mainAxisSpacing: AppDimensions.gridSpacingLg,
-                childAspectRatio: itemWidth / desiredCardHeight,
+                mainAxisExtent: desiredCardHeight,
               ),
               itemCount: collections.length,
               itemBuilder: (context, index) {
@@ -474,15 +472,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Widget _buildBookmarkGrid(List<Bookmark> bookmarks, {required String keyPrefix}) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        const maxCrossAxisExtent = AppDimensions.gridMaxCrossAxisExtent;
         const crossAxisSpacing = AppDimensions.gridSpacingMd;
         const desiredCardHeight = AppDimensions.gridBookmarkCardHeight;
-        final gridWidth = constraints.maxWidth;
-        final columnCount = (gridWidth /
-                (maxCrossAxisExtent + crossAxisSpacing))
-            .ceil()
-            .clamp(1, 10)
-            .toInt();
+        final columnCount = _responsiveColumnCount(constraints.maxWidth);
 
         return GridView.builder(
           shrinkWrap: true,
@@ -587,17 +579,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildTagsView(List<Bookmark> allBookmarks) {
-
-    // Collect tags from real bookmarks
-    final Map<String, int> tagCounts = {};
-    for (final b in allBookmarks) {
-      for (final t in b.tags) {
-        final clean = t.trim();
-        if (clean.isNotEmpty) {
-          tagCounts[clean] = (tagCounts[clean] ?? 0) + 1;
-        }
-      }
-    }
+    final tagCounts = _collectTagCounts(allBookmarks);
 
     final userTags = tagCounts.entries
         .map((e) => MapEntry(e.key, e.value))
@@ -608,8 +590,40 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return a.key.toLowerCase().compareTo(b.key.toLowerCase());
       });
 
-    final displayedTags =
-        userTags.isNotEmpty ? userTags : NeoTagBadge.sampleTags;
+    if (userTags.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+          child: Column(
+            children: [
+              Icon(
+                Icons.local_offer_outlined,
+                size: 48,
+                color: Colors.black26,
+              ),
+              SizedBox(height: 12),
+              Text(
+                'No tags yet',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              SizedBox(height: 6),
+              Text(
+                'Add tags to your saves to organize and find them here',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppTheme.textMuted,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     // Filter bookmarks for currently selected tag
     final matchingBookmarks = _selectedTagFilter == null
@@ -637,8 +651,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 12.0,
             runSpacing: 16.0,
-            children: List.generate(displayedTags.length, (index) {
-              final entry = displayedTags[index];
+            children: List.generate(userTags.length, (index) {
+              final entry = userTags[index];
               final tilt = NeoTagBadge.getTilt(index);
               final isTagSelected = _selectedTagFilter != null &&
                   (_selectedTagFilter!.toLowerCase().trim() ==
@@ -668,43 +682,50 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.bookmark_outline,
-                    size: 18,
-                    color: AppTheme.border,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'TAGGED #${_selectedTagFilter!.toUpperCase()}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.bookmark_outline,
+                      size: 18,
                       color: AppTheme.border,
-                      letterSpacing: 0.5,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.border, width: 1.5),
-                    ),
-                    child: Text(
-                      '${matchingBookmarks.length}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w900,
-                        color: AppTheme.border,
+                    const SizedBox(width: 8),
+                    Flexible(
+                      child: Text(
+                        'TAGGED #${_selectedTagFilter!.toUpperCase()}',
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.border,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 8),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppTheme.border, width: 1.5),
+                      ),
+                      child: Text(
+                        '${matchingBookmarks.length}',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          color: AppTheme.border,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 8),
               GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -891,15 +912,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         const horizontalPadding = AppDimensions.paddingLg * 2;
-        const maxCrossAxisExtent = 200.0;
         const crossAxisSpacing = AppDimensions.gridSpacingMd;
         const desiredCardHeight = AppDimensions.gridBookmarkCardHeight;
         final contentWidth = constraints.maxWidth - horizontalPadding;
-        final columnCount = (contentWidth /
-                (maxCrossAxisExtent + crossAxisSpacing))
-            .ceil()
-            .clamp(1, 10)
-            .toInt();
+        final columnCount = _responsiveColumnCount(contentWidth);
 
         return GridView.builder(
           clipBehavior: Clip.none,
@@ -940,11 +956,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final pinnedCount = allBookmarks.where((b) => b.isPinned).length;
 
     // Count unique tags
-    final Set<String> uniqueTags = {};
-    for (var b in allBookmarks) {
-      uniqueTags.addAll(b.tags);
-    }
-    final tagsCount = uniqueTags.length;
+    final tagsCount = _collectTagCounts(allBookmarks).length;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
