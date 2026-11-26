@@ -10,6 +10,10 @@ final repositoryProvider = Provider<IsarRepository>((ref) {
   return IsarRepository();
 });
 
+final metadataFetcherProvider = Provider<MetadataFetcher>((ref) {
+  return const UrlHelperMetadataFetcher();
+});
+
 final collectionsProvider =
     FutureProvider<List<BookmarkCollection>>((ref) async {
   final repo = ref.watch(repositoryProvider);
@@ -72,8 +76,27 @@ final refreshingBookmarkIdsProvider = StateProvider<Set<int>>((ref) => {});
 // A notifier to handle adding a bookmark and fetching metadata
 class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
+  final MetadataFetcher _metadataFetcher;
+  final Set<MetadataCancelToken> _activeMetadataTokens = {};
 
-  BookmarkNotifier(this.ref) : super(const AsyncValue.data(null));
+  BookmarkNotifier(this.ref, {MetadataFetcher? metadataFetcher})
+      : _metadataFetcher = metadataFetcher ?? ref.read(metadataFetcherProvider),
+        super(const AsyncValue.data(null));
+
+  MetadataCancelToken _createCancelToken() {
+    final token = MetadataCancelToken();
+    _activeMetadataTokens.add(token);
+    return token;
+  }
+
+  @override
+  void dispose() {
+    for (final token in _activeMetadataTokens) {
+      token.cancel();
+    }
+    _activeMetadataTokens.clear();
+    super.dispose();
+  }
 
   Future<void> quickSave(String url, {BookmarkCollection? collection, bool isPinned = false}) async {
     state = const AsyncValue.loading();
@@ -127,11 +150,17 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     String cleanUrl,
     BookmarkCollection? collection,
   ) async {
+    final cancelToken = _createCancelToken();
     try {
       final repo = ref.read(repositoryProvider);
 
       // Resolve redirect chains (e.g. share.google, bit.ly, t.co) to canonical target
-      final resolvedUrl = await UrlHelper.resolveFinalUrl(cleanUrl);
+      final resolvedUrl = await _metadataFetcher.resolveFinalUrl(
+        cleanUrl,
+        cancelToken: cancelToken,
+      );
+      if (!mounted || cancelToken.isCancelled) return;
+
       final cleanUri = Uri.tryParse(cleanUrl);
       final resolvedUri = Uri.tryParse(resolvedUrl);
 
@@ -150,7 +179,11 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       String? sourceDomain = targetUri.host;
 
       try {
-        var data = await UrlHelper.fetchMetadata(resolvedUrl);
+        final data = await _metadataFetcher.fetchMetadata(
+          resolvedUrl,
+          cancelToken: cancelToken,
+        );
+        if (!mounted || cancelToken.isCancelled) return;
         if (data != null) {
           if (data.title != null && data.title!.isNotEmpty) {
             title = data.title;
@@ -163,6 +196,8 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
       } catch (e) {
         debugPrint('Error fetching metadata: $e');
       }
+
+      if (!mounted || cancelToken.isCancelled) return;
 
       bookmark.url = finalUrl;
       bookmark.title = title ?? cleanUrl;
@@ -178,13 +213,16 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     } catch (e) {
       debugPrint('Error updating bookmark metadata: $e');
     } finally {
-      ref.read(savingBookmarkIdsProvider.notifier).update(
-            (set) => set.where((id) => id != bookmark.id).toSet(),
-          );
-      ref.invalidate(bookmarksProvider);
-      ref.invalidate(unsortedBookmarksProvider);
-      if (collection != null) {
-        ref.invalidate(collectionBookmarksProvider(collection.id));
+      _activeMetadataTokens.remove(cancelToken);
+      if (mounted) {
+        ref.read(savingBookmarkIdsProvider.notifier).update(
+              (set) => set.where((id) => id != bookmark.id).toSet(),
+            );
+        ref.invalidate(bookmarksProvider);
+        ref.invalidate(unsortedBookmarksProvider);
+        if (collection != null) {
+          ref.invalidate(collectionBookmarksProvider(collection.id));
+        }
       }
     }
   }
@@ -220,6 +258,7 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<void> refreshMetadata(Bookmark bookmark) async {
+    final cancelToken = _createCancelToken();
     ref.read(refreshingBookmarkIdsProvider.notifier).update((set) => {...set, bookmark.id});
     try {
       if (bookmark.collection.isAttached && !bookmark.collection.isLoaded) {
@@ -227,11 +266,18 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
           await bookmark.collection.load();
         } catch (_) {}
       }
+      if (!mounted || cancelToken.isCancelled) return;
+
       String url = UrlHelper.extractUrl(bookmark.url) ?? bookmark.url.trim();
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         url = 'https://$url';
       }
-      final resolvedUrl = await UrlHelper.resolveFinalUrl(url);
+      final resolvedUrl = await _metadataFetcher.resolveFinalUrl(
+        url,
+        cancelToken: cancelToken,
+      );
+      if (!mounted || cancelToken.isCancelled) return;
+
       final originalUri = Uri.tryParse(url);
       final resolvedUri = Uri.tryParse(resolvedUrl);
 
@@ -247,7 +293,12 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
         bookmark.sourceDomain = (resolvedUri ?? originalUri)?.host ?? bookmark.sourceDomain;
       }
 
-      var data = await UrlHelper.fetchMetadata(resolvedUrl);
+      final data = await _metadataFetcher.fetchMetadata(
+        resolvedUrl,
+        cancelToken: cancelToken,
+      );
+      if (!mounted || cancelToken.isCancelled) return;
+
       if (data != null) {
         if (data.title != null && data.title!.isNotEmpty) {
           bookmark.title = data.title!;
@@ -273,14 +324,17 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
     } catch (e) {
       debugPrint('Error refreshing metadata: $e');
     } finally {
-      ref.read(refreshingBookmarkIdsProvider.notifier).update(
-            (set) => set.where((id) => id != bookmark.id).toSet(),
-          );
-      ref.invalidate(bookmarksProvider);
-      ref.invalidate(unsortedBookmarksProvider);
-      final colId = bookmark.collection.value?.id;
-      if (colId != null) {
-        ref.invalidate(collectionBookmarksProvider(colId));
+      _activeMetadataTokens.remove(cancelToken);
+      if (mounted) {
+        ref.read(refreshingBookmarkIdsProvider.notifier).update(
+              (set) => set.where((id) => id != bookmark.id).toSet(),
+            );
+        ref.invalidate(bookmarksProvider);
+        ref.invalidate(unsortedBookmarksProvider);
+        final colId = bookmark.collection.value?.id;
+        if (colId != null) {
+          ref.invalidate(collectionBookmarksProvider(colId));
+        }
       }
     }
   }
@@ -436,7 +490,10 @@ class BookmarkNotifier extends StateNotifier<AsyncValue<void>> {
 
 final bookmarkNotifierProvider =
     StateNotifierProvider<BookmarkNotifier, AsyncValue<void>>((ref) {
-  return BookmarkNotifier(ref);
+  return BookmarkNotifier(
+    ref,
+    metadataFetcher: ref.watch(metadataFetcherProvider),
+  );
 });
 
 // A notifier to handle adding collections

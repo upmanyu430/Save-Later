@@ -1,7 +1,85 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:html/parser.dart' as parser;
 import 'package:http/http.dart' as http;
 import 'package:metadata_fetch/metadata_fetch.dart';
+
+/// Cancellation token for aborting in-flight URL resolution and metadata fetches.
+class MetadataCancelToken {
+  bool _isCancelled = false;
+  final List<void Function()> _listeners = [];
+
+  bool get isCancelled => _isCancelled;
+
+  /// Registers [listener] to run when cancelled, or immediately if already cancelled.
+  /// Returns a callback that unregisters [listener].
+  void Function() addListener(void Function() listener) {
+    if (_isCancelled) {
+      listener();
+      return () {};
+    }
+    _listeners.add(listener);
+    return () => _listeners.remove(listener);
+  }
+
+  void cancel() {
+    if (_isCancelled) return;
+    _isCancelled = true;
+    final snapshot = List<void Function()>.from(_listeners);
+    _listeners.clear();
+    for (final listener in snapshot) {
+      listener();
+    }
+  }
+}
+
+class _CancelledException implements Exception {
+  const _CancelledException();
+}
+
+/// Injectable interface for resolving URLs and fetching webpage metadata.
+abstract class MetadataFetcher {
+  Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
+  });
+
+  Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
+  });
+}
+
+/// Default [MetadataFetcher] backed by [UrlHelper].
+class UrlHelperMetadataFetcher implements MetadataFetcher {
+  const UrlHelperMetadataFetcher();
+
+  @override
+  Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
+  }) =>
+      UrlHelper.resolveFinalUrl(
+        url,
+        timeout: timeout,
+        cancelToken: cancelToken,
+      );
+
+  @override
+  Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
+  }) =>
+      UrlHelper.fetchMetadata(
+        url,
+        timeout: timeout,
+        cancelToken: cancelToken,
+      );
+}
 
 class UrlHelper {
   // Regex matching http/https URLs or www. domains in text
@@ -159,13 +237,67 @@ class UrlHelper {
     return 'https://image.thum.io/get/width/$width/crop/900/$trimmed';
   }
 
+  /// Runs [future] with a cancellable timeout so disposing callers can abort
+  /// pending timers cleanly instead of leaving uncancelled Future.timeout timers.
+  static Future<T> _awaitWithTimeoutAndCancel<T>(
+    Future<T> future, {
+    required Duration timeout,
+    MetadataCancelToken? cancelToken,
+    void Function()? onAbort,
+  }) {
+    if (cancelToken?.isCancelled == true) {
+      onAbort?.call();
+      return Future.error(const _CancelledException());
+    }
+
+    final completer = Completer<T>();
+    Timer? timer;
+    void Function()? removeListener;
+
+    void finishError(Object error, [StackTrace? stackTrace]) {
+      if (completer.isCompleted) return;
+      timer?.cancel();
+      removeListener?.call();
+      completer.completeError(error, stackTrace);
+    }
+
+    void finishValue(T value) {
+      if (completer.isCompleted) return;
+      timer?.cancel();
+      removeListener?.call();
+      completer.complete(value);
+    }
+
+    timer = Timer(timeout, () {
+      onAbort?.call();
+      finishError(TimeoutException('Operation timed out', timeout));
+    });
+
+    if (cancelToken != null) {
+      removeListener = cancelToken.addListener(() {
+        onAbort?.call();
+        finishError(const _CancelledException());
+      });
+    }
+
+    future.then(
+      finishValue,
+      onError: (Object error, StackTrace stackTrace) {
+        finishError(error, stackTrace);
+      },
+    );
+
+    return completer.future;
+  }
+
   /// Resolves HTTP redirect chains (e.g. share.google, bit.ly, t.co) to find the canonical URL.
   /// Uses GET with automatic redirect following so services that only redirect on GET (like Google share links)
   /// are properly resolved.
-  /// Falls back to the original [url] if network fails or resolution times out.
+  /// Falls back to the original [url] if network fails, times out, or is cancelled.
   static Future<String> resolveFinalUrl(
     String url, {
     Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
   }) async {
     final trimmed = url.trim();
     if (trimmed.isEmpty) return trimmed;
@@ -173,6 +305,8 @@ class UrlHelper {
     final normalized = trimmed.startsWith(RegExp(r'https?:\/\/', caseSensitive: false))
         ? trimmed
         : 'https://$trimmed';
+
+    if (cancelToken?.isCancelled == true) return normalized;
 
     final uri = Uri.tryParse(normalized);
     if (uri == null) return normalized;
@@ -185,10 +319,20 @@ class UrlHelper {
         ..headers['User-Agent'] =
             'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
-      final response = await client.send(request).timeout(timeout);
+      final response = await _awaitWithTimeoutAndCancel(
+        client.send(request),
+        timeout: timeout,
+        cancelToken: cancelToken,
+        onAbort: client.close,
+      );
       try {
         // Cancel the response body stream immediately so large payloads aren't downloaded.
-        await response.stream.listen((_) {}).cancel().timeout(timeout);
+        await _awaitWithTimeoutAndCancel(
+          response.stream.listen((_) {}).cancel(),
+          timeout: timeout,
+          cancelToken: cancelToken,
+          onAbort: client.close,
+        );
       } catch (_) {}
 
       if (response case http.BaseResponseWithUrl(url: final finalUri)) {
@@ -208,7 +352,10 @@ class UrlHelper {
   static Future<Metadata?> fetchMetadata(
     String url, {
     Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
   }) async {
+    if (cancelToken?.isCancelled == true) return null;
+
     final cleanUrl = extractUrl(url) ?? url.trim();
     if (!isValidUrl(cleanUrl)) return null;
 
@@ -225,8 +372,14 @@ class UrlHelper {
       'Accept-Language': 'en-US,en;q=0.9',
     };
 
+    final client = http.Client();
     try {
-      final response = await http.get(targetUri, headers: headers).timeout(timeout);
+      final response = await _awaitWithTimeoutAndCancel(
+        client.get(targetUri, headers: headers),
+        timeout: timeout,
+        cancelToken: cancelToken,
+        onAbort: client.close,
+      );
       if (response.statusCode == 200) {
         final document = parser.parse(utf8.decode(response.bodyBytes, allowMalformed: true));
         final data = MetadataParser.parse(document, url: targetUri.toString());
@@ -265,12 +418,23 @@ class UrlHelper {
 
         return data;
       }
-    } catch (_) {
+    } catch (e) {
+      if (e is _CancelledException || cancelToken?.isCancelled == true) {
+        return null;
+      }
       // Fall through to MetadataFetch.extract
+    } finally {
+      client.close();
     }
 
+    if (cancelToken?.isCancelled == true) return null;
+
     try {
-      return await MetadataFetch.extract(targetUri.toString()).timeout(timeout);
+      return await _awaitWithTimeoutAndCancel(
+        MetadataFetch.extract(targetUri.toString()),
+        timeout: timeout,
+        cancelToken: cancelToken,
+      );
     } catch (_) {
       return null;
     }

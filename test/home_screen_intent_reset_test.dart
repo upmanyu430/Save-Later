@@ -13,6 +13,26 @@ import 'package:save_later/repositories/isar_repository.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/screens/home_screen.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
+import 'package:metadata_fetch/metadata_fetch.dart';
+import 'package:save_later/utils/url_helper.dart';
+
+class _FakeMetadataFetcher implements MetadataFetcher {
+  @override
+  Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      url;
+
+  @override
+  Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      null;
+}
 
 class TestReceiveSharingIntent extends ReceiveSharingIntent {
   final List<SharedMediaFile> initialMedia;
@@ -146,6 +166,7 @@ void main() {
         overrides: [
           repositoryProvider.overrideWithValue(fakeRepo),
           collectionsProvider.overrideWith((ref) => Future.value([])),
+          metadataFetcherProvider.overrideWithValue(_FakeMetadataFetcher()),
         ],
         child: buildTestApp(
           home: const HomeScreen(),
@@ -211,6 +232,7 @@ void main() {
         overrides: [
           repositoryProvider.overrideWithValue(fakeRepo),
           collectionsProvider.overrideWith((ref) => Future.value([])),
+          metadataFetcherProvider.overrideWithValue(_FakeMetadataFetcher()),
         ],
         child: buildTestApp(
           home: const HomeScreen(),

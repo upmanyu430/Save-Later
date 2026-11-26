@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:isar/isar.dart';
+import 'package:metadata_fetch/metadata_fetch.dart';
 import 'package:save_later/models/bookmark.dart';
 import 'package:save_later/models/collection.dart';
 import 'package:save_later/providers/providers.dart';
@@ -13,6 +14,25 @@ import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/screens/collection_detail_screen.dart';
 import 'package:save_later/ui/widgets/neo_box.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
+import 'package:save_later/utils/url_helper.dart';
+
+class _FakeMetadataFetcher implements MetadataFetcher {
+  @override
+  Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      url;
+
+  @override
+  Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      null;
+}
 
 class MockAddLinkRepository implements IsarRepository {
   @override
@@ -85,10 +105,14 @@ class MockAddLinkRepository implements IsarRepository {
 Widget createAddLinkTestApp({
   required Widget child,
   required IsarRepository repo,
+  MetadataFetcher? metadataFetcher,
 }) {
   return ProviderScope(
     overrides: [
       repositoryProvider.overrideWithValue(repo),
+      metadataFetcherProvider.overrideWithValue(
+        metadataFetcher ?? _FakeMetadataFetcher(),
+      ),
     ],
     child: MaterialApp(
       localizationsDelegates: const [

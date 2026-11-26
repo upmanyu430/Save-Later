@@ -301,6 +301,31 @@ Hope you like it!
       expect(badCertCallbackAssigned, isFalse);
       expect(resolvedTlsError, 'https://untrusted.example/step1');
     });
+
+    test('aborts immediately when MetadataCancelToken is cancelled on hanging request', () async {
+      final token = MetadataCancelToken();
+      final sw = Stopwatch()..start();
+      Future.delayed(const Duration(milliseconds: 25), token.cancel);
+
+      final resolved = await UrlHelper.resolveFinalUrl(
+        '$serverUrl/hang',
+        timeout: const Duration(seconds: 4),
+        cancelToken: token,
+      );
+      sw.stop();
+
+      expect(resolved, '$serverUrl/hang');
+      expect(sw.elapsedMilliseconds, lessThan(250));
+    });
+
+    test('returns normalized URL immediately when token is already cancelled', () async {
+      final token = MetadataCancelToken()..cancel();
+      final resolved = await UrlHelper.resolveFinalUrl(
+        '$serverUrl/step1',
+        cancelToken: token,
+      );
+      expect(resolved, '$serverUrl/step1');
+    });
   });
 }
 

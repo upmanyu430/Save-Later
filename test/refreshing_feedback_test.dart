@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:isar/isar.dart';
+import 'package:metadata_fetch/metadata_fetch.dart';
 import 'package:save_later/models/bookmark.dart';
 import 'package:save_later/models/collection.dart';
 import 'package:save_later/repositories/isar_repository.dart';
@@ -11,6 +12,25 @@ import 'package:save_later/providers/providers.dart';
 import 'package:save_later/ui/widgets/bookmark_grid_item.dart';
 import 'package:save_later/ui/widgets/neo_button.dart';
 import 'package:save_later/ui/screens/bookmark_detail_screen.dart';
+import 'package:save_later/utils/url_helper.dart';
+
+class _FakeMetadataFetcher implements MetadataFetcher {
+  @override
+  Future<String> resolveFinalUrl(
+    String url, {
+    Duration timeout = const Duration(seconds: 4),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      url;
+
+  @override
+  Future<Metadata?> fetchMetadata(
+    String url, {
+    Duration timeout = const Duration(seconds: 8),
+    MetadataCancelToken? cancelToken,
+  }) async =>
+      null;
+}
 
 class _FakeRepo implements IsarRepository {
   @override
@@ -153,6 +173,7 @@ void main() {
       ProviderScope(
         overrides: [
           repositoryProvider.overrideWithValue(repo),
+          metadataFetcherProvider.overrideWithValue(_FakeMetadataFetcher()),
         ],
         child: MaterialApp(
           localizationsDelegates: const [
