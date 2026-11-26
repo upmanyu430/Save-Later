@@ -680,85 +680,41 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         if (_selectedTagFilter != null) ...[
           const SizedBox(height: 28),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.bookmark_outline,
-                      size: 18,
-                      color: AppTheme.border,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'TAGGED #${_selectedTagFilter!.toUpperCase()}',
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.border,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: AppTheme.border, width: 1.5),
-                      ),
-                      child: Text(
-                        '${matchingBookmarks.length}',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w900,
-                          color: AppTheme.border,
-                        ),
-                      ),
-                    ),
-                  ],
+              const Icon(
+                Icons.bookmark_outline,
+                size: 18,
+                color: AppTheme.border,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'TAGGED #${_selectedTagFilter!.toUpperCase()}',
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.border,
+                    letterSpacing: 0.5,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  setState(() => _selectedTagFilter = null);
-                },
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.border, width: 2),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(1.5, 1.5),
-                      ),
-                    ],
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.close, size: 14, color: AppTheme.border),
-                      SizedBox(width: 4),
-                      Text(
-                        'Clear',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.border,
-                        ),
-                      ),
-                    ],
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: AppTheme.border, width: 1.5),
+                ),
+                child: Text(
+                  '${matchingBookmarks.length}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.border,
                   ),
                 ),
               ),

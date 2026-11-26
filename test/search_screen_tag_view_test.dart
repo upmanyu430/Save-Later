@@ -208,8 +208,9 @@ void main() {
       await tester.tap(find.text('#recipes'));
       await tester.pumpAndSettle();
 
-      // Active tag section header is displayed
+      // Active tag section header is displayed without a Clear button
       expect(find.text('TAGGED #RECIPES'), findsOneWidget);
+      expect(find.text('Clear'), findsNothing);
       // Results should show Pasta Carbonara (tagged recipes)
       expect(find.text('Pasta Carbonara'), findsOneWidget);
       // Tokyo Trip Guide (tagged travel) should not show
@@ -217,8 +218,8 @@ void main() {
       // Bookmark with word 'recipes' in title but tagged 'baking' must NOT appear
       expect(find.text('Old Family Recipes'), findsNothing);
 
-      // Tapping Clear clears the tag filter
-      await tester.tap(find.text('Clear'));
+      // Tapping the selected tag again clears the tag filter
+      await tester.tap(find.text('#recipes'));
       await tester.pumpAndSettle();
 
       expect(find.text('TAGGED #RECIPES'), findsNothing);
