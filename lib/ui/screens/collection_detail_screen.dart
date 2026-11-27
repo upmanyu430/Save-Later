@@ -460,7 +460,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   child: NeoButton(
                                     onPressed: () => context.push('/review', extra: effectiveCollection),
                                     color: const Color(0xFFFFD166), // Yellow
-                                    borderColor: colors.onAccent,
                                     shadowColor: colors.shadow,
                                     padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusMd,
@@ -824,7 +823,6 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       }
                     },
                     color: AppTheme.accent,
-                    borderColor: colors.onAccent,
                     shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
@@ -1043,7 +1041,6 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
           child: NeoButton(
             onPressed: _handleSave,
             color: AppTheme.accent,
-            borderColor: colors.onAccent,
             shadowColor: colors.shadow,
             padding: EdgeInsets.zero,
             borderRadius: AppDimensions.radiusMd,

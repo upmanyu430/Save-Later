@@ -154,7 +154,6 @@ class DeleteConfirmationDialog extends StatelessWidget {
                     Navigator.of(context).pop(true);
                   },
                   color: const Color(0xFFEF476F),
-                  borderColor: colors.onAccent,
                   shadowColor: colors.shadow,
                   borderWidth: 2.5,
                   borderRadius: 12.0,

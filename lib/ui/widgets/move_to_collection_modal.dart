@@ -387,7 +387,6 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                         ? () => _handleMove(_selectedCollection)
                                         : null,
                                     color: const Color(0xFFFFD166),
-                                    borderColor: colors.onAccent,
                                     shadowColor: colors.shadow,
                                     padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusMd,

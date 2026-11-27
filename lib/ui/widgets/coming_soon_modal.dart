@@ -122,7 +122,6 @@ class ComingSoonModal extends StatelessWidget {
                 child: NeoButton(
                   onPressed: () => dismissAppModalSheet(context),
                   color: AppTheme.accent,
-                  borderColor: colors.onAccent,
                   shadowColor: colors.shadow,
                   borderRadius: AppDimensions.radiusMd,
                   borderWidth: AppDimensions.borderWidthMd,

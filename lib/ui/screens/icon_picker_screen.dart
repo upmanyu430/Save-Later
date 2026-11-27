@@ -490,7 +490,6 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                   return NeoButton(
                     onPressed: () => _selectAndReturn(_selectedIconCode),
                     color: selectedColor,
-                    borderColor: colors.onAccent,
                     shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Center(

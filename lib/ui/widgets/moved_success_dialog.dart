@@ -154,7 +154,6 @@ class MovedSuccessDialog extends StatelessWidget {
               }
             },
             color: AppTheme.accent,
-            borderColor: colors.onAccent,
             shadowColor: colors.shadow,
             borderWidth: 2.5,
             borderRadius: 12.0,

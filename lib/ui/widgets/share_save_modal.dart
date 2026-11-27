@@ -529,7 +529,6 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                               child: NeoButton(
                                 onPressed: _isSaving ? null : _handleSave,
                                 color: const Color(0xFFFFD166),
-                                borderColor: colors.onAccent,
                                 shadowColor: colors.shadow,
                                 padding: EdgeInsets.zero,
                                 borderRadius: AppDimensions.radiusMd,

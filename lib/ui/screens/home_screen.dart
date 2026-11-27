@@ -398,7 +398,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: EdgeInsets.zero,
                       borderRadius: AppDimensions.radiusMd,
                       color: AppTheme.accent, // Yellow button
-                      borderColor: colors.onAccent,
                       shadowColor: colors.shadow,
                       onPressed: () {
                         _quickSave();
@@ -565,7 +564,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 NeoButton(
                                   onPressed: () => ref.invalidate(collectionsProvider),
                                   color: AppTheme.accent,
-                                  borderColor: colors.onAccent,
                                   shadowColor: colors.shadow,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,

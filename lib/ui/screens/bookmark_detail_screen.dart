@@ -268,7 +268,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   await _removeTag(tag);
                                 },
                                 color: const Color(0xFFFF6B6B),
-                                borderColor: colors.onAccent,
                                 shadowColor: colors.shadow,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 borderRadius: AppDimensions.radiusMd,
@@ -543,7 +542,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       }
                                     },
                                     color: const Color(0xFFFFD166),
-                                    borderColor: colors.onAccent,
                                     shadowColor: colors.shadow,
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                                     borderRadius: AppDimensions.radiusSm,
@@ -818,7 +816,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         });
                                       },
                                       color: AppTheme.accent,
-                                      borderColor: colors.onAccent,
                                       shadowColor: colors.shadow,
                                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                                       borderRadius: AppDimensions.radiusSm,
@@ -931,7 +928,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   },
                                   padding: EdgeInsets.zero,
                                   color: bookmark.isPinned ? const Color(0xFFFFD166) : colors.card,
-                                  borderColor: bookmark.isPinned ? colors.onAccent : colors.border,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: AppDimensions.borderWidthMd,
                                   child: PinIcon(
@@ -1079,7 +1075,6 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             child: NeoButton(
                               onPressed: () => Navigator.pop(ctx, true),
                               color: const Color(0xFF26D5A8),
-                              borderColor: colors.onAccent,
                               shadowColor: colors.shadow,
                               borderRadius: 12.0,
                               borderWidth: 2.5,
@@ -1552,7 +1547,6 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
                   scale: scale,
                   child: NeoBox(
                     color: const Color(0xFFFFD166), // Yellow
-                    borderColor: colors.onAccent,
                     shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppDimensions.paddingLg,
@@ -2016,7 +2010,6 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                   color: canAdd
                                       ? AppTheme.accent
                                       : colors.surfaceSubtle,
-                                  borderColor: canAdd ? colors.onAccent : colors.border,
                                   shadowColor: colors.shadow,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: 2,
@@ -2073,7 +2066,7 @@ class _TagAddButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppTheme.accent,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                border: Border.all(color: colors.onAccent, width: 2),
+                border: Border.all(color: colors.border, width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: colors.shadow,

@@ -225,7 +225,6 @@ class _HomeHeadlineModalState extends ConsumerState<HomeHeadlineModal>
                       child: NeoButton(
                         onPressed: _save,
                         color: AppTheme.accent,
-                        borderColor: colors.onAccent,
                         shadowColor: colors.shadow,
                         borderRadius: AppDimensions.radiusMd,
                         borderWidth: AppDimensions.borderWidthMd,

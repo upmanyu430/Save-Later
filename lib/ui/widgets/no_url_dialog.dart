@@ -55,7 +55,6 @@ void showNoUrlDialog(BuildContext context) {
                           width: double.infinity,
                           child: NeoButton(
                             color: AppTheme.accent,
-                            borderColor: colors.onAccent,
                             shadowColor: colors.shadow,
                             borderWidth: AppDimensions.borderWidthMd,
                             padding: const EdgeInsets.symmetric(vertical: AppDimensions.paddingLg),

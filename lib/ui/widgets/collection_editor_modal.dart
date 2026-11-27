@@ -471,7 +471,6 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 color: !isNameEmpty
                     ? const Color(0xFFFFD166)
                     : colors.card,
-                borderColor: !isNameEmpty ? colors.onAccent : colors.border,
                 shadowColor: colors.shadow,
                 padding: EdgeInsets.zero,
                 borderRadius: AppDimensions.radiusMd,
