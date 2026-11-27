@@ -13,7 +13,7 @@ import '../../providers/providers.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
 import '../widgets/backup_restore_modal.dart';
-import '../widgets/cloud_sync_modal.dart';
+import '../widgets/coming_soon_modal.dart';
 import '../widgets/delete_confirmation_dialog.dart';
 import '../widgets/home_headline_modal.dart';
 import '../widgets/language_picker_modal.dart';
@@ -450,7 +450,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: _buildIconContainer(context, Icons.cloud_outlined),
                         onTap: () {
                           _triggerHapticIfEnabled();
-                          CloudSyncModal.show(context);
+                          ComingSoonModal.show(
+                            context,
+                            icon: Icons.cloud_outlined,
+                            iconBackgroundColor: AppTheme.secondary,
+                            title: l10n.cloudSyncComingSoonTitle,
+                            body: l10n.cloudSyncComingSoonBody,
+                          );
                         },
                         trailing: Icon(
                           Icons.chevron_right,
@@ -546,11 +552,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         title: l10n.rateAppTitle(AppConfig.appName),
                         subtitle: l10n.rateAppSubtitle(AppConfig.appName),
                         icon: _buildRateBadgeIcon(context),
-                        onTap: () => _openUrl(AppConfig.playStoreUrl),
+                        onTap: () {
+                          _triggerHapticIfEnabled();
+                          ComingSoonModal.show(
+                            context,
+                            icon: Icons.star_rounded,
+                            iconBackgroundColor: AppTheme.accent,
+                            title: l10n.rateAppComingSoonTitle,
+                            body: l10n.rateAppComingSoonBody(AppConfig.appName),
+                          );
+                        },
                         trailing: Icon(
-                          Icons.open_in_new,
+                          Icons.chevron_right,
                           color: colors.textSecondary,
-                          size: 20,
                         ),
                       ),
                       _buildSettingRow(

@@ -271,6 +271,16 @@ void main() {
     await tester.tap(find.text('Got it'));
     await tester.pumpAndSettle();
 
+    // Tap Rate Save Later on Google Play -> opens Coming Soon modal
+    final rateTile = find.text('Rate Save Later on Google Play');
+    await tester.ensureVisible(rateTile);
+    await tester.tap(rateTile);
+    await tester.pumpAndSettle();
+    expect(find.text('Google Play Rating Coming Soon'), findsOneWidget);
+
+    await tester.tap(find.text('Got it'));
+    await tester.pumpAndSettle();
+
     // Tap Copy user ID -> copies UUIDv4 to clipboard
     final copyButton = find.text('Copy user ID');
     await tester.ensureVisible(copyButton);

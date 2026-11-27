@@ -115,6 +115,8 @@
   "account": "KONTO",
   "rateAppTitle": "{appName} bei Google Play bewerten",
   "rateAppSubtitle": "Gefällt dir {appName}? Eine 5-Sterne-Bewertung hilft uns sehr!",
+  "rateAppComingSoonTitle": "Google Play-Bewertung bald verfügbar",
+  "rateAppComingSoonBody": "{appName} ist noch nicht auf Google Play veröffentlicht. Bewertungen werden verfügbar, sobald der Play Store-Release live ist.",
   "deleteAllData": "Alle Daten löschen",
   "deleteAllDataSubtitle": "Alle gespeicherten Links, Sammlungen und Tags auf diesem Gerät dauerhaft löschen",
   "versionLabel": "Version {version}",

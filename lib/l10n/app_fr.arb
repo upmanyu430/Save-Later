@@ -115,6 +115,8 @@
   "account": "COMPTE",
   "rateAppTitle": "Noter {appName} sur Google Play",
   "rateAppSubtitle": "Vous aimez {appName} ? Un avis 5 étoiles compte beaucoup pour nous !",
+  "rateAppComingSoonTitle": "Avis Google Play bientôt disponible",
+  "rateAppComingSoonBody": "{appName} n'est pas encore publiée sur Google Play. Les avis et notes seront disponibles dès le lancement sur le Play Store.",
   "deleteAllData": "Supprimer toutes les données",
   "deleteAllDataSubtitle": "Effacer définitivement tous les liens, collections et tags de cet appareil",
   "versionLabel": "Version {version}",

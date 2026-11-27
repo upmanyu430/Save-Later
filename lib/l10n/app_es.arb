@@ -115,6 +115,8 @@
   "account": "CUENTA",
   "rateAppTitle": "Valora {appName} en Google Play",
   "rateAppSubtitle": "¿Disfrutas de {appName}? ¡Una reseña de 5 estrellas nos ayuda mucho!",
+  "rateAppComingSoonTitle": "Valoración en Google Play próximamente",
+  "rateAppComingSoonBody": "{appName} aún no está publicada en Google Play. Las reseñas y valoraciones estarán disponibles cuando se lance en Play Store.",
   "deleteAllData": "Eliminar todos los datos",
   "deleteAllDataSubtitle": "Borra permanentemente todos los guardados, colecciones y etiquetas de este dispositivo",
   "versionLabel": "Versión {version}",

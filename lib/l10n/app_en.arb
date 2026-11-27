@@ -535,6 +535,19 @@
       }
     }
   },
+  "rateAppComingSoonTitle": "Google Play Rating Coming Soon",
+  "@rateAppComingSoonTitle": {
+    "description": "Modal title when Google Play rating is not yet available"
+  },
+  "rateAppComingSoonBody": "{appName} isn't published on Google Play yet. Reviews and ratings will open right here once the Play Store release goes live.",
+  "@rateAppComingSoonBody": {
+    "description": "Informative message inside Google Play rating coming soon modal",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
   "deleteAllData": "Delete All Data",
   "@deleteAllData": {
     "description": "Action title to delete all data"

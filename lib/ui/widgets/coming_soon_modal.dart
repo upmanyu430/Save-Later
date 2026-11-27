@@ -5,13 +5,36 @@ import '../../theme/app_theme.dart';
 import 'app_modal_sheet.dart';
 import 'neo_button.dart';
 
-class CloudSyncModal extends StatelessWidget {
-  const CloudSyncModal({super.key});
+/// Shared neo-brutalist bottom sheet for upcoming Settings features.
+class ComingSoonModal extends StatelessWidget {
+  final IconData icon;
+  final Color iconBackgroundColor;
+  final String title;
+  final String body;
 
-  static Future<void> show(BuildContext context) {
+  const ComingSoonModal({
+    super.key,
+    required this.icon,
+    required this.iconBackgroundColor,
+    required this.title,
+    required this.body,
+  });
+
+  static Future<void> show(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconBackgroundColor,
+    required String title,
+    required String body,
+  }) {
     return showAppModalSheet<void>(
       context: context,
-      builder: (_) => const CloudSyncModal(),
+      builder: (_) => ComingSoonModal(
+        icon: icon,
+        iconBackgroundColor: iconBackgroundColor,
+        title: title,
+        body: body,
+      ),
     );
   }
 
@@ -58,7 +81,7 @@ class CloudSyncModal extends StatelessWidget {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppTheme.secondary,
+                    color: iconBackgroundColor,
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
                       color: colors.onAccent,
@@ -66,7 +89,7 @@ class CloudSyncModal extends StatelessWidget {
                     ),
                   ),
                   child: Icon(
-                    Icons.cloud_outlined,
+                    icon,
                     size: 28,
                     color: colors.onAccent,
                   ),
@@ -74,7 +97,7 @@ class CloudSyncModal extends StatelessWidget {
               ),
               const SizedBox(height: AppDimensions.paddingMd),
               Text(
-                l10n.cloudSyncComingSoonTitle,
+                title,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
@@ -84,7 +107,7 @@ class CloudSyncModal extends StatelessWidget {
               ),
               const SizedBox(height: AppDimensions.paddingSm),
               Text(
-                l10n.cloudSyncComingSoonBody,
+                body,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,

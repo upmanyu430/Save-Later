@@ -115,6 +115,8 @@
   "account": "खाता",
   "rateAppTitle": "Google Play पर {appName} को रेट करें",
   "rateAppSubtitle": "{appName} पसंद आ रहा है? 5-स्टार समीक्षा हमारे लिए बहुत मायने रखती है!",
+  "rateAppComingSoonTitle": "Google Play रेटिंग जल्द आ रही है",
+  "rateAppComingSoonBody": "{appName} अभी Google Play पर प्रकाशित नहीं है। Play Store पर रिलीज़ होते ही समीक्षा और रेटिंग यहाँ उपलब्ध होंगी।",
   "deleteAllData": "सभी डेटा हटाएं",
   "deleteAllDataSubtitle": "इस डिवाइस पर सभी सहेजे गए लिंक, संग्रह और टैग स्थायी रूप से मिटाएं",
   "versionLabel": "संस्करण {version}",

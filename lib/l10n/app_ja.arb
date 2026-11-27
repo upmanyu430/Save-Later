@@ -115,6 +115,8 @@
   "account": "アカウント",
   "rateAppTitle": "Google Play で {appName} を評価",
   "rateAppSubtitle": "{appName} をお楽しみですか？5つ星のレビューはとても励みになります！",
+  "rateAppComingSoonTitle": "Google Play 評価は近日公開",
+  "rateAppComingSoonBody": "{appName} はまだ Google Play に公開されていません。Play ストアでの公開後、こちらから評価できるようになります。",
   "deleteAllData": "すべてのデータを削除",
   "deleteAllDataSubtitle": "この端末上のすべての保存、コレクション、タグを完全に削除します",
   "versionLabel": "バージョン {version}",
