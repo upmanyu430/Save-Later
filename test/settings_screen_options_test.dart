@@ -124,6 +124,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.nightlight_outlined), findsNothing);
+
     // Find the Dark Mode CupertinoSwitch (2nd switch: Haptic=0, DarkMode=1, Reminders=2)
     final switches = find.byType(CupertinoSwitch);
     expect(switches, findsNWidgets(3));
@@ -133,9 +136,21 @@ void main() {
 
     final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
     expect(scaffold.backgroundColor, AppColors.dark.background);
+    expect(find.byIcon(Icons.nightlight_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.wb_sunny_outlined), findsNothing);
 
     final prefs = await SharedPreferences.getInstance();
     expect(prefs.getBool('darkMode'), isTrue);
+
+    // Tapping the Dark Mode row itself toggles back to Light Mode and swaps icon to sun
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pumpAndSettle();
+
+    final lightScaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(lightScaffold.backgroundColor, AppColors.light.background);
+    expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.nightlight_outlined), findsNothing);
+    expect(prefs.getBool('darkMode'), isFalse);
   });
 
   testWidgets('Language picker changes active locale to Spanish', (tester) async {

@@ -55,6 +55,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  void _toggleDarkMode(bool enabled) {
+    _triggerHapticIfEnabled();
+    ref.read(appSettingsProvider.notifier).setDarkMode(enabled);
+  }
+
   Future<void> _openUrl(String url) async {
     _triggerHapticIfEnabled();
     await openUrl(url, context: context);
@@ -263,10 +268,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         color: bgColor ?? colors.surfaceSubtle,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Icon(
-        icon,
-        color: iconColor ?? colors.textPrimary,
-        size: AppDimensions.iconSizeMd,
+      child: AnimatedSwitcher(
+        duration: AppDurations.animationMedium,
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: animation, child: child),
+        ),
+        child: Icon(
+          icon,
+          key: ValueKey<IconData>(icon),
+          color: iconColor ?? colors.textPrimary,
+          size: AppDimensions.iconSizeMd,
+        ),
       ),
     );
   }
@@ -382,11 +397,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         subtitle: l10n.darkModeSubtitle,
                         icon: _buildIconContainer(
                           context,
-                          Icons.nightlight_outlined,
+                          settings.darkMode
+                              ? Icons.nightlight_outlined
+                              : Icons.wb_sunny_outlined,
                         ),
+                        onTap: () => _toggleDarkMode(!settings.darkMode),
                         trailing: CupertinoSwitch(
                           value: settings.darkMode,
-                          onChanged: settingsNotifier.setDarkMode,
+                          onChanged: _toggleDarkMode,
                           activeTrackColor: const Color(0xFF26D5A8),
                         ),
                       ),
