@@ -13,6 +13,7 @@ import 'package:save_later/ui/screens/home_screen.dart';
 import 'package:save_later/ui/screens/settings_screen.dart';
 import 'package:save_later/ui/widgets/neo_box.dart';
 import 'package:save_later/ui/widgets/neo_switch.dart';
+import 'package:save_later/ui/widgets/theme_transition_overlay.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildTestApp({
@@ -384,5 +385,67 @@ void main() {
     expect(copiedClipboardText, isNotNull);
     expect(copiedClipboardText!.length, 36);
     expect(find.text('User ID copied to clipboard'), findsOneWidget);
+  });
+
+  testWidgets('ThemeTransitionScope reveals Dark Mode <-> Light Mode smoothly and handles rapid interrupts', (tester) async {
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        child: Consumer(
+          builder: (context, ref, _) {
+            final (themeMode, locale) = ref.watch(
+              appSettingsProvider.select((s) => (s.themeMode, s.locale)),
+            );
+            return MaterialApp(
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              themeAnimationDuration: Duration.zero,
+              locale: locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              builder: (context, child) => ThemeTransitionScope(
+                child: child ?? const SizedBox.shrink(),
+              ),
+              home: const SettingsScreen(),
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Toggle Light -> Dark via Dark Mode row
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      AppColors.dark.background,
+    );
+
+    // Rapidly interrupt mid-transition Dark -> Light
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      AppColors.light.background,
+    );
+
+    // Complete a full Dark -> Light cycle after settling
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      AppColors.dark.background,
+    );
+    await tester.tap(find.text('Dark Mode'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor,
+      AppColors.light.background,
+    );
   });
 }

@@ -19,6 +19,7 @@ import '../widgets/language_picker_modal.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
 import '../widgets/neo_switch.dart';
+import '../widgets/theme_transition_overlay.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -28,6 +29,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  final GlobalKey _darkModeSwitchKey = GlobalKey();
   String _appVersion = '1.0.0';
   String _buildNumber = '1';
 
@@ -52,6 +54,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _triggerHapticIfEnabled() {
     if (ref.read(appSettingsProvider).hapticFeedback) {
       HapticFeedback.lightImpact();
+    }
+  }
+
+  void _toggleDarkMode(bool nextValue) {
+    Offset? switchCenter;
+    final renderBox =
+        _darkModeSwitchKey.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null && renderBox.hasSize) {
+      switchCenter = renderBox.localToGlobal(
+        renderBox.size.center(Offset.zero),
+      );
+    }
+
+    void apply() => ref.read(appSettingsProvider.notifier).setDarkMode(nextValue);
+
+    final scope = ThemeTransitionScope.maybeOf(context);
+    if (scope != null) {
+      scope.runTransition(origin: switchCenter, applyTheme: apply);
+    } else {
+      apply();
     }
   }
 
@@ -398,8 +420,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           final enabled = rowRef.watch(
                             appSettingsProvider.select((s) => s.darkMode),
                           );
-                          final notifier =
-                              rowRef.read(appSettingsProvider.notifier);
                           return _buildSettingRow(
                             context: context,
                             title: l10n.darkMode,
@@ -410,10 +430,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   ? Icons.nightlight_outlined
                                   : Icons.wb_sunny_outlined,
                             ),
-                            onTap: () => notifier.setDarkMode(!enabled),
+                            onTap: () => _toggleDarkMode(!enabled),
                             trailing: NeoSwitch(
+                              key: _darkModeSwitchKey,
                               value: enabled,
-                              onChanged: notifier.setDarkMode,
+                              onChanged: _toggleDarkMode,
                               semanticLabel: l10n.darkMode,
                             ),
                           );

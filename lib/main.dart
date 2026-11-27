@@ -11,6 +11,7 @@ import 'ui/screens/review_mode_screen.dart';
 import 'ui/screens/settings_screen.dart';
 import 'ui/screens/search_screen.dart';
 import 'ui/screens/bookmark_detail_screen.dart';
+import 'ui/widgets/theme_transition_overlay.dart';
 import 'models/bookmark.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -194,8 +195,6 @@ class SaveLaterApp extends ConsumerWidget {
     );
     final overlayStyle =
         darkMode ? _darkSystemUiOverlayStyle : _lightSystemUiOverlayStyle;
-    final disableAnimations =
-        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
     return MaterialApp.router(
       title: 'Save Later',
@@ -203,18 +202,17 @@ class SaveLaterApp extends ConsumerWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
-      themeAnimationCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
-      themeAnimationDuration: disableAnimations
-          ? Duration.zero
-          : const Duration(milliseconds: 220),
+      themeAnimationDuration: Duration.zero,
       locale: locale,
       routerConfig: _router,
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: overlayStyle,
-          child: ColoredBox(
-            color: context.appColors.background,
-            child: child ?? const SizedBox.shrink(),
+          child: ThemeTransitionScope(
+            child: ColoredBox(
+              color: context.appColors.background,
+              child: child ?? const SizedBox.shrink(),
+            ),
           ),
         );
       },
