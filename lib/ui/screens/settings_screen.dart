@@ -165,13 +165,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return NeoBox(
       padding: EdgeInsets.zero,
-      borderRadius: AppDimensions.radiusMd,
+      borderRadius: AppDimensions.radiusXxl,
       borderWidth: AppDimensions.borderWidthMd,
       color: colors.card,
       borderColor: colors.border,
       shadowColor: colors.shadow,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppDimensions.radiusMd - 2),
+        borderRadius: BorderRadius.circular(
+          AppDimensions.radiusXxl - AppDimensions.borderWidthMd,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: children,

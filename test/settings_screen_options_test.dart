@@ -6,11 +6,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:save_later/config/app_constants.dart';
 import 'package:save_later/providers/app_settings_provider.dart';
 import 'package:save_later/providers/providers.dart';
 import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/screens/home_screen.dart';
 import 'package:save_later/ui/screens/settings_screen.dart';
+import 'package:save_later/ui/widgets/neo_box.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildTestApp({
@@ -87,6 +89,19 @@ void main() {
 
     expect(find.text('Version 1.7.2 (build 21)'), findsOneWidget);
     expect(find.text('Copy user ID'), findsOneWidget);
+
+    final groupedCards = tester.widgetList<NeoBox>(find.byType(NeoBox)).toList();
+    expect(groupedCards, hasLength(4));
+    for (final card in groupedCards) {
+      expect(card.borderRadius, AppDimensions.radiusXxl);
+      final clip = card.child as ClipRRect;
+      expect(
+        clip.borderRadius,
+        BorderRadius.circular(
+          AppDimensions.radiusXxl - AppDimensions.borderWidthMd,
+        ),
+      );
+    }
   });
 
   testWidgets('Dark Mode toggle switches ThemeMode and persists to SharedPreferences', (tester) async {
