@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import '../../providers/app_settings_provider.dart';
 import '../../providers/providers.dart';
 import '../../utils/url_helper.dart';
 import '../widgets/neo_box.dart';
@@ -208,6 +209,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final collectionsAsync = ref.watch(collectionsProvider);
     final isSaving = ref.watch(bookmarkNotifierProvider).isLoading;
+    final settings = ref.watch(appSettingsProvider);
+    final colors = context.appColors;
     final effectiveWidth = MediaQuery.sizeOf(context).width;
     final titleFontSize = MediaQuery.textScalerOf(context).scale(
       (effectiveWidth * 0.1).clamp(32.0, 44.0),
@@ -215,7 +218,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
@@ -242,7 +245,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     // Pinned Top Action Bar
                     Container(
-                      color: AppTheme.background,
+                      color: colors.background,
                       padding: const EdgeInsets.fromLTRB(
                         AppDimensions.paddingLg,
                         AppDimensions.paddingLg,
@@ -258,10 +261,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: NeoButton(
                       onPressed: () => _pushRoute('/settings'),
                       padding: EdgeInsets.zero,
-                      color: AppTheme.cardColor,
+                      color: colors.card,
                       borderRadius: AppDimensions.radiusMd,
                       borderWidth: AppDimensions.borderWidthMd,
-                      child: const Icon(Icons.settings_outlined,
+                      child: Icon(Icons.settings_outlined,
+                          color: colors.textPrimary,
                           size: AppDimensions.iconSizeMd),
                     ),
                   ),
@@ -273,10 +277,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: NeoButton(
                           onPressed: _showAddCollectionModal,
                           padding: EdgeInsets.zero,
-                          color: AppTheme.cardColor,
+                          color: colors.card,
                           borderRadius: AppDimensions.radiusMd,
                           borderWidth: AppDimensions.borderWidthMd,
-                          child: const Icon(Icons.create_new_folder_outlined,
+                          child: Icon(Icons.create_new_folder_outlined,
+                              color: colors.textPrimary,
                               size: AppDimensions.iconSizeMd),
                         ),
                       ),
@@ -287,10 +292,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         child: NeoButton(
                           onPressed: () => _pushRoute('/search'),
                           padding: EdgeInsets.zero,
-                          color: AppTheme.cardColor,
+                          color: colors.card,
                           borderRadius: AppDimensions.radiusMd,
                           borderWidth: AppDimensions.borderWidthMd,
-                          child: const Icon(Icons.search,
+                          child: Icon(Icons.search,
+                              color: colors.textPrimary,
                               size: AppDimensions.iconSizeMd),
                         ),
                       ),
@@ -317,13 +323,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                           // Title
               Text(
-                l10n.saveNowFindAnytime,
+                settings.customHomeHeadline ?? l10n.saveNowFindAnytime,
                 textScaler: TextScaler.noScaling,
                 style: GoogleFonts.gabarito(
                   fontSize: titleFontSize,
                   fontWeight: FontWeight.bold,
                   height: 1.1,
                   letterSpacing: -1,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppDimensions.paddingXxl),
@@ -347,14 +354,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           style: GoogleFonts.gabarito(
                             fontSize: 14.0,
                             fontWeight: FontWeight.w500,
-                            color: AppTheme.border,
+                            color: colors.textPrimary,
                           ),
                           decoration: InputDecoration(
                             hintText: l10n.pasteLinkHint,
                             hintStyle: GoogleFonts.gabarito(
                               fontSize: 14.0,
                               fontWeight: FontWeight.w400,
-                              color: Colors.black38,
+                              color: colors.textMuted,
                             ),
                             border: InputBorder.none,
                             isDense: true,
@@ -364,8 +371,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 minWidth: 40,
                                 minHeight: 40,
                               ),
-                              icon: const Icon(Icons.paste_outlined,
-                                  color: AppTheme.border),
+                              icon: Icon(Icons.paste_outlined,
+                                  color: colors.textPrimary),
                               onPressed: () async {
                                 HapticFeedback.lightImpact();
                                 final data = await Clipboard.getData(
@@ -391,18 +398,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: EdgeInsets.zero,
                       borderRadius: AppDimensions.radiusMd,
                       color: AppTheme.accent, // Yellow button
+                      borderColor: colors.onAccent,
+                      shadowColor: colors.shadow,
                       onPressed: () {
                         _quickSave();
                     
                       },
                       child: isSaving
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                  color: AppTheme.border, strokeWidth: 3))
-                          : const Icon(Icons.add,
-                              color: AppTheme.border,
+                                  color: colors.onAccent, strokeWidth: 3))
+                          : Icon(Icons.add,
+                              color: colors.onAccent,
                               size: AppDimensions.iconSizeLg),
                     ),
                   ),
@@ -416,6 +425,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: GoogleFonts.gabarito(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
+                  color: colors.textPrimary,
                 ),
               ),
               const SizedBox(height: AppDimensions.paddingMd),
@@ -508,8 +518,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const CircularProgressIndicator(
-                                color: AppTheme.border,
+                              CircularProgressIndicator(
+                                color: colors.textPrimary,
                               ),
                               const SizedBox(height: AppDimensions.paddingMd),
                               Text(
@@ -517,7 +527,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 style: GoogleFonts.gabarito(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
-                                  color: AppTheme.border,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                             ],
@@ -536,10 +546,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.error_outline,
                                   size: 48,
-                                  color: Color(0xFFEF476F),
+                                  color: colors.danger,
                                 ),
                                 const SizedBox(height: AppDimensions.paddingMd),
                                 Text(
@@ -548,13 +558,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   style: GoogleFonts.gabarito(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: AppTheme.border,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                                 const SizedBox(height: AppDimensions.paddingLg),
                                 NeoButton(
                                   onPressed: () => ref.invalidate(collectionsProvider),
                                   color: AppTheme.accent,
+                                  borderColor: colors.onAccent,
+                                  shadowColor: colors.shadow,
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 24,
                                     vertical: 12,
@@ -566,7 +578,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     style: GoogleFonts.gabarito(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: AppTheme.border,
+                                      color: colors.onAccent,
                                     ),
                                   ),
                                 ),

@@ -63,24 +63,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   Widget _buildStatTab({
     IconData? icon,
-    Widget? iconWidget,
+    Widget Function(Color color)? iconBuilder,
     required String count,
     required String label,
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final colors = context.appColors;
+    final fgColor = isSelected ? colors.textPrimary : colors.onAccent;
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        iconWidget ??
-            Icon(icon!, size: 20, color: AppTheme.border),
+        if (iconBuilder != null)
+          iconBuilder(fgColor)
+        else
+          Icon(icon!, size: 20, color: fgColor),
         const SizedBox(height: 2),
         Text(
           count,
           style: GoogleFonts.gabarito(
             fontSize: 20,
             fontWeight: FontWeight.w900,
-            color: AppTheme.border,
+            color: fgColor,
             height: 1.0,
           ),
         ),
@@ -90,7 +94,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           style: GoogleFonts.gabarito(
             fontSize: 10.5,
             fontWeight: FontWeight.w700,
-            color: AppTheme.border,
+            color: fgColor,
           ),
         ),
       ],
@@ -106,10 +110,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected ? colors.card : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppTheme.border : Colors.transparent,
+            color: isSelected ? colors.border : Colors.transparent,
             width: 2.0,
           ),
         ),
@@ -125,8 +129,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     int tagsCount,
   ) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     return NeoBox(
       color: const Color(0xFFFFD166), // Yellow
+      borderColor: colors.onAccent,
+      shadowColor: colors.shadow,
       borderRadius: 16.0,
       borderWidth: 2.5,
       shadowOffset: 3.0,
@@ -143,7 +150,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 style: GoogleFonts.gabarito(
                   fontSize: 13,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.border,
+                  color: colors.onAccent,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -160,17 +167,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     vertical: 3.5,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.card,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppTheme.border,
+                      color: colors.border,
                       width: 2.0,
                     ),
                     boxShadow: _selectedTab == LibraryTab.overview
-                        ? const [
+                        ? [
                             BoxShadow(
-                              color: AppTheme.border,
-                              offset: Offset(1.5, 1.5),
+                              color: colors.shadow,
+                              offset: const Offset(1.5, 1.5),
                               blurRadius: 0,
                             ),
                           ]
@@ -181,7 +188,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     style: GoogleFonts.gabarito(
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -214,10 +221,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         : LibraryTab.saves),
               ),
               _buildStatTab(
-                iconWidget: const PinIcon(
+                iconBuilder: (fg) => PinIcon(
                   size: 20,
                   isPinned: true,
-                  color: AppTheme.border,
+                  color: fg,
                 ),
                 count: '$pinnedCount',
                 label: l10n.pinned,
@@ -274,18 +281,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     AppLocalizations l10n,
     List<Bookmark> allBookmarks,
   ) {
+    final colors = context.appColors;
     switch (_selectedTab) {
       case LibraryTab.collections:
         return Row(
           children: [
-            const Icon(Icons.folder_outlined, size: 18, color: AppTheme.border),
+            Icon(Icons.folder_outlined, size: 18, color: colors.textPrimary),
             const SizedBox(width: 8),
             Text(
               l10n.collections.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -294,14 +302,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case LibraryTab.saves:
         return Row(
           children: [
-            const Icon(Icons.link, size: 18, color: AppTheme.border),
+            Icon(Icons.link, size: 18, color: colors.textPrimary),
             const SizedBox(width: 8),
             Text(
               l10n.saves.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -310,14 +318,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case LibraryTab.pinned:
         return Row(
           children: [
-            const PinIcon(size: 18, isPinned: true, color: AppTheme.border),
+            PinIcon(size: 18, isPinned: true, color: colors.textPrimary),
             const SizedBox(width: 8),
             Text(
               l10n.pinned.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -337,18 +345,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             tagCounts.isNotEmpty ? tagCounts.length : NeoTagBadge.sampleTags.length;
         return Row(
           children: [
-            const Icon(
+            Icon(
               Icons.local_offer_outlined,
               size: 18,
-              color: AppTheme.border,
+              color: colors.textPrimary,
             ),
             const SizedBox(width: 8),
             Text(
               l10n.tagsLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -356,16 +364,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.card,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppTheme.border, width: 1.5),
+                border: Border.all(color: colors.border, width: 1.5),
               ),
               child: Text(
                 '$displayedCount',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.border,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -374,14 +382,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       case LibraryTab.overview:
         return Row(
           children: [
-            const Icon(Icons.schedule, color: AppTheme.border, size: 20),
+            Icon(Icons.schedule, color: colors.textPrimary, size: 20),
             const SizedBox(width: AppDimensions.paddingSm),
             Text(
               l10n.recentlySaved,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 letterSpacing: 0.5,
               ),
             ),
@@ -395,21 +403,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     List<Bookmark> allBookmarks,
     AppLocalizations l10n,
   ) {
+    final colors = context.appColors;
     if (collections.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 40),
           child: Column(
             children: [
-              const Icon(Icons.folder_open_outlined,
-                  size: 48, color: Colors.black26),
+              Icon(Icons.folder_open_outlined,
+                  size: 48, color: colors.textMuted),
               const SizedBox(height: 12),
               Text(
                 l10n.myCollections,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: Colors.black45,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -511,20 +520,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     List<Bookmark> allBookmarks,
     AppLocalizations l10n,
   ) {
+    final colors = context.appColors;
     if (allBookmarks.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 40),
+          padding: const EdgeInsets.symmetric(vertical: 40),
           child: Column(
             children: [
-              Icon(Icons.bookmark_border, size: 48, color: Colors.black26),
-              SizedBox(height: 12),
+              Icon(Icons.bookmark_border, size: 48, color: colors.textMuted),
+              const SizedBox(height: 12),
               Text(
                 'No saves yet',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
-                  color: Colors.black45,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -545,35 +555,36 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     List<Bookmark> allBookmarks,
     AppLocalizations l10n,
   ) {
+    final colors = context.appColors;
     final pinned = allBookmarks.where((b) => b.isPinned).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (pinned.isEmpty)
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 36, horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 16),
               child: Column(
                 children: [
                   PinIcon(
                     size: 48,
                     isPinned: true,
-                    color: Colors.black26,
+                    color: colors.textMuted,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     'No pinned saves',
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
-                      color: Colors.black45,
+                      color: colors.textSecondary,
                     ),
                   ),
-                  SizedBox(height: 6),
+                  const SizedBox(height: 6),
                   Text(
                     'Pin your favorite saves to quickly find them here',
-                    style: TextStyle(fontSize: 13, color: Colors.black38),
+                    style: TextStyle(fontSize: 13, color: colors.textMuted),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -587,6 +598,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildTagsView(List<Bookmark> allBookmarks) {
+    final colors = context.appColors;
 
     // Collect tags from real bookmarks
     final Map<String, int> tagCounts = {};
@@ -670,18 +682,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.bookmark_outline,
                     size: 18,
-                    color: AppTheme.border,
+                    color: colors.textPrimary,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'TAGGED #${_selectedTagFilter!.toUpperCase()}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -690,16 +702,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.card,
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppTheme.border, width: 1.5),
+                      border: Border.all(color: colors.border, width: 1.5),
                     ),
                     child: Text(
                       '${matchingBookmarks.length}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
-                        color: AppTheme.border,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -714,27 +726,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.card,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.border, width: 2),
-                    boxShadow: const [
+                    border: Border.all(color: colors.border, width: 2),
+                    boxShadow: [
                       BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(1.5, 1.5),
+                        color: colors.shadow,
+                        offset: const Offset(1.5, 1.5),
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.close, size: 14, color: AppTheme.border),
-                      SizedBox(width: 4),
+                      Icon(Icons.close, size: 14, color: colors.textPrimary),
+                      const SizedBox(width: 4),
                       Text(
                         'Clear',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.border,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ],
@@ -750,15 +762,15 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 child: Column(
                   children: [
-                    const Icon(Icons.bookmark_border,
-                        size: 40, color: Colors.black26),
+                    Icon(Icons.bookmark_border,
+                        size: 40, color: colors.textMuted),
                     const SizedBox(height: 8),
                     Text(
                       'No bookmarks found with tag #$_selectedTagFilter',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: Colors.black45,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -769,21 +781,21 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             _buildBookmarkGrid(matchingBookmarks, keyPrefix: 'tag_bookmark'),
         ] else ...[
           const SizedBox(height: 24),
-          const Center(
+          Center(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(Icons.touch_app_outlined,
-                      size: 16, color: Colors.black38),
-                  SizedBox(width: 6),
+                      size: 16, color: colors.textMuted),
+                  const SizedBox(width: 6),
                   Text(
                     'Tap any tag above to view its bookmarks',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black45,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -799,6 +811,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     List<Bookmark> allBookmarks,
     AppLocalizations l10n,
   ) {
+    final colors = context.appColors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -821,19 +834,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         const SizedBox(height: 64),
 
         // Empty search state indicator
-        const Center(
+        Center(
           child: Icon(
             Icons.search,
             size: 64,
-            color: AppTheme.border,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppDimensions.paddingLg),
         Center(
           child: Text(
             l10n.typeSomethingToSearch,
-            style: const TextStyle(
-              color: Colors.black54,
+            style: TextStyle(
+              color: colors.textSecondary,
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
@@ -845,6 +858,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   Widget _buildSearchResults(List<Bookmark> allBookmarks, double bottomInset) {
+    final colors = context.appColors;
     final isTagSearch = _searchQuery.startsWith('#');
     final tagQuery = isTagSearch
         ? _searchQuery.substring(1).trim().toLowerCase()
@@ -878,8 +892,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           padding: const EdgeInsets.all(32.0),
           child: Text(
             AppLocalizations.of(context)!.noResultsFound,
-            style: const TextStyle(
-              color: Colors.black54,
+            style: TextStyle(
+              color: colors.textSecondary,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -946,15 +960,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     }
     final tagsCount = uniqueTags.length;
 
+    final colors = context.appColors;
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         bottom: false,
         child: Column(
               children: [
                 // Pinned Header: Search Bar & Cancel Button + Library Stats (when not searching)
                 Container(
-                  color: AppTheme.background,
+                  color: colors.background,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -973,16 +988,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                       left: 10,
                                       right: 8,
                                     ),
-                                    color: Colors.white,
+                                    color: colors.card,
                                     borderRadius: 14.0,
                                     borderWidth: 2.5,
                                     shadowOffset: 2.0,
                                     child: Row(
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
-                                        const Icon(
+                                        Icon(
                                           Icons.search,
-                                          color: AppTheme.border,
+                                          color: colors.textPrimary,
                                           size: 21,
                                         ),
                                         const SizedBox(width: 7),
@@ -999,13 +1014,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                               hintStyle: GoogleFonts.gabarito(
                                                 fontSize: 13.5,
                                                 fontWeight: FontWeight.w400,
-                                                color: Colors.black38,
+                                                color: colors.textMuted,
                                               ),
                                             ),
                                             style: GoogleFonts.gabarito(
                                               fontSize: 14.5,
                                               fontWeight: FontWeight.w600,
-                                              color: AppTheme.border,
+                                              color: colors.textPrimary,
                                             ),
                                           ),
                                         ),
@@ -1018,10 +1033,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                                 _searchQuery = '';
                                               });
                                             },
-                                            child: const Padding(
-                                              padding: EdgeInsets.symmetric(horizontal: 4.0),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
                                               child: Icon(Icons.close,
-                                                  color: AppTheme.border, size: 20),
+                                                  color: colors.textPrimary, size: 20),
                                             ),
                                           ),
                                       ],
@@ -1039,7 +1054,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   horizontal: 14,
                                   vertical: 0,
                                 ),
-                                color: Colors.white,
+                                color: colors.card,
                                 borderWidth: 2.5,
                                 borderRadius: 14.0,
                                 shadowOffset: 2.0,
@@ -1048,7 +1063,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   style: GoogleFonts.gabarito(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w800,
-                                    color: AppTheme.border,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ),

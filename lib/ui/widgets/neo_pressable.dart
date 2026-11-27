@@ -246,18 +246,19 @@ class _NeoPressableState extends State<NeoPressable>
                   );
 
                   if (_isFocused) {
+                    final colors = context.appColors;
                     content = Container(
                       decoration: BoxDecoration(
                         borderRadius:
                             BorderRadius.circular(widget.borderRadius),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: AppTheme.border,
+                            color: colors.border,
                             offset: Offset.zero,
                             spreadRadius: 4.0,
                             blurRadius: 0,
                           ),
-                          BoxShadow(
+                          const BoxShadow(
                             color: AppTheme.primary,
                             offset: Offset.zero,
                             spreadRadius: 2.5,

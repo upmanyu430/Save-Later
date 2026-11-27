@@ -70,19 +70,20 @@ class DeleteConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: AppDimensions.maxDialogWidth),
       child: Container(
       margin: const EdgeInsets.symmetric(horizontal: 28),
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: AppTheme.border, width: 2.5),
-        boxShadow: const [
+        border: Border.all(color: colors.border, width: 2.5),
+        boxShadow: [
           BoxShadow(
-            color: AppTheme.border,
-            offset: Offset(2.8, 2.8),
+            color: colors.shadow,
+            offset: const Offset(2.8, 2.8),
             blurRadius: 0,
             spreadRadius: 0,
           ),
@@ -96,10 +97,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w900,
-              color: AppTheme.border,
+              color: colors.textPrimary,
               letterSpacing: -0.3,
               height: 1.2,
             ),
@@ -110,10 +111,10 @@ class DeleteConfirmationDialog extends StatelessWidget {
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: Color(0xFF555555),
+              color: colors.textSecondary,
               height: 1.35,
             ),
           ),
@@ -128,17 +129,17 @@ class DeleteConfirmationDialog extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop(false);
                   },
-                  color: Colors.white,
+                  color: colors.card,
                   borderWidth: 2.5,
                   borderRadius: 12.0,
                   shadowOffset: 3.0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Text(
                     cancelText,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                       letterSpacing: 0.3,
                     ),
                   ),
@@ -153,6 +154,8 @@ class DeleteConfirmationDialog extends StatelessWidget {
                     Navigator.of(context).pop(true);
                   },
                   color: const Color(0xFFEF476F),
+                  borderColor: colors.onAccent,
+                  shadowColor: colors.shadow,
                   borderWidth: 2.5,
                   borderRadius: 12.0,
                   shadowOffset: 3.0,

@@ -240,11 +240,12 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final filtered = _filteredIcons;
     final selectedColor = _themeColor;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -262,10 +263,10 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                     child: NeoButton(
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
-                      color: Colors.white,
+                      color: colors.card,
                       borderWidth: AppDimensions.borderWidthMd,
                       borderRadius: AppDimensions.radiusMd,
-                      child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+                      child: Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd, color: colors.textPrimary),
                     ),
                   ),
                   const SizedBox(width: AppDimensions.paddingLg),
@@ -275,7 +276,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                       style: GoogleFonts.gabarito(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.border,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -286,12 +287,14 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                     decoration: BoxDecoration(
                       color: selectedColor,
                       borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                      border: Border.all(color: AppTheme.border, width: 2.5),
+                      border: Border.all(color: colors.border, width: 2.5),
                     ),
                     child: Icon(
                       storedIcon(_selectedIconCode, kStoredIconFontFamily),
                       size: 22,
-                      color: AppTheme.border,
+                      color: BookmarkCollection.isWhiteIconColor(selectedColor)
+                          ? Colors.white
+                          : colors.onAccent,
                     ),
                   ),
                 ],
@@ -306,12 +309,13 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
               ),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-                  border: Border.all(color: AppTheme.border, width: 2),
+                  border: Border.all(color: colors.border, width: 2),
                 ),
                 child: TextField(
                   controller: _searchController,
+                  style: TextStyle(color: colors.textPrimary),
                   onChanged: (val) {
                     setState(() {
                       _searchQuery = val.trim();
@@ -319,11 +323,11 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                   },
                   decoration: InputDecoration(
                     hintText: 'Search icons (e.g. food, star, car, code)...',
-                    hintStyle: const TextStyle(color: Colors.black38, fontSize: 14),
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.border),
+                    hintStyle: TextStyle(color: colors.textMuted, fontSize: 14),
+                    prefixIcon: Icon(Icons.search, color: colors.textPrimary),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear, size: 18),
+                            icon: Icon(Icons.clear, size: 18, color: colors.textPrimary),
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               _searchController.clear();
@@ -362,9 +366,9 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: isCatSelected ? AppTheme.border : Colors.white,
+                        color: isCatSelected ? colors.textPrimary : colors.card,
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppTheme.border, width: 2),
+                        border: Border.all(color: colors.border, width: 2),
                       ),
                       alignment: Alignment.center,
                       child: Text(
@@ -372,7 +376,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: isCatSelected ? Colors.white : AppTheme.border,
+                          color: isCatSelected ? colors.card : colors.textPrimary,
                         ),
                       ),
                     ),
@@ -393,11 +397,11 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colors.card,
                               shape: BoxShape.circle,
-                              border: Border.all(color: AppTheme.border, width: 2),
+                              border: Border.all(color: colors.border, width: 2),
                             ),
-                            child: const Icon(Icons.search_off, size: 36, color: Colors.grey),
+                            child: Icon(Icons.search_off, size: 36, color: colors.textMuted),
                           ),
                           const SizedBox(height: 12),
                           Text(
@@ -405,12 +409,13 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                             style: GoogleFonts.gabarito(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
+                          Text(
                             'Try a different search keyword or category',
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                            style: TextStyle(color: colors.textSecondary, fontSize: 13),
                           ),
                         ],
                       ),
@@ -446,10 +451,10 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                                 },
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: isSelected ? selectedColor : Colors.white,
+                                    color: isSelected ? selectedColor : colors.card,
                                     borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                                     border: Border.all(
-                                      color: AppTheme.border,
+                                      color: colors.border,
                                       width: isSelected ? 2.0 : 1.0,
                                     ),
                                   ),
@@ -459,7 +464,7 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                                     color: isSelected &&
                                             BookmarkCollection.isWhiteIconColor(selectedColor)
                                         ? Colors.white
-                                        : AppTheme.border,
+                                        : colors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -480,11 +485,13 @@ class _IconPickerScreenState extends State<IconPickerScreen> {
                 builder: (context) {
                   final isDarkBtn =
                       BookmarkCollection.isWhiteIconColor(selectedColor);
-                  final btnTextColor = isDarkBtn ? Colors.white : AppTheme.border;
+                  final btnTextColor = isDarkBtn ? Colors.white : colors.onAccent;
 
                   return NeoButton(
                     onPressed: () => _selectAndReturn(_selectedIconCode),
                     color: selectedColor,
+                    borderColor: colors.onAccent,
+                    shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: Center(
                       child: Row(

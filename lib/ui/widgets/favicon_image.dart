@@ -82,7 +82,7 @@ class _FaviconImageState extends State<FaviconImage> {
         Icon(
           Icons.public,
           size: widget.size,
-          color: widget.fallbackColor ?? AppTheme.border,
+          color: widget.fallbackColor ?? context.appColors.textPrimary,
         );
 
     if (domain == null || domain.isEmpty) {

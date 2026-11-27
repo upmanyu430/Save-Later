@@ -205,6 +205,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final maxCardHeight = screenHeight - topClearance;
 
+    final colors = context.appColors;
     final scrollContent = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -220,8 +221,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     : (widget.parentId != null
                         ? l10n.newSubCollection
                         : l10n.newCollection),
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: colors.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -232,11 +235,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
               child: NeoButton(
                 onPressed: () => dismissAppModalSheet(context),
                 padding: EdgeInsets.zero,
-                color: Colors.white,
+                color: colors.card,
                 borderWidth: 2,
                 borderRadius: AppDimensions.radiusSm,
                 shadowOffset: 0,
-                child: const Icon(Icons.close, size: 18),
+                child: Icon(Icons.close, size: 18, color: colors.textPrimary),
               ),
             ),
           ],
@@ -247,14 +250,16 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(l10n.nameUpper,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: colors.textPrimary)),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: _nameController,
               builder: (context, value, _) {
                 return Text(
                   '${value.text.length}/40',
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(color: colors.textMuted, fontSize: 12),
                 );
               },
             ),
@@ -265,8 +270,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
           height: 48.0,
           child: Container(
             decoration: BoxDecoration(
+              color: colors.surfaceSubtle,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
-              border: Border.all(color: AppTheme.border, width: 1.0),
+              border: Border.all(color: colors.border, width: 1.0),
             ),
             child: Center(
               child: TextField(
@@ -274,10 +280,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 focusNode: _nameFocusNode,
                 maxLength: 40,
                 textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(
+                style: TextStyle(color: colors.textPrimary),
+                decoration: InputDecoration(
                   hintText: 'e.g. Travel, Design Inspiration...',
-                  hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                  hintStyle: TextStyle(color: colors.textMuted, fontSize: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   border: InputBorder.none,
                   isDense: true,
                   counterText: '',
@@ -290,7 +297,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
 
         // Color Picker
         Text(l10n.colorUpper,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: colors.textPrimary)),
         const SizedBox(height: 5),
         GridView.builder(
           shrinkWrap: true,
@@ -319,14 +329,14 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   color: color,
                   borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                   border: Border.all(
-                    color: AppTheme.border,
+                    color: colors.border,
                     width: isSelected ? 2.0 : 1.0,
                   ),
                   boxShadow: isSelected
-                      ? const [
+                      ? [
                           BoxShadow(
-                            color: AppTheme.border,
-                            offset: Offset(2, 2),
+                            color: colors.shadow,
+                            offset: const Offset(2, 2),
                             blurRadius: 0,
                             spreadRadius: 0,
                           ),
@@ -339,7 +349,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         size: 16,
                         color: BookmarkCollection.isWhiteIconColor(color)
                             ? Colors.white
-                            : Colors.black,
+                            : colors.onAccent,
                       )
                     : null,
               ),
@@ -350,7 +360,10 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
 
         // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
         Text(l10n.iconUpper,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: colors.textPrimary)),
         const SizedBox(height: 5),
         AnimatedSize(
           duration: const Duration(milliseconds: 220),
@@ -388,11 +401,12 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                           borderRadius:
                               BorderRadius.circular(AppDimensions.radiusSm),
                           border: Border.all(
-                            color: AppTheme.border,
+                            color: colors.border,
                             width: 1.0,
                           ),
                         ),
-                        child: const Icon(Icons.more_horiz, size: 20),
+                        child: Icon(Icons.more_horiz,
+                            size: 20, color: colors.textPrimary),
                       ),
                     );
                   }
@@ -412,14 +426,14 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusSm),
                         border: Border.all(
-                          color: AppTheme.border,
+                          color: colors.border,
                           width: isSelected ? 2.0 : 1.0,
                         ),
                         boxShadow: isSelected
-                            ? const [
+                            ? [
                                 BoxShadow(
-                                  color: AppTheme.border,
-                                  offset: Offset(2, 2),
+                                  color: colors.shadow,
+                                  offset: const Offset(2, 2),
                                   blurRadius: 0,
                                   spreadRadius: 0,
                                 ),
@@ -433,7 +447,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                                 BookmarkCollection.isWhiteIconColor(
                                     currentColor)
                             ? Colors.white
-                            : AppTheme.border,
+                            : colors.textPrimary,
                       ),
                     ),
                   );
@@ -456,7 +470,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 onPressed: !isNameEmpty ? _save : () {},
                 color: !isNameEmpty
                     ? const Color(0xFFFFD166)
-                    : AppTheme.cardColor,
+                    : colors.card,
+                borderColor: !isNameEmpty ? colors.onAccent : colors.border,
+                shadowColor: colors.shadow,
                 padding: EdgeInsets.zero,
                 borderRadius: AppDimensions.radiusMd,
                 shadowOffset: 2.0,
@@ -470,7 +486,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: !isNameEmpty ? AppTheme.border : Colors.black38,
+                      color: !isNameEmpty ? colors.onAccent : colors.textMuted,
                     ),
                   ),
                 ),
@@ -506,9 +522,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                 child: Container(
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
-                    color: AppTheme.cardColor,
+                    color: colors.card,
                     borderRadius: BorderRadius.circular(55),
-                    border: Border.all(color: AppTheme.border, width: 2.5),
+                    border: Border.all(color: colors.border, width: 2.5),
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -522,7 +538,7 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                             width: 44,
                             height: 4,
                             decoration: BoxDecoration(
-                              color: AppTheme.border,
+                              color: colors.border,
                               borderRadius: BorderRadius.circular(2),
                             ),
                           ),

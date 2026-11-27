@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'models/collection.dart';
+import 'providers/app_settings_provider.dart';
 import 'theme/app_theme.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/collection_detail_screen.dart';
@@ -11,11 +12,10 @@ import 'ui/screens/settings_screen.dart';
 import 'ui/screens/search_screen.dart';
 import 'ui/screens/bookmark_detail_screen.dart';
 import 'models/bookmark.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const _systemUiOverlayStyle = SystemUiOverlayStyle(
+const _lightSystemUiOverlayStyle = SystemUiOverlayStyle(
   statusBarColor: Colors.transparent,
   statusBarIconBrightness: Brightness.dark,
   statusBarBrightness: Brightness.light,
@@ -25,10 +25,20 @@ const _systemUiOverlayStyle = SystemUiOverlayStyle(
   systemNavigationBarContrastEnforced: false,
 );
 
+const _darkSystemUiOverlayStyle = SystemUiOverlayStyle(
+  statusBarColor: Colors.transparent,
+  statusBarIconBrightness: Brightness.light,
+  statusBarBrightness: Brightness.dark,
+  systemNavigationBarColor: Colors.transparent,
+  systemNavigationBarDividerColor: Colors.transparent,
+  systemNavigationBarIconBrightness: Brightness.light,
+  systemNavigationBarContrastEnforced: false,
+);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setSystemUIOverlayStyle(_systemUiOverlayStyle);
+  SystemChrome.setSystemUIOverlayStyle(_lightSystemUiOverlayStyle);
   try {
     await dotenv
         .load(fileName: 'assets/env')
@@ -41,8 +51,8 @@ Future<void> main() async {
 }
 
 CustomTransitionPage<T> _buildPageWithTransition<T>({
-  required BuildContext context, 
-  required GoRouterState state, 
+  required BuildContext context,
+  required GoRouterState state,
   required Widget child,
 }) {
   return CustomTransitionPage<T>(
@@ -174,34 +184,35 @@ final _router = GoRouter(
   ],
 );
 
-class SaveLaterApp extends StatelessWidget {
+class SaveLaterApp extends ConsumerWidget {
   const SaveLaterApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(appSettingsProvider);
+    final overlayStyle = settings.darkMode
+        ? _darkSystemUiOverlayStyle
+        : _lightSystemUiOverlayStyle;
+
     return MaterialApp.router(
       title: 'Save Later',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.theme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: settings.themeMode,
+      locale: settings.locale,
       routerConfig: _router,
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _systemUiOverlayStyle,
+          value: overlayStyle,
           child: ColoredBox(
-            color: AppTheme.background,
+            color: context.appColors.background,
             child: child ?? const SizedBox.shrink(),
           ),
         );
       },
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('en', ''), 
-      ],
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

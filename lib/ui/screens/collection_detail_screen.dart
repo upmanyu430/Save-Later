@@ -121,13 +121,15 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   void _showMenuModal(BuildContext context, [BookmarkCollection? currentCollection]) {
     showAppModalSheet<void>(
       context: context,
-      builder: (ctx) => AppModalKeyboardLift(
+      builder: (ctx) {
+        final colors = ctx.appColors;
+        return AppModalKeyboardLift(
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.card,
             borderRadius: BorderRadius.circular(55),
-            border: Border.all(color: AppTheme.border, width: 2.5),
+            border: Border.all(color: colors.border, width: 2.5),
           ),
           child: Material(
             color: Colors.transparent,
@@ -145,7 +147,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       width: 48,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppTheme.border,
+                        color: colors.border,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -228,26 +230,28 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             ),
           ),
         ),
-      ),
+      );
+      },
     );
   }
 
   Widget _buildMenuItem({required IconData icon, required String title, Widget? trailing, required VoidCallback onTap}) {
+    final colors = context.appColors;
     return InkWell(
       onTap: () { HapticFeedback.lightImpact(); onTap(); },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 14.0),
         child: Row(
           children: [
-            Icon(icon, size: AppDimensions.iconSizeLg, color: AppTheme.border),
+            Icon(icon, size: AppDimensions.iconSizeLg, color: colors.textPrimary),
             const SizedBox(width: AppDimensions.paddingLg),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.border,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -259,24 +263,26 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
   }
 
   Widget _buildDivider() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Container(
         height: 2,
-        color: AppTheme.border,
+        color: colors.divider,
       ),
     );
   }
   
   Widget _buildSelectButton(String label, {Color? color, Color? textColor, VoidCallback? onTap}) {
+    final colors = context.appColors;
     return NeoButton(
       onPressed: onTap,
-      color: color ?? Colors.white,
+      color: color ?? colors.card,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
       borderRadius: AppDimensions.radiusSm,
       borderWidth: AppDimensions.borderWidthMd,
       shadowOffset: 2.0,
-      child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? AppTheme.border)),
+      child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: textColor ?? colors.textPrimary)),
     );
   }
 
@@ -365,10 +371,11 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
         ? ref.watch(singleCollectionProvider(widget.collectionId!))
         : null;
     final effectiveCollection = singleColAsync?.valueOrNull ?? widget.collection;
+    final colors = context.appColors;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         bottom: false,
@@ -380,7 +387,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               children: [
                 // Top Custom App Bar
                 Container(
-                  color: AppTheme.background,
+                  color: colors.background,
                   padding: const EdgeInsets.fromLTRB(
                     AppDimensions.paddingLg,
                     AppDimensions.paddingLg,
@@ -397,7 +404,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                               children: [
                                 Text(
                                   l10n.selectedCount(_selectedIds.length),
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colors.textPrimary),
                                 ),
                                 _buildSelectButton(l10n.cancel, onTap: () {
                                   setState(() {
@@ -439,10 +446,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                               child: NeoButton(
                                 onPressed: () => context.pop(),
                                 padding: EdgeInsets.zero,
-                                color: AppTheme.cardColor,
+                                color: colors.card,
                                 borderRadius: AppDimensions.radiusMd,
                                 borderWidth: AppDimensions.borderWidthMd,
-                                child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+                                child: Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd, color: colors.textPrimary),
                               ),
                             ),
                             Row(
@@ -453,10 +460,12 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   child: NeoButton(
                                     onPressed: () => context.push('/review', extra: effectiveCollection),
                                     color: const Color(0xFFFFD166), // Yellow
+                                    borderColor: colors.onAccent,
+                                    shadowColor: colors.shadow,
                                     padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusMd,
                                     borderWidth: AppDimensions.borderWidthMd,
-                                    child: const ReviewCardsIcon(size: AppDimensions.iconSizeMd),
+                                    child: ReviewCardsIcon(size: AppDimensions.iconSizeMd, color: colors.onAccent),
                                   ),
                                 ),
                                 const SizedBox(width: AppDimensions.paddingSm),
@@ -466,10 +475,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                   child: NeoButton(
                                     onPressed: () => _showMenuModal(context, effectiveCollection),
                                     padding: EdgeInsets.zero,
-                                    color: AppTheme.cardColor,
+                                    color: colors.card,
                                     borderRadius: AppDimensions.radiusMd,
                                     borderWidth: AppDimensions.borderWidthMd,
-                                    child: const Icon(Icons.more_vert, size: AppDimensions.iconSizeMd),
+                                    child: Icon(Icons.more_vert, size: AppDimensions.iconSizeMd, color: colors.textPrimary),
                                   ),
                                 ),
                               ],
@@ -546,6 +555,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                             fontWeight: FontWeight.bold,
                                             height: 1.1,
                                             letterSpacing: -0.5,
+                                            color: colors.textPrimary,
                                           ),
                                         ),
                                         const SizedBox(height: AppDimensions.paddingXs),
@@ -554,7 +564,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                                               ? '${l10n.itemsCount(bookmarks.length)} · ${l10n.subcollectionsCount(subCollections.length)}'
                                               : l10n.itemsCount(bookmarks.length),
                                           style: GoogleFonts.gabarito(
-                                            color: Colors.black54,
+                                            color: colors.textSecondary,
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
                                           ),
@@ -762,8 +772,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(
-                  color: AppTheme.border,
+                CircularProgressIndicator(
+                  color: colors.textPrimary,
                 ),
                 const SizedBox(height: AppDimensions.paddingMd),
                 Text(
@@ -773,7 +783,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                   style: GoogleFonts.gabarito(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.border,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -787,10 +797,10 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline,
                     size: 48,
-                    color: Color(0xFFEF476F),
+                    color: colors.danger,
                   ),
                   const SizedBox(height: AppDimensions.paddingMd),
                   Text(
@@ -799,7 +809,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                     style: GoogleFonts.gabarito(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: AppDimensions.paddingLg),
@@ -814,6 +824,8 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       }
                     },
                     color: AppTheme.accent,
+                    borderColor: colors.onAccent,
+                    shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 24,
                       vertical: 12,
@@ -825,7 +837,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                       style: GoogleFonts.gabarito(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.border,
+                        color: colors.onAccent,
                       ),
                     ),
                   ),
@@ -919,6 +931,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     final scrollContent = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -929,7 +942,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
             width: 48,
             height: 4,
             decoration: BoxDecoration(
-              color: AppTheme.border,
+              color: colors.border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -941,10 +954,10 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
             Expanded(
               child: Text(
                 l10n.addLinkToCollection,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.border,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -954,11 +967,11 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
               child: NeoButton(
                 onPressed: () => dismissAppModalSheet(context),
                 padding: EdgeInsets.zero,
-                color: Colors.white,
+                color: colors.card,
                 borderWidth: 2,
                 borderRadius: AppDimensions.radiusSm,
                 shadowOffset: 0,
-                child: const Icon(Icons.close, size: 18),
+                child: Icon(Icons.close, size: 18, color: colors.textPrimary),
               ),
             ),
           ],
@@ -967,7 +980,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
         SizedBox(
           height: 52.0,
           child: NeoBox(
-            color: AppTheme.cardColor,
+            color: colors.card,
             borderRadius: AppDimensions.radiusMd,
             borderWidth: AppDimensions.borderWidthMd,
             shadowOffset: 2.0,
@@ -982,14 +995,14 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
               style: GoogleFonts.gabarito(
                 fontSize: 14.0,
                 fontWeight: FontWeight.w500,
-                color: AppTheme.border,
+                color: colors.textPrimary,
               ),
               decoration: InputDecoration(
                 hintText: l10n.linkUrlHint,
                 hintStyle: GoogleFonts.gabarito(
                   fontSize: 14.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black38,
+                  color: colors.textMuted,
                 ),
                 border: InputBorder.none,
                 isDense: true,
@@ -1003,15 +1016,15 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
                   icon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.paste_outlined,
-                          size: 18, color: AppTheme.border),
+                      Icon(Icons.paste_outlined,
+                          size: 18, color: colors.textPrimary),
                       const SizedBox(width: 4),
                       Text(
                         'Paste',
                         style: GoogleFonts.gabarito(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: AppTheme.border,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ],
@@ -1030,6 +1043,8 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
           child: NeoButton(
             onPressed: _handleSave,
             color: AppTheme.accent,
+            borderColor: colors.onAccent,
+            shadowColor: colors.shadow,
             padding: EdgeInsets.zero,
             borderRadius: AppDimensions.radiusMd,
             borderWidth: AppDimensions.borderWidthMd,
@@ -1037,10 +1052,10 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
             child: Center(
               child: Text(
                 l10n.save,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: AppTheme.border,
+                  color: colors.onAccent,
                 ),
               ),
             ),
@@ -1061,9 +1076,9 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
           return Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.card,
               borderRadius: BorderRadius.circular(55),
-              border: Border.all(color: AppTheme.border, width: 2.5),
+              border: Border.all(color: colors.border, width: 2.5),
             ),
             padding: EdgeInsets.only(
               top: 14,

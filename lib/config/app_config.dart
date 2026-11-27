@@ -6,4 +6,7 @@ class AppConfig {
   static String get howToUrl => dotenv.env['HOW_TO_URL'] ?? 'https://savelater.app/howto';
   static String get privacyPolicyUrl => dotenv.env['PRIVACY_POLICY_URL'] ?? 'https://savelater.app/privacy';
   static String get termsOfServiceUrl => dotenv.env['TERMS_OF_SERVICE_URL'] ?? 'https://savelater.app/terms';
+  static String get playStoreUrl =>
+      dotenv.env['PLAY_STORE_URL'] ??
+      'https://play.google.com/store/apps/details?id=app.savelater.app';
 }

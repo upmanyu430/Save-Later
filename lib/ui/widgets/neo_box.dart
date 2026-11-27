@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
 import 'package:save_later/config/app_constants.dart';
-
+import '../../theme/app_theme.dart';
 
 class NeoBox extends StatelessWidget {
   final Widget child;
-  final Color color;
+  final Color? color;
+  final Color? borderColor;
+  final Color? shadowColor;
   final double borderWidth;
   final double borderRadius;
   final double shadowOffset;
@@ -14,7 +15,9 @@ class NeoBox extends StatelessWidget {
   const NeoBox({
     super.key,
     required this.child,
-    this.color = AppTheme.cardColor,
+    this.color,
+    this.borderColor,
+    this.shadowColor,
     this.borderWidth = 3.0,
     this.borderRadius = 16.0,
     this.shadowOffset = 2.0,
@@ -23,20 +26,25 @@ class NeoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final resolvedColor = color ?? colors.card;
+    final resolvedBorder = borderColor ?? colors.border;
+    final resolvedShadow = shadowColor ?? colors.shadow;
+
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: color,
+        color: resolvedColor,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppTheme.border,
+          color: resolvedBorder,
           width: borderWidth,
         ),
         boxShadow: shadowOffset <= 0
             ? null
             : [
                 BoxShadow(
-                  color: AppTheme.border,
+                  color: resolvedShadow,
                   offset: Offset(shadowOffset, shadowOffset),
                   blurRadius: 0,
                   spreadRadius: 0,
