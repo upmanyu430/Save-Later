@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -19,6 +18,7 @@ import '../widgets/home_headline_modal.dart';
 import '../widgets/language_picker_modal.dart';
 import '../widgets/neo_box.dart';
 import '../widgets/neo_button.dart';
+import '../widgets/neo_switch.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -55,11 +55,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _toggleDarkMode(bool enabled) {
-    _triggerHapticIfEnabled();
-    ref.read(appSettingsProvider.notifier).setDarkMode(enabled);
-  }
-
   Future<void> _openUrl(String url) async {
     _triggerHapticIfEnabled();
     await openUrl(url, context: context);
@@ -85,9 +80,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<void> _copyUserId(String userId) async {
+  Future<void> _copyUserId() async {
     _triggerHapticIfEnabled();
-    if (userId.isEmpty) {
+    if (ref.read(appSettingsProvider).userId.isEmpty) {
       await ref.read(appSettingsProvider.notifier).ensureLoaded();
     }
     final resolvedId = ref.read(appSettingsProvider).userId;
@@ -168,20 +163,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     }
 
-    return NeoBox(
-      padding: EdgeInsets.zero,
-      borderRadius: AppDimensions.radiusXxl,
-      borderWidth: AppDimensions.borderWidthMd,
-      color: colors.card,
-      borderColor: colors.border,
-      shadowColor: colors.shadow,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          AppDimensions.radiusXxl - AppDimensions.borderWidthMd,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: children,
+    return RepaintBoundary(
+      child: NeoBox(
+        padding: EdgeInsets.zero,
+        borderRadius: AppDimensions.radiusXxl,
+        borderWidth: AppDimensions.borderWidthMd,
+        color: colors.card,
+        borderColor: colors.border,
+        shadowColor: colors.shadow,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(
+            AppDimensions.radiusXxl - AppDimensions.borderWidthMd,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: children,
+          ),
         ),
       ),
     );
@@ -270,8 +267,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       child: AnimatedSwitcher(
         duration: AppDurations.animationMedium,
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
+        switchInCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
+        switchOutCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
         transitionBuilder: (child, animation) => FadeTransition(
           opacity: animation,
           child: ScaleTransition(scale: animation, child: child),
@@ -311,12 +308,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final colors = context.appColors;
-    final settings = ref.watch(appSettingsProvider);
-    final settingsNotifier = ref.read(appSettingsProvider.notifier);
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-
-    final currentHeadline = settings.customHomeHeadline ?? l10n.saveNowFindAnytime;
-    final headlinePreview = currentHeadline.replaceAll(RegExp(r'\s*\n\s*'), ' ');
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -380,79 +372,134 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   _buildGroupedSection(
                     context,
                     [
-                      _buildSettingRow(
-                        context: context,
-                        title: l10n.hapticFeedback,
-                        subtitle: l10n.hapticFeedbackSubtitle,
-                        icon: _buildIconContainer(context, Icons.bolt),
-                        trailing: CupertinoSwitch(
-                          value: settings.hapticFeedback,
-                          onChanged: settingsNotifier.setHapticFeedback,
-                          activeTrackColor: const Color(0xFF26D5A8),
-                        ),
-                      ),
-                      _buildSettingRow(
-                        context: context,
-                        title: l10n.darkMode,
-                        subtitle: l10n.darkModeSubtitle,
-                        icon: _buildIconContainer(
-                          context,
-                          settings.darkMode
-                              ? Icons.nightlight_outlined
-                              : Icons.wb_sunny_outlined,
-                        ),
-                        onTap: () => _toggleDarkMode(!settings.darkMode),
-                        trailing: CupertinoSwitch(
-                          value: settings.darkMode,
-                          onChanged: _toggleDarkMode,
-                          activeTrackColor: const Color(0xFF26D5A8),
-                        ),
-                      ),
-                      _buildSettingRow(
-                        context: context,
-                        title: l10n.language,
-                        subtitle: languageDisplayName(settings.languageCode),
-                        icon: _buildIconContainer(context, Icons.language),
-                        onTap: () {
-                          _triggerHapticIfEnabled();
-                          LanguagePickerModal.show(context);
-                        },
-                        trailing: Icon(
-                          Icons.open_in_new,
-                          color: colors.textSecondary,
-                          size: 20,
-                        ),
-                      ),
-                      _buildSettingRow(
-                        context: context,
-                        title: l10n.homeHeadline,
-                        subtitle: headlinePreview,
-                        icon: _buildIconContainer(context, Icons.home_outlined),
-                        onTap: () {
-                          _triggerHapticIfEnabled();
-                          HomeHeadlineModal.show(
-                            context,
-                            currentHeadline: currentHeadline,
+                      Consumer(
+                        builder: (context, rowRef, _) {
+                          final enabled = rowRef.watch(
+                            appSettingsProvider.select((s) => s.hapticFeedback),
+                          );
+                          final notifier =
+                              rowRef.read(appSettingsProvider.notifier);
+                          return _buildSettingRow(
+                            context: context,
+                            title: l10n.hapticFeedback,
+                            subtitle: l10n.hapticFeedbackSubtitle,
+                            icon: _buildIconContainer(context, Icons.bolt),
+                            onTap: () => notifier.setHapticFeedback(!enabled),
+                            trailing: NeoSwitch(
+                              value: enabled,
+                              onChanged: notifier.setHapticFeedback,
+                              semanticLabel: l10n.hapticFeedback,
+                            ),
                           );
                         },
-                        trailing: Icon(
-                          Icons.chevron_right,
-                          color: colors.textSecondary,
-                        ),
                       ),
-                      _buildSettingRow(
-                        context: context,
-                        title: l10n.newSaveReminders,
-                        subtitle: l10n.newSaveRemindersSubtitle,
-                        icon: _buildIconContainer(
-                          context,
-                          Icons.notifications_none,
-                        ),
-                        trailing: CupertinoSwitch(
-                          value: settings.newSaveReminders,
-                          onChanged: settingsNotifier.setNewSaveReminders,
-                          activeTrackColor: const Color(0xFF26D5A8),
-                        ),
+                      Consumer(
+                        builder: (context, rowRef, _) {
+                          final enabled = rowRef.watch(
+                            appSettingsProvider.select((s) => s.darkMode),
+                          );
+                          final notifier =
+                              rowRef.read(appSettingsProvider.notifier);
+                          return _buildSettingRow(
+                            context: context,
+                            title: l10n.darkMode,
+                            subtitle: l10n.darkModeSubtitle,
+                            icon: _buildIconContainer(
+                              context,
+                              enabled
+                                  ? Icons.nightlight_outlined
+                                  : Icons.wb_sunny_outlined,
+                            ),
+                            onTap: () => notifier.setDarkMode(!enabled),
+                            trailing: NeoSwitch(
+                              value: enabled,
+                              onChanged: notifier.setDarkMode,
+                              semanticLabel: l10n.darkMode,
+                            ),
+                          );
+                        },
+                      ),
+                      Consumer(
+                        builder: (context, rowRef, _) {
+                          final languageCode = rowRef.watch(
+                            appSettingsProvider.select((s) => s.languageCode),
+                          );
+                          return _buildSettingRow(
+                            context: context,
+                            title: l10n.language,
+                            subtitle: languageDisplayName(languageCode),
+                            icon: _buildIconContainer(context, Icons.language),
+                            onTap: () {
+                              _triggerHapticIfEnabled();
+                              LanguagePickerModal.show(context);
+                            },
+                            trailing: Icon(
+                              Icons.open_in_new,
+                              color: colors.textSecondary,
+                              size: 20,
+                            ),
+                          );
+                        },
+                      ),
+                      Consumer(
+                        builder: (context, rowRef, _) {
+                          final customHeadline = rowRef.watch(
+                            appSettingsProvider
+                                .select((s) => s.customHomeHeadline),
+                          );
+                          final currentHeadline =
+                              customHeadline ?? l10n.saveNowFindAnytime;
+                          final headlinePreview = currentHeadline.replaceAll(
+                            RegExp(r'\s*\n\s*'),
+                            ' ',
+                          );
+                          return _buildSettingRow(
+                            context: context,
+                            title: l10n.homeHeadline,
+                            subtitle: headlinePreview,
+                            icon: _buildIconContainer(
+                              context,
+                              Icons.home_outlined,
+                            ),
+                            onTap: () {
+                              _triggerHapticIfEnabled();
+                              HomeHeadlineModal.show(
+                                context,
+                                currentHeadline: currentHeadline,
+                              );
+                            },
+                            trailing: Icon(
+                              Icons.chevron_right,
+                              color: colors.textSecondary,
+                            ),
+                          );
+                        },
+                      ),
+                      Consumer(
+                        builder: (context, rowRef, _) {
+                          final enabled = rowRef.watch(
+                            appSettingsProvider
+                                .select((s) => s.newSaveReminders),
+                          );
+                          final notifier =
+                              rowRef.read(appSettingsProvider.notifier);
+                          return _buildSettingRow(
+                            context: context,
+                            title: l10n.newSaveReminders,
+                            subtitle: l10n.newSaveRemindersSubtitle,
+                            icon: _buildIconContainer(
+                              context,
+                              Icons.notifications_none,
+                            ),
+                            onTap: () =>
+                                notifier.setNewSaveReminders(!enabled),
+                            trailing: NeoSwitch(
+                              value: enabled,
+                              onChanged: notifier.setNewSaveReminders,
+                              semanticLabel: l10n.newSaveReminders,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -615,7 +662,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                   Center(
                     child: TextButton(
-                      onPressed: () => _copyUserId(settings.userId),
+                      onPressed: _copyUserId,
                       style: TextButton.styleFrom(
                         minimumSize: const Size(44, 44),
                         padding: const EdgeInsets.symmetric(

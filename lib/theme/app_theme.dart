@@ -150,7 +150,11 @@ class AppTheme {
 
   static ThemeData get theme => lightTheme;
 
-  static ThemeData get lightTheme {
+  static final ThemeData lightTheme = _buildLightTheme();
+
+  static final ThemeData darkTheme = _buildDarkTheme();
+
+  static ThemeData _buildLightTheme() {
     return ThemeData(
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.light.background,
@@ -190,7 +194,7 @@ class AppTheme {
     );
   }
 
-  static ThemeData get darkTheme {
+  static ThemeData _buildDarkTheme() {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.dark.background,

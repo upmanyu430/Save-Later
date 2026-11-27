@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -13,6 +12,7 @@ import 'package:save_later/theme/app_theme.dart';
 import 'package:save_later/ui/screens/home_screen.dart';
 import 'package:save_later/ui/screens/settings_screen.dart';
 import 'package:save_later/ui/widgets/neo_box.dart';
+import 'package:save_later/ui/widgets/neo_switch.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildTestApp({
@@ -127,8 +127,8 @@ void main() {
     expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
     expect(find.byIcon(Icons.nightlight_outlined), findsNothing);
 
-    // Find the Dark Mode CupertinoSwitch (2nd switch: Haptic=0, DarkMode=1, Reminders=2)
-    final switches = find.byType(CupertinoSwitch);
+    // Find the NeoSwitches (Haptic=0, DarkMode=1, Reminders=2)
+    final switches = find.byType(NeoSwitch);
     expect(switches, findsNWidgets(3));
 
     await tester.tap(switches.at(1));
@@ -151,6 +151,85 @@ void main() {
     expect(find.byIcon(Icons.wb_sunny_outlined), findsOneWidget);
     expect(find.byIcon(Icons.nightlight_outlined), findsNothing);
     expect(prefs.getBool('darkMode'), isFalse);
+
+    // Verify Haptic Feedback & New Save Reminders toggles also respond to switch & row taps
+    await tester.tap(switches.at(0));
+    await tester.pumpAndSettle();
+    expect(prefs.getBool('hapticFeedback'), isFalse);
+
+    await tester.tap(find.text('Haptic Feedback'));
+    await tester.pumpAndSettle();
+    expect(prefs.getBool('hapticFeedback'), isTrue);
+
+    await tester.tap(find.text('New Save Reminders'));
+    await tester.pumpAndSettle();
+    expect(prefs.getBool('newSaveReminders'), isFalse);
+  });
+
+  testWidgets('NeoSwitch retargets smoothly on mid-flight interruption and honors disableAnimations', (tester) async {
+    var value = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            return Scaffold(
+              body: Center(
+                child: NeoSwitch(
+                  value: value,
+                  onChanged: (next) => setState(() => value = next),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Tap to start sliding ON, interrupt mid-animation after 60ms, and reverse smoothly
+    await tester.tap(find.byType(NeoSwitch));
+    await tester.pump(const Duration(milliseconds: 60));
+    expect(value, isTrue);
+
+    await tester.tap(find.byType(NeoSwitch));
+    await tester.pumpAndSettle();
+    expect(value, isFalse);
+
+    // Verify disableAnimations snaps immediately with zero animation lag
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Center(
+              child: NeoSwitch(
+                value: false,
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(disableAnimations: true),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Center(
+              child: NeoSwitch(
+                value: true,
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final switchWidget = tester.widget<NeoSwitch>(find.byType(NeoSwitch));
+    expect(switchWidget.value, isTrue);
   });
 
   testWidgets('Language picker changes active locale to Spanish', (tester) async {

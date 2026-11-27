@@ -189,18 +189,25 @@ class SaveLaterApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(appSettingsProvider);
-    final overlayStyle = settings.darkMode
-        ? _darkSystemUiOverlayStyle
-        : _lightSystemUiOverlayStyle;
+    final (themeMode, locale, darkMode) = ref.watch(
+      appSettingsProvider.select((s) => (s.themeMode, s.locale, s.darkMode)),
+    );
+    final overlayStyle =
+        darkMode ? _darkSystemUiOverlayStyle : _lightSystemUiOverlayStyle;
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
 
     return MaterialApp.router(
       title: 'Save Later',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: settings.themeMode,
-      locale: settings.locale,
+      themeMode: themeMode,
+      themeAnimationCurve: const Cubic(0.23, 1.0, 0.32, 1.0),
+      themeAnimationDuration: disableAnimations
+          ? Duration.zero
+          : const Duration(milliseconds: 220),
+      locale: locale,
       routerConfig: _router,
       builder: (context, child) {
         return AnnotatedRegion<SystemUiOverlayStyle>(
