@@ -131,12 +131,13 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
           ),
           child: Material(
             color: Colors.transparent,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                top: 14,
-                bottom: 20 + MediaQuery.paddingOf(ctx).bottom,
-              ),
-              child: Column(
+            child: RepaintBoundary(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.only(
+                  top: 14,
+                  bottom: 20 + MediaQuery.paddingOf(ctx).bottom,
+                ),
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Drag handle
@@ -226,6 +227,7 @@ class _CollectionDetailScreenState extends ConsumerState<CollectionDetailScreen>
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),
@@ -975,51 +977,53 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
               left: AppDimensions.paddingMd,
               right: AppDimensions.paddingXs,
             ),
-            child: TextField(
-              controller: _urlController,
-              focusNode: _focusNode,
-              textAlignVertical: TextAlignVertical.center,
-              style: GoogleFonts.gabarito(
-                fontSize: 14.0,
-                fontWeight: FontWeight.w500,
-                color: AppTheme.border,
-              ),
-              decoration: InputDecoration(
-                hintText: l10n.linkUrlHint,
-                hintStyle: GoogleFonts.gabarito(
+            child: RepaintBoundary(
+              child: TextField(
+                controller: _urlController,
+                focusNode: _focusNode,
+                textAlignVertical: TextAlignVertical.center,
+                style: GoogleFonts.gabarito(
                   fontSize: 14.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black38,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.border,
                 ),
-                border: InputBorder.none,
-                isDense: true,
-                suffixIcon: IconButton(
-                  tooltip: 'Paste',
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  constraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
+                decoration: InputDecoration(
+                  hintText: l10n.linkUrlHint,
+                  hintStyle: GoogleFonts.gabarito(
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black38,
                   ),
-                  icon: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.paste_outlined,
-                          size: 18, color: AppTheme.border),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Paste',
-                        style: GoogleFonts.gabarito(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.border,
+                  border: InputBorder.none,
+                  isDense: true,
+                  suffixIcon: IconButton(
+                    tooltip: 'Paste',
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
+                    icon: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.paste_outlined,
+                            size: 18, color: AppTheme.border),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Paste',
+                          style: GoogleFonts.gabarito(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.border,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                    onPressed: _pasteFromClipboard,
                   ),
-                  onPressed: _pasteFromClipboard,
                 ),
+                onSubmitted: (_) => _handleSave(),
               ),
-              onSubmitted: (_) => _handleSave(),
             ),
           ),
         ),
@@ -1049,14 +1053,21 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
       ],
     );
 
+    final cachedScrollView = RepaintBoundary(
+      child: SingleChildScrollView(
+        controller: _scrollController,
+        child: scrollContent,
+      ),
+    );
+
     return AppModalKeyboardLift(
-      child: Builder(
-        builder: (innerContext) {
-          final bottomInset = MediaQuery.viewInsetsOf(innerContext).bottom;
-          final bottomPadding = bottomInset > 0
-              ? 16.0
-              : (AppDimensions.modalActionButtonBottomPadding +
-                  MediaQuery.paddingOf(innerContext).bottom);
+      child: AppModalImeBuilder(
+        child: cachedScrollView,
+        builder: (innerContext, bottomInset, safeBottom, child) {
+          final idleBottom =
+              AppDimensions.modalActionButtonBottomPadding + safeBottom;
+          final bottomPadding =
+              (idleBottom - bottomInset).clamp(16.0, idleBottom);
 
           return Container(
             clipBehavior: Clip.antiAlias,
@@ -1071,10 +1082,7 @@ class _AddLinkModalState extends ConsumerState<AddLinkModal>
               right: 20,
               bottom: bottomPadding,
             ),
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              child: scrollContent,
-            ),
+            child: child,
           );
         },
       ),

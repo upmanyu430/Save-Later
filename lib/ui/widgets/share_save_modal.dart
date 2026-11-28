@@ -242,10 +242,11 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                 ),
               ),
               Flexible(
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                          child: Column(
+                child: RepaintBoundary(
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -358,6 +359,8 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
 
                             return ListView.separated(
                               shrinkWrap: true,
+                              addAutomaticKeepAlives: false,
+                              addRepaintBoundaries: false,
                               physics: const NeverScrollableScrollPhysics(),
                               padding: EdgeInsets.zero,
                               itemCount: collections.length + 1,
@@ -487,6 +490,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                       ),
                     ),
                   ),
+                ),
 
                   // Pinned Bottom Section: Divider & Save Button
                   Container(
@@ -600,7 +604,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
   void initState() {
     super.initState();
     _dismissTimer = Timer(widget.autoDismissDuration, () {
-      if (mounted) {
+      if (mounted && (ModalRoute.of(context)?.isCurrent ?? true)) {
         dismissAppModalSheet(context);
       }
     });

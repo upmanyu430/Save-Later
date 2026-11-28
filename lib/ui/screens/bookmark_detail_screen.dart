@@ -1641,124 +1641,116 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
     final allTagsAsync = ref.watch(allTagsProvider);
     final existingTags = allTagsAsync.value ?? [];
 
-    return AppModalKeyboardLift(
-      horizontalPadding: 16.0,
-      child: Builder(
-        builder: (cardContext) {
-          final hasKeyboard = MediaQuery.viewInsetsOf(cardContext).bottom > 0;
-          final safeBottom = MediaQuery.paddingOf(cardContext).bottom;
-
-          return Padding(
-            padding: EdgeInsets.only(
-              bottom: hasKeyboard ? 12.0 : (16.0 + safeBottom),
-            ),
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: AppTheme.border, width: 2.5),
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppTheme.border,
-                    offset: Offset(2.8, 2.8),
-                    blurRadius: 0,
-                    spreadRadius: 0,
+    final sheetCard = Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: AppTheme.border, width: 2.5),
+        boxShadow: const [
+          BoxShadow(
+            color: AppTheme.border,
+            offset: Offset(2.8, 2.8),
+            blurRadius: 0,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: RepaintBoundary(
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Top Grab Handle
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.border,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ],
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.fromLTRB(18.0, 14.0, 18.0, 18.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Top Grab Handle
-                      Center(
-                        child: Container(
-                          width: 48,
-                          height: 4,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: AppTheme.border,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.addTag,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w900,
+                        color: AppTheme.border,
+                        letterSpacing: -0.3,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.addTag,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.border,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          SizedBox(
-                            width: AppDimensions.dialogHeaderButtonSize,
-                            height: AppDimensions.dialogHeaderButtonSize,
-                            child: NeoButton(
-                              onPressed: () => dismissAppModalSheet(context),
-                              padding: EdgeInsets.zero,
-                              color: AppTheme.cardColor,
-                              borderRadius: AppDimensions.radiusSm,
-                              borderWidth: 2,
-                              child: const Icon(Icons.close, size: 18),
-                            ),
-                          ),
-                        ],
+                    ),
+                    SizedBox(
+                      width: AppDimensions.dialogHeaderButtonSize,
+                      height: AppDimensions.dialogHeaderButtonSize,
+                      child: NeoButton(
+                        onPressed: () => dismissAppModalSheet(context),
+                        padding: EdgeInsets.zero,
+                        color: AppTheme.cardColor,
+                        borderRadius: AppDimensions.radiusSm,
+                        borderWidth: 2,
+                        child: const Icon(Icons.close, size: 18),
                       ),
-                      const SizedBox(height: AppDimensions.paddingLg),
-                      TextField(
-                        controller: _controller,
-                        focusNode: _tagFocusNode,
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (val) {
-                          final cleanQuery = val.trim();
-                          if (cleanQuery.isEmpty) return;
-                          if (TagHelper.isDuplicate(
-                              cleanQuery, widget.currentTags)) {
-                            return;
-                          }
-                          final canonicalMatch = TagHelper.findCanonicalTag(
-                              cleanQuery, existingTags);
-                          _submitTag(canonicalMatch ?? cleanQuery);
-                        },
-                        decoration: InputDecoration(
-                          hintText: l10n.tagNameHint,
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.local_offer_outlined,
-                              color: AppTheme.border),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 14),
-                          border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
-                          ),
-                        ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.paddingLg),
+                RepaintBoundary(
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _tagFocusNode,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (val) {
+                      final cleanQuery = val.trim();
+                      if (cleanQuery.isEmpty) return;
+                      if (TagHelper.isDuplicate(
+                          cleanQuery, widget.currentTags)) {
+                        return;
+                      }
+                      final canonicalMatch =
+                          TagHelper.findCanonicalTag(cleanQuery, existingTags);
+                      _submitTag(canonicalMatch ?? cleanQuery);
+                    },
+                    decoration: InputDecoration(
+                      hintText: l10n.tagNameHint,
+                      hintStyle: const TextStyle(color: Colors.black38),
+                      prefixIcon: const Icon(Icons.local_offer_outlined,
+                          color: AppTheme.border),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 14),
+                      border: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusMd),
+                        borderSide:
+                            const BorderSide(color: AppTheme.border, width: 3),
                       ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusMd),
+                        borderSide:
+                            const BorderSide(color: AppTheme.border, width: 3),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(AppDimensions.radiusMd),
+                        borderSide:
+                            const BorderSide(color: AppTheme.border, width: 3),
+                      ),
+                    ),
+                  ),
+                ),
                       ValueListenableBuilder<TextEditingValue>(
                         valueListenable: _controller,
                         builder: (context, value, _) {
@@ -2010,6 +2002,20 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                 ),
               ),
             ),
+          );
+
+    return AppModalKeyboardLift(
+      horizontalPadding: 16.0,
+      child: AppModalImeBuilder(
+        child: sheetCard,
+        builder: (cardContext, bottomInset, safeBottom, child) {
+          final idleBottom = 16.0 + safeBottom;
+          final effectiveBottom =
+              (idleBottom - bottomInset).clamp(12.0, idleBottom);
+
+          return Padding(
+            padding: EdgeInsets.only(bottom: effectiveBottom),
+            child: child,
           );
         },
       ),

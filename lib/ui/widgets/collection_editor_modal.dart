@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -55,9 +57,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   late final TextEditingController _nameController;
   late final ScrollController _scrollController;
   late final FocusNode _nameFocusNode;
-  late String _selectedColorHex;
-  late int _selectedIconCode;
-  bool _isExpanded = false;
+  late final ValueNotifier<String> _selectedColorNotifier;
+  late final ValueNotifier<int> _selectedIconNotifier;
+  late final ValueNotifier<bool> _isExpandedNotifier;
 
   final List<String> _colors = [
     'FFD166',
@@ -130,11 +132,11 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     Icons.home_outlined,
   ];
 
-  List<IconData> get _displayIcons {
-    if (!_allIcons.any((icon) => icon.codePoint == _selectedIconCode)) {
+  List<IconData> _displayIconsFor(int selectedIconCode) {
+    if (!_allIcons.any((icon) => icon.codePoint == selectedIconCode)) {
       return [
         ..._allIcons,
-        storedIcon(_selectedIconCode, kStoredIconFontFamily)
+        storedIcon(selectedIconCode, kStoredIconFontFamily)
       ];
     }
     return _allIcons;
@@ -147,16 +149,17 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         TextEditingController(text: widget.existingCollection?.name ?? '');
     _scrollController = ScrollController();
     _nameFocusNode = FocusNode();
-    _selectedColorHex = widget.existingCollection?.colorHex ?? _colors[0];
-    _selectedIconCode =
+    final initialColorHex = widget.existingCollection?.colorHex ?? _colors[0];
+    final initialIconCode =
         widget.existingCollection?.iconCodePoint ?? _allIcons[0].codePoint;
+    _selectedColorNotifier = ValueNotifier<String>(initialColorHex);
+    _selectedIconNotifier = ValueNotifier<int>(initialIconCode);
 
     final existingIconIndex =
-        _allIcons.indexWhere((icon) => icon.codePoint == _selectedIconCode);
-    if (existingIconIndex >= 23 ||
-        (existingIconIndex == -1 && widget.existingCollection != null)) {
-      _isExpanded = true;
-    }
+        _allIcons.indexWhere((icon) => icon.codePoint == initialIconCode);
+    final initiallyExpanded = existingIconIndex >= 23 ||
+        (existingIconIndex == -1 && widget.existingCollection != null);
+    _isExpandedNotifier = ValueNotifier<bool>(initiallyExpanded);
   }
 
   @override
@@ -164,6 +167,9 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     _nameController.dispose();
     _scrollController.dispose();
     _nameFocusNode.dispose();
+    _selectedColorNotifier.dispose();
+    _selectedIconNotifier.dispose();
+    _isExpandedNotifier.dispose();
     super.dispose();
   }
 
@@ -171,19 +177,22 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
+    final selectedColorHex = _selectedColorNotifier.value;
+    final selectedIconCode = _selectedIconNotifier.value;
+
     if (widget.existingCollection == null) {
       ref.read(collectionNotifierProvider.notifier).addCollection(
             name,
-            _selectedColorHex,
-            _selectedIconCode,
+            selectedColorHex,
+            selectedIconCode,
             parentId: widget.parentId,
           );
     } else {
       ref.read(collectionNotifierProvider.notifier).updateCollection(
             widget.existingCollection!,
             name,
-            _selectedColorHex,
-            _selectedIconCode,
+            selectedColorHex,
+            selectedIconCode,
           );
     }
     if (mounted) {
@@ -195,13 +204,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
   Widget build(BuildContext context) {
     final isEditing = widget.existingCollection != null;
     final l10n = AppLocalizations.of(context)!;
-    final view = View.maybeOf(context);
-    final windowPaddingTop =
-        view != null ? MediaQueryData.fromView(view).padding.top : 0.0;
-    final statusBarHeight = windowPaddingTop > 0
-        ? windowPaddingTop
-        : MediaQuery.paddingOf(context).top;
-    final topClearance = statusBarHeight + 16.0;
+    final isHosted = isAppModalRouteHosted(context);
+    final topClearance = resolveModalTopClearance(context);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final maxCardHeight = screenHeight - topClearance;
 
@@ -269,18 +273,20 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
               border: Border.all(color: AppTheme.border, width: 1.0),
             ),
             child: Center(
-              child: TextField(
-                controller: _nameController,
-                focusNode: _nameFocusNode,
-                maxLength: 40,
-                textAlignVertical: TextAlignVertical.center,
-                decoration: const InputDecoration(
-                  hintText: 'e.g. Travel, Design Inspiration...',
-                  hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                  border: InputBorder.none,
-                  isDense: true,
-                  counterText: '',
+              child: RepaintBoundary(
+                child: TextField(
+                  controller: _nameController,
+                  focusNode: _nameFocusNode,
+                  maxLength: 40,
+                  textAlignVertical: TextAlignVertical.center,
+                  decoration: const InputDecoration(
+                    hintText: 'e.g. Travel, Design Inspiration...',
+                    hintStyle: TextStyle(color: Colors.black38, fontSize: 15),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                    border: InputBorder.none,
+                    isDense: true,
+                    counterText: '',
+                  ),
                 ),
               ),
             ),
@@ -292,79 +298,14 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         Text(l10n.colorUpper,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
         const SizedBox(height: 5),
-        GridView.builder(
-          shrinkWrap: true,
-          padding: EdgeInsets.zero,
-          clipBehavior: Clip.none,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 8,
-            crossAxisSpacing: 7,
-            mainAxisSpacing: 7,
-          ),
-          itemCount: _colors.length,
-          itemBuilder: (context, index) {
-            final colorHex = _colors[index];
-            final color = BookmarkCollection.parseColor(colorHex);
-            final isSelected = _selectedColorHex == colorHex;
-
-            return GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () {
-                HapticFeedback.lightImpact();
-                setState(() => _selectedColorHex = colorHex);
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: color,
-                  borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                  border: Border.all(
-                    color: AppTheme.border,
-                    width: isSelected ? 2.0 : 1.0,
-                  ),
-                  boxShadow: isSelected
-                      ? const [
-                          BoxShadow(
-                            color: AppTheme.border,
-                            offset: Offset(2, 2),
-                            blurRadius: 0,
-                            spreadRadius: 0,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        size: 16,
-                        color: BookmarkCollection.isWhiteIconColor(color)
-                            ? Colors.white
-                            : Colors.black,
-                      )
-                    : null,
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 10),
-
-        // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
-        Text(l10n.iconUpper,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-        const SizedBox(height: 5),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: Builder(
-            builder: (context) {
-              final icons = _displayIcons;
-              final currentColor =
-                  BookmarkCollection.parseColor(_selectedColorHex);
-              final count = _isExpanded ? icons.length : 24;
-
+        RepaintBoundary(
+          child: ValueListenableBuilder<String>(
+            valueListenable: _selectedColorNotifier,
+            builder: (context, selectedColorHex, _) {
               return GridView.builder(
                 shrinkWrap: true,
+                addAutomaticKeepAlives: false,
+                addRepaintBoundaries: false,
                 padding: EdgeInsets.zero,
                 clipBehavior: Clip.none,
                 physics: const NeverScrollableScrollPhysics(),
@@ -373,42 +314,21 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                   crossAxisSpacing: 7,
                   mainAxisSpacing: 7,
                 ),
-                itemCount: count,
+                itemCount: _colors.length,
                 itemBuilder: (context, index) {
-                  // In collapsed state, slot 24 (index 23) is the 3-dots expand button
-                  if (!_isExpanded && index == 23) {
-                    return GestureDetector(
-                      onTap: () {
-                        HapticFeedback.lightImpact();
-                        setState(() => _isExpanded = true);
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          borderRadius:
-                              BorderRadius.circular(AppDimensions.radiusSm),
-                          border: Border.all(
-                            color: AppTheme.border,
-                            width: 1.0,
-                          ),
-                        ),
-                        child: const Icon(Icons.more_horiz, size: 20),
-                      ),
-                    );
-                  }
-
-                  final icon = icons[index];
-                  final isSelected = _selectedIconCode == icon.codePoint;
+                  final colorHex = _colors[index];
+                  final color = BookmarkCollection.parseColor(colorHex);
+                  final isSelected = selectedColorHex == colorHex;
 
                   return GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       HapticFeedback.lightImpact();
-                      setState(() => _selectedIconCode = icon.codePoint);
+                      _selectedColorNotifier.value = colorHex;
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? currentColor : Colors.transparent,
+                        color: color,
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusSm),
                         border: Border.all(
@@ -426,20 +346,127 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                               ]
                             : null,
                       ),
-                      child: Icon(
-                        icon,
-                        size: 20,
-                        color: isSelected &&
-                                BookmarkCollection.isWhiteIconColor(
-                                    currentColor)
-                            ? Colors.white
-                            : AppTheme.border,
-                      ),
+                      child: isSelected
+                          ? Icon(
+                              Icons.check,
+                              size: 16,
+                              color: BookmarkCollection.isWhiteIconColor(color)
+                                  ? Colors.white
+                                  : Colors.black,
+                            )
+                          : null,
                     ),
                   );
                 },
               );
             },
+          ),
+        ),
+        const SizedBox(height: 10),
+
+        // Icon Picker (3 rows collapsed with 3-dots at slot 24, or full 43 icons expanded)
+        Text(l10n.iconUpper,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+        const SizedBox(height: 5),
+        RepaintBoundary(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: AnimatedBuilder(
+              animation: Listenable.merge([
+                _selectedColorNotifier,
+                _selectedIconNotifier,
+                _isExpandedNotifier,
+              ]),
+              builder: (context, _) {
+                final selectedIconCode = _selectedIconNotifier.value;
+                final isExpanded = _isExpandedNotifier.value;
+                final icons = _displayIconsFor(selectedIconCode);
+                final currentColor =
+                    BookmarkCollection.parseColor(_selectedColorNotifier.value);
+                final count = isExpanded ? icons.length : 24;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  addAutomaticKeepAlives: false,
+                  addRepaintBoundaries: false,
+                  padding: EdgeInsets.zero,
+                  clipBehavior: Clip.none,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 8,
+                    crossAxisSpacing: 7,
+                    mainAxisSpacing: 7,
+                  ),
+                  itemCount: count,
+                  itemBuilder: (context, index) {
+                    // In collapsed state, slot 24 (index 23) is the 3-dots expand button
+                    if (!isExpanded && index == 23) {
+                      return GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _isExpandedNotifier.value = true;
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius:
+                                BorderRadius.circular(AppDimensions.radiusSm),
+                            border: Border.all(
+                              color: AppTheme.border,
+                              width: 1.0,
+                            ),
+                          ),
+                          child: const Icon(Icons.more_horiz, size: 20),
+                        ),
+                      );
+                    }
+
+                    final icon = icons[index];
+                    final isSelected = selectedIconCode == icon.codePoint;
+
+                    return GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        _selectedIconNotifier.value = icon.codePoint;
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected ? currentColor : Colors.transparent,
+                          borderRadius:
+                              BorderRadius.circular(AppDimensions.radiusSm),
+                          border: Border.all(
+                            color: AppTheme.border,
+                            width: isSelected ? 2.0 : 1.0,
+                          ),
+                          boxShadow: isSelected
+                              ? const [
+                                  BoxShadow(
+                                    color: AppTheme.border,
+                                    offset: Offset(2, 2),
+                                    blurRadius: 0,
+                                    spreadRadius: 0,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 20,
+                          color: isSelected &&
+                                  BookmarkCollection.isWhiteIconColor(
+                                      currentColor)
+                              ? Colors.white
+                              : AppTheme.border,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -481,6 +508,8 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
       ],
     );
 
+    final cachedScrollContent = RepaintBoundary(child: scrollContent);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => dismissAppModalSheet(context),
@@ -488,11 +517,12 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
         padding: EdgeInsets.only(
           left: 5.0,
           right: 5.0,
-          top: topClearance,
+          top: isHosted ? 0.0 : topClearance,
           bottom: 0,
         ),
         child: Align(
           alignment: Alignment.bottomCenter,
+          heightFactor: isHosted ? 1.0 : null,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: 420,
@@ -529,28 +559,35 @@ class _CollectionEditorModalState extends ConsumerState<CollectionEditorModal> {
                         ),
                       ),
                       Flexible(
-                        child: Builder(
-                          builder: (scrollContext) {
-                            final bottomInset =
-                                MediaQuery.viewInsetsOf(scrollContext).bottom;
-                            final safeBottom =
-                                MediaQuery.paddingOf(scrollContext).bottom;
-                            final bottomPadding = bottomInset > 0
-                                ? (14.0 + bottomInset)
-                                : (AppDimensions.modalActionButtonBottomPadding +
-                                    safeBottom);
+                        child: RepaintBoundary(
+                          child: AppModalImeBuilder(
+                            child: cachedScrollContent,
+                            builder: (
+                              scrollContext,
+                              bottomInset,
+                              safeBottom,
+                              child,
+                            ) {
+                              final closedBottomPadding =
+                                  AppDimensions.modalActionButtonBottomPadding +
+                                      safeBottom;
+                              final bottomPadding = math.max(
+                                closedBottomPadding,
+                                14.0 + bottomInset,
+                              );
 
-                            return SingleChildScrollView(
-                              controller: _scrollController,
-                              padding: EdgeInsets.fromLTRB(
-                                18.0,
-                                8.0,
-                                18.0,
-                                bottomPadding,
-                              ),
-                              child: RepaintBoundary(child: scrollContent),
-                            );
-                          },
+                              return SingleChildScrollView(
+                                controller: _scrollController,
+                                padding: EdgeInsets.fromLTRB(
+                                  18.0,
+                                  8.0,
+                                  18.0,
+                                  bottomPadding,
+                                ),
+                                child: child,
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ],
