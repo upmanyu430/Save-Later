@@ -68,7 +68,7 @@ class FolderBox extends StatelessWidget {
           padding: const EdgeInsets.all(AppDimensions.paddingLg),
           decoration: BoxDecoration(
             color: colors.card,
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
             border: Border.all(
               color: colors.border,
               width: AppDimensions.borderWidthMd,
@@ -93,7 +93,7 @@ class FolderBox extends StatelessWidget {
                     height: 44,
                     decoration: BoxDecoration(
                       color: folderColor,
-                      borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+                      borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                       border: Border.all(
                         color: colors.border,
                         width: 2.0,
@@ -196,8 +196,8 @@ class FolderBox extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: folderColor,
                             borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              topRight: Radius.circular(12),
+                              topLeft: Radius.circular(AppDimensions.radiusLg),
+                              topRight: Radius.circular(AppDimensions.radiusLg),
                             ),
                             border: Border.all(
                               color: colors.border,
