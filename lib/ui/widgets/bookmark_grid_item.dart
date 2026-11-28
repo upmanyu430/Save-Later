@@ -138,7 +138,8 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   }
   
   static const double _cardRadius = AppDimensions.radiusBookmarkCard;
-  static const double _innerRadius = _cardRadius - 3.0;
+  static const double _cardBorderWidth = AppDimensions.borderWidthMd;
+  static const double _innerRadius = _cardRadius - _cardBorderWidth;
 
   String _getInitialLetter(Bookmark b) {
     if (b.sourceDomain != null && b.sourceDomain!.isNotEmpty) {
@@ -175,6 +176,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         NeoBox(
           padding: const EdgeInsets.all(0),
           borderRadius: _cardRadius,
+          borderWidth: _cardBorderWidth,
           shadowOffset: shadowOffset,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(_innerRadius),
@@ -187,7 +189,12 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: colors.border, width: 3.0)),
+                border: Border(
+                  bottom: BorderSide(
+                    color: colors.border,
+                    width: _cardBorderWidth,
+                  ),
+                ),
                 color: colors.surfaceSubtle,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(_innerRadius)),
               ),

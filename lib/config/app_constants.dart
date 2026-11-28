@@ -11,7 +11,7 @@ class AppDimensions {
 
   // Border Radius
   static const double radiusSm = 8.0;
-  static const double radiusBookmarkCard = 10.0;
+  static const double radiusBookmarkCard = 14.0;
   static const double radiusMd = 12.0;
   static const double radiusLg = 14.0;
   static const double radiusXl = 16.0;
