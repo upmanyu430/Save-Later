@@ -524,5 +524,29 @@
   "showLess": "Show less",
   "@showLess": {
     "description": "Button to collapse expanded text"
+  },
+  "welcomeTitle": "Save now.\nFind anytime.",
+  "@welcomeTitle": {
+    "description": "Main headline on welcome screen"
+  },
+  "welcomeSubtitle": "Your tactile, local-first pocket for links worth keeping.",
+  "@welcomeSubtitle": {
+    "description": "Subtitle on welcome screen"
+  },
+  "welcomeFeatureQuickSave": "Share from any app or paste a link to save in one tap",
+  "@welcomeFeatureQuickSave": {
+    "description": "First feature bullet on welcome screen"
+  },
+  "welcomeFeatureOrganize": "Sort into colorful collections, tags, and review stacks",
+  "@welcomeFeatureOrganize": {
+    "description": "Second feature bullet on welcome screen"
+  },
+  "welcomeFeaturePrivate": "Stored locally on your device with zero accounts required",
+  "@welcomeFeaturePrivate": {
+    "description": "Third feature bullet on welcome screen"
+  },
+  "getStarted": "Get Started",
+  "@getStarted": {
+    "description": "Primary CTA button on welcome screen"
   }
 }
