@@ -346,7 +346,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           left: AppDimensions.paddingMd,
                           right: AppDimensions.paddingXs,
                         ),
-                        borderRadius: AppDimensions.radiusMd,
+                        borderRadius: AppDimensions.radiusLg,
+                        borderWidth: AppDimensions.borderWidthMd,
                         child: TextField(
                           controller: _urlController,
                           focusNode: _urlFocusNode,
@@ -396,7 +397,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     width: 50.4,
                     child: NeoButton(
                       padding: EdgeInsets.zero,
-                      borderRadius: AppDimensions.radiusMd,
+                      borderRadius: AppDimensions.radiusLg,
+                      borderWidth: AppDimensions.borderWidthMd,
                       color: AppTheme.accent, // Yellow button
                       shadowColor: colors.shadow,
                       onPressed: () {
