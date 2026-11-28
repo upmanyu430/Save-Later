@@ -50,3 +50,6 @@ test_selected_*.png
 screenshot.png
 screenshot*.png
 *.png
+!assets/images/*.png
+!android/app/src/main/res/**/*.png
+!ios/Runner/Assets.xcassets/**/*.png

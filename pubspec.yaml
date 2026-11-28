@@ -54,6 +54,7 @@ dependencies:
     sdk: flutter
   flutter_dotenv: ^6.0.1
   flutter_animate: ^4.5.2
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -86,6 +87,7 @@ flutter:
   assets:
     - assets/env
     - assets/fonts/
+    - assets/images/
 
   fonts:
     - family: Gabarito
@@ -102,3 +104,14 @@ flutter:
           weight: 800
         - asset: assets/fonts/Gabarito-Black.ttf
           weight: 900
+
+flutter_native_splash:
+  color: "#F4F0EB"
+  image: assets/images/splash_emblem.png
+  android_12:
+    color: "#F4F0EB"
+    image: assets/images/splash_emblem_android12.png
+    icon_background_color: "#FFD166"
+  ios: true
+  android: true
+  web: false
