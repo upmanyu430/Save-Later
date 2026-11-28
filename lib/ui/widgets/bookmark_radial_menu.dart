@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/bookmark.dart';
 import '../../providers/providers.dart';
+import '../../theme/app_theme.dart';
 import '../../utils/url_launcher.dart';
 import 'delete_confirmation_dialog.dart';
 import 'pin_icon.dart';
@@ -475,8 +476,12 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
               return AnimatedBuilder(
                 animation: _anim,
                 builder: (context, _) {
-                  final buttonColor = isSelected ? action.color : Colors.white;
-                  final iconColor = isSelected ? Colors.white : Colors.black;
+                  final colors = context.appColors;
+                  final isDark = context.isDarkMode;
+                  final buttonColor = isSelected ? action.color : colors.card;
+                  final iconColor = isSelected
+                      ? Colors.white
+                      : (isDark ? colors.textPrimary : Colors.black);
 
                   return Positioned(
                     left: _origin.dx - buttonRadius,
@@ -504,12 +509,14 @@ class _RadialMenuOverlayWidgetState extends State<_RadialMenuOverlayWidget>
                             decoration: BoxDecoration(
                               color: buttonColor,
                               shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.black, width: 3.0),
-                              boxShadow: const [
+                              border: Border.all(
+                                color: isDark ? colors.border : Colors.black,
+                                width: 3.0,
+                              ),
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black,
-                                  offset: Offset(1.5, 1.5),
+                                  color: isDark ? colors.shadow : Colors.black,
+                                  offset: const Offset(1.5, 1.5),
                                   blurRadius: 0,
                                 ),
                               ],

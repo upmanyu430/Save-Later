@@ -61,6 +61,25 @@ void main() {
               'textMuted contrast on background ($contrast:1) must meet WCAG AA threshold of 4.5:1',
         );
       });
+
+      test(
+          'AppColors.dark text tokens achieve >= 4.5:1 WCAG AA contrast on dark background and card',
+          () {
+        for (final bg in [AppColors.dark.background, AppColors.dark.card]) {
+          expect(
+            calculateContrastRatio(AppColors.dark.textPrimary, bg),
+            greaterThanOrEqualTo(4.5),
+          );
+          expect(
+            calculateContrastRatio(AppColors.dark.textSecondary, bg),
+            greaterThanOrEqualTo(4.5),
+          );
+          expect(
+            calculateContrastRatio(AppColors.dark.textMuted, bg),
+            greaterThanOrEqualTo(4.5),
+          );
+        }
+      });
     });
 
     group('Keyboard Accessibility & Activation (R-32)', () {

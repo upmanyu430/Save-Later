@@ -199,6 +199,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
       },
       pageBuilder: (dialogContext, animation, secondaryAnimation) {
         final l10n = AppLocalizations.of(context)!;
+        final colors = dialogContext.appColors;
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => Navigator.pop(dialogContext, false),
@@ -212,13 +213,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 32),
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: AppTheme.background,
+                    color: colors.card,
                     borderRadius: BorderRadius.circular(AppDimensions.radiusXxl),
-                    border: Border.all(color: AppTheme.border, width: 3),
-                    boxShadow: const [
+                    border: Border.all(color: colors.border, width: 3),
+                    boxShadow: [
                       BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(2.8, 2.8),
+                        color: colors.shadow,
+                        offset: const Offset(2.8, 2.8),
                         blurRadius: 0,
                         spreadRadius: 0,
                       ),
@@ -233,13 +234,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         Text(
                           'Delete tag?',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: colors.textPrimary),
                         ),
                         const SizedBox(height: AppDimensions.paddingSm),
                         Text(
                           'Remove "$tag" from this bookmark?',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 15, color: Colors.black54),
+                          style: TextStyle(fontSize: 15, color: colors.textSecondary),
                         ),
                         const SizedBox(height: AppDimensions.paddingXl),
                         Row(
@@ -249,13 +250,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 onPressed: () {
                                   Navigator.pop(dialogContext, false);
                                 },
-                                color: Colors.white,
+                                color: colors.card,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 borderRadius: AppDimensions.radiusMd,
                                 borderWidth: 2,
                                 child: Text(
                                   l10n.cancel,
-                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                  style: TextStyle(fontWeight: FontWeight.w800, color: colors.textPrimary),
                                 ),
                               ),
                             ),
@@ -267,12 +268,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                   await _removeTag(tag);
                                 },
                                 color: const Color(0xFFFF6B6B),
+                                shadowColor: colors.shadow,
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 borderRadius: AppDimensions.radiusMd,
                                 borderWidth: 2,
                                 child: Text(
                                   l10n.delete,
-                                  style: const TextStyle(fontWeight: FontWeight.w800),
+                                  style: TextStyle(fontWeight: FontWeight.w800, color: colors.onAccent),
                                 ),
                               ),
                             ),
@@ -302,10 +304,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
+
     if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: AppTheme.background,
-        body: Center(
+      return Scaffold(
+        backgroundColor: colors.background,
+        body: const Center(
           child: CircularProgressIndicator(color: AppTheme.primary),
         ),
       );
@@ -313,7 +318,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
 
     if (_notFound || _loadedBookmark == null) {
       return Scaffold(
-        backgroundColor: AppTheme.background,
+        backgroundColor: colors.background,
         body: SafeArea(
           child: Center(
             child: Padding(
@@ -321,17 +326,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.bookmark_border, size: 64, color: Colors.black26),
+                  Icon(Icons.bookmark_border, size: 64, color: colors.textMuted),
                   const SizedBox(height: AppDimensions.paddingMd),
-                  const Text(
+                  Text(
                     'Bookmark not found',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colors.textPrimary),
                   ),
                   const SizedBox(height: AppDimensions.paddingLg),
                   NeoButton(
                     onPressed: () => context.pop(),
-                    color: Colors.white,
-                    child: const Text('Go back', style: TextStyle(fontWeight: FontWeight.bold)),
+                    color: colors.card,
+                    child: Text('Go back', style: TextStyle(fontWeight: FontWeight.bold, color: colors.textPrimary)),
                   ),
                 ],
               ),
@@ -346,13 +351,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
         (MediaQuery.sizeOf(context).width * 0.16).clamp(48.0, 80.0);
     final topInset = MediaQuery.paddingOf(context).top;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: AppTheme.background,
+        backgroundColor: colors.background,
         body: Stack(
           children: [
             // 1. Background Image Box
@@ -368,12 +373,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     imageUrl: bookmark.imageUrl,
                     url: bookmark.url,
                     fallback: Container(
-                      color: const Color(0xFFEFECE6),
+                      color: colors.surfaceSubtle,
                       child: Center(
                         child: Icon(
                           Icons.link,
                           size: placeholderIconSize,
-                          color: AppTheme.border.withValues(alpha: 0.35),
+                          color: colors.textMuted,
                         ),
                       ),
                     ),
@@ -386,7 +391,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                     right: 0,
                     child: Container(
                       height: AppDimensions.borderWidthLg,
-                      color: AppTheme.border,
+                      color: colors.border,
                     ),
                   ),
                 ],
@@ -431,16 +436,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 SliverToBoxAdapter(
                   child: Container(
                     margin: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(32)),
+                        decoration: BoxDecoration(
+                          color: colors.card,
+                          borderRadius: const BorderRadius.all(Radius.circular(32)),
                           border: Border.fromBorderSide(
-                            BorderSide(color: AppTheme.border, width: 3),
+                            BorderSide(color: colors.border, width: 3),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.border,
-                              offset: Offset(2.8, 2.8),
+                              color: colors.shadow,
+                              offset: const Offset(2.8, 2.8),
                               blurRadius: 0,
                             ),
                           ],
@@ -460,7 +465,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             const SizedBox(width: AppDimensions.paddingSm),
                             Text(
                               bookmark.sourceDomain ?? l10n.unknownSource,
-                              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: colors.textPrimary),
                             ),
                           ],
                         ),
@@ -473,19 +478,19 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             children: [
                               Container(
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: colors.surfaceSubtle,
                                   borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
                                   border: Border.all(color: const Color(0xFFFFD166), width: 3),
                                 ),
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 child: TextField(
                                   controller: _titleController,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 23,
                                     fontWeight: FontWeight.w900,
                                     height: 1.2,
                                     letterSpacing: -0.5,
-                                    color: Colors.black,
+                                    color: colors.textPrimary,
                                   ),
                                   maxLines: null,
                                   decoration: const InputDecoration(
@@ -506,16 +511,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         _titleController.text = bookmark.title ?? bookmark.url;
                                       });
                                     },
-                                    color: Colors.white,
+                                    color: colors.card,
                                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                     borderRadius: AppDimensions.radiusSm,
                                     borderWidth: 2,
                                     child: Text(
                                       l10n.cancel,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 13,
-                                        color: Colors.black,
+                                        color: colors.textPrimary,
                                       ),
                                     ),
                                   ),
@@ -537,15 +542,16 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       }
                                     },
                                     color: const Color(0xFFFFD166),
+                                    shadowColor: colors.shadow,
                                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                                     borderRadius: AppDimensions.radiusSm,
                                     borderWidth: 2,
                                     child: Text(
                                       l10n.save,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w800,
                                         fontSize: 13,
-                                        color: Colors.black,
+                                        color: colors.onAccent,
                                       ),
                                     ),
                                   ),
@@ -560,11 +566,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               Expanded(
                                 child: Text(
                                   bookmark.title ?? bookmark.url,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 23,
                                     fontWeight: FontWeight.w900,
                                     height: 1.1,
                                     letterSpacing: -0.5,
+                                    color: colors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -578,11 +585,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                       _isEditingTitle = true;
                                     });
                                   },
-                                  color: Colors.white,
+                                  color: colors.card,
                                   padding: EdgeInsets.zero,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: AppDimensions.borderWidthMd,
-                                  child: const Icon(Icons.edit_outlined, size: AppDimensions.iconSizeMd),
+                                  child: Icon(Icons.edit_outlined, size: AppDimensions.iconSizeMd, color: colors.textPrimary),
                                 ),
                               ),
                             ],
@@ -600,7 +607,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               borderRadius: AppDimensions.radiusSm,
                               borderWidth: 2,
                               shadowOffset: 0,
-                              color: Colors.white,
+                              color: colors.card,
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -609,21 +616,21 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     height: 16,
                                     decoration: BoxDecoration(
                                       color: bookmark.collection.value?.color ?? const Color(0xFFE5E5E5),
-                                      border: Border.all(color: AppTheme.border, width: 2),
+                                      border: Border.all(color: colors.border, width: 2),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     bookmark.collection.value?.name ?? l10n.unsorted,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: colors.textPrimary),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
                               DateFormat('dd MMM yyyy, h:mm a').format(bookmark.createdAt),
-                              style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 13),
+                              style: TextStyle(color: colors.textSecondary, fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           ],
                         ),
@@ -641,12 +648,12 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         // Actions Strip
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: colors.card,
                             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
-                            boxShadow: const [
+                            boxShadow: [
                               BoxShadow(
-                                color: AppTheme.border,
-                                offset: Offset(2.8, 2.8),
+                                color: colors.shadow,
+                                offset: const Offset(2.8, 2.8),
                                 blurRadius: 0,
                                 spreadRadius: 0,
                               ),
@@ -655,7 +662,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           foregroundDecoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
                             border: Border.all(
-                              color: AppTheme.border,
+                              color: colors.border,
                               width: AppDimensions.borderWidthMd,
                             ),
                           ),
@@ -719,13 +726,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                         const SizedBox(height: AppDimensions.paddingLg),
 
                         // Description
-                        Text(l10n.descriptionLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        Text(l10n.descriptionLabel, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2, color: colors.textPrimary)),
                         const SizedBox(height: AppDimensions.paddingSm),
                         _buildDescription(l10n),
                         const SizedBox(height: AppDimensions.paddingLg),
 
                         // Tags
-                        Text(l10n.tagsLabel, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2)),
+                        Text(l10n.tagsLabel, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2, color: colors.textPrimary)),
                         const SizedBox(height: AppDimensions.paddingSm),
                         Wrap(
                           spacing: 8.0,
@@ -745,7 +752,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                           tag.isEmpty
                                               ? tag
                                               : '${tag[0].toUpperCase()}${tag.substring(1)}',
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: colors.textPrimary),
                                         ),
                                       ),
                                     ),
@@ -768,10 +775,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             children: [
                               Text(
                                 l10n.notesLabel,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12,
                                   letterSpacing: 1.2,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               if (_isEditingNotes)
@@ -788,13 +796,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                           _isEditingNotes = false;
                                         });
                                       },
-                                      color: Colors.white,
+                                      color: colors.card,
                                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                                       borderRadius: AppDimensions.radiusSm,
                                       borderWidth: 2,
                                       child: Text(
                                         l10n.cancel,
-                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: colors.textPrimary),
                                       ),
                                     ),
                                     const SizedBox(width: AppDimensions.paddingSm),
@@ -808,12 +816,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                         });
                                       },
                                       color: AppTheme.accent,
+                                      shadowColor: colors.shadow,
                                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
                                       borderRadius: AppDimensions.radiusSm,
                                       borderWidth: 2,
                                       child: Text(
                                         l10n.save,
-                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                                        style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: colors.onAccent),
                                       ),
                                     ),
                                   ],
@@ -831,7 +840,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                               }
                             },
                             child: NeoBox(
-                              color: const Color(0xFFFFF7E0), // Pale yellow
+                              color: isDark ? const Color(0xFF2D281D) : const Color(0xFFFFF7E0),
                               borderRadius: AppDimensions.radiusMd,
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               child: TextField(
@@ -840,6 +849,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 maxLines: null,
                                 expands: true,
                                 textAlignVertical: TextAlignVertical.top,
+                                style: TextStyle(color: colors.textPrimary, fontSize: 14),
                                 onTap: () {
                                   if (!_isEditingNotes) {
                                     setState(() => _isEditingNotes = true);
@@ -852,10 +862,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 onEditingComplete: () {
                                   if (_notesEdited) _saveNotes(_notesController.text);
                                 },
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   hintText: 'Tap here to save notes',
                                   hintStyle: TextStyle(
-                                    color: Colors.black38,
+                                    color: colors.textMuted,
                                     fontSize: 14,
                                     fontStyle: FontStyle.italic,
                                   ),
@@ -900,10 +910,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                 child: NeoButton(
                                   onPressed: () => context.pop(),
                                   padding: EdgeInsets.zero,
-                                  color: Colors.white,
+                                  color: colors.card,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: AppDimensions.borderWidthMd,
-                                  child: const Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd),
+                                  child: Icon(Icons.arrow_back, size: AppDimensions.iconSizeMd, color: colors.textPrimary),
                                 ),
                               ),
                               SizedBox(
@@ -917,13 +927,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                                     }
                                   },
                                   padding: EdgeInsets.zero,
-                                  color: bookmark.isPinned ? const Color(0xFFFFD166) : Colors.white,
+                                  color: bookmark.isPinned ? const Color(0xFFFFD166) : colors.card,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: AppDimensions.borderWidthMd,
                                   child: PinIcon(
                                     isPinned: bookmark.isPinned,
                                     size: AppDimensions.iconSizeMd,
-                                    color: AppTheme.border,
+                                    color: bookmark.isPinned ? colors.onAccent : colors.textPrimary,
                                   ),
                                 ),
                               ),
@@ -945,11 +955,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
               child: IgnorePointer(
                 child: Container(
                   height: topInset,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: colors.card,
                     border: Border(
                       bottom: BorderSide(
-                        color: AppTheme.border,
+                        color: colors.border,
                         width: AppDimensions.borderWidthLg,
                       ),
                     ),
@@ -983,7 +993,9 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
           ),
         );
       },
-      pageBuilder: (ctx, animation, secondaryAnimation) => GestureDetector(
+      pageBuilder: (ctx, animation, secondaryAnimation) {
+        final colors = ctx.appColors;
+        return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.pop(ctx, false),
         child: Center(
@@ -996,13 +1008,13 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 28),
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.card,
                   borderRadius: BorderRadius.circular(16.0),
-                  border: Border.all(color: AppTheme.border, width: 2.5),
-                  boxShadow: const [
+                  border: Border.all(color: colors.border, width: 2.5),
+                  boxShadow: [
                     BoxShadow(
-                      color: AppTheme.border,
-                      offset: Offset(2.8, 2.8),
+                      color: colors.shadow,
+                      offset: const Offset(2.8, 2.8),
                       blurRadius: 0,
                       spreadRadius: 0,
                     ),
@@ -1017,10 +1029,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       Text(
                         AppLocalizations.of(context)!.refreshLinkMetadata,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w900,
-                          color: AppTheme.border,
+                          color: colors.textPrimary,
                           letterSpacing: -0.3,
                           height: 1.2,
                         ),
@@ -1029,10 +1041,10 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                       Text(
                         AppLocalizations.of(context)!.refreshMetadataDescription,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF555555),
+                          color: colors.textSecondary,
                           height: 1.35,
                         ),
                       ),
@@ -1042,17 +1054,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                           Expanded(
                             child: NeoButton(
                               onPressed: () => Navigator.pop(ctx, false),
-                              color: Colors.white,
+                              color: colors.card,
                               borderRadius: 12.0,
                               borderWidth: 2.5,
                               shadowOffset: 3.0,
                               padding: const EdgeInsets.symmetric(vertical: 13),
                               child: Text(
                                 AppLocalizations.of(context)!.cancel,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
+                                  color: colors.textPrimary,
                                   letterSpacing: 0.3,
                                 ),
                               ),
@@ -1063,16 +1075,17 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                             child: NeoButton(
                               onPressed: () => Navigator.pop(ctx, true),
                               color: const Color(0xFF26D5A8),
+                              shadowColor: colors.shadow,
                               borderRadius: 12.0,
                               borderWidth: 2.5,
                               shadowOffset: 3.0,
                               padding: const EdgeInsets.symmetric(vertical: 13),
                               child: Text(
                                 AppLocalizations.of(context)!.refresh,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
+                                  color: colors.onAccent,
                                   letterSpacing: 0.3,
                                 ),
                               ),
@@ -1087,13 +1100,15 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
             ),
           ),
         ),
-      ),
+      );
+      },
     );
   }
 
   Widget _buildDescription(AppLocalizations l10n) {
+    final colors = context.appColors;
     final description = bookmark.description?.trim();
-    const style = TextStyle(fontSize: 16, height: 1.5, color: Color(0xFF333333));
+    final style = TextStyle(fontSize: 16, height: 1.5, color: colors.textSecondary);
 
     if (description == null || description.isEmpty) {
       return Text(
@@ -1136,11 +1151,11 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Text(
                     _isDescriptionExpanded ? l10n.showLess : l10n.showMore,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
                       decoration: TextDecoration.underline,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -1155,7 +1170,7 @@ class _BookmarkDetailScreenState extends ConsumerState<BookmarkDetailScreen> {
   Widget _buildSegmentDivider() {
     return Container(
       width: AppDimensions.borderWidthMd,
-      color: AppTheme.border,
+      color: context.appColors.border,
     );
   }
 
@@ -1280,7 +1295,10 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
 
   @override
   Widget build(BuildContext context) {
-    final idleFgColor = widget.isDestructive ? const Color(0xFFC0392B) : AppTheme.border;
+    final colors = context.appColors;
+    final idleFgColor = widget.isDestructive
+        ? (context.isDarkMode ? colors.danger : const Color(0xFFC0392B))
+        : colors.textPrimary;
     const activeFgColor = Colors.white;
 
     return Expanded(
@@ -1312,7 +1330,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
               animation: _animation,
               builder: (context, child) {
                 final t = _animation.value;
-                final backgroundColor = Color.lerp(Colors.white, widget.color, t)!;
+                final backgroundColor = Color.lerp(colors.card, widget.color, t)!;
                 final fgColor = Color.lerp(idleFgColor, activeFgColor, t)!;
                 final scale = 1.0 - (t * 0.04);
                 final offsetX = t * 1.5;
@@ -1332,7 +1350,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
                           left: 0,
                           right: 0,
                           height: topRecess,
-                          child: const ColoredBox(color: AppTheme.border),
+                          child: ColoredBox(color: colors.border),
                         ),
                       // Left recess shadow simulating mechanical button depression
                       if (leftRecess > 0)
@@ -1341,7 +1359,7 @@ class _ActionStripButtonState extends State<ActionStripButton> with SingleTicker
                           left: 0,
                           bottom: 0,
                           width: leftRecess,
-                          child: const ColoredBox(color: AppTheme.border),
+                          child: ColoredBox(color: colors.border),
                         ),
                       // Button contents (Icon and Label)
                       Center(
@@ -1487,6 +1505,7 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     final displayUrl = widget.url.replaceFirst(RegExp(r'^https?:\/\/', caseSensitive: false), '');
 
     return Semantics(
@@ -1528,6 +1547,7 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
                   scale: scale,
                   child: NeoBox(
                     color: const Color(0xFFFFD166), // Yellow
+                    shadowColor: colors.shadow,
                     padding: const EdgeInsets.symmetric(
                       horizontal: AppDimensions.paddingLg,
                       vertical: 6.8,
@@ -1542,16 +1562,18 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
                             children: [
                               Text(
                                 l10n.openLink,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w800,
+                                  color: colors.onAccent,
                                 ),
                               ),
                               Text(
                                 displayUrl,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12.0,
                                   fontWeight: FontWeight.w600,
+                                  color: colors.onAccent,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1561,8 +1583,8 @@ class _OpenLinkButtonState extends State<_OpenLinkButton> with SingleTickerProvi
                         ),
                         Container(
                           padding: const EdgeInsets.all(5.0),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.border,
+                          decoration: BoxDecoration(
+                            color: colors.onAccent,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -1638,6 +1660,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     final allTagsAsync = ref.watch(allTagsProvider);
     final existingTags = allTagsAsync.value ?? [];
 
@@ -1655,13 +1678,13 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
             child: Container(
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.card,
                 borderRadius: BorderRadius.circular(28),
-                border: Border.all(color: AppTheme.border, width: 2.5),
-                boxShadow: const [
+                border: Border.all(color: colors.border, width: 2.5),
+                boxShadow: [
                   BoxShadow(
-                    color: AppTheme.border,
-                    offset: Offset(2.8, 2.8),
+                    color: colors.shadow,
+                    offset: const Offset(2.8, 2.8),
                     blurRadius: 0,
                     spreadRadius: 0,
                   ),
@@ -1683,7 +1706,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                           height: 4,
                           margin: const EdgeInsets.only(bottom: 16),
                           decoration: BoxDecoration(
-                            color: AppTheme.border,
+                            color: colors.border,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -1693,10 +1716,10 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                         children: [
                           Text(
                             l10n.addTag,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w900,
-                              color: AppTheme.border,
+                              color: colors.textPrimary,
                               letterSpacing: -0.3,
                             ),
                           ),
@@ -1706,10 +1729,10 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                             child: NeoButton(
                               onPressed: () => dismissAppModalSheet(context),
                               padding: EdgeInsets.zero,
-                              color: AppTheme.cardColor,
+                              color: colors.card,
                               borderRadius: AppDimensions.radiusSm,
                               borderWidth: 2,
-                              child: const Icon(Icons.close, size: 18),
+                              child: Icon(Icons.close, size: 18, color: colors.textPrimary),
                             ),
                           ),
                         ],
@@ -1719,6 +1742,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                         controller: _controller,
                         focusNode: _tagFocusNode,
                         textInputAction: TextInputAction.done,
+                        style: TextStyle(color: colors.textPrimary),
                         onSubmitted: (val) {
                           final cleanQuery = val.trim();
                           if (cleanQuery.isEmpty) return;
@@ -1732,30 +1756,30 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                         },
                         decoration: InputDecoration(
                           hintText: l10n.tagNameHint,
-                          hintStyle: const TextStyle(color: Colors.black38),
-                          prefixIcon: const Icon(Icons.local_offer_outlined,
-                              color: AppTheme.border),
+                          hintStyle: TextStyle(color: colors.textMuted),
+                          prefixIcon: Icon(Icons.local_offer_outlined,
+                              color: colors.textPrimary),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: colors.surfaceSubtle,
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           border: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
+                            borderSide: BorderSide(
+                                color: colors.border, width: 3),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
+                            borderSide: BorderSide(
+                                color: colors.border, width: 3),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius:
                                 BorderRadius.circular(AppDimensions.radiusMd),
-                            borderSide: const BorderSide(
-                                color: AppTheme.border, width: 3),
+                            borderSide: BorderSide(
+                                color: colors.border, width: 3),
                           ),
                         ),
                       ),
@@ -1862,11 +1886,11 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                         cleanQuery.isEmpty
                                             ? l10n.existingTags
                                             : 'Suggestions',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w800,
                                           letterSpacing: 0.8,
-                                          color: Colors.black54,
+                                          color: colors.textSecondary,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -1878,7 +1902,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                             return GestureDetector(
                                               onTap: () => _submitTag(tag),
                                               child: NeoBox(
-                                                color: Colors.white,
+                                                color: colors.card,
                                                 padding:
                                                     const EdgeInsets.symmetric(
                                                         horizontal: 10,
@@ -1890,16 +1914,17 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                                   mainAxisSize:
                                                       MainAxisSize.min,
                                                   children: [
-                                                    const Icon(Icons.add,
+                                                    Icon(Icons.add,
                                                         size: 14,
-                                                        color: AppTheme.border),
+                                                        color: colors.textPrimary),
                                                     const SizedBox(width: 4),
                                                     Text(
                                                       tag,
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          fontSize: 13),
+                                                          fontSize: 13,
+                                                          color: colors.textPrimary),
                                                     ),
                                                   ],
                                                 ),
@@ -1909,7 +1934,7 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                         )
                                       else
                                         NeoBox(
-                                          color: Colors.white,
+                                          color: colors.card,
                                           padding: EdgeInsets.zero,
                                           borderRadius: AppDimensions.radiusMd,
                                           borderWidth: 2,
@@ -1920,10 +1945,10 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                                   i < suggestions.length;
                                                   i++) ...[
                                                 if (i > 0)
-                                                  const Divider(
+                                                  Divider(
                                                       height: 1,
                                                       thickness: 1,
-                                                      color: AppTheme.border),
+                                                      color: colors.divider),
                                                 InkWell(
                                                   onTap: () =>
                                                       _submitTag(suggestions[i]),
@@ -1938,29 +1963,29 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                                         vertical: 10),
                                                     child: Row(
                                                       children: [
-                                                        const Icon(
+                                                        Icon(
                                                             Icons
                                                                 .local_offer_outlined,
                                                             size: 16,
-                                                            color: AppTheme
-                                                                .border),
+                                                            color: colors.textPrimary),
                                                         const SizedBox(
                                                             width: 10),
                                                         Expanded(
                                                           child: Text(
                                                             suggestions[i],
-                                                            style: const TextStyle(
+                                                            style: TextStyle(
                                                                 fontWeight:
                                                                     FontWeight
                                                                         .bold,
-                                                                fontSize: 14),
+                                                                fontSize: 14,
+                                                                color: colors.textPrimary),
                                                           ),
                                                         ),
-                                                        const Icon(
+                                                        Icon(
                                                             Icons.north_west,
                                                             size: 14,
                                                             color:
-                                                                Colors.black38),
+                                                                colors.textMuted),
                                                       ],
                                                     ),
                                                   ),
@@ -1984,7 +2009,8 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                       : null,
                                   color: canAdd
                                       ? AppTheme.accent
-                                      : const Color(0xFFDDDDDD),
+                                      : colors.surfaceSubtle,
+                                  shadowColor: colors.shadow,
                                   borderRadius: AppDimensions.radiusMd,
                                   borderWidth: 2,
                                   padding: EdgeInsets.zero,
@@ -1994,8 +2020,8 @@ class _AddTagSheetState extends ConsumerState<_AddTagSheet>
                                       style: TextStyle(
                                         fontWeight: FontWeight.w900,
                                         color: canAdd
-                                            ? AppTheme.border
-                                            : Colors.black38,
+                                            ? colors.onAccent
+                                            : colors.textMuted,
                                       ),
                                     ),
                                   ),
@@ -2026,6 +2052,7 @@ class _TagAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
       child: Center(
@@ -2039,10 +2066,10 @@ class _TagAddButton extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppTheme.accent,
                 borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
-                border: Border.all(color: AppTheme.border, width: 2),
+                border: Border.all(color: colors.border, width: 2),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.border,
+                    color: colors.shadow,
                     offset: Offset(shadowOffset, shadowOffset),
                     blurRadius: 0,
                     spreadRadius: 0,
@@ -2051,7 +2078,7 @@ class _TagAddButton extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: colors.onAccent),
               ),
             );
           },

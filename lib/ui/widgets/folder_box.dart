@@ -57,6 +57,7 @@ class FolderBox extends StatelessWidget {
       scaleSquash: 0.025,
       enableFeedback: enableFeedback,
       builder: (context, t, currentShadow) {
+        final colors = context.appColors;
         final showBadge = hasNewItems || newCount > 0;
         final badgeText = newCount > 0
             ? '$newCount ${AppLocalizations.of(context)!.newBadge}'
@@ -66,15 +67,15 @@ class FolderBox extends StatelessWidget {
           key: bodyKey,
           padding: const EdgeInsets.all(AppDimensions.paddingLg),
           decoration: BoxDecoration(
-            color: AppTheme.cardColor,
+            color: colors.card,
             borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             border: Border.all(
-              color: AppTheme.border,
+              color: colors.border,
               width: AppDimensions.borderWidthMd,
             ),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.border,
+                color: colors.shadow,
                 offset: Offset(currentShadow, currentShadow),
               ),
             ],
@@ -94,7 +95,7 @@ class FolderBox extends StatelessWidget {
                       color: folderColor,
                       borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
                       border: Border.all(
-                        color: AppTheme.border,
+                        color: colors.border,
                         width: 2.0,
                       ),
                     ),
@@ -103,7 +104,7 @@ class FolderBox extends StatelessWidget {
                         icon,
                         color: BookmarkCollection.isWhiteIconColor(folderColor)
                             ? Colors.white
-                            : AppTheme.border,
+                            : colors.onAccent,
                         size: AppDimensions.iconSizeLg,
                       ),
                     ),
@@ -124,7 +125,7 @@ class FolderBox extends StatelessWidget {
                                 color: const Color(0xFFFFD166),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: AppTheme.border,
+                                  color: colors.onAccent,
                                   width: 1.5,
                                 ),
                               ),
@@ -133,7 +134,7 @@ class FolderBox extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 9,
                                   fontWeight: forceBold ? FontWeight.bold : FontWeight.w900,
-                                  color: AppTheme.border,
+                                  color: colors.onAccent,
                                   letterSpacing: 0.5,
                                 ),
                               ),
@@ -146,10 +147,10 @@ class FolderBox extends StatelessWidget {
                           alignment: Alignment.centerLeft,
                           child: Text(
                             itemCountText,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: AppTheme.border,
+                              color: colors.textSecondary,
                             ),
                           ),
                         ),
@@ -164,7 +165,7 @@ class FolderBox extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: forceBold ? FontWeight.bold : FontWeight.bold,
-                  color: AppTheme.border,
+                  color: colors.textPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -199,12 +200,12 @@ class FolderBox extends StatelessWidget {
                               topRight: Radius.circular(12),
                             ),
                             border: Border.all(
-                              color: AppTheme.border,
+                              color: colors.border,
                               width: AppDimensions.borderWidthMd,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppTheme.border,
+                                color: colors.shadow,
                                 offset: Offset(currentShadow, currentShadow),
                               ),
                             ],

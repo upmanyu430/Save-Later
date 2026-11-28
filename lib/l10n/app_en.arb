@@ -358,6 +358,123 @@
   "@newSaveRemindersSubtitle": {
     "description": "Subtitle for new save reminders setting"
   },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Setting title for dark mode"
+  },
+  "darkModeSubtitle": "Use a darker look for the app",
+  "@darkModeSubtitle": {
+    "description": "Subtitle for dark mode setting"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Setting title for language"
+  },
+  "chooseLanguage": "Choose Language",
+  "@chooseLanguage": {
+    "description": "Modal title for choosing app language"
+  },
+  "homeHeadline": "Home Headline",
+  "@homeHeadline": {
+    "description": "Setting title for customizing the home screen headline"
+  },
+  "editHomeHeadline": "Edit Home Headline",
+  "@editHomeHeadline": {
+    "description": "Modal title for editing the home screen headline"
+  },
+  "homeHeadlineHint": "Enter a headline for your home screen...",
+  "@homeHeadlineHint": {
+    "description": "Hint text for home headline input field"
+  },
+  "resetToDefault": "Reset to default",
+  "@resetToDefault": {
+    "description": "Button label to reset a custom value back to default"
+  },
+  "dataAndStorage": "DATA & STORAGE",
+  "@dataAndStorage": {
+    "description": "Section header for data and storage settings"
+  },
+  "cloudSync": "Cloud Sync",
+  "@cloudSync": {
+    "description": "Setting title for cloud sync"
+  },
+  "cloudSyncSubtitle": "Sync your library across Android devices",
+  "@cloudSyncSubtitle": {
+    "description": "Subtitle for cloud sync setting"
+  },
+  "cloudSyncComingSoonTitle": "Cloud Sync Coming Soon",
+  "@cloudSyncComingSoonTitle": {
+    "description": "Modal title when cloud sync is not yet available"
+  },
+  "cloudSyncComingSoonBody": "Automatic cross-device sync is on the way. For now, you can back up and restore your library anytime using Backup & Restore.",
+  "@cloudSyncComingSoonBody": {
+    "description": "Informative message inside cloud sync modal"
+  },
+  "gotIt": "Got it",
+  "@gotIt": {
+    "description": "Acknowledge button label"
+  },
+  "backupAndRestore": "Backup & Restore",
+  "@backupAndRestore": {
+    "description": "Setting title for backup and restore"
+  },
+  "backupAndRestoreSubtitle": "Local backups and bookmark imports",
+  "@backupAndRestoreSubtitle": {
+    "description": "Subtitle for backup and restore setting"
+  },
+  "exportBookmarks": "Export Bookmarks (HTML)",
+  "@exportBookmarks": {
+    "description": "Action title to export bookmarks as Netscape HTML"
+  },
+  "exportBookmarksSubtitle": "Save collections, tags, and links as a standard browser HTML file",
+  "@exportBookmarksSubtitle": {
+    "description": "Subtitle explaining HTML bookmark export"
+  },
+  "importBookmarks": "Import Bookmarks (HTML)",
+  "@importBookmarks": {
+    "description": "Action title to import bookmarks from Netscape HTML"
+  },
+  "importBookmarksSubtitle": "Restore from a backup or import bookmarks from Chrome, Firefox, or Safari",
+  "@importBookmarksSubtitle": {
+    "description": "Subtitle explaining HTML bookmark import"
+  },
+  "exportingBookmarks": "Exporting bookmarks...",
+  "@exportingBookmarks": {
+    "description": "Progress label while exporting bookmarks"
+  },
+  "importingBookmarks": "Importing bookmarks...",
+  "@importingBookmarks": {
+    "description": "Progress label while importing bookmarks"
+  },
+  "exportSuccess": "Bookmarks exported successfully!",
+  "@exportSuccess": {
+    "description": "Success message after exporting bookmarks"
+  },
+  "importSuccess": "Imported {imported} bookmarks ({skipped} duplicates skipped).",
+  "@importSuccess": {
+    "description": "Success message after importing bookmarks",
+    "placeholders": {
+      "imported": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "importNoBookmarksFound": "No valid bookmarks found in the selected file.",
+  "@importNoBookmarksFound": {
+    "description": "Message when selected HTML file contains no bookmarks"
+  },
+  "backupError": "Backup operation failed: {error}",
+  "@backupError": {
+    "description": "Error message when export or import fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "support": "SUPPORT",
   "@support": {
     "description": "Section header for support"
@@ -379,9 +496,14 @@
   "@sendFeedback": {
     "description": "Setting title for sending feedback"
   },
-  "sendFeedbackSubtitle": "Got a bug or idea? We'd love to hear it!",
+  "sendFeedbackSubtitle": "Got a bug or idea? Help us improve {appName}!",
   "@sendFeedbackSubtitle": {
-    "description": "Subtitle for send feedback setting"
+    "description": "Subtitle for send feedback setting",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
   },
   "privacyPolicy": "Privacy Policy",
   "@privacyPolicy": {
@@ -394,6 +516,37 @@
   "account": "ACCOUNT",
   "@account": {
     "description": "Section header for account"
+  },
+  "rateAppTitle": "Rate {appName} on Google Play",
+  "@rateAppTitle": {
+    "description": "Setting title for rating the app on Google Play",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "rateAppSubtitle": "Enjoying {appName}? A 5-star review means a lot to us!",
+  "@rateAppSubtitle": {
+    "description": "Subtitle for rating the app on Google Play",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "rateAppComingSoonTitle": "Google Play Rating Coming Soon",
+  "@rateAppComingSoonTitle": {
+    "description": "Modal title when Google Play rating is not yet available"
+  },
+  "rateAppComingSoonBody": "{appName} isn't published on Google Play yet. Reviews and ratings will open right here once the Play Store release goes live.",
+  "@rateAppComingSoonBody": {
+    "description": "Informative message inside Google Play rating coming soon modal",
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
   },
   "deleteAllData": "Delete All Data",
   "@deleteAllData": {
@@ -411,6 +564,26 @@
         "type": "String"
       }
     }
+  },
+  "versionWithBuildLabel": "Version {version} (build {buildNumber})",
+  "@versionWithBuildLabel": {
+    "description": "Version label with version number and build number",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "buildNumber": {
+        "type": "String"
+      }
+    }
+  },
+  "copyUserId": "Copy user ID",
+  "@copyUserId": {
+    "description": "Action link to copy user ID"
+  },
+  "userIdCopied": "User ID copied to clipboard",
+  "@userIdCopied": {
+    "description": "Snackbar message when user ID is copied"
   },
   "couldNotOpenEmailClient": "Could not open email client",
   "@couldNotOpenEmailClient": {

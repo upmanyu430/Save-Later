@@ -47,9 +47,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
 
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -80,10 +81,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               height: 76,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(18),
-                                boxShadow: const [
+                                boxShadow: [
                                   BoxShadow(
-                                    color: AppTheme.border,
-                                    offset: Offset(4, 4),
+                                    color: colors.shadow,
+                                    offset: const Offset(4, 4),
                                     blurRadius: 0,
                                   ),
                                 ],
@@ -95,6 +96,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 fit: BoxFit.contain,
                                 errorBuilder: (_, __, ___) => NeoBox(
                                   color: AppTheme.accent,
+                                  borderColor: AppTheme.border,
+                                  shadowColor: colors.shadow,
                                   borderRadius: 18,
                                   shadowOffset: 0,
                                   padding: EdgeInsets.zero,
@@ -114,7 +117,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               style: GoogleFonts.gabarito(
                                 fontSize: 36,
                                 fontWeight: FontWeight.w900,
-                                color: AppTheme.border,
+                                color: colors.textPrimary,
                                 height: 1.08,
                                 letterSpacing: -1.0,
                               ),
@@ -125,7 +128,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               style: GoogleFonts.gabarito(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: AppTheme.textSecondary,
+                                color: colors.textSecondary,
                                 height: 1.35,
                               ),
                             ),
@@ -153,6 +156,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         NeoButton(
                           onPressed: _isSubmitting ? null : _handleGetStarted,
                           color: AppTheme.accent,
+                          borderColor: AppTheme.border,
                           borderRadius: AppDimensions.radiusMd,
                           borderWidth: AppDimensions.borderWidthLg,
                           shadowOffset: AppDimensions.shadowOffsetXl,
@@ -170,14 +174,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 style: GoogleFonts.gabarito(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w900,
-                                  color: AppTheme.border,
+                                  color: colors.onAccent,
                                 ),
                               ),
                               const SizedBox(width: AppDimensions.paddingSm),
-                              const Icon(
+                              Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 20,
-                                color: AppTheme.border,
+                                color: colors.onAccent,
                               ),
                             ],
                           ),
@@ -208,8 +212,10 @@ class _WelcomeFeatureRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return NeoBox(
-      color: AppTheme.cardColor,
+      color: colors.card,
       borderRadius: AppDimensions.radiusMd,
       borderWidth: AppDimensions.borderWidthMd,
       shadowOffset: AppDimensions.shadowOffsetLg,
@@ -227,7 +233,7 @@ class _WelcomeFeatureRow extends StatelessWidget {
                 width: AppDimensions.borderWidthSm,
               ),
             ),
-            child: Icon(icon, size: 22, color: AppTheme.border),
+            child: Icon(icon, size: 22, color: colors.onAccent),
           ),
           const SizedBox(width: AppDimensions.paddingMd),
           Expanded(
@@ -236,7 +242,7 @@ class _WelcomeFeatureRow extends StatelessWidget {
               style: GoogleFonts.gabarito(
                 fontSize: 14.5,
                 fontWeight: FontWeight.w700,
-                color: AppTheme.border,
+                color: colors.textPrimary,
                 height: 1.3,
               ),
             ),

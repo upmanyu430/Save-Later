@@ -166,6 +166,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
     bool isSaving = false,
     bool isRefreshing = false,
   }) {
+    final colors = context.appColors;
     final isBusy = isSaving || isRefreshing;
     final b = widget.bookmark;
     return Stack(
@@ -185,10 +186,10 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         children: [
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppTheme.border, width: 3.0)),
-                color: Color(0xFFF0F0F0),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(_innerRadius)),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: colors.border, width: 3.0)),
+                color: colors.surfaceSubtle,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(_innerRadius)),
               ),
               child: Stack(
                 fit: StackFit.expand,
@@ -203,7 +204,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           fit: BoxFit.scaleDown,
                           child: Text(
                             _getInitialLetter(b),
-                            style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: AppTheme.border),
+                            style: TextStyle(fontSize: 36, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: colors.textPrimary),
                           ),
                         ),
                       ),
@@ -242,14 +243,14 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFD166),
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: AppTheme.border, width: 1.5),
+                            border: Border.all(color: colors.onAccent, width: 1.5),
                           ),
                           child: Text(
                             AppLocalizations.of(context)!.newBadge,
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900,
-                              color: AppTheme.border,
+                              color: colors.onAccent,
                             ),
                           ),
                         ),
@@ -264,18 +265,18 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                       child: Container(
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: widget.isSelected ? const Color(0xFFFFD166) : Colors.white,
+                          color: widget.isSelected ? const Color(0xFFFFD166) : colors.card,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppTheme.border, width: 2),
+                          border: Border.all(color: colors.border, width: 2),
                         ),
                         child: AnimatedScale(
                           scale: widget.isSelected ? 1.0 : 0.0,
                           duration: const Duration(milliseconds: 200),
                           curve: const Cubic(0.23, 1.0, 0.32, 1.0),
-                          child: const Icon(
+                          child: Icon(
                             Icons.check, 
                             size: 16, 
-                            color: AppTheme.border,
+                            color: colors.onAccent,
                           ),
                         ),
                       ),
@@ -286,9 +287,9 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
           Container(
             padding: const EdgeInsets.fromLTRB(9, 5, 9, 5),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(_innerRadius)),
+            decoration: BoxDecoration(
+              color: colors.card,
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(_innerRadius)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,7 +302,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                     style: TextStyle(
                       fontSize: 11.5,
                       fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w800,
-                      color: AppTheme.border,
+                      color: colors.textPrimary,
                       height: 1.15,
                     ),
                     maxLines: 2,
@@ -319,14 +320,14 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                       fallback: Container(
                         width: 14,
                         height: 14,
-                        decoration: const BoxDecoration(
-                          color: AppTheme.border,
+                        decoration: BoxDecoration(
+                          color: colors.textPrimary,
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             b.sourceDomain != null && b.sourceDomain!.isNotEmpty ? b.sourceDomain![0].toUpperCase() : '?',
-                            style: TextStyle(fontSize: 8, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: Colors.white),
+                            style: TextStyle(fontSize: 8, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900, color: colors.card),
                           ),
                         ),
                       ),
@@ -335,7 +336,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                     Expanded(
                       child: Text(
                         b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                        style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
+                        style: TextStyle(fontSize: 10, color: colors.textSecondary, fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -357,11 +358,11 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFD166),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppTheme.border, width: 2.0),
-                          boxShadow: const [
+                          border: Border.all(color: colors.onAccent, width: 2.0),
+                          boxShadow: [
                             BoxShadow(
-                              color: AppTheme.border,
-                              offset: Offset(2, 2),
+                              color: colors.shadow,
+                              offset: const Offset(2, 2),
                               blurRadius: 0,
                               spreadRadius: 0,
                             ),
@@ -370,19 +371,19 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const SizedBox(
+                            SizedBox(
                               width: 13,
                               height: 13,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.0,
-                                valueColor: AlwaysStoppedAnimation<Color>(AppTheme.border),
+                                valueColor: AlwaysStoppedAnimation<Color>(colors.onAccent),
                               ),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               isRefreshing ? 'REFRESHING...' : 'SAVING...',
                               style: TextStyle(
-                                color: AppTheme.border,
+                                color: colors.onAccent,
                                 fontWeight: widget.forceBold ? FontWeight.bold : FontWeight.w900,
                                 fontSize: 11.5,
                                 letterSpacing: 0.8,
@@ -403,14 +404,16 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
         right: 8,
         child: NeoBox(
           color: const Color(0xFFFFD166),
+          borderColor: colors.onAccent,
+          shadowColor: colors.shadow,
           borderRadius: 8.0,
           borderWidth: 2.0,
           shadowOffset: shadowOffset,
           padding: const EdgeInsets.all(4.0),
-          child: const PinIcon(
+          child: PinIcon(
             isPinned: true,
             size: 16,
-            color: AppTheme.border,
+            color: colors.onAccent,
             strokeWidth: 2.2,
           ),
         ),

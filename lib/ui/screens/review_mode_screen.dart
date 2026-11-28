@@ -972,6 +972,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
     double cardWidth,
     double cardHeight,
   ) {
+    final colors = context.appColors;
     final collection = b.collection.value ?? widget.collection;
     final collectionName =
         collection?.name ?? AppLocalizations.of(context)!.unsorted;
@@ -985,9 +986,12 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
       height: cardHeight,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.card,
         borderRadius: BorderRadius.circular(26),
-        border: Border.all(color: Colors.black, width: 2.5),
+        border: Border.all(
+          color: context.isDarkMode ? colors.border : Colors.black,
+          width: 2.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1007,10 +1011,10 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                 Expanded(
                   child: Text(
                     b.sourceDomain ?? AppLocalizations.of(context)!.unknown,
-                    style: const TextStyle(
+                    style: TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
-                        color: Colors.black),
+                        color: colors.textPrimary),
                   ),
                 ),
               ],
@@ -1024,7 +1028,7 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               decoration: BoxDecoration(
                 color: const Color(0xFF111111),
                 borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
-                border: Border.all(color: AppTheme.border, width: 2.0),
+                border: Border.all(color: colors.border, width: 2.0),
               ),
               child: Stack(
                 fit: StackFit.expand,
@@ -1057,14 +1061,14 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colors.card,
                         borderRadius:
                             BorderRadius.circular(AppDimensions.radiusSm),
-                        border: Border.all(color: AppTheme.border, width: 2),
-                        boxShadow: const [
+                        border: Border.all(color: colors.border, width: 2),
+                        boxShadow: [
                           BoxShadow(
-                            color: AppTheme.border,
-                            offset: Offset(2.0, 2.0),
+                            color: colors.shadow,
+                            offset: const Offset(2.0, 2.0),
                             blurRadius: 0,
                             spreadRadius: 0,
                           ),
@@ -1080,16 +1084,16 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
                               color: collectionColor,
                               borderRadius: BorderRadius.circular(4),
                               border:
-                                  Border.all(color: AppTheme.border, width: 2),
+                                  Border.all(color: colors.border, width: 2),
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
                             collectionName,
-                            style: const TextStyle(
+                            style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
-                                color: Colors.black),
+                                color: colors.textPrimary),
                           ),
                         ],
                       ),
@@ -1109,18 +1113,18 @@ class _ReviewModeScreenState extends ConsumerState<ReviewModeScreen> {
               children: [
                 Text(
                   b.title ?? b.url,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
                       height: 1.2,
-                      color: Colors.black),
+                      color: colors.textPrimary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 10),
                 Text(
                   b.description ?? b.url,
-                  style: const TextStyle(fontSize: 15, color: Colors.black54),
+                  style: TextStyle(fontSize: 15, color: colors.textSecondary),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
