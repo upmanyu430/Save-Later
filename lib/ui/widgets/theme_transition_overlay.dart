@@ -97,10 +97,16 @@ class ThemeTransitionScopeState extends State<ThemeTransitionScope>
     final boundary =
         _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
 
+    var needsPaint = false;
+    assert(() {
+      needsPaint = boundary?.debugNeedsPaint ?? false;
+      return true;
+    }());
+
     if (disableAnimations ||
         boundary == null ||
         !boundary.hasSize ||
-        boundary.debugNeedsPaint) {
+        needsPaint) {
       applyTheme();
       return;
     }
