@@ -218,12 +218,13 @@ class _NeoButtonState extends State<NeoButton>
                     // Subtle scale compression (0.97 at peak press) simulating mechanical depression.
                     final scale = 1.0 - (t * 0.03);
 
+                    final colors = context.appColors;
                     final List<BoxShadow> shadows = [];
                     // Solid crisp neo-brutalist focus rings when focused
                     if (_isFocused) {
                       shadows.addAll([
                         BoxShadow(
-                          color: AppTheme.border,
+                          color: colors.border,
                           offset: Offset.zero,
                           spreadRadius: 4.0,
                           blurRadius: 0,
@@ -239,7 +240,7 @@ class _NeoButtonState extends State<NeoButton>
                     if (hasShadow) {
                       shadows.add(
                         BoxShadow(
-                          color: widget.shadowColor ?? AppTheme.border,
+                          color: widget.shadowColor ?? colors.shadow,
                           offset: currentShadow,
                           blurRadius: 0,
                           spreadRadius: 0,
@@ -258,7 +259,7 @@ class _NeoButtonState extends State<NeoButton>
                             borderRadius:
                                 BorderRadius.circular(widget.borderRadius),
                             border: Border.all(
-                              color: widget.borderColor ?? AppTheme.border,
+                              color: widget.borderColor ?? colors.border,
                               width: widget.borderWidth,
                             ),
                             boxShadow: shadows.isNotEmpty ? shadows : null,

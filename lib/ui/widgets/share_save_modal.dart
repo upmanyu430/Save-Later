@@ -129,12 +129,12 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
     }
   }
 
-  BoxDecoration _optionDecoration(bool isSelected) {
+  BoxDecoration _optionDecoration(AppColors colors, bool isSelected) {
     return BoxDecoration(
-      color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
+      color: isSelected ? colors.selectedSurface : colors.card,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(
-        color: isSelected ? const Color(0xFFFDD164) : Colors.transparent,
+        color: isSelected ? colors.selectedBorder : Colors.transparent,
         width: 1.5,
       ),
     );
@@ -142,6 +142,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
 
   Widget _buildUnsortedTile(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final colors = context.appColors;
     final isSelected = _isUnsortedSelected;
 
     return GestureDetector(
@@ -162,23 +163,23 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           padding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: AppDimensions.modalFolderOptionVerticalPadding),
-          decoration: _optionDecoration(isSelected),
+          decoration: _optionDecoration(colors, isSelected),
           child: Row(
             children: [
               Container(
                 width: AppDimensions.modalFolderOptionIconBoxSize,
                 height: AppDimensions.modalFolderOptionIconBoxSize,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE5E5E5),
+                  color: colors.surfaceSubtle,
                   borderRadius: BorderRadius.circular(6),
                   border: Border.all(
-                    color: AppTheme.border,
+                    color: colors.border,
                     width: 1.8,
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.folder_outlined,
-                  color: AppTheme.border,
+                  color: colors.textPrimary,
                   size: AppDimensions.modalFolderOptionIconSize,
                 ),
               ),
@@ -188,10 +189,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                   l10n?.unsorted ?? 'Unsorted',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.border,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -204,6 +205,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final collectionsAsync = ref.watch(allCollectionsProvider);
     final l10n = AppLocalizations.of(context);
     // Exact height matching the Add New Collection modal (CollectionEditorModal):
@@ -219,9 +221,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
           key: _cardKey,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.card,
             borderRadius: BorderRadius.circular(55),
-            border: Border.all(color: AppTheme.border, width: 2.5),
+            border: Border.all(color: colors.border, width: 2.5),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -235,7 +237,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                     width: 44,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppTheme.border,
+                      color: colors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -256,13 +258,13 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Expanded(
+                                  Expanded(
                                     child: Text(
                                       'Save to Save Later',
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.w900,
-                                        color: AppTheme.border,
+                                        color: colors.textPrimary,
                                         letterSpacing: -0.3,
                                       ),
                                       overflow: TextOverflow.ellipsis,
@@ -276,13 +278,13 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     child: NeoButton(
                                       onPressed: _openCreateCollection,
                                       padding: EdgeInsets.zero,
-                                      color: Colors.white,
+                                      color: colors.card,
                                       borderRadius: AppDimensions.radiusMd,
                                       borderWidth: AppDimensions.borderWidthMd,
-                                      child: const Icon(
+                                      child: Icon(
                                         Icons.create_new_folder_outlined,
                                         size: AppDimensions.dialogHeaderIconSize,
-                                        color: AppTheme.border,
+                                        color: colors.textPrimary,
                                       ),
                                     ),
                                   ),
@@ -295,10 +297,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                           widget.url,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black54,
+                            color: colors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -319,7 +321,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 14,
                                 vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                            decoration: _optionDecoration(_isPinned),
+                            decoration: _optionDecoration(colors, _isPinned),
                             child: Row(
                               children: [
                                 PinIcon(
@@ -327,10 +329,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                   size: 20,
                                   color: _isPinned
                                       ? const Color(0xFFFDD164)
-                                      : AppTheme.border,
+                                      : colors.textPrimary,
                                 ),
                                 const SizedBox(width: 12),
-                                const Expanded(
+                                Expanded(
                                   child: Text(
                                     'Pin this link',
                                     maxLines: 1,
@@ -338,7 +340,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                     style: TextStyle(
                                       fontSize: 14.5,
                                       fontWeight: FontWeight.w800,
-                                      color: AppTheme.border,
+                                      color: colors.textPrimary,
                                     ),
                                   ),
                                 ),
@@ -378,7 +380,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                   final iconColor =
                                       BookmarkCollection.isWhiteIconColor(col.color)
                                           ? Colors.white
-                                          : AppTheme.border;
+                                          : colors.onAccent;
 
                                   return GestureDetector(
                                     key: ValueKey('share_modal_collection_${col.id}'),
@@ -398,7 +400,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 14,
                                           vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                                      decoration: _optionDecoration(isSelected),
+                                      decoration: _optionDecoration(colors, isSelected),
                                       child: Row(
                                         children: [
                                           Container(
@@ -408,7 +410,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                               color: col.color,
                                               borderRadius: BorderRadius.circular(6),
                                               border: Border.all(
-                                                color: AppTheme.border,
+                                                color: colors.border,
                                                 width: 1.8,
                                               ),
                                             ),
@@ -432,10 +434,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                   col.name,
                                                   maxLines: 1,
                                                   overflow: TextOverflow.ellipsis,
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 15,
                                                     fontWeight: FontWeight.w800,
-                                                    color: AppTheme.border,
+                                                    color: colors.textPrimary,
                                                   ),
                                                 ),
                                                 if (col.parentId != null) ...[
@@ -455,8 +457,7 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                                         style: TextStyle(
                                                           fontSize: 11,
                                                           fontWeight: FontWeight.w600,
-                                                          color: Colors.black
-                                                              .withValues(alpha: 0.5),
+                                                          color: colors.textSecondary,
                                                         ),
                                                       );
                                                     },
@@ -496,7 +497,9 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                   Container(
                     key: const ValueKey('share_save_divider'),
                     height: 1,
-                    color: Colors.black.withValues(alpha: 0.08),
+                    color: context.isDarkMode
+                        ? colors.divider
+                        : Colors.black.withValues(alpha: 0.08),
                     margin: const EdgeInsets.only(top: 6, bottom: 12),
                   ),
                   Padding(
@@ -530,16 +533,17 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                               child: NeoButton(
                                 onPressed: _isSaving ? null : _handleSave,
                                 color: const Color(0xFFFFD166),
+                                shadowColor: colors.shadow,
                                 padding: EdgeInsets.zero,
                                 borderRadius: AppDimensions.radiusMd,
                                 shadowOffset: 2.0,
                                 child: Center(
                                   child: _isSaving
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 24,
                                           height: 24,
                                           child: CircularProgressIndicator(
-                                            color: AppTheme.border,
+                                            color: colors.onAccent,
                                             strokeWidth: 2.5,
                                           ),
                                         )
@@ -547,10 +551,10 @@ class _ShareSaveModalState extends ConsumerState<ShareSaveModal> {
                                           buttonLabel,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.bold,
-                                            color: AppTheme.border,
+                                            color: colors.onAccent,
                                           ),
                                         ),
                                 ),
@@ -618,6 +622,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
     final view = View.maybeOf(context);
     final windowPaddingTop = view != null
@@ -645,9 +650,9 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
         height: effectiveHeight,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.card,
           borderRadius: BorderRadius.circular(55),
-          border: Border.all(color: AppTheme.border, width: 2.5),
+          border: Border.all(color: colors.border, width: 2.5),
         ),
         child: Padding(
           padding: EdgeInsets.fromLTRB(
@@ -669,7 +674,7 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                     height: 4,
                     margin: const EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: AppTheme.border,
+                      color: colors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -684,13 +689,13 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                     color: const Color(0xFF00D287),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: AppTheme.border,
+                      color: colors.onAccent,
                       width: 2.8,
                     ),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: AppTheme.border,
-                        offset: Offset(3.0, 3.0),
+                        color: colors.shadow,
+                        offset: const Offset(3.0, 3.0),
                         blurRadius: 0,
                         spreadRadius: 0,
                       ),
@@ -705,24 +710,24 @@ class _SaveSuccessModalState extends State<SaveSuccessModal> {
                 const SizedBox(height: 24),
 
                 // Title
-                const Text(
+                Text(
                   'Saved!',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w900,
-                    color: AppTheme.border,
+                    color: colors.textPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
                 const SizedBox(height: 8),
 
                 // Subtitle
-                const Text(
+                Text(
                   'Link saved',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black54,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],

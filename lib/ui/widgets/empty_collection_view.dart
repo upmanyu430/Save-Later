@@ -220,6 +220,7 @@ class EmptyCollectionView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final colors = context.appColors;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -232,20 +233,20 @@ class EmptyCollectionView extends StatelessWidget {
         Text(
           l10n.noItemsYet,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w900,
-            color: AppTheme.border,
+            color: colors.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.tapOrShareToSave,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7280),
+            color: colors.textSecondary,
           ),
         ),
       ],

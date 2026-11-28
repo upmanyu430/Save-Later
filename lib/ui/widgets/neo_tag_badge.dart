@@ -189,6 +189,7 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final bgColor = widget.color ?? NeoTagBadge.getColor(widget.name);
     final fgColor = widget.textColor ?? NeoTagBadge.getTextColor(bgColor);
     const noseWidth = 22.0;
@@ -214,8 +215,8 @@ class _NeoTagBadgeState extends State<NeoTagBadge>
               child: CustomPaint(
                 painter: NeoTagPainter(
                   color: bgColor,
-                  borderColor: AppTheme.border,
-                  shadowColor: AppTheme.border,
+                  borderColor: colors.border,
+                  shadowColor: colors.shadow,
                   borderWidth: baseBorderWidth,
                   shadowOffset: currentShadowOffset,
                   noseWidth: noseWidth,

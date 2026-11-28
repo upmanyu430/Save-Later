@@ -66,12 +66,12 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
   late final ScrollController _scrollController;
   BookmarkCollection? _selectedCollection;
 
-  BoxDecoration _optionDecoration(bool isSelected) {
+  BoxDecoration _optionDecoration(AppColors colors, bool isSelected) {
     return BoxDecoration(
-      color: isSelected ? const Color(0xFFFFF4D0) : Colors.white,
+      color: isSelected ? colors.selectedSurface : colors.card,
       borderRadius: BorderRadius.circular(10),
       border: Border.all(
-        color: isSelected ? const Color(0xFFFDD164) : Colors.transparent,
+        color: isSelected ? colors.selectedBorder : Colors.transparent,
         width: 1.5,
       ),
     );
@@ -113,6 +113,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final collectionsAsync = ref.watch(allCollectionsProvider);
     // Exact height matching the Add New Collection modal (CollectionEditorModal):
     final targetModalHeight =
@@ -126,9 +127,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
         child: Container(
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.card,
             borderRadius: BorderRadius.circular(55),
-            border: Border.all(color: AppTheme.border, width: 2.5),
+            border: Border.all(color: colors.border, width: 2.5),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -142,7 +143,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                     width: 44,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppTheme.border,
+                      color: colors.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -166,13 +167,13 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Expanded(
+                                    Expanded(
                                       child: Text(
                                         'Move to Collection',
                                         style: TextStyle(
                                           fontSize: 20,
                                           fontWeight: FontWeight.w900,
-                                          color: AppTheme.border,
+                                          color: colors.textPrimary,
                                           letterSpacing: -0.3,
                                         ),
                                         overflow: TextOverflow.ellipsis,
@@ -185,13 +186,13 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                       child: NeoButton(
                                         onPressed: _openCreateCollection,
                                         padding: EdgeInsets.zero,
-                                        color: Colors.white,
+                                        color: colors.card,
                                         borderRadius: AppDimensions.radiusMd,
                                         borderWidth: AppDimensions.borderWidthMd,
-                                        child: const Icon(
+                                        child: Icon(
                                           Icons.create_new_folder_outlined,
                                           size: AppDimensions.dialogHeaderIconSize,
-                                          color: AppTheme.border,
+                                          color: colors.textPrimary,
                                         ),
                                       ),
                                     ),
@@ -207,15 +208,15 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                 child: collectionsAsync.when(
                                 data: (collections) {
                                   if (collections.isEmpty) {
-                                    return const Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 24.0),
                                       child: Center(
                                         child: Text(
                                           'No collections yet',
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w700,
-                                            color: Colors.black54,
+                                            color: colors.textSecondary,
                                           ),
                                         ),
                                       ),
@@ -239,7 +240,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                       final iconColor =
                                           BookmarkCollection.isWhiteIconColor(col.color)
                                               ? Colors.white
-                                              : AppTheme.border;
+                                              : colors.onAccent;
 
                                       return GestureDetector(
                                         key: ValueKey('collection_${col.id}'),
@@ -258,7 +259,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                             padding: const EdgeInsets.symmetric(
                                                 horizontal: 14,
                                                 vertical: AppDimensions.modalFolderOptionVerticalPadding),
-                                            decoration: _optionDecoration(isSelected),
+                                            decoration: _optionDecoration(colors, isSelected),
                                             child: Row(
                                               children: [
                                                 // Collection Icon Box
@@ -269,7 +270,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                     color: col.color,
                                                     borderRadius: BorderRadius.circular(6),
                                                     border: Border.all(
-                                                      color: AppTheme.border,
+                                                      color: colors.border,
                                                       width: 1.8,
                                                     ),
                                                   ),
@@ -292,10 +293,10 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                         col.name,
                                                         maxLines: 1,
                                                         overflow: TextOverflow.ellipsis,
-                                                        style: const TextStyle(
+                                                        style: TextStyle(
                                                           fontSize: 15,
                                                           fontWeight: FontWeight.w800,
-                                                          color: AppTheme.border,
+                                                          color: colors.textPrimary,
                                                         ),
                                                       ),
                                                       if (col.parentId != null) ...[
@@ -314,7 +315,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                                               style: TextStyle(
                                                                 fontSize: 11,
                                                                 fontWeight: FontWeight.w600,
-                                                                color: Colors.black.withValues(alpha: 0.5),
+                                                                color: colors.textSecondary,
                                                               ),
                                                             );
                                                           },
@@ -358,7 +359,9 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                       Container(
                         key: const ValueKey('move_to_collection_divider'),
                         height: 1,
-                        color: Colors.black.withValues(alpha: 0.08),
+                        color: context.isDarkMode
+                            ? colors.divider
+                            : Colors.black.withValues(alpha: 0.08),
                         margin: const EdgeInsets.only(top: 6, bottom: 12),
                       ),
                       Padding(
@@ -388,6 +391,7 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                         ? () => _handleMove(_selectedCollection)
                                         : null,
                                     color: const Color(0xFFFFD166),
+                                    shadowColor: colors.shadow,
                                     padding: EdgeInsets.zero,
                                     borderRadius: AppDimensions.radiusMd,
                                     shadowOffset: 2.0,
@@ -396,10 +400,10 @@ class _MoveToCollectionModalState extends ConsumerState<MoveToCollectionModal> {
                                         buttonLabel,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
-                                          color: AppTheme.border,
+                                          color: colors.onAccent,
                                         ),
                                       ),
                                     ),

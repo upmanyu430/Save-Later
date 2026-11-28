@@ -54,6 +54,8 @@ dependencies:
     sdk: flutter
   flutter_dotenv: ^6.0.1
   flutter_animate: ^4.5.2
+  flutter_native_splash: ^2.4.4
+  file_picker: ^8.0.7
 
 dev_dependencies:
   flutter_test:
@@ -69,6 +71,7 @@ dev_dependencies:
   isar_generator: ^3.1.0+1
   integration_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -86,6 +89,7 @@ flutter:
   assets:
     - assets/env
     - assets/fonts/
+    - assets/images/
 
   fonts:
     - family: Gabarito
@@ -102,3 +106,24 @@ flutter:
           weight: 800
         - asset: assets/fonts/Gabarito-Black.ttf
           weight: 900
+
+flutter_native_splash:
+  color: "#F4F0EB"
+  image: assets/images/splash_emblem.png
+  android_12:
+    color: "#F4F0EB"
+    image: assets/images/splash_emblem_android12.png
+    icon_background_color: "#FFD166"
+  ios: true
+  android: true
+  web: false
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: assets/images/splash_emblem.png
+  image_path_ios: assets/images/app_icon.png
+  adaptive_icon_background: "#FFD166"
+  adaptive_icon_foreground: assets/images/app_icon_foreground.png
+  min_sdk_android: 21
