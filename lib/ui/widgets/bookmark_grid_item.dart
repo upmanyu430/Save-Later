@@ -8,6 +8,7 @@ import '../../models/bookmark.dart';
 import '../../theme/app_theme.dart';
 import 'neo_box.dart';
 import 'neo_pressable.dart';
+import 'app_launch_overlay.dart';
 import 'bookmark_radial_menu.dart';
 import 'bookmark_image.dart';
 import 'pin_icon.dart';
@@ -43,6 +44,13 @@ class BookmarkGridItem extends ConsumerStatefulWidget {
 class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
   final GlobalKey _cardKey = GlobalKey();
   bool _isMenuOpen = false;
+  late final Duration _entranceDelay;
+
+  @override
+  void initState() {
+    super.initState();
+    _entranceDelay = LaunchTransitionCoordinator.remainingCardSlamDelay();
+  }
 
   void _handleLongPressStart(LongPressStartDetails details) {
     if (widget.isSelectMode) return;
@@ -126,7 +134,7 @@ class _BookmarkGridItemState extends ConsumerState<BookmarkGridItem> {
           ),
         );
       },
-    ).animate().slideY(curve: const Cubic(0.23, 1.0, 0.32, 1.0), duration: 400.ms).fadeIn();
+    ).animate(delay: _entranceDelay).slideY(curve: const Cubic(0.23, 1.0, 0.32, 1.0), duration: 400.ms).fadeIn();
   }
   
   static const double _cardRadius = AppDimensions.radiusBookmarkCard;
